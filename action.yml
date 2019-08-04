@@ -1,0 +1,27 @@
+name: 'Close Stale Issues'
+description: 'Action to close stale issues'
+author: 'GitHub'
+inputs:
+  stale_age_days:
+    description: 'The number of days old an issue can be before marking it stale'
+    default: 60
+  wait_after_stale_days:
+    description: 'The number of days to wait to close an issue after it being marked stale'
+    default: 7
+  max_operations_per_run:
+    description: 'The maximum number of operations per run, used to control rate limiting'
+    default: 30
+  stale_label:
+    description: 'The label to apply when an item is stale'
+    default: 'Stale'
+  stale_message:
+    description: 'The message to post on the issue when tagging it'
+    default: >
+      Message goes here.
+#This issue has not had any activity within the past ${{inputs.stale_age_days}} days. It will be
+#closed in ${{wait_after_stale_days}} days if there is no more activity.
+  GITHUB_TOKEN:
+    description: 'The PAT for the identity to use to access to issues and to post messages'
+runs:
+  using: 'node12'
+  main: 'lib/main.js'

@@ -1,0 +1,17 @@
+name: "Close stale issues"
+on:
+  push: {}
+  schedule:
+  - cron: 0 * * * *
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: bbq-beets/stale-bot@master
+      with:
+        stale_age_days: 0
+        wait_after_stale_days: 0
+        max_operations_per_run: 1
+      env:
+        GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}" # todo: secrets.github_token

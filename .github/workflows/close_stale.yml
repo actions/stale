@@ -14,4 +14,4 @@ jobs:
         wait_after_stale_days: 0
         max_operations_per_run: 1
       env:
-        GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}" # todo: secrets.github_token
+        GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"

@@ -10,8 +10,8 @@ jobs:
     steps:
     - uses: bbq-beets/stale-bot@master
       with:
-        stale_age_days: 0
-        wait_after_stale_days: 0
-        max_operations_per_run: 1
+        stale_age_days: 60
+        wait_after_stale_days: 7
+        max_operations_per_run: 30
       env:
         GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"

@@ -3,68 +3,90 @@ import * as github from '@actions/github';
 import * as Octokit from '@octokit/rest';
 
 type Args = {
-  token: string;
-  repo_owner: string;
-  repo_name: string;
-  stale_age_days: number;
-  wait_after_stale_days: number;
-  max_operations_per_run: number;
-  stale_label: string;
-  stale_message: string;
+  repoToken: string;
+  staleIssueMessage: string;
+  stalePrMessage: string;
+  daysBeforeStale: number;
+  daysBeforeClose: number;
+  staleIssueLabel: string;
+  stalePrLabel: string;
+  operationsPerRun: number;
 };
 
 async function run() {
   try {
     const args = getAndValidateArgs();
 
-    const octokit = new github.GitHub(args.token);
-    const issues = await octokit.issues.listForRepo({
-      owner: args.repo_owner,
-      repo: args.repo_name,
-      state: 'open'
-    });
-
-    let operationsLeft = args.max_operations_per_run - 1;
-
-    for (var issue of issues.data.values()) {
-      core.debug(
-        `found issue: ${issue.title} last updated ${issue.updated_at}`
-      );
-
-      if (isLabeledStale(issue, args.stale_label)) {
-        if (wasLastUpdatedBefore(issue, args.wait_after_stale_days)) {
-          operationsLeft -= await closeIssue(octokit, issue, args);
-        } else {
-          continue;
-        }
-      } else if (wasLastUpdatedBefore(issue, args.stale_age_days)) {
-        operationsLeft -= await markStale(octokit, issue, args);
-      }
-
-      if (operationsLeft <= 0) {
-        core.warning(
-          `performed ${args.max_operations_per_run} operations, exiting to avoid rate limit`
-        );
-        break;
-      }
-    }
+    const client = new github.GitHub(args.repoToken);
+    await processIssues(client, args, args.operationsPerRun);
   } catch (error) {
     core.error(error);
     core.setFailed(error.message);
   }
 }
 
+async function processIssues(
+  client: github.GitHub,
+  args: Args,
+  operationsLeft: number,
+  page: number = 1
+): Promise<number> {
+  const issues = await client.issues.listForRepo({
+    owner: github.context.repo.owner,
+    repo: github.context.repo.repo,
+    state: 'open',
+    per_page: 100,
+    page: page
+  });
+
+  operationsLeft -= 1;
+
+  if (issues.data.length === 0 || operationsLeft === 0) {
+    return operationsLeft;
+  }
+
+  for (var issue of issues.data.values()) {
+    core.debug(`found issue: ${issue.title} last updated ${issue.updated_at}`);
+    let isPr = !!issue.pull_request;
+    let staleMessage = isPr ? args.stalePrMessage : args.staleIssueMessage;
+    let staleLabel = isPr ? args.stalePrLabel : args.staleIssueLabel;
+
+    if (isLabeledStale(issue, staleLabel)) {
+      if (wasLastUpdatedBefore(issue, args.daysBeforeClose)) {
+        operationsLeft -= await closeIssue(client, issue);
+      } else {
+        continue;
+      }
+    } else if (wasLastUpdatedBefore(issue, args.daysBeforeStale)) {
+      operationsLeft -= await markStale(
+        client,
+        issue,
+        staleMessage,
+        staleLabel
+      );
+    }
+
+    if (operationsLeft <= 0) {
+      core.warning(
+        `performed ${args.operationsPerRun} operations, exiting to avoid rate limit`
+      );
+      return 0;
+    }
+  }
+  return await processIssues(client, args, operationsLeft, page + 1);
+}
+
 function isLabeledStale(
   issue: Octokit.IssuesListForRepoResponseItem,
   label: string
-) {
+): boolean {
   return issue.labels.filter(i => i.name === label).length > 0;
 }
 
 function wasLastUpdatedBefore(
   issue: Octokit.IssuesListForRepoResponseItem,
   num_days: number
-) {
+): boolean {
   const daysInMillis = 1000 * 60 * 60 * num_days;
   const millisSinceLastUpdated =
     new Date().getTime() - new Date(issue.updated_at).getTime();
@@ -73,39 +95,39 @@ function wasLastUpdatedBefore(
 }
 
 async function markStale(
-  octokit: github.GitHub,
+  client: github.GitHub,
   issue: Octokit.IssuesListForRepoResponseItem,
-  args: Args
-) {
+  staleMessage: string,
+  staleLabel: string
+): Promise<number> {
   core.debug(`marking issue${issue.title} as stale`);
 
-  await octokit.issues.createComment({
-    owner: args.repo_owner,
-    repo: args.repo_name,
+  await client.issues.createComment({
+    owner: github.context.repo.owner,
+    repo: github.context.repo.repo,
     issue_number: issue.number,
-    body: args.stale_message
+    body: staleMessage
   });
 
-  await octokit.issues.addLabels({
-    owner: args.repo_owner,
-    repo: args.repo_name,
+  await client.issues.addLabels({
+    owner: github.context.repo.owner,
+    repo: github.context.repo.repo,
     issue_number: issue.number,
-    labels: [args.stale_label]
+    labels: [staleLabel]
   });
 
   return 2; // operations performed
 }
 
 async function closeIssue(
-  octokit: github.GitHub,
-  issue: Octokit.IssuesListForRepoResponseItem,
-  args: Args
-) {
+  client: github.GitHub,
+  issue: Octokit.IssuesListForRepoResponseItem
+): Promise<number> {
   core.debug(`closing issue ${issue.title} for being stale`);
 
-  await octokit.issues.update({
-    owner: args.repo_owner,
-    repo: args.repo_name,
+  await client.issues.update({
+    owner: github.context.repo.owner,
+    repo: github.context.repo.repo,
     issue_number: issue.number,
     state: 'closed'
   });
@@ -115,32 +137,28 @@ async function closeIssue(
 
 function getAndValidateArgs(): Args {
   const args = {
-    token: process.env.GITHUB_TOKEN || '',
-    repo_owner: (process.env.GITHUB_REPOSITORY || '').split('/')[0],
-    repo_name: (process.env.GITHUB_REPOSITORY || '').split('/')[1],
-    stale_age_days: parseInt(core.getInput('stale_age_days')),
-    wait_after_stale_days: parseInt(core.getInput('wait_after_stale_days')),
-    max_operations_per_run: parseInt(core.getInput('max_operations_per_run')),
-    stale_label: core.getInput('stale_label'),
-    stale_message: core.getInput('stale_message')
+    repoToken: core.getInput('repo-token', {required: true}),
+    staleIssueMessage: core.getInput('stale-issue-message'),
+    stalePrMessage: core.getInput('stale-pr-message', {required: true}),
+    daysBeforeStale: parseInt(
+      core.getInput('days-before-stale', {required: true})
+    ),
+    daysBeforeClose: parseInt(
+      core.getInput('days-before-close', {required: true})
+    ),
+    staleIssueLabel: core.getInput('stale-issue-label', {required: true}),
+    stalePrLabel: core.getInput('stale-pr-label', {required: true}),
+    operationsPerRun: parseInt(
+      core.getInput('operations-per-run', {required: true})
+    )
   };
 
-  if (!args.token) {
-    throw new Error('could not resolve token from GITHUB_TOKEN');
-  }
-
-  if (!args.repo_owner || !args.repo_name) {
-    throw new Error('could not resolve repo from GITHUB_REPOSITORY');
-  }
-
-  for (var stringInput of ['stale_label', 'stale_message']) {
-    if (!args[stringInput]) {
-      throw Error(`input ${stringInput} was empty`);
-    }
-  }
-
-  for (var numberInput of [ 'stale_age_days', 'wait_after_stale_days', 'max_operations_per_run' ]) {
-    if (isNaN(args[numberInput])) {
+  for (var numberInput of [
+    'days-before-stale',
+    'days-before-close',
+    'operations-per-run'
+  ]) {
+    if (isNaN(parseInt(core.getInput(numberInput)))) {
       throw Error(`input ${numberInput} did not parse to a valid integer`);
     }
   }

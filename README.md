@@ -1,15 +1,12 @@
-# Close Stale Issues
+# Close Stale Issues and PRs
 
-To use, spin up a workflow. The following inputs are available:
- * stale_age_days: The number of days old an issue can be before marking it stale (default 60)
- * wait_after_stale_days: The number of days to wait to close an issue after it being marked stale (default 7)
- * max_operations_per_run:The maximum number of operations per run, used to control rate limiting (default 30)
- * stale_label: The label to apply when an item is stale (default 'Stale')
- * stale_message: The message to post on the issue when tagging it
+Warns and then closes issues and PRs that have had no activity for a specified amount of time.
+
+### Usage
+
+See [action.yml](./action.yml) For comprehensive list of options.
  
-You'll need to map `GITHUB_TOKEN` to a PAT token for the identity you want to use to modify the issues:
- 
-Example workflow:
+Basic:
 ```
 name: "Close stale issues"
 on:
@@ -18,13 +15,53 @@ on:
   - cron: 0 * * * *
 
 jobs:
-  build:
+  stale:
     runs-on: ubuntu-latest
     steps:
     - uses: bbq-beets/stale-bot@master
       with:
-        stale_age_days: 60
-        wait_after_stale_days: 7
-      env:
-        GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+        repo-token: ${{ secrets.GITHUB_TOKEN }}
+        stale-issue-message: 'Message to comment on stale issues. If none provided, will not mark issues stale'
+        stale-pr-message: 'Message to comment on stale PRs. If none provided, will not mark PRs stale'
+```
+ 
+Configure stale timeouts:
+```
+name: "Close stale issues"
+on:
+  push: {}
+  schedule:
+  - cron: 0 * * * *
+
+jobs:
+  stale:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: bbq-beets/stale-bot@master
+      with:
+        repo-token: ${{ secrets.GITHUB_TOKEN }}
+        stale-issue-message: 'This issue is stale because it has been open 30 days with no activity. Remove stale label or comment or this will be closed in 5 days'
+        days-before-stale: 30
+        days-before-close: 5
+```
+ 
+Configure labels:
+```
+name: "Close stale issues"
+on:
+  push: {}
+  schedule:
+  - cron: 0 * * * *
+
+jobs:
+  stale:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: bbq-beets/stale-bot@master
+      with:
+        repo-token: ${{ secrets.GITHUB_TOKEN }}
+        stale-issue-message: 'Stale issue message'
+        stale-pr-message: 'Stale issue message'
+        stale-issue-label: 'no-issue-activity'
+        stale-pr-label: 'no-pr-activity'
 ```

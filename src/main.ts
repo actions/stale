@@ -2,6 +2,9 @@ import * as core from '@actions/core';
 import * as github from '@actions/github';
 import * as Octokit from '@octokit/rest';
 
+type Issue = Octokit.IssuesListForRepoResponseItem;
+type IssueLabels = Octokit.IssuesListForRepoResponseItemLabelsItem;
+
 type Args = {
   repoToken: string;
   staleIssueMessage: string;
@@ -83,16 +86,16 @@ async function processIssues(
 }
 
 function isLabeledStale(
-  issue: Octokit.IssuesListForRepoResponseItem,
+  issue: Issue,
   label: string
 ): boolean {
-  const labelComparer = l =>
-    label.localeCompare(l.name, undefined, {sensitivity: 'accent'});
+  const labelComparer : (l: IssueLabels) => boolean = l =>
+    label.localeCompare(l.name, undefined, {sensitivity: 'accent'}) === 0;
   return issue.labels.filter(labelComparer).length > 0;
 }
 
 function wasLastUpdatedBefore(
-  issue: Octokit.IssuesListForRepoResponseItem,
+  issue: Issue,
   num_days: number
 ): boolean {
   const daysInMillis = 1000 * 60 * 60 * num_days;
@@ -103,7 +106,7 @@ function wasLastUpdatedBefore(
 
 async function markStale(
   client: github.GitHub,
-  issue: Octokit.IssuesListForRepoResponseItem,
+  issue: Issue,
   staleMessage: string,
   staleLabel: string
 ): Promise<number> {
@@ -128,7 +131,7 @@ async function markStale(
 
 async function closeIssue(
   client: github.GitHub,
-  issue: Octokit.IssuesListForRepoResponseItem
+  issue: Issue
 ): Promise<number> {
   core.debug(`closing issue ${issue.title} for being stale`);
 

@@ -86,7 +86,9 @@ function isLabeledStale(
   issue: Octokit.IssuesListForRepoResponseItem,
   label: string
 ): boolean {
-  return issue.labels.filter(i => i.name === label).length > 0;
+  const labelComparer = l =>
+    label.localeCompare(l.name, undefined, {sensitivity: 'accent'});
+  return issue.labels.filter(labelComparer).length > 0;
 }
 
 function wasLastUpdatedBefore(

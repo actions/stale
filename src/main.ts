@@ -48,7 +48,13 @@ async function processIssues(
   for (var issue of issues.data.values()) {
     core.debug(`found issue: ${issue.title} last updated ${issue.updated_at}`);
     let isPr = !!issue.pull_request;
+
     let staleMessage = isPr ? args.stalePrMessage : args.staleIssueMessage;
+    if (!staleMessage) {
+      core.debug(`skipping ${isPr ? "pr" : "issue"} due to empty message`);
+      continue;
+    }
+
     let staleLabel = isPr ? args.stalePrLabel : args.staleIssueLabel;
 
     if (isLabeledStale(issue, staleLabel)) {
@@ -80,7 +86,9 @@ function isLabeledStale(
   issue: Octokit.IssuesListForRepoResponseItem,
   label: string
 ): boolean {
-  return issue.labels.filter(i => i.name === label).length > 0;
+  const labelComparer = l =>
+    label.localeCompare(l.name, undefined, {sensitivity: 'accent'});
+  return issue.labels.filter(labelComparer).length > 0;
 }
 
 function wasLastUpdatedBefore(
@@ -90,7 +98,6 @@ function wasLastUpdatedBefore(
   const daysInMillis = 1000 * 60 * 60 * num_days;
   const millisSinceLastUpdated =
     new Date().getTime() - new Date(issue.updated_at).getTime();
-  core.debug(`${daysInMillis}, ${millisSinceLastUpdated}`);
   return millisSinceLastUpdated >= daysInMillis;
 }
 
@@ -139,7 +146,7 @@ function getAndValidateArgs(): Args {
   const args = {
     repoToken: core.getInput('repo-token', {required: true}),
     staleIssueMessage: core.getInput('stale-issue-message'),
-    stalePrMessage: core.getInput('stale-pr-message', {required: true}),
+    stalePrMessage: core.getInput('stale-pr-message'),
     daysBeforeStale: parseInt(
       core.getInput('days-before-stale', {required: true})
     ),

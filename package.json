@@ -12,12 +12,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/actions/start-vm-action.git"
+    "url": "git+https://github.com/actions/stale.git"
   },
   "keywords": [
     "actions",
     "node",
-    "setup"
+    "stale"
   ],
   "author": "GitHub",
   "license": "MIT",

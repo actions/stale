@@ -3,7 +3,7 @@ import * as github from '@actions/github';
 import * as Octokit from '@octokit/rest';
 
 type Issue = Octokit.IssuesListForRepoResponseItem;
-type IssueLabels = Octokit.IssuesListForRepoResponseItemLabelsItem;
+type IssueLabel = Octokit.IssuesListForRepoResponseItemLabelsItem;
 
 type Args = {
   repoToken: string;
@@ -54,7 +54,7 @@ async function processIssues(
 
     let staleMessage = isPr ? args.stalePrMessage : args.staleIssueMessage;
     if (!staleMessage) {
-      core.debug(`skipping ${isPr ? "pr" : "issue"} due to empty message`);
+      core.debug(`skipping ${isPr ? 'pr' : 'issue'} due to empty message`);
       continue;
     }
 
@@ -85,19 +85,13 @@ async function processIssues(
   return await processIssues(client, args, operationsLeft, page + 1);
 }
 
-function isLabeledStale(
-  issue: Issue,
-  label: string
-): boolean {
-  const labelComparer : (l: IssueLabels) => boolean = l =>
+function isLabeledStale(issue: Issue, label: string): boolean {
+  const labelComparer: (l: IssueLabel) => boolean = l =>
     label.localeCompare(l.name, undefined, {sensitivity: 'accent'}) === 0;
   return issue.labels.filter(labelComparer).length > 0;
 }
 
-function wasLastUpdatedBefore(
-  issue: Issue,
-  num_days: number
-): boolean {
+function wasLastUpdatedBefore(issue: Issue, num_days: number): boolean {
   const daysInMillis = 1000 * 60 * 60 * num_days;
   const millisSinceLastUpdated =
     new Date().getTime() - new Date(issue.updated_at).getTime();

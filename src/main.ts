@@ -2,6 +2,9 @@ import * as core from '@actions/core';
 import * as github from '@actions/github';
 import * as Octokit from '@octokit/rest';
 
+type Issue = Octokit.IssuesListForRepoResponseItem;
+type IssueLabel = Octokit.IssuesListForRepoResponseItemLabelsItem;
+
 type Args = {
   repoToken: string;
   staleIssueMessage: string;
@@ -51,7 +54,7 @@ async function processIssues(
 
     let staleMessage = isPr ? args.stalePrMessage : args.staleIssueMessage;
     if (!staleMessage) {
-      core.debug(`skipping ${isPr ? "pr" : "issue"} due to empty message`);
+      core.debug(`skipping ${isPr ? 'pr' : 'issue'} due to empty message`);
       continue;
     }
 
@@ -82,19 +85,13 @@ async function processIssues(
   return await processIssues(client, args, operationsLeft, page + 1);
 }
 
-function isLabeledStale(
-  issue: Octokit.IssuesListForRepoResponseItem,
-  label: string
-): boolean {
-  const labelComparer = l =>
-    label.localeCompare(l.name, undefined, {sensitivity: 'accent'});
+function isLabeledStale(issue: Issue, label: string): boolean {
+  const labelComparer: (l: IssueLabel) => boolean = l =>
+    label.localeCompare(l.name, undefined, {sensitivity: 'accent'}) === 0;
   return issue.labels.filter(labelComparer).length > 0;
 }
 
-function wasLastUpdatedBefore(
-  issue: Octokit.IssuesListForRepoResponseItem,
-  num_days: number
-): boolean {
+function wasLastUpdatedBefore(issue: Issue, num_days: number): boolean {
   const daysInMillis = 1000 * 60 * 60 * num_days;
   const millisSinceLastUpdated =
     new Date().getTime() - new Date(issue.updated_at).getTime();
@@ -103,7 +100,7 @@ function wasLastUpdatedBefore(
 
 async function markStale(
   client: github.GitHub,
-  issue: Octokit.IssuesListForRepoResponseItem,
+  issue: Issue,
   staleMessage: string,
   staleLabel: string
 ): Promise<number> {
@@ -128,7 +125,7 @@ async function markStale(
 
 async function closeIssue(
   client: github.GitHub,
-  issue: Octokit.IssuesListForRepoResponseItem
+  issue: Issue
 ): Promise<number> {
   core.debug(`closing issue ${issue.title} for being stale`);
 

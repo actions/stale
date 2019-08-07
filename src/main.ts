@@ -51,6 +51,7 @@ async function processIssues(
 
     let staleMessage = isPr ? args.stalePrMessage : args.staleIssueMessage;
     if (!staleMessage) {
+      core.debug(`skipping ${isPr ? "pr" : "issue"} due to empty message`);
       continue;
     }
 

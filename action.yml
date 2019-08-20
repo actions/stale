@@ -6,7 +6,7 @@ inputs:
     description: 'Token for the repo. Can be passed in using {{ secrets.GITHUB_TOKEN }}'
     required: true
   stale-issue-message:
-    description: 'The message to post on the issue when tagging it. If none provided, will not mark iusses stale.'
+    description: 'The message to post on the issue when tagging it. If none provided, will not mark issues stale.'
   stale-pr-message:
     description: 'The message to post on the pr when tagging it. If none provided, will not mark prs stale.'
   days-before-stale:

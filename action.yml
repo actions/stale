@@ -18,9 +18,15 @@ inputs:
   stale-issue-label:
     description: 'The label to apply when an issue is stale'
     default: 'Stale'
+  exempt-issue-label:
+    description: 'The label to apply when an issue is exempt from being marked stale'
+    default: ''
   stale-pr-label:
     description: 'The label to apply when a pull request is stale'
     default: 'Stale'
+  exempt-pr-label:
+    description: 'The label to apply when a pull request is exempt from being marked stale'
+    default: ''
   operations-per-run:
     description: 'The maximum number of operations per run, used to control rate limiting'
     default: 30

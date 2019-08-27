@@ -63,7 +63,7 @@ async function processIssues(
     let staleLabel = isPr ? args.stalePrLabel : args.staleIssueLabel;
     let exemptLabel = isPr ? args.exemptPrLabel : args.exemptIssueLabel;
 
-    if (isLabeled(issue, exemptLabel)) {
+    if (exemptLabel && isLabeled(issue, exemptLabel)) {
       operationsLeft -= 1;
       continue;
     } else if (isLabeled(issue, staleLabel)) {

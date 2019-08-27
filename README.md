@@ -60,5 +60,7 @@ jobs:
         stale-issue-message: 'Stale issue message'
         stale-pr-message: 'Stale issue message'
         stale-issue-label: 'no-issue-activity'
+        exempt-issue-label: 'awaiting-approval'
         stale-pr-label: 'no-pr-activity'
+        exempt-pr-label: 'awaiting-approval'
 ```

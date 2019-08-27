@@ -12,7 +12,9 @@ type Args = {
   daysBeforeStale: number;
   daysBeforeClose: number;
   staleIssueLabel: string;
+  exemptIssueLabel: string;
   stalePrLabel: string;
+  exemptPrLabel: string;
   operationsPerRun: number;
 };
 
@@ -59,8 +61,11 @@ async function processIssues(
     }
 
     let staleLabel = isPr ? args.stalePrLabel : args.staleIssueLabel;
+    let exemptLabel = isPr ? args.exemptPrLabel : args.exemptIssueLabel;
 
-    if (isLabeledStale(issue, staleLabel)) {
+    if (exemptLabel && isLabeled(issue, exemptLabel)) {
+      continue;
+    } else if (isLabeled(issue, staleLabel)) {
       if (wasLastUpdatedBefore(issue, args.daysBeforeClose)) {
         operationsLeft -= await closeIssue(client, issue);
       } else {
@@ -85,7 +90,7 @@ async function processIssues(
   return await processIssues(client, args, operationsLeft, page + 1);
 }
 
-function isLabeledStale(issue: Issue, label: string): boolean {
+function isLabeled(issue: Issue, label: string): boolean {
   const labelComparer: (l: IssueLabel) => boolean = l =>
     label.localeCompare(l.name, undefined, {sensitivity: 'accent'}) === 0;
   return issue.labels.filter(labelComparer).length > 0;
@@ -151,7 +156,9 @@ function getAndValidateArgs(): Args {
       core.getInput('days-before-close', {required: true})
     ),
     staleIssueLabel: core.getInput('stale-issue-label', {required: true}),
+    exemptIssueLabel: core.getInput('exempt-issue-label'),
     stalePrLabel: core.getInput('stale-pr-label', {required: true}),
+    exemptPrLabel: core.getInput('exempt-pr-label'),
     operationsPerRun: parseInt(
       core.getInput('operations-per-run', {required: true})
     )

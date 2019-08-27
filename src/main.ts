@@ -12,7 +12,9 @@ type Args = {
   daysBeforeStale: number;
   daysBeforeClose: number;
   staleIssueLabel: string;
+  exemptIssueLabel: string;
   stalePrLabel: string;
+  exemptPrLabel: string;
   operationsPerRun: number;
 };
 
@@ -151,7 +153,9 @@ function getAndValidateArgs(): Args {
       core.getInput('days-before-close', {required: true})
     ),
     staleIssueLabel: core.getInput('stale-issue-label', {required: true}),
+    exemptIssueLabel: core.getInput('exempt-issue-label'),
     stalePrLabel: core.getInput('stale-pr-label', {required: true}),
+    exemptPrLabel: core.getInput('exempt-pr-label'),
     operationsPerRun: parseInt(
       core.getInput('operations-per-run', {required: true})
     )

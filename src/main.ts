@@ -64,7 +64,6 @@ async function processIssues(
     let exemptLabel = isPr ? args.exemptPrLabel : args.exemptIssueLabel;
 
     if (exemptLabel && isLabeled(issue, exemptLabel)) {
-      operationsLeft -= 1;
       continue;
     } else if (isLabeled(issue, staleLabel)) {
       if (wasLastUpdatedBefore(issue, args.daysBeforeClose)) {

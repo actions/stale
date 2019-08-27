@@ -60,7 +60,7 @@ async function processIssues(
 
     let staleLabel = isPr ? args.stalePrLabel : args.staleIssueLabel;
 
-    if (isLabeledStale(issue, staleLabel)) {
+    if (isLabeled(issue, staleLabel)) {
       if (wasLastUpdatedBefore(issue, args.daysBeforeClose)) {
         operationsLeft -= await closeIssue(client, issue);
       } else {
@@ -85,7 +85,7 @@ async function processIssues(
   return await processIssues(client, args, operationsLeft, page + 1);
 }
 
-function isLabeledStale(issue: Issue, label: string): boolean {
+function isLabeled(issue: Issue, label: string): boolean {
   const labelComparer: (l: IssueLabel) => boolean = l =>
     label.localeCompare(l.name, undefined, {sensitivity: 'accent'}) === 0;
   return issue.labels.filter(labelComparer).length > 0;

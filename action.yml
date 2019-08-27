@@ -6,21 +6,25 @@ inputs:
     description: 'Token for the repo. Can be passed in using {{ secrets.GITHUB_TOKEN }}'
     required: true
   stale-issue-message:
-    description: 'The message to post on the issue when tagging it. If none provided, will not mark iusses stale.'
+    description: 'The message to post on the issue when tagging it. If none provided, will not mark issues stale.'
   stale-pr-message:
-    description: 'The message to post on the pr when tagging it. If none provided, will not mark prs stale.'
+    description: 'The message to post on the pr when tagging it. If none provided, will not mark pull requests stale.'
   days-before-stale:
     description: 'The number of days old an issue can be before marking it stale'
     default: 60
   days-before-close:
-    description: 'The number of days to wait to close an issue or pr after it being marked stale'
+    description: 'The number of days to wait to close an issue or pull request after it being marked stale'
     default: 7
   stale-issue-label:
     description: 'The label to apply when an issue is stale'
     default: 'Stale'
+  exempt-issue-label:
+    description: 'The label to apply when an issue is exempt from being marked stale'
   stale-pr-label:
-    description: 'The label to apply when a pr is stale'
+    description: 'The label to apply when a pull request is stale'
     default: 'Stale'
+  exempt-pr-label:
+    description: 'The label to apply when a pull request is exempt from being marked stale'
   operations-per-run:
     description: 'The maximum number of operations per run, used to control rate limiting'
     default: 30

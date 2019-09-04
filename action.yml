@@ -13,7 +13,7 @@ inputs:
     description: 'The number of days old an issue can be before marking it stale'
     default: 60
   days-before-close:
-    description: 'The number of days to wait to close an issue or pull request after it being marked stale'
+    description: 'The number of days to wait to close an issue or pull request after it being marked stale. Set to -1 to never close stale issues.'
     default: 7
   stale-issue-label:
     description: 'The label to apply when an issue is stale'

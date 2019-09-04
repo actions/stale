@@ -66,10 +66,15 @@ async function processIssues(
     if (exemptLabel && isLabeled(issue, exemptLabel)) {
       continue;
     } else if (isLabeled(issue, staleLabel)) {
-      if (wasLastUpdatedBefore(issue, args.daysBeforeClose)) {
-        operationsLeft -= await closeIssue(client, issue);
-      } else {
+      if (args.daysBeforeClose < 0) {
         continue;
+      }
+      else {
+        if (wasLastUpdatedBefore(issue, args.daysBeforeClose)) {
+          operationsLeft -= await closeIssue(client, issue);
+        } else {
+          continue;
+        }
       }
     } else if (wasLastUpdatedBefore(issue, args.daysBeforeStale)) {
       operationsLeft -= await markStale(

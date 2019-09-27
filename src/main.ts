@@ -15,6 +15,7 @@ type Args = {
   exemptIssueLabel: string;
   stalePrLabel: string;
   exemptPrLabel: string;
+  onlyLabels: string;
   operationsPerRun: number;
 };
 
@@ -40,6 +41,7 @@ async function processIssues(
     owner: github.context.repo.owner,
     repo: github.context.repo.repo,
     state: 'open',
+    labels: args.onlyLabels,
     per_page: 100,
     page: page
   });
@@ -159,6 +161,7 @@ function getAndValidateArgs(): Args {
     exemptIssueLabel: core.getInput('exempt-issue-label'),
     stalePrLabel: core.getInput('stale-pr-label', {required: true}),
     exemptPrLabel: core.getInput('exempt-pr-label'),
+    onlyLabels: core.getInput('only-labels'),
     operationsPerRun: parseInt(
       core.getInput('operations-per-run', {required: true})
     )

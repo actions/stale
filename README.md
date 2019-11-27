@@ -7,7 +7,7 @@ Warns and then closes issues and PRs that have had no activity for a specified a
 See [action.yml](./action.yml) For comprehensive list of options.
  
 Basic:
-```
+```yaml
 name: "Close stale issues"
 on:
   schedule:
@@ -25,7 +25,7 @@ jobs:
 ```
  
 Configure stale timeouts:
-```
+```yaml
 name: "Close stale issues"
 on:
   schedule:
@@ -44,7 +44,7 @@ jobs:
 ```
  
 Configure labels:
-```
+```yaml
 name: "Close stale issues"
 on:
   schedule:

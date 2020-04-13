@@ -25,6 +25,9 @@ inputs:
     default: 'Stale'
   exempt-pr-label:
     description: 'The label to apply when a pull request is exempt from being marked stale'
+  only-labels:
+    description: 'Only issues or pull requests with all of these labels are checked if stale. Defaults to `[]` (disabled)' and can be a comma-separated list of labels
+    default: ''
   operations-per-run:
     description: 'The maximum number of operations per run, used to control rate limiting'
     default: 30

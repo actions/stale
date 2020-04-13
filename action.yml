@@ -1,9 +1,9 @@
 name: 'Close Stale Issues'
-description: 'Action to close stale issues'
+description: 'Close issues and pull requests with no recent activity'
 author: 'GitHub'
 inputs:
   repo-token:
-    description: 'Token for the repo. Can be passed in using {{ secrets.GITHUB_TOKEN }}'
+    description: 'Token for the repository. Can be passed in using {{ secrets.GITHUB_TOKEN }}'
     required: true
   stale-issue-message:
     description: 'The message to post on the issue when tagging it. If none provided, will not mark issues stale.'
@@ -13,7 +13,7 @@ inputs:
     description: 'The number of days old an issue can be before marking it stale'
     default: 60
   days-before-close:
-    description: 'The number of days to wait to close an issue or pull request after it being marked stale'
+    description: 'The number of days to wait to close an issue or pull request after it being marked stale. Set to -1 to never close stale issues.'
     default: 7
   stale-issue-label:
     description: 'The label to apply when an issue is stale'
@@ -27,6 +27,9 @@ inputs:
   exempt-pr-labels:
     description: 'The labels to use to exempt a pull request from being marked stale'
     default: []
+  only-labels:
+    description: 'Only issues or pull requests with all of these labels are checked if stale. Defaults to `[]` (disabled)' and can be a comma-separated list of labels
+    default: ''
   operations-per-run:
     description: 'The maximum number of operations per run, used to control rate limiting'
     default: 30

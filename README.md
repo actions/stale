@@ -7,7 +7,7 @@ Warns and then closes issues and PRs that have had no activity for a specified a
 See [action.yml](./action.yml) For comprehensive list of options.
  
 Basic:
-```
+```yaml
 name: "Close stale issues"
 on:
   schedule:
@@ -17,7 +17,7 @@ jobs:
   stale:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/stale@v1
+    - uses: actions/stale@v1.1.0
       with:
         repo-token: ${{ secrets.GITHUB_TOKEN }}
         stale-issue-message: 'Message to comment on stale issues. If none provided, will not mark issues stale'
@@ -25,7 +25,7 @@ jobs:
 ```
  
 Configure stale timeouts:
-```
+```yaml
 name: "Close stale issues"
 on:
   schedule:
@@ -35,7 +35,7 @@ jobs:
   stale:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/stale@v1
+    - uses: actions/stale@v1.1.0
       with:
         repo-token: ${{ secrets.GITHUB_TOKEN }}
         stale-issue-message: 'This issue is stale because it has been open 30 days with no activity. Remove stale label or comment or this will be closed in 5 days'
@@ -44,7 +44,7 @@ jobs:
 ```
  
 Configure labels:
-```
+```yaml
 name: "Close stale issues"
 on:
   schedule:
@@ -54,7 +54,7 @@ jobs:
   stale:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/stale@v1
+    - uses: actions/stale@v1.1.0
       with:
         repo-token: ${{ secrets.GITHUB_TOKEN }}
         stale-issue-message: 'Stale issue message'

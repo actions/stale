@@ -15,6 +15,7 @@ type Args = {
   exemptIssueLabels: string;
   stalePrLabel: string;
   exemptPrLabels: string;
+  onlyLabels: string;
   operationsPerRun: number;
 };
 
@@ -40,6 +41,7 @@ async function processIssues(
     owner: github.context.repo.owner,
     repo: github.context.repo.repo,
     state: 'open',
+    labels: args.onlyLabels,
     per_page: 100,
     page: page
   });
@@ -66,7 +68,7 @@ async function processIssues(
     if (exemptLabels.some(exemptLabel => isLabeled(issue, exemptLabel))) {
       continue;
     } else if (isLabeled(issue, staleLabel)) {
-      if (wasLastUpdatedBefore(issue, args.daysBeforeClose)) {
+      if (args.daysBeforeClose >= 0 && wasLastUpdatedBefore(issue, args.daysBeforeClose)) {
         operationsLeft -= await closeIssue(client, issue);
       } else {
         continue;
@@ -159,6 +161,7 @@ function getAndValidateArgs(): Args {
     exemptIssueLabels: core.getInput('exempt-issue-labels'),
     stalePrLabel: core.getInput('stale-pr-label', {required: true}),
     exemptPrLabels: core.getInput('exempt-pr-labels'),
+    onlyLabels: core.getInput('only-labels'),
     operationsPerRun: parseInt(
       core.getInput('operations-per-run', {required: true})
     )

@@ -63,7 +63,7 @@ async function processIssues(
     }
 
     let staleLabel = isPr ? args.stalePrLabel : args.staleIssueLabel;
-    let exemptLabels = isPr ? args.exemptPrLabels : args.exemptIssueLabels;
+    let exemptLabels = parseCommaSeparatedString(isPr ? args.exemptPrLabels : args.exemptIssueLabels);
 
     if (exemptLabels.some(exemptLabel => isLabeled(issue, exemptLabel))) {
       continue;
@@ -144,6 +144,13 @@ async function closeIssue(
   });
 
   return 1; // operations performed
+}
+
+function parseCommaSeparatedString(s: string): string[] {
+  // String.prototype.split defaults to [''] when called on an empty string
+  // In this case, we'd prefer to just return an empty array indicating no labels
+  if (!s.length) return [];
+  return s.split(",");
 }
 
 function getAndValidateArgs(): Args {

@@ -1,6 +1,6 @@
 {
   "name": "stale-action",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "private": true,
   "description": "Marks old issues and PRs as stale",
   "main": "lib/main.js",
@@ -8,7 +8,10 @@
     "build": "tsc",
     "format": "prettier --write **/*.ts",
     "format-check": "prettier --check **/*.ts",
-    "test": "jest"
+    "lint": "eslint src/**/*.ts",
+    "pack": "ncc build",
+    "test": "jest",
+    "all": "npm run build && npm run format && npm run lint && npm run pack && npm test"
   },
   "repository": {
     "type": "git",
@@ -22,29 +25,25 @@
   "author": "GitHub",
   "license": "MIT",
   "dependencies": {
-    "@actions/core": "file:toolkit/actions-core-0.0.0.tgz",
-    "@actions/exec": "file:toolkit/actions-exec-0.0.0.tgz",
-    "@actions/github": "file:toolkit/actions-github-0.0.0.tgz",
-    "@actions/io": "file:toolkit/actions-io-0.0.0.tgz",
-    "@actions/tool-cache": "file:toolkit/actions-tool-cache-0.0.0.tgz",
+    "@actions/core": "^1.2.3",
+    "@actions/github": "^2.1.1",
+    "@octokit/rest": "^16.43.1",
     "semver": "^6.1.1"
   },
   "devDependencies": {
-    "@types/jest": "^24.0.13",
-    "@types/node": "^12.6.8",
     "@types/semver": "^6.0.0",
-    "husky": "^2.3.0",
-    "jest": "^24.8.0",
-    "jest-circus": "^24.7.1",
-    "prettier": "^1.17.1",
-    "ts-jest": "^24.0.2",
-    "typescript": "^3.5.1"
-  },
-  "husky": {
-    "skipCI": true,
-    "hooks": {
-      "pre-commit": "npm run build && npm run format",
-      "post-commit": "npm prune --production && git add node_modules/* && git commit -m \"Husky commit correct node modules\""
-    }
+    "@types/jest": "^24.0.23",
+    "@types/node": "^12.7.12",
+    "@typescript-eslint/parser": "^2.8.0",
+    "@zeit/ncc": "^0.20.5",
+    "eslint": "^5.16.0",
+    "eslint-plugin-github": "^2.0.0",
+    "eslint-plugin-jest": "^22.21.0",
+    "jest": "^24.9.0",
+    "jest-circus": "^24.9.0",
+    "js-yaml": "^3.13.1",
+    "prettier": "^1.19.1",
+    "ts-jest": "^24.2.0",
+    "typescript": "^3.6.4"
   }
 }

@@ -8450,6 +8450,7 @@ class IssueProcessor {
     constructor(options) {
         this.operationsLeft = 0;
         this.options = options;
+        this.operationsLeft = options.operationsPerRun;
         this.client = new github.GitHub(options.repoToken);
     }
     processIssues(page = 1) {

@@ -1,11 +1,11 @@
 import * as core from '@actions/core';
 import * as github from '@actions/github';
-import * as Octokit from '@octokit/rest';
+import {Octokit} from '@octokit/rest';
 
 type Issue = Octokit.IssuesListForRepoResponseItem;
 type IssueLabel = Octokit.IssuesListForRepoResponseItemLabelsItem;
 
-type Args = {
+interface Args {
   repoToken: string;
   staleIssueMessage: string;
   stalePrMessage: string;
@@ -17,9 +17,9 @@ type Args = {
   exemptPrLabels: string;
   onlyLabels: string;
   operationsPerRun: number;
-};
+}
 
-async function run() {
+async function run(): Promise<void> {
   try {
     const args = getAndValidateArgs();
 
@@ -43,7 +43,7 @@ async function processIssues(
     state: 'open',
     labels: args.onlyLabels,
     per_page: 100,
-    page: page
+    page
   });
 
   operationsLeft -= 1;
@@ -52,23 +52,26 @@ async function processIssues(
     return operationsLeft;
   }
 
-  for (var issue of issues.data.values()) {
+  for (const issue of issues.data.values()) {
     core.debug(`found issue: ${issue.title} last updated ${issue.updated_at}`);
-    let isPr = !!issue.pull_request;
+    const isPr = !!issue.pull_request;
 
-    let staleMessage = isPr ? args.stalePrMessage : args.staleIssueMessage;
+    const staleMessage = isPr ? args.stalePrMessage : args.staleIssueMessage;
     if (!staleMessage) {
       core.debug(`skipping ${isPr ? 'pr' : 'issue'} due to empty message`);
       continue;
     }
 
-    let staleLabel = isPr ? args.stalePrLabel : args.staleIssueLabel;
-    let exemptLabels = parseCommaSeparatedString(isPr ? args.exemptPrLabels : args.exemptIssueLabels);
+    const staleLabel = isPr ? args.stalePrLabel : args.staleIssueLabel;
+    const exemptLabels = parseCommaSeparatedString(isPr ? args.exemptPrLabels : args.exemptIssueLabels);
 
     if (exemptLabels.some(exemptLabel => isLabeled(issue, exemptLabel))) {
       continue;
     } else if (isLabeled(issue, staleLabel)) {
-      if (args.daysBeforeClose >= 0 && wasLastUpdatedBefore(issue, args.daysBeforeClose)) {
+      if (
+        args.daysBeforeClose >= 0 &&
+        wasLastUpdatedBefore(issue, args.daysBeforeClose)
+      ) {
         operationsLeft -= await closeIssue(client, issue);
       } else {
         continue;
@@ -174,7 +177,7 @@ function getAndValidateArgs(): Args {
     )
   };
 
-  for (var numberInput of [
+  for (const numberInput of [
     'days-before-stale',
     'days-before-close',
     'operations-per-run'

@@ -3,36 +3,36 @@ description: 'Close issues and pull requests with no recent activity'
 author: 'GitHub'
 inputs:
   repo-token:
-    description: 'Token for the repository. Can be passed in using {{ secrets.GITHUB_TOKEN }}'
+    description: 'Token for the repository. Can be passed in using `{{ secrets.GITHUB_TOKEN }}`.'
     required: true
   stale-issue-message:
     description: 'The message to post on the issue when tagging it. If none provided, will not mark issues stale.'
   stale-pr-message:
     description: 'The message to post on the pr when tagging it. If none provided, will not mark pull requests stale.'
   days-before-stale:
-    description: 'The number of days old an issue can be before marking it stale'
+    description: 'The number of days old an issue can be before marking it stale.'
     default: 60
   days-before-close:
     description: 'The number of days to wait to close an issue or pull request after it being marked stale. Set to -1 to never close stale issues.'
     default: 7
   stale-issue-label:
-    description: 'The label to apply when an issue is stale'
+    description: 'The label to apply when an issue is stale.'
     default: 'Stale'
   exempt-issue-labels:
-    description: 'The labels to use to exempt an issue from being marked stale. Separate multiple labels with commas (eg. "label1,label2")'
+    description: 'The labels to apply when an issue is exempt from being marked stale. Separate multiple labels with commas (eg. "label1,label2")'
     default: ''
   stale-pr-label:
-    description: 'The label to apply when a pull request is stale'
+    description: 'The label to apply when a pull request is stale.'
     default: 'Stale'
   exempt-pr-labels:
-    description: 'The labels to use to exempt a pull request from being marked stale. Separate multiple labels with commas (eg. "label1,label2")''
+    description: 'The labels to apply when a pull request is exempt from being marked stale. Separate multiple labels with commas (eg. "label1,label2")''
     default: ''
   only-labels:
-    description: 'Only issues or pull requests with all of these labels are checked if stale. Defaults to `[]` (disabled)' and can be a comma-separated list of labels
+    description: 'Only issues or pull requests with all of these labels are checked if stale. Defaults to `[]` (disabled) and can be a comma-separated list of labels.'
     default: ''
   operations-per-run:
-    description: 'The maximum number of operations per run, used to control rate limiting'
+    description: 'The maximum number of operations per run, used to control rate limiting.'
     default: 30
 runs:
   using: 'node12'
-  main: 'lib/main.js'
+  main: 'dist/index.js'

@@ -1,8 +1,5 @@
 import * as core from '@actions/core';
-import { IssueProcessor, IssueProcessorOptions } from './IssueProcessor';
-
-interface Args extends IssueProcessorOptions {
-}
+import {IssueProcessor, IssueProcessorOptions} from './IssueProcessor';
 
 async function run(): Promise<void> {
   try {
@@ -10,14 +7,13 @@ async function run(): Promise<void> {
 
     const processor: IssueProcessor = new IssueProcessor(args);
     await processor.processIssues();
-
   } catch (error) {
     core.error(error);
     core.setFailed(error.message);
   }
 }
 
-function getAndValidateArgs(): Args {
+function getAndValidateArgs(): IssueProcessorOptions {
   const args = {
     repoToken: core.getInput('repo-token', {required: true}),
     staleIssueMessage: core.getInput('stale-issue-message'),
@@ -36,7 +32,7 @@ function getAndValidateArgs(): Args {
     operationsPerRun: parseInt(
       core.getInput('operations-per-run', {required: true})
     ),
-    debugOnly: (core.getInput('debug-only') === 'true')
+    debugOnly: core.getInput('debug-only') === 'true'
   };
 
   for (const numberInput of [

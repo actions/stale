@@ -8490,7 +8490,7 @@ class IssueProcessor {
                     core.debug(`Skipping ${issueType} because it has an exempt label`);
                     continue; // don't process exempt issues
                 }
-                if (!IssueProcessor.isLabeled(issue, staleLabel)) {
+                if (IssueProcessor.isLabeled(issue, staleLabel)) {
                     core.debug(`Found a stale ${issueType}`);
                     if (this.options.daysBeforeClose >= 0 &&
                         IssueProcessor.wasLastUpdatedBefore(issue, this.options.daysBeforeClose)) {

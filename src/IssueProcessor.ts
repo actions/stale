@@ -84,7 +84,7 @@ export class IssueProcessor {
         continue; // don't process exempt issues
       }
 
-      if (!IssueProcessor.isLabeled(issue, staleLabel)) {
+      if (IssueProcessor.isLabeled(issue, staleLabel)) {
         core.debug(`Found a stale ${issueType}`);
         if (
           this.options.daysBeforeClose >= 0 &&

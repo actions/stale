@@ -31,6 +31,7 @@ export class IssueProcessor {
 
   constructor(options: IssueProcessorOptions) {
     this.options = options;
+    this.operationsLeft = options.operationsPerRun;
     this.client = new github.GitHub(options.repoToken);
   }
 

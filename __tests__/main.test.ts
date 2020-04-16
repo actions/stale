@@ -178,3 +178,25 @@ test('exempt pr labels will not be marked stale', async () => {
 
   expect(processor.staleIssues.length).toEqual(2); // PR should get processed even though it has an exempt **issue** label
 });
+
+test('stale issues should not be closed if days is set to -1', async () => {
+  const TestIssueList: Issue[] = [
+    generateIssue(1, 'My first issue', '2020-01-01T17:00:00Z', false, [
+      'Stale'
+    ]),
+    generateIssue(2, 'My first PR', '2020-01-01T17:00:00Z', true, ['Stale']),
+    generateIssue(3, 'Another issue', '2020-01-01T17:00:00Z', false, ['Stale'])
+  ];
+
+  let opts = DefaultProcessorOptions;
+  opts.daysBeforeClose = -1;
+
+  const processor = new IssueProcessor(DefaultProcessorOptions, async p =>
+    p == 1 ? TestIssueList : []
+  );
+
+  // process our fake issue list
+  await processor.processIssues(1);
+
+  expect(processor.closedIssues.length).toEqual(0);
+});

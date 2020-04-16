@@ -2,6 +2,23 @@
 
 Warns and then closes issues and PRs that have had no activity for a specified amount of time.
 
+### Building and testing
+
+Install the dependencies  
+```bash
+$ npm install
+```
+
+Build the typescript and package it for distribution
+```bash
+$ npm run build && npm run pack
+```
+
+Run the tests :heavy_check_mark:  
+```bash
+$ npm test
+```
+
 ### Usage
 
 See [action.yml](./action.yml) For comprehensive list of options.

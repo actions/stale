@@ -12,9 +12,9 @@ interface Args {
   daysBeforeStale: number;
   daysBeforeClose: number;
   staleIssueLabel: string;
-  exemptIssueLabel: string;
+  exemptIssueLabels: string;
   stalePrLabel: string;
-  exemptPrLabel: string;
+  exemptPrLabels: string;
   onlyLabels: string;
   operationsPerRun: number;
 }
@@ -63,9 +63,11 @@ async function processIssues(
     }
 
     const staleLabel = isPr ? args.stalePrLabel : args.staleIssueLabel;
-    const exemptLabel = isPr ? args.exemptPrLabel : args.exemptIssueLabel;
+    const exemptLabels = parseCommaSeparatedString(
+      isPr ? args.exemptPrLabels : args.exemptIssueLabels
+    );
 
-    if (exemptLabel && isLabeled(issue, exemptLabel)) {
+    if (exemptLabels.some(exemptLabel => isLabeled(issue, exemptLabel))) {
       continue;
     } else if (isLabeled(issue, staleLabel)) {
       if (
@@ -149,6 +151,13 @@ async function closeIssue(
   return 1; // operations performed
 }
 
+function parseCommaSeparatedString(s: string): string[] {
+  // String.prototype.split defaults to [''] when called on an empty string
+  // In this case, we'd prefer to just return an empty array indicating no labels
+  if (!s.length) return [];
+  return s.split(',');
+}
+
 function getAndValidateArgs(): Args {
   const args = {
     repoToken: core.getInput('repo-token', {required: true}),
@@ -161,9 +170,9 @@ function getAndValidateArgs(): Args {
       core.getInput('days-before-close', {required: true})
     ),
     staleIssueLabel: core.getInput('stale-issue-label', {required: true}),
-    exemptIssueLabel: core.getInput('exempt-issue-label'),
+    exemptIssueLabels: core.getInput('exempt-issue-labels'),
     stalePrLabel: core.getInput('stale-pr-label', {required: true}),
-    exemptPrLabel: core.getInput('exempt-pr-label'),
+    exemptPrLabels: core.getInput('exempt-pr-labels'),
     onlyLabels: core.getInput('only-labels'),
     operationsPerRun: parseInt(
       core.getInput('operations-per-run', {required: true})

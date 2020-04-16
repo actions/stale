@@ -53,15 +53,15 @@ export class IssueProcessor {
     if (getIssues) {
       this.getIssues = getIssues;
     }
-  }
 
-  async processIssues(page: number = 1): Promise<number> {
     if (this.options.debugOnly) {
       core.warning(
         'Executing in debug mode. Debug output will be written but no issues will be processed.'
       );
     }
+  }
 
+  async processIssues(page: number = 1): Promise<number> {
     if (this.operationsLeft <= 0) {
       core.warning('Reached max number of operations to process. Exiting.');
       return 0;

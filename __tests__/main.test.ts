@@ -13,11 +13,14 @@ function generateIssue(
   id: number,
   title: string,
   updatedAt: string,
-  isPullRequest: boolean = false
+  isPullRequest: boolean = false,
+  labels: string[] = []
 ): Issue {
   return {
     number: id,
-    labels: [],
+    labels: labels.map(l => {
+      return {name: l};
+    }),
     title: title,
     updated_at: updatedAt,
     pull_request: isPullRequest ? {} : null
@@ -49,19 +52,58 @@ test('empty issue list results in 1 operation', async () => {
   expect(operationsLeft).toEqual(99);
 });
 
-test('processing an issue with no label will not make it stale', async () => {
+test('processing an issue with no label will make it stale', async () => {
   const TestIssueList: Issue[] = [
-    generateIssue(1, 'My first issue', Date.now().toString())
+    generateIssue(1, 'My first issue', '2020-01-01T17:00:00Z')
   ];
 
   const processor = new IssueProcessor(
     DefaultProcessorOptions,
-    async () => TestIssueList
+    async (p) => p == 1 ? TestIssueList : []
   );
 
   // process our fake issue list
-  const operationsLeft = await processor.processIssues(1);
+  await processor.processIssues(1);
 
-  // processing an empty issue list should result in 1 operation
-  expect(operationsLeft).toBeLessThan(100);
+  expect(processor.staleIssues.length).toEqual(1);
+  expect(processor.closedIssues.length).toEqual(0);
+});
+
+test('processing a stale issue will close it', async () => {
+  const TestIssueList: Issue[] = [
+    generateIssue(1, 'My first issue', '2020-01-01T17:00:00Z', false, ['Stale'])
+  ];
+
+  const processor = new IssueProcessor(
+    DefaultProcessorOptions,
+    async (p) => p == 1 ? TestIssueList : []
+  );
+
+  // process our fake issue list
+  await processor.processIssues(1);
+
+  expect(processor.staleIssues.length).toEqual(0);
+  expect(processor.closedIssues.length).toEqual(1);
+});
+
+test('exempt issue labels will not be marked stale', async () => {
+  const TestIssueList: Issue[] = [
+    generateIssue(1, 'My first issue', '2020-01-01T17:00:00Z', false, [
+      'Exempt'
+    ])
+  ];
+
+  let opts = DefaultProcessorOptions;
+  opts.exemptIssueLabels = 'Exempt';
+
+  const processor = new IssueProcessor(
+    DefaultProcessorOptions,
+    async (p) => p == 1 ? TestIssueList : []
+  );
+
+  // process our fake issue list
+  await processor.processIssues(1);
+
+  expect(processor.staleIssues.length).toEqual(0);
+  expect(processor.closedIssues.length).toEqual(0);
 });

@@ -13,9 +13,9 @@ export interface IssueProcessorOptions {
   daysBeforeStale: number;
   daysBeforeClose: number;
   staleIssueLabel: string;
-  exemptIssueLabel: string;
+  exemptIssueLabels: string;
   stalePrLabel: string;
-  exemptPrLabel: string;
+  exemptPrLabels: string;
   onlyLabels: string;
   operationsPerRun: number;
   debugOnly: boolean;
@@ -35,7 +35,10 @@ export class IssueProcessor {
     this.client = new github.GitHub(options.repoToken);
   }
 
-  async processIssues(page: number = 1): Promise<number> {
+  async processIssues(
+    page: number = 1,
+    getIssues: (page: number) => Promise<IssueList> = this.getIssues // used for injecting issues to test
+    ): Promise<number> {
     if (this.options.debugOnly) {
       core.warning(
         'Executing in debug mode. Debug output will be written but no issues will be processed.'
@@ -48,7 +51,7 @@ export class IssueProcessor {
     }
 
     // get the next batch of issues
-    const issues: IssueList = await this.getIssues(page);
+    const issues: IssueList = await getIssues(page);
 
     if (issues.data.length <= 0) {
       core.debug('No more issues found to process. Exiting.');
@@ -69,9 +72,9 @@ export class IssueProcessor {
       const staleLabel: string = isPr
         ? this.options.stalePrLabel
         : this.options.staleIssueLabel;
-      const exemptLabel: string = isPr
-        ? this.options.exemptPrLabel
-        : this.options.exemptIssueLabel;
+      const exemptLabels = IssueProcessor.parseCommaSeparatedString(
+          isPr ? this.options.exemptPrLabels : this.options.exemptIssueLabels
+        );
       const issueType: string = isPr ? 'pr' : 'issue';
 
       if (!staleMessage) {
@@ -79,7 +82,7 @@ export class IssueProcessor {
         continue;
       }
 
-      if (exemptLabel && IssueProcessor.isLabeled(issue, exemptLabel)) {
+      if (exemptLabels.some((exemptLabel: string) => IssueProcessor.isLabeled(issue, exemptLabel))) {
         core.debug(`Skipping ${issueType} because it has an exempt label`);
         continue; // don't process exempt issues
       }
@@ -115,7 +118,7 @@ export class IssueProcessor {
     }
 
     // do the next batch
-    return await this.processIssues(page + 1);
+    return this.processIssues(page + 1);
   }
 
   // grab issues from github in baches of 100
@@ -186,5 +189,12 @@ export class IssueProcessor {
     const millisSinceLastUpdated =
       new Date().getTime() - new Date(issue.updated_at).getTime();
     return millisSinceLastUpdated >= daysInMillis;
+  }
+
+  private static parseCommaSeparatedString(s: string): string[] {
+    // String.prototype.split defaults to [''] when called on an empty string
+    // In this case, we'd prefer to just return an empty array indicating no labels
+    if (!s.length) return [];
+    return s.split(',');
   }
 }

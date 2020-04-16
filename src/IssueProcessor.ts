@@ -29,6 +29,9 @@ export class IssueProcessor {
   readonly options: IssueProcessorOptions;
   private operationsLeft: number = 0;
 
+  readonly staleIssues: Issue[] = [];
+  readonly closedIssues: Issue[] = [];
+
   constructor(options: IssueProcessorOptions) {
     this.options = options;
     this.operationsLeft = options.operationsPerRun;
@@ -37,8 +40,8 @@ export class IssueProcessor {
 
   async processIssues(
     page: number = 1,
-    getIssues: (page: number) => Promise<IssueList> = this.getIssues // used for injecting issues to test
-    ): Promise<number> {
+    getIssues: (page: number) => Promise<IssueList> = this.getIssues.bind(this) // used for injecting issues to test
+  ): Promise<number> {
     if (this.options.debugOnly) {
       core.warning(
         'Executing in debug mode. Debug output will be written but no issues will be processed.'
@@ -52,6 +55,7 @@ export class IssueProcessor {
 
     // get the next batch of issues
     const issues: IssueList = await getIssues(page);
+    this.operationsLeft -= 1;
 
     if (issues.data.length <= 0) {
       core.debug('No more issues found to process. Exiting.');
@@ -73,8 +77,8 @@ export class IssueProcessor {
         ? this.options.stalePrLabel
         : this.options.staleIssueLabel;
       const exemptLabels = IssueProcessor.parseCommaSeparatedString(
-          isPr ? this.options.exemptPrLabels : this.options.exemptIssueLabels
-        );
+        isPr ? this.options.exemptPrLabels : this.options.exemptIssueLabels
+      );
       const issueType: string = isPr ? 'pr' : 'issue';
 
       if (!staleMessage) {
@@ -82,7 +86,11 @@ export class IssueProcessor {
         continue;
       }
 
-      if (exemptLabels.some((exemptLabel: string) => IssueProcessor.isLabeled(issue, exemptLabel))) {
+      if (
+        exemptLabels.some((exemptLabel: string) =>
+          IssueProcessor.isLabeled(issue, exemptLabel)
+        )
+      ) {
         core.debug(`Skipping ${issueType} because it has an exempt label`);
         continue; // don't process exempt issues
       }
@@ -141,6 +149,8 @@ export class IssueProcessor {
   ): Promise<void> {
     core.debug(`Marking issue #${issue.number} - ${issue.title} as stale`);
 
+    this.staleIssues.push(issue);
+
     if (this.options.debugOnly) {
       return;
     }
@@ -165,6 +175,8 @@ export class IssueProcessor {
     core.debug(
       `Closing issue #${issue.number} - ${issue.title} for being stale`
     );
+
+    this.closedIssues.push(issue);
 
     if (this.options.debugOnly) {
       return;

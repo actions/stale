@@ -3751,9 +3751,9 @@ function getAndValidateArgs() {
         daysBeforeStale: parseInt(core.getInput('days-before-stale', { required: true })),
         daysBeforeClose: parseInt(core.getInput('days-before-close', { required: true })),
         staleIssueLabel: core.getInput('stale-issue-label', { required: true }),
-        exemptIssueLabel: core.getInput('exempt-issue-label'),
+        exemptIssueLabels: core.getInput('exempt-issue-labels'),
         stalePrLabel: core.getInput('stale-pr-label', { required: true }),
-        exemptPrLabel: core.getInput('exempt-pr-label'),
+        exemptPrLabels: core.getInput('exempt-pr-labels'),
         onlyLabels: core.getInput('only-labels'),
         operationsPerRun: parseInt(core.getInput('operations-per-run', { required: true })),
         debugOnly: core.getInput('debug-only') === 'true'
@@ -8449,11 +8449,14 @@ const github = __importStar(__webpack_require__(469));
 class IssueProcessor {
     constructor(options) {
         this.operationsLeft = 0;
+        this.staleIssues = [];
+        this.closedIssues = [];
         this.options = options;
         this.operationsLeft = options.operationsPerRun;
         this.client = new github.GitHub(options.repoToken);
     }
-    processIssues(page = 1) {
+    processIssues(page = 1, getIssues = this.getIssues.bind(this) // used for injecting issues to test
+    ) {
         return __awaiter(this, void 0, void 0, function* () {
             if (this.options.debugOnly) {
                 core.warning('Executing in debug mode. Debug output will be written but no issues will be processed.');
@@ -8463,7 +8466,8 @@ class IssueProcessor {
                 return 0;
             }
             // get the next batch of issues
-            const issues = yield this.getIssues(page);
+            const issues = yield getIssues(page);
+            this.operationsLeft -= 1;
             if (issues.data.length <= 0) {
                 core.debug('No more issues found to process. Exiting.');
                 return this.operationsLeft;
@@ -8478,15 +8482,13 @@ class IssueProcessor {
                 const staleLabel = isPr
                     ? this.options.stalePrLabel
                     : this.options.staleIssueLabel;
-                const exemptLabel = isPr
-                    ? this.options.exemptPrLabel
-                    : this.options.exemptIssueLabel;
+                const exemptLabels = IssueProcessor.parseCommaSeparatedString(isPr ? this.options.exemptPrLabels : this.options.exemptIssueLabels);
                 const issueType = isPr ? 'pr' : 'issue';
                 if (!staleMessage) {
                     core.debug(`Skipping ${issueType} due to empty stale message`);
                     continue;
                 }
-                if (exemptLabel && IssueProcessor.isLabeled(issue, exemptLabel)) {
+                if (exemptLabels.some((exemptLabel) => IssueProcessor.isLabeled(issue, exemptLabel))) {
                     core.debug(`Skipping ${issueType} because it has an exempt label`);
                     continue; // don't process exempt issues
                 }
@@ -8509,7 +8511,7 @@ class IssueProcessor {
                 }
             }
             // do the next batch
-            return yield this.processIssues(page + 1);
+            return this.processIssues(page + 1);
         });
     }
     // grab issues from github in baches of 100
@@ -8529,6 +8531,7 @@ class IssueProcessor {
     markStale(issue, staleMessage, staleLabel) {
         return __awaiter(this, void 0, void 0, function* () {
             core.debug(`Marking issue #${issue.number} - ${issue.title} as stale`);
+            this.staleIssues.push(issue);
             if (this.options.debugOnly) {
                 return;
             }
@@ -8550,6 +8553,7 @@ class IssueProcessor {
     closeIssue(issue) {
         return __awaiter(this, void 0, void 0, function* () {
             core.debug(`Closing issue #${issue.number} - ${issue.title} for being stale`);
+            this.closedIssues.push(issue);
             if (this.options.debugOnly) {
                 return;
             }
@@ -8569,6 +8573,13 @@ class IssueProcessor {
         const daysInMillis = 1000 * 60 * 60 * 24 * num_days;
         const millisSinceLastUpdated = new Date().getTime() - new Date(issue.updated_at).getTime();
         return millisSinceLastUpdated >= daysInMillis;
+    }
+    static parseCommaSeparatedString(s) {
+        // String.prototype.split defaults to [''] when called on an empty string
+        // In this case, we'd prefer to just return an empty array indicating no labels
+        if (!s.length)
+            return [];
+        return s.split(',');
     }
 }
 exports.IssueProcessor = IssueProcessor;

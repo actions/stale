@@ -19,7 +19,7 @@ inputs:
     description: 'The label to apply when an issue is stale.'
     default: 'Stale'
   exempt-issue-labels:
-    description: 'The labels to apply when an issue is exempt from being marked stale. Separate multiple labels with commas (eg. "label1,label2")'
+    description: 'The labels to apply when an issue is exempt from being marked stale. Separate multiple labels with commas (eg. label1,label2)'
     default: ''
   stale-pr-label:
     description: 'The label to apply when a pull request is stale.'

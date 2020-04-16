@@ -2,9 +2,19 @@ import * as core from '@actions/core';
 import * as github from '@actions/github';
 import {Octokit} from '@octokit/rest';
 
-type Issue = Octokit.IssuesListForRepoResponseItem;
-type IssueLabel = Octokit.IssuesListForRepoResponseItemLabelsItem;
-type IssueList = Octokit.Response<Octokit.IssuesListForRepoResponse>;
+type OcotoKitIssueList = Octokit.Response<Octokit.IssuesListForRepoResponse>;
+
+export interface Issue {
+  title: string;
+  number: number;
+  updated_at: string;
+  labels: Label[];
+  pull_request: any;
+}
+
+export interface Label {
+  name: string;
+}
 
 export interface IssueProcessorOptions {
   repoToken: string;
@@ -32,16 +42,20 @@ export class IssueProcessor {
   readonly staleIssues: Issue[] = [];
   readonly closedIssues: Issue[] = [];
 
-  constructor(options: IssueProcessorOptions) {
+  constructor(
+    options: IssueProcessorOptions,
+    getIssues?: (page: number) => Promise<Issue[]>
+  ) {
     this.options = options;
     this.operationsLeft = options.operationsPerRun;
     this.client = new github.GitHub(options.repoToken);
+
+    if (getIssues) {
+      this.getIssues = getIssues;
+    }
   }
 
-  async processIssues(
-    page: number = 1,
-    getIssues: (page: number) => Promise<IssueList> = this.getIssues.bind(this) // used for injecting issues to test
-  ): Promise<number> {
+  async processIssues(page: number = 1): Promise<number> {
     if (this.options.debugOnly) {
       core.warning(
         'Executing in debug mode. Debug output will be written but no issues will be processed.'
@@ -54,15 +68,15 @@ export class IssueProcessor {
     }
 
     // get the next batch of issues
-    const issues: IssueList = await getIssues(page);
+    const issues: Issue[] = await this.getIssues(page);
     this.operationsLeft -= 1;
 
-    if (issues.data.length <= 0) {
+    if (issues.length <= 0) {
       core.debug('No more issues found to process. Exiting.');
       return this.operationsLeft;
     }
 
-    for (const issue of issues.data.values()) {
+    for (const issue of issues.values()) {
       const isPr = !!issue.pull_request;
 
       core.debug(
@@ -130,15 +144,19 @@ export class IssueProcessor {
   }
 
   // grab issues from github in baches of 100
-  private async getIssues(page: number): Promise<IssueList> {
-    return this.client.issues.listForRepo({
-      owner: github.context.repo.owner,
-      repo: github.context.repo.repo,
-      state: 'open',
-      labels: this.options.onlyLabels,
-      per_page: 100,
-      page
-    });
+  private async getIssues(page: number): Promise<Issue[]> {
+    const issueResult: OcotoKitIssueList = await this.client.issues.listForRepo(
+      {
+        owner: github.context.repo.owner,
+        repo: github.context.repo.repo,
+        state: 'open',
+        labels: this.options.onlyLabels,
+        per_page: 100,
+        page
+      }
+    );
+
+    return issueResult.data;
   }
 
   // Mark an issue as stale with a comment and a label
@@ -191,7 +209,7 @@ export class IssueProcessor {
   }
 
   private static isLabeled(issue: Issue, label: string): boolean {
-    const labelComparer: (l: IssueLabel) => boolean = l =>
+    const labelComparer: (l: Label) => boolean = l =>
       label.localeCompare(l.name, undefined, {sensitivity: 'accent'}) === 0;
     return issue.labels.filter(labelComparer).length > 0;
   }

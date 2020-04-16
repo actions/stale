@@ -8447,16 +8447,18 @@ const github = __importStar(__webpack_require__(469));
  * Handle processing of issues for staleness/closure.
  */
 class IssueProcessor {
-    constructor(options) {
+    constructor(options, getIssues) {
         this.operationsLeft = 0;
         this.staleIssues = [];
         this.closedIssues = [];
         this.options = options;
         this.operationsLeft = options.operationsPerRun;
         this.client = new github.GitHub(options.repoToken);
+        if (getIssues) {
+            this.getIssues = getIssues;
+        }
     }
-    processIssues(page = 1, getIssues = this.getIssues.bind(this) // used for injecting issues to test
-    ) {
+    processIssues(page = 1) {
         return __awaiter(this, void 0, void 0, function* () {
             if (this.options.debugOnly) {
                 core.warning('Executing in debug mode. Debug output will be written but no issues will be processed.');
@@ -8466,13 +8468,13 @@ class IssueProcessor {
                 return 0;
             }
             // get the next batch of issues
-            const issues = yield getIssues(page);
+            const issues = yield this.getIssues(page);
             this.operationsLeft -= 1;
-            if (issues.data.length <= 0) {
+            if (issues.length <= 0) {
                 core.debug('No more issues found to process. Exiting.');
                 return this.operationsLeft;
             }
-            for (const issue of issues.data.values()) {
+            for (const issue of issues.values()) {
                 const isPr = !!issue.pull_request;
                 core.debug(`Found issue: issue #${issue.number} - ${issue.title} last updated ${issue.updated_at} (is pr? ${isPr})`);
                 // calculate string based messages for this issue
@@ -8517,7 +8519,7 @@ class IssueProcessor {
     // grab issues from github in baches of 100
     getIssues(page) {
         return __awaiter(this, void 0, void 0, function* () {
-            return this.client.issues.listForRepo({
+            const issueResult = yield this.client.issues.listForRepo({
                 owner: github.context.repo.owner,
                 repo: github.context.repo.repo,
                 state: 'open',
@@ -8525,6 +8527,7 @@ class IssueProcessor {
                 per_page: 100,
                 page
             });
+            return issueResult.data;
         });
     }
     // Mark an issue as stale with a comment and a label

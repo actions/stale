@@ -225,6 +225,6 @@ export class IssueProcessor {
     // String.prototype.split defaults to [''] when called on an empty string
     // In this case, we'd prefer to just return an empty array indicating no labels
     if (!s.length) return [];
-    return s.split(',');
+    return s.split(',').map(l => l.trim());
   }
 }

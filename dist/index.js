@@ -8457,12 +8457,12 @@ class IssueProcessor {
         if (getIssues) {
             this.getIssues = getIssues;
         }
+        if (this.options.debugOnly) {
+            core.warning('Executing in debug mode. Debug output will be written but no issues will be processed.');
+        }
     }
     processIssues(page = 1) {
         return __awaiter(this, void 0, void 0, function* () {
-            if (this.options.debugOnly) {
-                core.warning('Executing in debug mode. Debug output will be written but no issues will be processed.');
-            }
             if (this.operationsLeft <= 0) {
                 core.warning('Reached max number of operations to process. Exiting.');
                 return 0;
@@ -8582,7 +8582,7 @@ class IssueProcessor {
         // In this case, we'd prefer to just return an empty array indicating no labels
         if (!s.length)
             return [];
-        return s.split(',');
+        return s.split(',').map(l => l.trim());
     }
 }
 exports.IssueProcessor = IssueProcessor;

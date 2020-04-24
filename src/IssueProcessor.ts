@@ -10,6 +10,8 @@ export interface Issue {
   updated_at: string;
   labels: Label[];
   pull_request: any;
+  state: string;
+  locked: boolean;
 }
 
 export interface Label {
@@ -98,6 +100,16 @@ export class IssueProcessor {
       if (!staleMessage) {
         core.debug(`Skipping ${issueType} due to empty stale message`);
         continue;
+      }
+
+      if (issue.state === 'closed') {
+        core.debug(`Skipping ${issueType} because it is closed`);
+        continue; // don't process closed issues
+      }
+
+      if (issue.locked) {
+        core.debug(`Skipping ${issueType} because it is locked`);
+        continue; // don't process locked issues
       }
 
       if (

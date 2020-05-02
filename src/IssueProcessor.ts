@@ -14,6 +14,14 @@ export interface Issue {
   locked: boolean;
 }
 
+export interface User {
+  type: string;
+}
+
+export interface Comment {
+  user: User;
+}
+
 export interface IssueEvent {
   created_at: string;
   event: string;
@@ -53,7 +61,12 @@ export class IssueProcessor {
 
   constructor(
     options: IssueProcessorOptions,
-    getIssues?: (page: number) => Promise<Issue[]>
+    getIssues?: (page: number) => Promise<Issue[]>,
+    listIssueComments?: (
+      issueNumber: number,
+      sinceDate: string
+    ) => Promise<Comment[]>,
+    getLabelCreationDate?: (issue: Issue, label: string) => Promise<string>
   ) {
     this.options = options;
     this.operationsLeft = options.operationsPerRun;
@@ -61,6 +74,14 @@ export class IssueProcessor {
 
     if (getIssues) {
       this.getIssues = getIssues;
+    }
+
+    if (listIssueComments) {
+      this.listIssueComments = listIssueComments;
+    }
+
+    if (getLabelCreationDate) {
+      this.getLabelCreationDate = getLabelCreationDate;
     }
 
     if (this.options.debugOnly) {
@@ -132,7 +153,10 @@ export class IssueProcessor {
         core.debug(`Found a stale ${issueType}`);
         await this.processStaleIssue(issue, issueType, staleLabel);
       } else if (
-        IssueProcessor.updatedSince(issue.updated_at, this.options.daysBeforeStale)
+        IssueProcessor.updatedSince(
+          issue.updated_at,
+          this.options.daysBeforeStale
+        )
       ) {
         core.debug(
           `Marking ${issueType} stale because it was last updated on ${issue.updated_at}`
@@ -147,13 +171,23 @@ export class IssueProcessor {
   }
 
   // handle all of the stale issue logic when we find a stale issue
-  private async processStaleIssue(issue: Issue, issueType: string, staleLabel: string) {
+  private async processStaleIssue(
+    issue: Issue,
+    issueType: string,
+    staleLabel: string
+  ) {
     if (this.options.daysBeforeClose < 0) {
       return; // nothing to do because we aren't closing stale issues
     }
 
-    const markedStaleOn: string = await this.getLabelCreationDate(issue, staleLabel);
-    const issueHasComments: boolean = await this.isIssueStillStale(issue, markedStaleOn);
+    const markedStaleOn: string = await this.getLabelCreationDate(
+      issue,
+      staleLabel
+    );
+    const issueHasComments: boolean = await this.isIssueStillStale(
+      issue,
+      markedStaleOn
+    );
     const issueHasUpdate: boolean = IssueProcessor.updatedSince(
       issue.updated_at,
       this.options.daysBeforeClose
@@ -161,7 +195,9 @@ export class IssueProcessor {
 
     core.debug(`Issue #${issue.number} marked stale on: ${markedStaleOn}`);
     core.debug(`Issue #${issue.number} has been updated: ${issueHasUpdate}`);
-    core.debug(`Issue #${issue.number} has been commented on: ${issueHasComments}`);
+    core.debug(
+      `Issue #${issue.number} has been commented on: ${issueHasComments}`
+    );
 
     if (!issueHasComments && !issueHasUpdate) {
       core.debug(
@@ -172,10 +208,46 @@ export class IssueProcessor {
       if (this.options.removeStaleWhenUpdated) {
         await this.removeLabel(issue, staleLabel);
       }
-      core.debug(
-        `Ignoring stale ${issueType} because it was updated recenlty`
-      );
+      core.debug(`Ignoring stale ${issueType} because it was updated recenlty`);
     }
+  }
+
+  // checks to see if a given issue is still stale (has had activity on it)
+  private async isIssueStillStale(
+    issue: Issue,
+    sinceDate: string
+  ): Promise<boolean> {
+    core.debug(
+      `Checking for comments on issue #${issue.number} since ${sinceDate} to see if it is still stale`
+    );
+
+    if (!sinceDate) {
+      return true; // if no date was provided then the issue was marked stale a long time ago
+    }
+
+    this.operationsLeft -= 1;
+
+    // find any comments since the stale label
+    const comments = await this.listIssueComments(issue.number, sinceDate);
+
+    // if there are any user comments returned, issue is not stale anymore
+    return comments.filter(comment => comment.user.type === 'User').length > 0;
+  }
+
+  // grab comments for an issue since a given date
+  private async listIssueComments(
+    issueNumber: number,
+    sinceDate: string
+  ): Promise<Comment[]> {
+    // find any comments since date on the given issue
+    const comments = await this.client.issues.listComments({
+      owner: github.context.repo.owner,
+      repo: github.context.repo.repo,
+      issue_number: issueNumber,
+      since: sinceDate
+    });
+
+    return comments.data;
   }
 
   // grab issues from github in baches of 100
@@ -247,51 +319,24 @@ export class IssueProcessor {
     });
   }
 
-    // Remove a label from an issue
-    private async removeLabel(issue: Issue, label: string): Promise<void> {
-      core.debug(
-        `Removing label ${label} from issue #${issue.number} - ${issue.title}`
-      );
-
-      this.operationsLeft -= 1;
-
-      if (this.options.debugOnly) {
-        return;
-      }
-
-      await this.client.issues.removeLabel({
-        owner: github.context.repo.owner,
-        repo: github.context.repo.repo,
-        issue_number: issue.number,
-        name: encodeURIComponent(label), // A label can have a "?" in the name
-      })
-    }
-
-  // checks to see if a given issue is still stale (has had activity on it)
-  private async isIssueStillStale(
-    issue: Issue,
-    sinceDate: string
-  ): Promise<boolean> {
+  // Remove a label from an issue
+  private async removeLabel(issue: Issue, label: string): Promise<void> {
     core.debug(
-      `Checking for comments on issue #${issue.number} since ${sinceDate} to see if it is still stale`
+      `Removing label ${label} from issue #${issue.number} - ${issue.title}`
     );
-
-    if (!sinceDate) {
-      return true; // if no date was provided then the issue was marked stale a long time ago
-    }
 
     this.operationsLeft -= 1;
 
-    // find any comments since the stale label
-    const comments = await this.client.issues.listComments({
+    if (this.options.debugOnly) {
+      return;
+    }
+
+    await this.client.issues.removeLabel({
       owner: github.context.repo.owner,
       repo: github.context.repo.repo,
       issue_number: issue.number,
-      since: sinceDate
+      name: encodeURIComponent(label) // A label can have a "?" in the name
     });
-
-    // if there are any user comments returned, issue is not stale anymore
-    return comments.data.filter(comment => comment.user.type === "User").length > 0
   }
 
   // returns the creation date of a given label on an issue (or nothing if no label existed)
@@ -300,9 +345,7 @@ export class IssueProcessor {
     issue: Issue,
     label: string
   ): Promise<string> {
-    core.debug(
-      `Checking for label ${label} on issue #${issue.number}`
-    );
+    core.debug(`Checking for label ${label} on issue #${issue.number}`);
 
     this.operationsLeft -= 1;
 
@@ -311,16 +354,16 @@ export class IssueProcessor {
       repo: github.context.repo.repo,
       per_page: 100,
       issue_number: issue.number
-    })
+    });
 
     const events: IssueEvent[] = await this.client.paginate(options);
     const reversedEvents = events.reverse();
 
     const staleLabeledEvent = reversedEvents.find(
-      event => event.event === "labeled" && event.label.name === label
+      event => event.event === 'labeled' && event.label.name === label
     );
 
-    return staleLabeledEvent!.created_at
+    return staleLabeledEvent!.created_at;
   }
 
   private static isLabeled(issue: Issue, label: string): boolean {

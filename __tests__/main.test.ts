@@ -43,11 +43,17 @@ const DefaultProcessorOptions: IssueProcessorOptions = {
   exemptPrLabels: '',
   onlyLabels: '',
   operationsPerRun: 100,
-  debugOnly: true
+  debugOnly: true,
+  removeStaleWhenUpdated: false
 };
 
 test('empty issue list results in 1 operation', async () => {
-  const processor = new IssueProcessor(DefaultProcessorOptions, async () => []);
+  const processor = new IssueProcessor(
+    DefaultProcessorOptions,
+    async () => [],
+    async (num, dt) => [],
+    async (issue, label) => new Date().toDateString()
+  );
 
   // process our fake issue list
   const operationsLeft = await processor.processIssues(1);
@@ -61,8 +67,11 @@ test('processing an issue with no label will make it stale', async () => {
     generateIssue(1, 'My first issue', '2020-01-01T17:00:00Z')
   ];
 
-  const processor = new IssueProcessor(DefaultProcessorOptions, async p =>
-    p == 1 ? TestIssueList : []
+  const processor = new IssueProcessor(
+    DefaultProcessorOptions,
+    async p => (p == 1 ? TestIssueList : []),
+    async (num, dt) => [],
+    async (issue, label) => new Date().toDateString()
   );
 
   // process our fake issue list
@@ -77,8 +86,11 @@ test('processing a stale issue will close it', async () => {
     generateIssue(1, 'My first issue', '2020-01-01T17:00:00Z', false, ['Stale'])
   ];
 
-  const processor = new IssueProcessor(DefaultProcessorOptions, async p =>
-    p == 1 ? TestIssueList : []
+  const processor = new IssueProcessor(
+    DefaultProcessorOptions,
+    async p => (p == 1 ? TestIssueList : []),
+    async (num, dt) => [],
+    async (issue, label) => new Date().toDateString()
   );
 
   // process our fake issue list
@@ -93,8 +105,11 @@ test('processing a stale PR will close it', async () => {
     generateIssue(1, 'My first PR', '2020-01-01T17:00:00Z', true, ['Stale'])
   ];
 
-  const processor = new IssueProcessor(DefaultProcessorOptions, async p =>
-    p == 1 ? TestIssueList : []
+  const processor = new IssueProcessor(
+    DefaultProcessorOptions,
+    async p => (p == 1 ? TestIssueList : []),
+    async (num, dt) => [],
+    async (issue, label) => new Date().toDateString()
   );
 
   // process our fake issue list
@@ -109,8 +124,10 @@ test('closed issues will not be marked stale', async () => {
     generateIssue(1, 'My first issue', '2020-01-01T17:00:00Z', false, [], true)
   ];
 
-  const processor = new IssueProcessor(DefaultProcessorOptions, async p =>
-    p == 1 ? TestIssueList : []
+  const processor = new IssueProcessor(
+    DefaultProcessorOptions,
+    async p => (p == 1 ? TestIssueList : []),
+    async (num, dt) => []
   );
 
   // process our fake issue list
@@ -122,11 +139,21 @@ test('closed issues will not be marked stale', async () => {
 
 test('stale closed issues will not be closed', async () => {
   const TestIssueList: Issue[] = [
-    generateIssue(1, 'My first issue', '2020-01-01T17:00:00Z', false, ['Stale'], true)
+    generateIssue(
+      1,
+      'My first issue',
+      '2020-01-01T17:00:00Z',
+      false,
+      ['Stale'],
+      true
+    )
   ];
 
-  const processor = new IssueProcessor(DefaultProcessorOptions, async p =>
-    p == 1 ? TestIssueList : []
+  const processor = new IssueProcessor(
+    DefaultProcessorOptions,
+    async p => (p == 1 ? TestIssueList : []),
+    async (num, dt) => [],
+    async (issue, label) => new Date().toDateString()
   );
 
   // process our fake issue list
@@ -141,8 +168,11 @@ test('closed prs will not be marked stale', async () => {
     generateIssue(1, 'My first PR', '2020-01-01T17:00:00Z', true, [], true)
   ];
 
-  const processor = new IssueProcessor(DefaultProcessorOptions, async p =>
-    p == 1 ? TestIssueList : []
+  const processor = new IssueProcessor(
+    DefaultProcessorOptions,
+    async p => (p == 1 ? TestIssueList : []),
+    async (num, dt) => [],
+    async (issue, label) => new Date().toDateString()
   );
 
   // process our fake issue list
@@ -154,11 +184,21 @@ test('closed prs will not be marked stale', async () => {
 
 test('stale closed prs will not be closed', async () => {
   const TestIssueList: Issue[] = [
-    generateIssue(1, 'My first PR', '2020-01-01T17:00:00Z', true, ['Stale'], true)
+    generateIssue(
+      1,
+      'My first PR',
+      '2020-01-01T17:00:00Z',
+      true,
+      ['Stale'],
+      true
+    )
   ];
 
-  const processor = new IssueProcessor(DefaultProcessorOptions, async p =>
-    p == 1 ? TestIssueList : []
+  const processor = new IssueProcessor(
+    DefaultProcessorOptions,
+    async p => (p == 1 ? TestIssueList : []),
+    async (num, dt) => [],
+    async (issue, label) => new Date().toDateString()
   );
 
   // process our fake issue list
@@ -170,7 +210,15 @@ test('stale closed prs will not be closed', async () => {
 
 test('locked issues will not be marked stale', async () => {
   const TestIssueList: Issue[] = [
-    generateIssue(1, 'My first issue', '2020-01-01T17:00:00Z', false, [], false, true)
+    generateIssue(
+      1,
+      'My first issue',
+      '2020-01-01T17:00:00Z',
+      false,
+      [],
+      false,
+      true
+    )
   ];
 
   const processor = new IssueProcessor(DefaultProcessorOptions, async p =>
@@ -186,11 +234,22 @@ test('locked issues will not be marked stale', async () => {
 
 test('stale locked issues will not be closed', async () => {
   const TestIssueList: Issue[] = [
-    generateIssue(1, 'My first issue', '2020-01-01T17:00:00Z', false, ['Stale'], false, true)
+    generateIssue(
+      1,
+      'My first issue',
+      '2020-01-01T17:00:00Z',
+      false,
+      ['Stale'],
+      false,
+      true
+    )
   ];
 
-  const processor = new IssueProcessor(DefaultProcessorOptions, async p =>
-    p == 1 ? TestIssueList : []
+  const processor = new IssueProcessor(
+    DefaultProcessorOptions,
+    async p => (p == 1 ? TestIssueList : []),
+    async (num, dt) => [],
+    async (issue, label) => new Date().toDateString()
   );
 
   // process our fake issue list
@@ -202,7 +261,15 @@ test('stale locked issues will not be closed', async () => {
 
 test('locked prs will not be marked stale', async () => {
   const TestIssueList: Issue[] = [
-    generateIssue(1, 'My first PR', '2020-01-01T17:00:00Z', true, [], false, true)
+    generateIssue(
+      1,
+      'My first PR',
+      '2020-01-01T17:00:00Z',
+      true,
+      [],
+      false,
+      true
+    )
   ];
 
   const processor = new IssueProcessor(DefaultProcessorOptions, async p =>
@@ -218,11 +285,22 @@ test('locked prs will not be marked stale', async () => {
 
 test('stale locked prs will not be closed', async () => {
   const TestIssueList: Issue[] = [
-    generateIssue(1, 'My first PR', '2020-01-01T17:00:00Z', true, ['Stale'], false, true)
+    generateIssue(
+      1,
+      'My first PR',
+      '2020-01-01T17:00:00Z',
+      true,
+      ['Stale'],
+      false,
+      true
+    )
   ];
 
-  const processor = new IssueProcessor(DefaultProcessorOptions, async p =>
-    p == 1 ? TestIssueList : []
+  const processor = new IssueProcessor(
+    DefaultProcessorOptions,
+    async p => (p == 1 ? TestIssueList : []),
+    async (num, dt) => [],
+    async (issue, label) => new Date().toDateString()
   );
 
   // process our fake issue list
@@ -242,8 +320,11 @@ test('exempt issue labels will not be marked stale', async () => {
   let opts = DefaultProcessorOptions;
   opts.exemptIssueLabels = 'Exempt';
 
-  const processor = new IssueProcessor(DefaultProcessorOptions, async p =>
-    p == 1 ? TestIssueList : []
+  const processor = new IssueProcessor(
+    DefaultProcessorOptions,
+    async p => (p == 1 ? TestIssueList : []),
+    async (num, dt) => [],
+    async (issue, label) => new Date().toDateString()
   );
 
   // process our fake issue list
@@ -261,8 +342,11 @@ test('exempt issue labels will not be marked stale (multi issue label with space
   let opts = DefaultProcessorOptions;
   opts.exemptIssueLabels = 'Exempt, Cool, None';
 
-  const processor = new IssueProcessor(DefaultProcessorOptions, async p =>
-    p == 1 ? TestIssueList : []
+  const processor = new IssueProcessor(
+    DefaultProcessorOptions,
+    async p => (p == 1 ? TestIssueList : []),
+    async (num, dt) => [],
+    async (issue, label) => new Date().toDateString()
   );
 
   // process our fake issue list
@@ -280,8 +364,11 @@ test('exempt issue labels will not be marked stale (multi issue label)', async (
   let opts = DefaultProcessorOptions;
   opts.exemptIssueLabels = 'Exempt,Cool,None';
 
-  const processor = new IssueProcessor(DefaultProcessorOptions, async p =>
-    p == 1 ? TestIssueList : []
+  const processor = new IssueProcessor(
+    DefaultProcessorOptions,
+    async p => (p == 1 ? TestIssueList : []),
+    async (num, dt) => [],
+    async (issue, label) => new Date().toDateString()
   );
 
   // process our fake issue list
@@ -301,8 +388,11 @@ test('exempt pr labels will not be marked stale', async () => {
   let opts = DefaultProcessorOptions;
   opts.exemptIssueLabels = 'Cool';
 
-  const processor = new IssueProcessor(DefaultProcessorOptions, async p =>
-    p == 1 ? TestIssueList : []
+  const processor = new IssueProcessor(
+    DefaultProcessorOptions,
+    async p => (p == 1 ? TestIssueList : []),
+    async (num, dt) => [],
+    async (issue, label) => new Date().toDateString()
   );
 
   // process our fake issue list
@@ -323,8 +413,11 @@ test('stale issues should not be closed if days is set to -1', async () => {
   let opts = DefaultProcessorOptions;
   opts.daysBeforeClose = -1;
 
-  const processor = new IssueProcessor(DefaultProcessorOptions, async p =>
-    p == 1 ? TestIssueList : []
+  const processor = new IssueProcessor(
+    DefaultProcessorOptions,
+    async p => (p == 1 ? TestIssueList : []),
+    async (num, dt) => [],
+    async (issue, label) => new Date().toDateString()
   );
 
   // process our fake issue list

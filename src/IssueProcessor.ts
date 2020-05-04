@@ -2,7 +2,7 @@ import * as core from '@actions/core';
 import * as github from '@actions/github';
 import {Octokit} from '@octokit/rest';
 
-type OcotoKitIssueList = Octokit.Response<Octokit.IssuesListForRepoResponse>;
+type OctoKitIssueList = Octokit.Response<Octokit.IssuesListForRepoResponse>;
 
 export interface Issue {
   title: string;
@@ -157,7 +157,7 @@ export class IssueProcessor {
 
   // grab issues from github in baches of 100
   private async getIssues(page: number): Promise<Issue[]> {
-    const issueResult: OcotoKitIssueList = await this.client.issues.listForRepo(
+    const issueResult: OctoKitIssueList = await this.client.issues.listForRepo(
       {
         owner: github.context.repo.owner,
         repo: github.context.repo.repo,

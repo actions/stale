@@ -254,16 +254,14 @@ export class IssueProcessor {
 
   // grab issues from github in baches of 100
   private async getIssues(page: number): Promise<Issue[]> {
-    const issueResult: OctoKitIssueList = await this.client.issues.listForRepo(
-      {
-        owner: github.context.repo.owner,
-        repo: github.context.repo.repo,
-        state: 'open',
-        labels: this.options.onlyLabels,
-        per_page: 100,
-        page
-      }
-    );
+    const issueResult: OctoKitIssueList = await this.client.issues.listForRepo({
+      owner: github.context.repo.owner,
+      repo: github.context.repo.repo,
+      state: 'open',
+      labels: this.options.onlyLabels,
+      per_page: 100,
+      page
+    });
 
     return issueResult.data;
   }

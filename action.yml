@@ -35,7 +35,7 @@ inputs:
     default: 30
   remove-stale-when-updated:
     description: 'Remove stale labels from issues when they are updated or commented on.'
-    default: false
+    default: true
   debug-only:
     description: 'Run the processor in debug mode without actually performing any operations on live issues.'
     default: false

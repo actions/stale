@@ -32,8 +32,9 @@ function getAndValidateArgs(): IssueProcessorOptions {
     operationsPerRun: parseInt(
       core.getInput('operations-per-run', {required: true})
     ),
-    removeStaleWhenUpdated:
-      core.getInput('remove-stale-when-updated') === 'true',
+    removeStaleWhenUpdated: !(
+      core.getInput('remove-stale-when-updated') === 'false'
+    ),
     debugOnly: core.getInput('debug-only') === 'true'
   };
 

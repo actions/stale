@@ -8452,6 +8452,7 @@ class IssueProcessor {
         this.operationsLeft = 0;
         this.staleIssues = [];
         this.closedIssues = [];
+        this.removedLabelIssues = [];
         this.options = options;
         this.operationsLeft = options.operationsPerRun;
         this.client = new github.GitHub(options.repoToken);
@@ -8632,6 +8633,7 @@ class IssueProcessor {
     removeLabel(issue, label) {
         return __awaiter(this, void 0, void 0, function* () {
             core.debug(`Removing label ${label} from issue #${issue.number} - ${issue.title}`);
+            this.removedLabelIssues.push(issue);
             this.operationsLeft -= 1;
             if (this.options.debugOnly) {
                 return;

@@ -343,11 +343,11 @@ test('exempt issue labels will not be marked stale', async () => {
     ])
   ];
 
-  let opts = DefaultProcessorOptions;
+  const opts = {...DefaultProcessorOptions};
   opts.exemptIssueLabels = 'Exempt';
 
   const processor = new IssueProcessor(
-    DefaultProcessorOptions,
+    opts,
     async p => (p == 1 ? TestIssueList : []),
     async (num, dt) => [],
     async (issue, label) => new Date().toDateString()
@@ -365,11 +365,11 @@ test('exempt issue labels will not be marked stale (multi issue label with space
     generateIssue(1, 'My first issue', '2020-01-01T17:00:00Z', false, ['Cool'])
   ];
 
-  let opts = DefaultProcessorOptions;
+  const opts = {...DefaultProcessorOptions};
   opts.exemptIssueLabels = 'Exempt, Cool, None';
 
   const processor = new IssueProcessor(
-    DefaultProcessorOptions,
+    opts,
     async p => (p == 1 ? TestIssueList : []),
     async (num, dt) => [],
     async (issue, label) => new Date().toDateString()
@@ -387,11 +387,11 @@ test('exempt issue labels will not be marked stale (multi issue label)', async (
     generateIssue(1, 'My first issue', '2020-01-01T17:00:00Z', false, ['Cool'])
   ];
 
-  let opts = DefaultProcessorOptions;
+  const opts = {...DefaultProcessorOptions};
   opts.exemptIssueLabels = 'Exempt,Cool,None';
 
   const processor = new IssueProcessor(
-    DefaultProcessorOptions,
+    opts,
     async p => (p == 1 ? TestIssueList : []),
     async (num, dt) => [],
     async (issue, label) => new Date().toDateString()
@@ -411,11 +411,11 @@ test('exempt pr labels will not be marked stale', async () => {
     generateIssue(3, 'Another issue', '2020-01-01T17:00:00Z', false)
   ];
 
-  let opts = DefaultProcessorOptions;
+  const opts = {...DefaultProcessorOptions};
   opts.exemptIssueLabels = 'Cool';
 
   const processor = new IssueProcessor(
-    DefaultProcessorOptions,
+    opts,
     async p => (p == 1 ? TestIssueList : []),
     async (num, dt) => [],
     async (issue, label) => new Date().toDateString()
@@ -436,11 +436,11 @@ test('stale issues should not be closed if days is set to -1', async () => {
     generateIssue(3, 'Another issue', '2020-01-01T17:00:00Z', false, ['Stale'])
   ];
 
-  let opts = DefaultProcessorOptions;
+  const opts = {...DefaultProcessorOptions};
   opts.daysBeforeClose = -1;
 
   const processor = new IssueProcessor(
-    DefaultProcessorOptions,
+    opts,
     async p => (p == 1 ? TestIssueList : []),
     async (num, dt) => [],
     async (issue, label) => new Date().toDateString()
@@ -450,4 +450,33 @@ test('stale issues should not be closed if days is set to -1', async () => {
   await processor.processIssues(1);
 
   expect(processor.closedIssues.length).toEqual(0);
+});
+
+test('stale label should be removed if a comment was added to a stale issue', async () => {
+  const TestIssueList: Issue[] = [
+    generateIssue(
+      1,
+      'An issue that should un-stale',
+      '2020-01-01T17:00:00Z',
+      false,
+      ['Stale']
+    )
+  ];
+
+  const opts = DefaultProcessorOptions;
+  opts.removeStaleWhenUpdated = true;
+
+  const processor = new IssueProcessor(
+    opts,
+    async p => (p == 1 ? TestIssueList : []),
+    async (num, dt) => [{user: {type: 'User'}}], // return a fake comment so indicate there was an update
+    async (issue, label) => new Date().toDateString()
+  );
+
+  // process our fake issue list
+  await processor.processIssues(1);
+
+  expect(processor.closedIssues.length).toEqual(0);
+  expect(processor.staleIssues.length).toEqual(0);
+  expect(processor.removedLabelIssues.length).toEqual(1);
 });

@@ -58,6 +58,7 @@ export class IssueProcessor {
 
   readonly staleIssues: Issue[] = [];
   readonly closedIssues: Issue[] = [];
+  readonly removedLabelIssues: Issue[] = [];
 
   constructor(
     options: IssueProcessorOptions,
@@ -325,6 +326,8 @@ export class IssueProcessor {
     core.debug(
       `Removing label ${label} from issue #${issue.number} - ${issue.title}`
     );
+
+    this.removedLabelIssues.push(issue);
 
     this.operationsLeft -= 1;
 

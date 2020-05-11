@@ -153,7 +153,7 @@ export class IssueProcessor {
         core.debug(`Found a stale ${issueType}`);
         await this.processStaleIssue(issue, issueType, staleLabel);
       } else if (
-        IssueProcessor.updatedSince(
+        !IssueProcessor.updatedSince(
           issue.updated_at,
           this.options.daysBeforeStale
         )
@@ -188,6 +188,7 @@ export class IssueProcessor {
       issue,
       markedStaleOn
     );
+
     const issueHasUpdate: boolean = IssueProcessor.updatedSince(
       issue.updated_at,
       this.options.daysBeforeClose
@@ -376,7 +377,8 @@ export class IssueProcessor {
     const daysInMillis = 1000 * 60 * 60 * 24 * num_days;
     const millisSinceLastUpdated =
       new Date().getTime() - new Date(timestamp).getTime();
-    return millisSinceLastUpdated >= daysInMillis;
+
+    return millisSinceLastUpdated < daysInMillis;
   }
 
   private static parseCommaSeparatedString(s: string): string[] {

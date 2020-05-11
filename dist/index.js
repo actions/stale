@@ -8513,7 +8513,7 @@ class IssueProcessor {
                     core.debug(`Found a stale ${issueType}`);
                     yield this.processStaleIssue(issue, issueType, staleLabel);
                 }
-                else if (IssueProcessor.updatedSince(issue.updated_at, this.options.daysBeforeStale)) {
+                else if (!IssueProcessor.updatedSince(issue.updated_at, this.options.daysBeforeStale)) {
                     core.debug(`Marking ${issueType} stale because it was last updated on ${issue.updated_at}`);
                     yield this.markStale(issue, staleMessage, staleLabel);
                     this.operationsLeft -= 2;
@@ -8669,7 +8669,7 @@ class IssueProcessor {
     static updatedSince(timestamp, num_days) {
         const daysInMillis = 1000 * 60 * 60 * 24 * num_days;
         const millisSinceLastUpdated = new Date().getTime() - new Date(timestamp).getTime();
-        return millisSinceLastUpdated >= daysInMillis;
+        return millisSinceLastUpdated < daysInMillis;
     }
     static parseCommaSeparatedString(s) {
         // String.prototype.split defaults to [''] when called on an empty string

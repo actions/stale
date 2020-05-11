@@ -64,7 +64,7 @@ test('empty issue list results in 1 operation', async () => {
 
 test('processing an issue with no label will make it stale', async () => {
   const TestIssueList: Issue[] = [
-    generateIssue(1, 'My first issue', '2020-01-01T17:00:00Z')
+    generateIssue(1, 'An issue with no label', '2020-01-01T17:00:00Z')
   ];
 
   const processor = new IssueProcessor(
@@ -83,7 +83,13 @@ test('processing an issue with no label will make it stale', async () => {
 
 test('processing a stale issue will close it', async () => {
   const TestIssueList: Issue[] = [
-    generateIssue(1, 'My first issue', '2020-01-01T17:00:00Z', false, ['Stale'])
+    generateIssue(
+      1,
+      'A stale issue that should be closed',
+      '2020-01-01T17:00:00Z',
+      false,
+      ['Stale']
+    )
   ];
 
   const processor = new IssueProcessor(
@@ -102,7 +108,13 @@ test('processing a stale issue will close it', async () => {
 
 test('processing a stale PR will close it', async () => {
   const TestIssueList: Issue[] = [
-    generateIssue(1, 'My first PR', '2020-01-01T17:00:00Z', true, ['Stale'])
+    generateIssue(
+      1,
+      'A stale PR that should be closed',
+      '2020-01-01T17:00:00Z',
+      true,
+      ['Stale']
+    )
   ];
 
   const processor = new IssueProcessor(
@@ -121,7 +133,14 @@ test('processing a stale PR will close it', async () => {
 
 test('closed issues will not be marked stale', async () => {
   const TestIssueList: Issue[] = [
-    generateIssue(1, 'My first issue', '2020-01-01T17:00:00Z', false, [], true)
+    generateIssue(
+      1,
+      'A closed issue that will not be marked',
+      '2020-01-01T17:00:00Z',
+      false,
+      [],
+      true
+    )
   ];
 
   const processor = new IssueProcessor(
@@ -141,7 +160,7 @@ test('stale closed issues will not be closed', async () => {
   const TestIssueList: Issue[] = [
     generateIssue(
       1,
-      'My first issue',
+      'A stale closed issue',
       '2020-01-01T17:00:00Z',
       false,
       ['Stale'],
@@ -165,7 +184,14 @@ test('stale closed issues will not be closed', async () => {
 
 test('closed prs will not be marked stale', async () => {
   const TestIssueList: Issue[] = [
-    generateIssue(1, 'My first PR', '2020-01-01T17:00:00Z', true, [], true)
+    generateIssue(
+      1,
+      'A closed PR that will not be marked',
+      '2020-01-01T17:00:00Z',
+      true,
+      [],
+      true
+    )
   ];
 
   const processor = new IssueProcessor(
@@ -186,7 +212,7 @@ test('stale closed prs will not be closed', async () => {
   const TestIssueList: Issue[] = [
     generateIssue(
       1,
-      'My first PR',
+      'A stale closed PR that will not be closed again',
       '2020-01-01T17:00:00Z',
       true,
       ['Stale'],
@@ -212,7 +238,7 @@ test('locked issues will not be marked stale', async () => {
   const TestIssueList: Issue[] = [
     generateIssue(
       1,
-      'My first issue',
+      'A locked issue that will not be stale',
       '2020-01-01T17:00:00Z',
       false,
       [],
@@ -236,7 +262,7 @@ test('stale locked issues will not be closed', async () => {
   const TestIssueList: Issue[] = [
     generateIssue(
       1,
-      'My first issue',
+      'A stale locked issue that will not be closed',
       '2020-01-01T17:00:00Z',
       false,
       ['Stale'],
@@ -263,7 +289,7 @@ test('locked prs will not be marked stale', async () => {
   const TestIssueList: Issue[] = [
     generateIssue(
       1,
-      'My first PR',
+      'A locked PR that will not be marked stale',
       '2020-01-01T17:00:00Z',
       true,
       [],
@@ -287,7 +313,7 @@ test('stale locked prs will not be closed', async () => {
   const TestIssueList: Issue[] = [
     generateIssue(
       1,
-      'My first PR',
+      'A stale locked PR that will not be closed',
       '2020-01-01T17:00:00Z',
       true,
       ['Stale'],

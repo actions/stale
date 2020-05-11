@@ -36,7 +36,7 @@ const DefaultProcessorOptions: IssueProcessorOptions = {
   staleIssueMessage: 'This issue is stale',
   stalePrMessage: 'This PR is stale',
   daysBeforeStale: 1,
-  daysBeforeClose: 1,
+  daysBeforeClose: 30,
   staleIssueLabel: 'Stale',
   exemptIssueLabels: '',
   stalePrLabel: 'Stale',
@@ -62,9 +62,33 @@ test('empty issue list results in 1 operation', async () => {
   expect(operationsLeft).toEqual(99);
 });
 
-test('processing an issue with no label will make it stale', async () => {
+test('processing an issue with no label will make it stale and close it, if it is old enough', async () => {
   const TestIssueList: Issue[] = [
     generateIssue(1, 'An issue with no label', '2020-01-01T17:00:00Z')
+  ];
+
+  const processor = new IssueProcessor(
+    DefaultProcessorOptions,
+    async p => (p == 1 ? TestIssueList : []),
+    async (num, dt) => [],
+    async (issue, label) => new Date().toDateString()
+  );
+
+  // process our fake issue list
+  await processor.processIssues(1);
+
+  expect(processor.staleIssues.length).toEqual(1);
+  expect(processor.closedIssues.length).toEqual(1);
+});
+
+test('processing an issue with no label will make it stale but not close it', async () => {
+  // issue should be from 2 days ago so it will be
+  // stale but not close-able, based on default settings
+  let issueDate = new Date();
+  issueDate.setDate(issueDate.getDate() - 2);
+
+  const TestIssueList: Issue[] = [
+    generateIssue(1, 'An issue with no label', issueDate.toDateString())
   ];
 
   const processor = new IssueProcessor(

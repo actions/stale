@@ -8510,14 +8510,20 @@ class IssueProcessor {
                     core.debug(`Skipping ${issueType} because it has an exempt label`);
                     continue; // don't process exempt issues
                 }
-                if (IssueProcessor.isLabeled(issue, staleLabel)) {
-                    core.debug(`Found a stale ${issueType}`);
-                    yield this.processStaleIssue(issue, issueType, staleLabel);
-                }
-                else if (!IssueProcessor.updatedSince(issue.updated_at, this.options.daysBeforeStale)) {
-                    core.debug(`Marking ${issueType} stale because it was last updated on ${issue.updated_at}`);
+                // does this issue have a stale label?
+                let isStale = IssueProcessor.isLabeled(issue, staleLabel);
+                // determine if this issue needs to be marked stale first
+                if (!isStale &&
+                    !IssueProcessor.updatedSince(issue.updated_at, this.options.daysBeforeStale)) {
+                    core.debug(`Marking ${issueType} stale because it was last updated on ${issue.updated_at} and it does not have a stale label`);
                     yield this.markStale(issue, staleMessage, staleLabel);
                     this.operationsLeft -= 2;
+                    isStale = true; // this issue is now considered stale
+                }
+                // process any issues marked stale (including the issue above, if it was marked)
+                if (isStale) {
+                    core.debug(`Found a stale ${issueType}`);
+                    yield this.processStaleIssue(issue, issueType, staleLabel);
                 }
             }
             // do the next batch

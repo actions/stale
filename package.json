@@ -25,7 +25,7 @@
   "author": "GitHub",
   "license": "MIT",
   "dependencies": {
-    "@actions/core": "^1.2.3",
+    "@actions/core": "^1.2.4",
     "@actions/github": "^2.2.0",
     "@octokit/rest": "^16.43.1",
     "semver": "^6.1.1"

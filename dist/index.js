@@ -8715,9 +8715,14 @@ class IssueProcessor {
                 return; // nothing to do because we aren't closing stale issues
             }
             const markedStaleOn = yield this.getLabelCreationDate(issue, staleLabel);
-            const issueHasComments = yield this.isIssueStillStale(issue, markedStaleOn);
+            const issueHasComments = yield this.isIssueStillStale(issue, markedStaleOn || issue.updated_at);
             const issueHasUpdate = IssueProcessor.updatedSince(issue.updated_at, this.options.daysBeforeClose);
-            core.debug(`Issue #${issue.number} marked stale on: ${markedStaleOn}`);
+            if (markedStaleOn) {
+                core.debug(`Issue #${issue.number} marked stale on: ${markedStaleOn}`);
+            }
+            else {
+                core.debug(`Issue #${issue.number} is not marked stale, but last update of ${issue.updated_at} is older than ${this.options.daysBeforeStale} days`);
+            }
             core.debug(`Issue #${issue.number} has been updated: ${issueHasUpdate}`);
             core.debug(`Issue #${issue.number} has been commented on: ${issueHasComments}`);
             if (!issueHasComments && !issueHasUpdate) {
@@ -8728,7 +8733,7 @@ class IssueProcessor {
                 if (this.options.removeStaleWhenUpdated) {
                     yield this.removeLabel(issue, staleLabel);
                 }
-                core.debug(`Ignoring stale ${issueType} because it was updated recenlty`);
+                core.debug(`Ignoring stale ${issueType} because it was updated recently`);
             }
         });
     }
@@ -8846,8 +8851,8 @@ class IssueProcessor {
             const reversedEvents = events.reverse();
             const staleLabeledEvent = reversedEvents.find(event => event.event === 'labeled' && event.label.name === label);
             if (!staleLabeledEvent) {
-                core.warning(`Could not find when issue #${issue.number} was labeled with ${label}`);
-                return '';
+                // Must be old rather than labeled
+                return undefined;
             }
             return staleLabeledEvent.created_at;
         });

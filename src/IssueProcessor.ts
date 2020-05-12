@@ -67,7 +67,7 @@ export class IssueProcessor {
       issueNumber: number,
       sinceDate: string
     ) => Promise<Comment[]>,
-    getLabelCreationDate?: (issue: Issue, label: string) => Promise<string>
+    getLabelCreationDate?: (issue: Issue, label: string) => Promise<string | undefined>
   ) {
     this.options = options;
     this.operationsLeft = options.operationsPerRun;
@@ -190,25 +190,27 @@ export class IssueProcessor {
       return; // nothing to do because we aren't closing stale issues
     }
 
-    const markedStaleOn: string = await this.getLabelCreationDate(
+    const markedStaleOn: string | undefined = await this.getLabelCreationDate(
       issue,
       staleLabel
     );
     const issueHasComments: boolean = await this.isIssueStillStale(
       issue,
-      markedStaleOn
+      markedStaleOn || issue.updated_at
     );
-
     const issueHasUpdate: boolean = IssueProcessor.updatedSince(
       issue.updated_at,
       this.options.daysBeforeClose
     );
 
-    core.debug(`Issue #${issue.number} marked stale on: ${markedStaleOn}`);
+    if (markedStaleOn) {
+      core.debug(`Issue #${issue.number} marked stale on: ${markedStaleOn}`);
+    }
+    else {
+      core.debug(`Issue #${issue.number} is not marked stale, but last update of ${issue.updated_at} is older than ${this.options.daysBeforeStale} days`);
+    }
     core.debug(`Issue #${issue.number} has been updated: ${issueHasUpdate}`);
-    core.debug(
-      `Issue #${issue.number} has been commented on: ${issueHasComments}`
-    );
+    core.debug(`Issue #${issue.number} has been commented on: ${issueHasComments}`);
 
     if (!issueHasComments && !issueHasUpdate) {
       core.debug(
@@ -219,7 +221,7 @@ export class IssueProcessor {
       if (this.options.removeStaleWhenUpdated) {
         await this.removeLabel(issue, staleLabel);
       }
-      core.debug(`Ignoring stale ${issueType} because it was updated recenlty`);
+      core.debug(`Ignoring stale ${issueType} because it was updated recently`);
     }
   }
 
@@ -355,7 +357,7 @@ export class IssueProcessor {
   private async getLabelCreationDate(
     issue: Issue,
     label: string
-  ): Promise<string> {
+  ): Promise<string | undefined> {
     core.debug(`Checking for label ${label} on issue #${issue.number}`);
 
     this.operationsLeft -= 1;
@@ -375,11 +377,11 @@ export class IssueProcessor {
     );
 
     if (!staleLabeledEvent) {
-      core.warning(`Could not find when issue #${issue.number} was labeled with ${label}`);
-      return '';
+      // Must be old rather than labeled
+      return undefined;
     }
 
-    return staleLabeledEvent!.created_at;
+    return staleLabeledEvent.created_at;
   }
 
   private static isLabeled(issue: Issue, label: string): boolean {

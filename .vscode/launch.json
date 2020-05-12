@@ -1,0 +1,20 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Debug Jest Tests",
+            "type": "node",
+            "request": "launch",
+            "program": "${workspaceRoot}/node_modules/jest/bin/jest",
+            "args": [
+                "-i"
+            ],
+            "preLaunchTask": "tsc: build - tsconfig.json",
+            "internalConsoleOptions": "openOnSessionStart",
+            "console": "integratedTerminal",
+            "outFiles": [
+                "${workspaceRoot}/build/dist/**/*"
+            ]
+        }
+    ]
+}

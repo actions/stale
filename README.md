@@ -34,7 +34,7 @@ jobs:
   stale:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/stale@v1
+    - uses: actions/stale@v3
       with:
         repo-token: ${{ secrets.GITHUB_TOKEN }}
         stale-issue-message: 'Message to comment on stale issues. If none provided, will not mark issues stale'
@@ -52,7 +52,7 @@ jobs:
   stale:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/stale@v1
+    - uses: actions/stale@v3
       with:
         repo-token: ${{ secrets.GITHUB_TOKEN }}
         stale-issue-message: 'This issue is stale because it has been open 30 days with no activity. Remove stale label or comment or this will be closed in 5 days'
@@ -71,7 +71,7 @@ jobs:
   stale:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/stale@v1
+    - uses: actions/stale@v3
       with:
         repo-token: ${{ secrets.GITHUB_TOKEN }}
         stale-issue-message: 'Stale issue message'
@@ -84,4 +84,4 @@ jobs:
 
 ### Debugging
 
-To see debug ouput from this action, you must set the secret `ACTIONS_STEP_DEBUG` to `true` in your repository. You can run this action in debug only mode (no actions will be taken on your issues) by passing `debug-only` `true` as an argument to the action.
+To see debug output from this action, you must set the secret `ACTIONS_STEP_DEBUG` to `true` in your repository. You can run this action in debug only mode (no actions will be taken on your issues) by passing `debug-only` `true` as an argument to the action.

@@ -3756,6 +3756,7 @@ function getAndValidateArgs() {
         exemptPrLabels: core.getInput('exempt-pr-labels'),
         onlyLabels: core.getInput('only-labels'),
         operationsPerRun: parseInt(core.getInput('operations-per-run', { required: true })),
+        removeStaleWhenUpdated: !(core.getInput('remove-stale-when-updated') === 'false'),
         debugOnly: core.getInput('debug-only') === 'true'
     };
     for (const numberInput of [
@@ -8447,15 +8448,22 @@ const github = __importStar(__webpack_require__(469));
  * Handle processing of issues for staleness/closure.
  */
 class IssueProcessor {
-    constructor(options, getIssues) {
+    constructor(options, getIssues, listIssueComments, getLabelCreationDate) {
         this.operationsLeft = 0;
         this.staleIssues = [];
         this.closedIssues = [];
+        this.removedLabelIssues = [];
         this.options = options;
         this.operationsLeft = options.operationsPerRun;
         this.client = new github.GitHub(options.repoToken);
         if (getIssues) {
             this.getIssues = getIssues;
+        }
+        if (listIssueComments) {
+            this.listIssueComments = listIssueComments;
+        }
+        if (getLabelCreationDate) {
+            this.getLabelCreationDate = getLabelCreationDate;
         }
         if (this.options.debugOnly) {
             core.warning('Executing in debug mode. Debug output will be written but no issues will be processed.');
@@ -8490,30 +8498,87 @@ class IssueProcessor {
                     core.debug(`Skipping ${issueType} due to empty stale message`);
                     continue;
                 }
+                if (issue.state === 'closed') {
+                    core.debug(`Skipping ${issueType} because it is closed`);
+                    continue; // don't process closed issues
+                }
+                if (issue.locked) {
+                    core.debug(`Skipping ${issueType} because it is locked`);
+                    continue; // don't process locked issues
+                }
                 if (exemptLabels.some((exemptLabel) => IssueProcessor.isLabeled(issue, exemptLabel))) {
                     core.debug(`Skipping ${issueType} because it has an exempt label`);
                     continue; // don't process exempt issues
                 }
-                if (IssueProcessor.isLabeled(issue, staleLabel)) {
-                    core.debug(`Found a stale ${issueType}`);
-                    if (this.options.daysBeforeClose >= 0 &&
-                        IssueProcessor.wasLastUpdatedBefore(issue, this.options.daysBeforeClose)) {
-                        core.debug(`Closing ${issueType} because it was last updated on ${issue.updated_at}`);
-                        yield this.closeIssue(issue);
-                        this.operationsLeft -= 1;
-                    }
-                    else {
-                        core.debug(`Ignoring stale ${issueType} because it was updated recenlty`);
-                    }
-                }
-                else if (IssueProcessor.wasLastUpdatedBefore(issue, this.options.daysBeforeStale)) {
-                    core.debug(`Marking ${issueType} stale because it was last updated on ${issue.updated_at}`);
+                // does this issue have a stale label?
+                let isStale = IssueProcessor.isLabeled(issue, staleLabel);
+                // determine if this issue needs to be marked stale first
+                if (!isStale &&
+                    !IssueProcessor.updatedSince(issue.updated_at, this.options.daysBeforeStale)) {
+                    core.debug(`Marking ${issueType} stale because it was last updated on ${issue.updated_at} and it does not have a stale label`);
                     yield this.markStale(issue, staleMessage, staleLabel);
                     this.operationsLeft -= 2;
+                    isStale = true; // this issue is now considered stale
+                }
+                // process any issues marked stale (including the issue above, if it was marked)
+                if (isStale) {
+                    core.debug(`Found a stale ${issueType}`);
+                    yield this.processStaleIssue(issue, issueType, staleLabel);
                 }
             }
             // do the next batch
             return this.processIssues(page + 1);
+        });
+    }
+    // handle all of the stale issue logic when we find a stale issue
+    processStaleIssue(issue, issueType, staleLabel) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (this.options.daysBeforeClose < 0) {
+                return; // nothing to do because we aren't closing stale issues
+            }
+            const markedStaleOn = yield this.getLabelCreationDate(issue, staleLabel);
+            const issueHasComments = yield this.isIssueStillStale(issue, markedStaleOn);
+            const issueHasUpdate = IssueProcessor.updatedSince(issue.updated_at, this.options.daysBeforeClose);
+            core.debug(`Issue #${issue.number} marked stale on: ${markedStaleOn}`);
+            core.debug(`Issue #${issue.number} has been updated: ${issueHasUpdate}`);
+            core.debug(`Issue #${issue.number} has been commented on: ${issueHasComments}`);
+            if (!issueHasComments && !issueHasUpdate) {
+                core.debug(`Closing ${issueType} because it was last updated on ${issue.updated_at}`);
+                yield this.closeIssue(issue);
+            }
+            else {
+                if (this.options.removeStaleWhenUpdated) {
+                    yield this.removeLabel(issue, staleLabel);
+                }
+                core.debug(`Ignoring stale ${issueType} because it was updated recenlty`);
+            }
+        });
+    }
+    // checks to see if a given issue is still stale (has had activity on it)
+    isIssueStillStale(issue, sinceDate) {
+        return __awaiter(this, void 0, void 0, function* () {
+            core.debug(`Checking for comments on issue #${issue.number} since ${sinceDate} to see if it is still stale`);
+            if (!sinceDate) {
+                return true; // if no date was provided then the issue was marked stale a long time ago
+            }
+            this.operationsLeft -= 1;
+            // find any comments since the stale label
+            const comments = yield this.listIssueComments(issue.number, sinceDate);
+            // if there are any user comments returned, issue is not stale anymore
+            return comments.filter(comment => comment.user.type === 'User').length > 0;
+        });
+    }
+    // grab comments for an issue since a given date
+    listIssueComments(issueNumber, sinceDate) {
+        return __awaiter(this, void 0, void 0, function* () {
+            // find any comments since date on the given issue
+            const comments = yield this.client.issues.listComments({
+                owner: github.context.repo.owner,
+                repo: github.context.repo.repo,
+                issue_number: issueNumber,
+                since: sinceDate
+            });
+            return comments.data;
         });
     }
     // grab issues from github in baches of 100
@@ -8535,6 +8600,7 @@ class IssueProcessor {
         return __awaiter(this, void 0, void 0, function* () {
             core.debug(`Marking issue #${issue.number} - ${issue.title} as stale`);
             this.staleIssues.push(issue);
+            this.operationsLeft -= 2;
             if (this.options.debugOnly) {
                 return;
             }
@@ -8552,11 +8618,12 @@ class IssueProcessor {
             });
         });
     }
-    /// Close an issue based on staleness
+    // Close an issue based on staleness
     closeIssue(issue) {
         return __awaiter(this, void 0, void 0, function* () {
             core.debug(`Closing issue #${issue.number} - ${issue.title} for being stale`);
             this.closedIssues.push(issue);
+            this.operationsLeft -= 1;
             if (this.options.debugOnly) {
                 return;
             }
@@ -8568,14 +8635,49 @@ class IssueProcessor {
             });
         });
     }
+    // Remove a label from an issue
+    removeLabel(issue, label) {
+        return __awaiter(this, void 0, void 0, function* () {
+            core.debug(`Removing label ${label} from issue #${issue.number} - ${issue.title}`);
+            this.removedLabelIssues.push(issue);
+            this.operationsLeft -= 1;
+            if (this.options.debugOnly) {
+                return;
+            }
+            yield this.client.issues.removeLabel({
+                owner: github.context.repo.owner,
+                repo: github.context.repo.repo,
+                issue_number: issue.number,
+                name: encodeURIComponent(label) // A label can have a "?" in the name
+            });
+        });
+    }
+    // returns the creation date of a given label on an issue (or nothing if no label existed)
+    ///see https://developer.github.com/v3/activity/events/
+    getLabelCreationDate(issue, label) {
+        return __awaiter(this, void 0, void 0, function* () {
+            core.debug(`Checking for label ${label} on issue #${issue.number}`);
+            this.operationsLeft -= 1;
+            const options = this.client.issues.listEvents.endpoint.merge({
+                owner: github.context.repo.owner,
+                repo: github.context.repo.repo,
+                per_page: 100,
+                issue_number: issue.number
+            });
+            const events = yield this.client.paginate(options);
+            const reversedEvents = events.reverse();
+            const staleLabeledEvent = reversedEvents.find(event => event.event === 'labeled' && event.label.name === label);
+            return staleLabeledEvent.created_at;
+        });
+    }
     static isLabeled(issue, label) {
         const labelComparer = l => label.localeCompare(l.name, undefined, { sensitivity: 'accent' }) === 0;
         return issue.labels.filter(labelComparer).length > 0;
     }
-    static wasLastUpdatedBefore(issue, num_days) {
+    static updatedSince(timestamp, num_days) {
         const daysInMillis = 1000 * 60 * 60 * 24 * num_days;
-        const millisSinceLastUpdated = new Date().getTime() - new Date(issue.updated_at).getTime();
-        return millisSinceLastUpdated >= daysInMillis;
+        const millisSinceLastUpdated = new Date().getTime() - new Date(timestamp).getTime();
+        return millisSinceLastUpdated < daysInMillis;
     }
     static parseCommaSeparatedString(s) {
         // String.prototype.split defaults to [''] when called on an empty string

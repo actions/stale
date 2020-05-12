@@ -374,6 +374,11 @@ export class IssueProcessor {
       event => event.event === 'labeled' && event.label.name === label
     );
 
+    if (!staleLabeledEvent) {
+      core.warning(`Could not find when issue #${issue.number} was labeled with ${label}`);
+      return '';
+    }
+
     return staleLabeledEvent!.created_at;
   }
 

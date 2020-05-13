@@ -44,7 +44,8 @@ const DefaultProcessorOptions: IssueProcessorOptions = {
   onlyLabels: '',
   operationsPerRun: 100,
   debugOnly: true,
-  removeStaleWhenUpdated: false
+  removeStaleWhenUpdated: false,
+  removeLabelsWhenUpdated: ''
 };
 
 test('empty issue list results in 1 operation', async () => {
@@ -503,4 +504,34 @@ test('stale label should be removed if a comment was added to a stale issue', as
   expect(processor.closedIssues.length).toEqual(0);
   expect(processor.staleIssues.length).toEqual(0);
   expect(processor.removedLabelIssues.length).toEqual(1);
+});
+
+test('multiple labels should be removed if a comment was added to a stale issue', async () => {
+  const TestIssueList: Issue[] = [
+    generateIssue(
+      1,
+      'An issue that should un-stale',
+      '2020-01-01T17:00:00Z',
+      false,
+      ['Stale', 'Need Info', 'And some other']
+    )
+  ];
+
+  const opts = DefaultProcessorOptions;
+  opts.removeStaleWhenUpdated = false;  // do not remove the stale label itself, but others instead:
+  opts.removeLabelsWhenUpdated = 'Need Info,And some other';
+
+  const processor = new IssueProcessor(
+    opts,
+    async p => (p == 1 ? TestIssueList : []),
+    async (num, dt) => [{user: {type: 'User'}}], // return a fake comment so indicate there was an update
+    async (issue, label) => new Date().toDateString()
+  );
+
+  // process our fake issue list
+  await processor.processIssues(1);
+
+  expect(processor.closedIssues.length).toEqual(0);
+  expect(processor.staleIssues.length).toEqual(0);
+  expect(processor.removedLabelIssues.length).toEqual(2);
 });

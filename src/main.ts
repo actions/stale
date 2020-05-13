@@ -35,6 +35,7 @@ function getAndValidateArgs(): IssueProcessorOptions {
     removeStaleWhenUpdated: !(
       core.getInput('remove-stale-when-updated') === 'false'
     ),
+    removeLabelsWhenUpdated: core.getInput('remove-labels-when-updated'),
     debugOnly: core.getInput('debug-only') === 'true'
   };
 

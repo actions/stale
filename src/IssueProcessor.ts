@@ -45,6 +45,7 @@ export interface IssueProcessorOptions {
   onlyLabels: string;
   operationsPerRun: number;
   removeStaleWhenUpdated: boolean;
+  removeLabelsWhenUpdated: string;
   debugOnly: boolean;
 }
 
@@ -124,6 +125,10 @@ export class IssueProcessor {
       const exemptLabels = IssueProcessor.parseCommaSeparatedString(
         isPr ? this.options.exemptPrLabels : this.options.exemptIssueLabels
       );
+      const removeLabelsWhenUpdate = IssueProcessor.parseCommaSeparatedString(
+        this.options.removeLabelsWhenUpdated
+      );
+
       const issueType: string = isPr ? 'pr' : 'issue';
 
       if (!staleMessage) {
@@ -148,6 +153,12 @@ export class IssueProcessor {
       ) {
         core.debug(`Skipping ${issueType} because it has an exempt label`);
         continue; // don't process exempt issues
+      }
+
+      for (const label of removeLabelsWhenUpdate) {
+        if (IssueProcessor.isLabeled(issue, label)) {
+          await this.processRemoveLabel(issue, label);
+        }
       }
 
       // does this issue have a stale label?
@@ -178,6 +189,28 @@ export class IssueProcessor {
 
     // do the next batch
     return this.processIssues(page + 1);
+  }
+
+  private async processRemoveLabel(
+    issue: Issue,
+    label: string
+  ) {
+    const labeledOn: string | undefined = await this.getLabelCreationDate(
+      issue,
+      label
+    );
+    const issueHasComments: boolean = await this.isIssueStillStale(
+      issue,
+      labeledOn || issue.updated_at
+    );
+    const issueHasUpdate: boolean = IssueProcessor.updatedSince(
+      issue.updated_at,
+      this.options.daysBeforeClose
+    );
+
+    if (issueHasComments || issueHasUpdate) {
+      await this.removeLabel(issue, label);
+    }
   }
 
   // handle all of the stale issue logic when we find a stale issue

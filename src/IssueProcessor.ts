@@ -326,11 +326,6 @@ export class IssueProcessor {
 
     this.operationsLeft -= 1;
 
-    if (this.options.debugOnly) {
-      return;
-    }
-
-    core.debug(`Checking closeMesage ${closeMessage}`)
     if (closeMessage){
       await this.client.issues.createComment({
         owner: github.context.repo.owner,
@@ -339,7 +334,9 @@ export class IssueProcessor {
         body: closeMessage
       });
     }
-
+    if (this.options.debugOnly) {
+      return;
+    }
     await this.client.issues.update({
       owner: github.context.repo.owner,
       repo: github.context.repo.repo,

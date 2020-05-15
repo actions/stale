@@ -53,6 +53,14 @@ const DefaultProcessorOptions: IssueProcessorOptions = {
 
 beforeEach(() => {
   octomock.resetMocks();
+  //let mockGitHub = octomock.getGitHubImplementation();
+  //mockGitHub.context = 
+  octomock.updateContext({
+    repo: {
+      owner: 'test',
+      repo: 'repo'
+    }
+  })
 })
 
 test('close issue adds comment before close', async () => {
@@ -83,6 +91,38 @@ test('close issue adds comment before close', async () => {
   expect(processor.staleIssues.length).toEqual(0);
   expect(processor.closedIssues.length).toEqual(1);
   expect(octomock.mockFunctions.issues.createComment).toHaveBeenCalledTimes(1);
+})
+
+test('close issue does not add comment before close', async () => {
+  const TestIssueList: Issue[] = [
+    generateIssue(
+      1,
+      'FROI AND CHRIS TEST ISSUE',
+      '2020-01-01T17:00:00Z',
+      false,
+      ['Stale']
+    )
+  ];
+
+  let processorOptions = {...DefaultProcessorOptions}// What? https://stackoverflow.com/a/122704/298149
+  processorOptions.closeIssueMessage = '';
+  const processor = new IssueProcessor(
+    processorOptions,
+    async p => (p == 1 ? TestIssueList : []),
+    async (num, dt) => [],
+    async (issue, label) => {
+      const d = new Date();
+      d.setDate(d.getDate() - 31);
+      return d.toDateString();
+    }
+  );
+
+  // process our fake issue list
+  await processor.processIssues(1);
+
+  expect(processor.staleIssues.length).toEqual(0);
+  expect(processor.closedIssues.length).toEqual(1);
+  expect(octomock.mockFunctions.issues.createComment).toHaveBeenCalledTimes(0);
 })
 
 test('empty issue list results in 1 operation', async () => {

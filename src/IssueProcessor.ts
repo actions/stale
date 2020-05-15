@@ -319,7 +319,7 @@ export class IssueProcessor {
   // Close an issue based on staleness
   private async closeIssue(issue: Issue, closeMessage: string): Promise<void> {
     core.debug(
-      `Closing issue #${issue.number} - ${issue.title} for being stale`
+      `TESTTESTClosing issue #${issue.number} - ${issue.title} for being stale`
     );
 
     this.closedIssues.push(issue);
@@ -329,7 +329,8 @@ export class IssueProcessor {
     if (this.options.debugOnly) {
       return;
     }
-    
+
+    core.debug(`Checking closeMesage ${closeMessage}`)
     if (closeMessage){
       await this.client.issues.createComment({
         owner: github.context.repo.owner,
@@ -338,6 +339,7 @@ export class IssueProcessor {
         body: closeMessage
       });
     }
+
     await this.client.issues.update({
       owner: github.context.repo.owner,
       repo: github.context.repo.repo,

@@ -1,0 +1,1 @@
+declare var octomock: any;

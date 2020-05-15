@@ -18,6 +18,8 @@ function getAndValidateArgs(): IssueProcessorOptions {
     repoToken: core.getInput('repo-token', {required: true}),
     staleIssueMessage: core.getInput('stale-issue-message'),
     stalePrMessage: core.getInput('stale-pr-message'),
+    closeIssueMessage: core.getInput('close-issue-message'),
+    closePrMessage: core.getInput('close-pr-message'),
     daysBeforeStale: parseInt(
       core.getInput('days-before-stale', {required: true})
     ),

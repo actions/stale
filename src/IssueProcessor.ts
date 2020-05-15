@@ -36,6 +36,8 @@ export interface IssueProcessorOptions {
   repoToken: string;
   staleIssueMessage: string;
   stalePrMessage: string;
+  closeIssueMessage: string;
+  closePrMessage: string;
   daysBeforeStale: number;
   daysBeforeClose: number;
   staleIssueLabel: string;
@@ -118,6 +120,11 @@ export class IssueProcessor {
       const staleMessage: string = isPr
         ? this.options.stalePrMessage
         : this.options.staleIssueMessage;
+
+      const closeMessage: string = isPr
+        ? this.options.closePrMessage
+        : this.options.closeIssueMessage;
+
       const staleLabel: string = isPr
         ? this.options.stalePrLabel
         : this.options.staleIssueLabel;
@@ -172,7 +179,7 @@ export class IssueProcessor {
       // process any issues marked stale (including the issue above, if it was marked)
       if (isStale) {
         core.debug(`Found a stale ${issueType}`);
-        await this.processStaleIssue(issue, issueType, staleLabel);
+        await this.processStaleIssue(issue, issueType, staleLabel, closeMessage);
       }
     }
 
@@ -184,7 +191,8 @@ export class IssueProcessor {
   private async processStaleIssue(
     issue: Issue,
     issueType: string,
-    staleLabel: string
+    staleLabel: string,
+    closeMessage: string
   ) {
     if (this.options.daysBeforeClose < 0) {
       return; // nothing to do because we aren't closing stale issues
@@ -216,7 +224,7 @@ export class IssueProcessor {
       core.debug(
         `Closing ${issueType} because it was last updated on ${issue.updated_at}`
       );
-      await this.closeIssue(issue);
+      await this.closeIssue(issue,closeMessage);
     } else {
       if (this.options.removeStaleWhenUpdated) {
         await this.removeLabel(issue, staleLabel);
@@ -309,7 +317,7 @@ export class IssueProcessor {
   }
 
   // Close an issue based on staleness
-  private async closeIssue(issue: Issue): Promise<void> {
+  private async closeIssue(issue: Issue, closeMessage: string): Promise<void> {
     core.debug(
       `Closing issue #${issue.number} - ${issue.title} for being stale`
     );
@@ -321,7 +329,15 @@ export class IssueProcessor {
     if (this.options.debugOnly) {
       return;
     }
-
+    
+    if (closeMessage){
+      await this.client.issues.createComment({
+        owner: github.context.repo.owner,
+        repo: github.context.repo.repo,
+        issue_number: issue.number,
+        body: closeMessage
+      });
+    }
     await this.client.issues.update({
       owner: github.context.repo.owner,
       repo: github.context.repo.repo,

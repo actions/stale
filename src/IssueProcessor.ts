@@ -319,7 +319,7 @@ export class IssueProcessor {
   // Close an issue based on staleness
   private async closeIssue(issue: Issue, closeMessage: string): Promise<void> {
     core.debug(
-      `TESTTESTClosing issue #${issue.number} - ${issue.title} for being stale`
+      `Closing issue #${issue.number} - ${issue.title} for being stale`
     );
 
     this.closedIssues.push(issue);

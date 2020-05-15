@@ -1,9 +1,21 @@
 import * as core from '@actions/core';
 import * as github from '@actions/github';
-import * as Octokit from '@octokit/rest';
 
-type Issue = Octokit.IssuesListForRepoResponseItem;
-type IssueLabel = Octokit.IssuesListForRepoResponseItemLabelsItem;
+export interface Issue {
+  title: string;
+  number: number;
+  updated_at: string;
+  labels: IssueLabel[];
+  pull_request: any;
+  state: string;
+  locked: boolean;
+}
+
+export interface IssueLabel {
+  name: string;
+}
+//type Issue = Octokit.IssuesListForRepoResponseItem;
+//type IssueLabel = Octokit.IssuesListForRepoResponseItemLabelsItem;
 
 type Args = {
   repoToken: string;

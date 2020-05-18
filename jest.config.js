@@ -7,5 +7,8 @@ module.exports = {
   transform: {
     '^.+\\.ts$': 'ts-jest'
   },
-  verbose: true
+  verbose: true,
+  setupFilesAfterEnv: [
+    './setupJest.ts'
+  ]
 }

@@ -493,7 +493,7 @@ test('stale label should be removed if a comment was added to a stale issue', as
   const processor = new IssueProcessor(
     opts,
     async p => (p == 1 ? TestIssueList : []),
-    async (num, dt) => [{user: {type: 'User'}}], // return a fake comment so indicate there was an update
+    async (num, dt) => [{user: {login: 'notme', type: 'User'}}], // return a fake comment to indicate there was an update
     async (issue, label) => new Date().toDateString()
   );
 
@@ -503,6 +503,36 @@ test('stale label should be removed if a comment was added to a stale issue', as
   expect(processor.closedIssues.length).toEqual(0);
   expect(processor.staleIssues.length).toEqual(0);
   expect(processor.removedLabelIssues.length).toEqual(1);
+});
+
+test('stale label should not be removed if a comment was added by the bot (and the issue should be closed)', async () => {
+  github.context.actor = 'abot';
+  const TestIssueList: Issue[] = [
+    generateIssue(
+      1,
+      'An issue that should stay stale',
+      '2020-01-01T17:00:00Z',
+      false,
+      ['Stale']
+    )
+  ];
+
+  const opts = DefaultProcessorOptions;
+  opts.removeStaleWhenUpdated = true;
+
+  const processor = new IssueProcessor(
+    opts,
+    async p => (p == 1 ? TestIssueList : []),
+    async (num, dt) => [{user: {login: 'abot', type: 'User'}}], // return a fake comment to indicate there was an update by the bot
+    async (issue, label) => new Date().toDateString()
+  );
+
+  // process our fake issue list
+  await processor.processIssues(1);
+
+  expect(processor.closedIssues.length).toEqual(1);
+  expect(processor.staleIssues.length).toEqual(0);
+  expect(processor.removedLabelIssues.length).toEqual(0);
 });
 
 test('stale issues should not be closed until after the closed number of days', async () => {

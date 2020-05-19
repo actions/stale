@@ -16,6 +16,7 @@ export interface Issue {
 
 export interface User {
   type: string;
+  login: string;
 }
 
 export interface Comment {
@@ -249,8 +250,14 @@ export class IssueProcessor {
     // find any comments since the stale label
     const comments = await this.listIssueComments(issue.number, sinceDate);
 
-    // if there are any user comments returned, issue is not stale anymore
-    return comments.filter(comment => comment.user.type === 'User').length > 0;
+    // if there are any user comments returned, and they were not by this bot, the issue is not stale anymore
+    return (
+      comments.filter(
+        comment =>
+          comment.user.type === 'User' &&
+          comment.user.login !== github.context.actor
+      ).length > 0
+    );
   }
 
   // grab comments for an issue since a given date

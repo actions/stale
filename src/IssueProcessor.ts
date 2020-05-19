@@ -67,7 +67,10 @@ export class IssueProcessor {
       issueNumber: number,
       sinceDate: string
     ) => Promise<Comment[]>,
-    getLabelCreationDate?: (issue: Issue, label: string) => Promise<string | undefined>
+    getLabelCreationDate?: (
+      issue: Issue,
+      label: string
+    ) => Promise<string | undefined>
   ) {
     this.options = options;
     this.operationsLeft = options.operationsPerRun;
@@ -200,17 +203,20 @@ export class IssueProcessor {
     );
     const issueHasUpdate: boolean = IssueProcessor.updatedSince(
       issue.updated_at,
-      this.options.daysBeforeClose
+      this.options.daysBeforeClose + (this.options.daysBeforeStale ?? 0)
     );
 
     if (markedStaleOn) {
       core.debug(`Issue #${issue.number} marked stale on: ${markedStaleOn}`);
-    }
-    else {
-      core.debug(`Issue #${issue.number} is not marked stale, but last update of ${issue.updated_at} is older than ${this.options.daysBeforeStale} days`);
+    } else {
+      core.debug(
+        `Issue #${issue.number} is not marked stale, but last update of ${issue.updated_at} is older than ${this.options.daysBeforeStale} days`
+      );
     }
     core.debug(`Issue #${issue.number} has been updated: ${issueHasUpdate}`);
-    core.debug(`Issue #${issue.number} has been commented on: ${issueHasComments}`);
+    core.debug(
+      `Issue #${issue.number} has been commented on: ${issueHasComments}`
+    );
 
     if (!issueHasComments && !issueHasUpdate) {
       core.debug(

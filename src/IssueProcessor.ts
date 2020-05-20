@@ -69,7 +69,10 @@ export class IssueProcessor {
       issueNumber: number,
       sinceDate: string
     ) => Promise<Comment[]>,
-    getLabelCreationDate?: (issue: Issue, label: string) => Promise<string | undefined>
+    getLabelCreationDate?: (
+      issue: Issue,
+      label: string
+    ) => Promise<string | undefined>
   ) {
     this.options = options;
     this.operationsLeft = options.operationsPerRun;
@@ -124,6 +127,7 @@ export class IssueProcessor {
       const closeMessage: string = isPr
         ? this.options.closePrMessage
         : this.options.closeIssueMessage;
+      core.debug(`Close Message: ${closeMessage}`);
 
       const staleLabel: string = isPr
         ? this.options.stalePrLabel
@@ -179,7 +183,12 @@ export class IssueProcessor {
       // process any issues marked stale (including the issue above, if it was marked)
       if (isStale) {
         core.debug(`Found a stale ${issueType}`);
-        await this.processStaleIssue(issue, issueType, staleLabel, closeMessage);
+        await this.processStaleIssue(
+          issue,
+          issueType,
+          staleLabel,
+          closeMessage
+        );
       }
     }
 
@@ -213,18 +222,21 @@ export class IssueProcessor {
 
     if (markedStaleOn) {
       core.debug(`Issue #${issue.number} marked stale on: ${markedStaleOn}`);
-    }
-    else {
-      core.debug(`Issue #${issue.number} is not marked stale, but last update of ${issue.updated_at} is older than ${this.options.daysBeforeStale} days`);
+    } else {
+      core.debug(
+        `Issue #${issue.number} is not marked stale, but last update of ${issue.updated_at} is older than ${this.options.daysBeforeStale} days`
+      );
     }
     core.debug(`Issue #${issue.number} has been updated: ${issueHasUpdate}`);
-    core.debug(`Issue #${issue.number} has been commented on: ${issueHasComments}`);
+    core.debug(
+      `Issue #${issue.number} has been commented on: ${issueHasComments}`
+    );
 
     if (!issueHasComments && !issueHasUpdate) {
       core.debug(
         `Closing ${issueType} because it was last updated on ${issue.updated_at}`
       );
-      await this.closeIssue(issue,closeMessage);
+      await this.closeIssue(issue, closeMessage);
     } else {
       if (this.options.removeStaleWhenUpdated) {
         await this.removeLabel(issue, staleLabel);
@@ -301,18 +313,18 @@ export class IssueProcessor {
       return;
     }
 
-    await this.client.issues.createComment({
-      owner: github.context.repo.owner,
-      repo: github.context.repo.repo,
-      issue_number: issue.number,
-      body: staleMessage
-    });
-
     await this.client.issues.addLabels({
       owner: github.context.repo.owner,
       repo: github.context.repo.repo,
       issue_number: issue.number,
       labels: [staleLabel]
+    });
+
+    await this.client.issues.createComment({
+      owner: github.context.repo.owner,
+      repo: github.context.repo.repo,
+      issue_number: issue.number,
+      body: staleMessage
     });
   }
 
@@ -326,7 +338,8 @@ export class IssueProcessor {
 
     this.operationsLeft -= 1;
 
-    if (closeMessage){
+    core.debug(`Close Message: ${closeMessage}`);
+    if (closeMessage) {
       await this.client.issues.createComment({
         owner: github.context.repo.owner,
         repo: github.context.repo.repo,

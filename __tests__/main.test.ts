@@ -50,18 +50,17 @@ const DefaultProcessorOptions: IssueProcessorOptions = {
   removeStaleWhenUpdated: false
 };
 
-
 beforeEach(() => {
   octomock.resetMocks();
   //let mockGitHub = octomock.getGitHubImplementation();
-  //mockGitHub.context = 
+  //mockGitHub.context =
   octomock.updateContext({
     repo: {
       owner: 'test',
       repo: 'repo'
     }
-  })
-})
+  });
+});
 
 test('close issue adds comment before close', async () => {
   const TestIssueList: Issue[] = [
@@ -91,7 +90,7 @@ test('close issue adds comment before close', async () => {
   expect(processor.staleIssues.length).toEqual(0);
   expect(processor.closedIssues.length).toEqual(1);
   expect(octomock.mockFunctions.issues.createComment).toHaveBeenCalledTimes(1);
-})
+});
 
 test('close issue does not add comment before close', async () => {
   const TestIssueList: Issue[] = [
@@ -104,7 +103,7 @@ test('close issue does not add comment before close', async () => {
     )
   ];
 
-  let processorOptions = {...DefaultProcessorOptions}// What? https://stackoverflow.com/a/122704/298149
+  let processorOptions = {...DefaultProcessorOptions}; // What? https://stackoverflow.com/a/122704/298149
   processorOptions.closeIssueMessage = '';
   const processor = new IssueProcessor(
     processorOptions,
@@ -123,7 +122,7 @@ test('close issue does not add comment before close', async () => {
   expect(processor.staleIssues.length).toEqual(0);
   expect(processor.closedIssues.length).toEqual(1);
   expect(octomock.mockFunctions.issues.createComment).toHaveBeenCalledTimes(0);
-})
+});
 
 test('empty issue list results in 1 operation', async () => {
   const processor = new IssueProcessor(

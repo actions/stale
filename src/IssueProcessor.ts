@@ -69,7 +69,10 @@ export class IssueProcessor {
       issueNumber: number,
       sinceDate: string
     ) => Promise<Comment[]>,
-    getLabelCreationDate?: (issue: Issue, label: string) => Promise<string | undefined>
+    getLabelCreationDate?: (
+      issue: Issue,
+      label: string
+    ) => Promise<string | undefined>
   ) {
     this.options = options;
     this.operationsLeft = options.operationsPerRun;
@@ -124,6 +127,7 @@ export class IssueProcessor {
       const closeMessage: string = isPr
         ? this.options.closePrMessage
         : this.options.closeIssueMessage;
+      core.debug(`Close Message: ${closeMessage}`);
 
       const staleLabel: string = isPr
         ? this.options.stalePrLabel
@@ -158,7 +162,7 @@ export class IssueProcessor {
       }
 
       // does this issue have a stale label?
-      let isStale = IssueProcessor.isLabeled(issue, staleLabel);
+      const isStale = IssueProcessor.isLabeled(issue, staleLabel);
 
       // determine if this issue needs to be marked stale first
       if (
@@ -173,13 +177,18 @@ export class IssueProcessor {
         );
         await this.markStale(issue, staleMessage, staleLabel);
         this.operationsLeft -= 2;
-        isStale = true; // this issue is now considered stale
+        continue; // If we just marked an issue stale we want to give users a chance to action them before closing
       }
 
       // process any issues marked stale (including the issue above, if it was marked)
       if (isStale) {
         core.debug(`Found a stale ${issueType}`);
-        await this.processStaleIssue(issue, issueType, staleLabel, closeMessage);
+        await this.processStaleIssue(
+          issue,
+          issueType,
+          staleLabel,
+          closeMessage
+        );
       }
     }
 
@@ -213,18 +222,21 @@ export class IssueProcessor {
 
     if (markedStaleOn) {
       core.debug(`Issue #${issue.number} marked stale on: ${markedStaleOn}`);
-    }
-    else {
-      core.debug(`Issue #${issue.number} is not marked stale, but last update of ${issue.updated_at} is older than ${this.options.daysBeforeStale} days`);
+    } else {
+      core.debug(
+        `Issue #${issue.number} is not marked stale, but last update of ${issue.updated_at} is older than ${this.options.daysBeforeStale} days`
+      );
     }
     core.debug(`Issue #${issue.number} has been updated: ${issueHasUpdate}`);
-    core.debug(`Issue #${issue.number} has been commented on: ${issueHasComments}`);
+    core.debug(
+      `Issue #${issue.number} has been commented on: ${issueHasComments}`
+    );
 
     if (!issueHasComments && !issueHasUpdate) {
       core.debug(
         `Closing ${issueType} because it was last updated on ${issue.updated_at}`
       );
-      await this.closeIssue(issue,closeMessage);
+      await this.closeIssue(issue, closeMessage);
     } else {
       if (this.options.removeStaleWhenUpdated) {
         await this.removeLabel(issue, staleLabel);
@@ -326,7 +338,8 @@ export class IssueProcessor {
 
     this.operationsLeft -= 1;
 
-    if (closeMessage){
+    core.debug(`Close Message: ${closeMessage}`);
+    if (closeMessage) {
       await this.client.issues.createComment({
         owner: github.context.repo.owner,
         repo: github.context.repo.repo,

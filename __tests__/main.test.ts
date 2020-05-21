@@ -139,7 +139,7 @@ test('empty issue list results in 1 operation', async () => {
   expect(operationsLeft).toEqual(99);
 });
 
-test('processing an issue with no label will make it stale and close it, if it is old enough', async () => {
+test('processing an issue with no label will make it stale but will not close it, even if it is old enough', async () => {
   const TestIssueList: Issue[] = [
     generateIssue(1, 'An issue with no label', '2020-01-01T17:00:00Z')
   ];
@@ -155,7 +155,7 @@ test('processing an issue with no label will make it stale and close it, if it i
   await processor.processIssues(1);
 
   expect(processor.staleIssues.length).toEqual(1);
-  expect(processor.closedIssues.length).toEqual(1);
+  expect(processor.closedIssues.length).toEqual(0);
 });
 
 test('processing an issue with no label will make it stale but not close it', async () => {

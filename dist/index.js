@@ -8695,14 +8695,14 @@ class IssueProcessor {
                     continue; // don't process exempt issues
                 }
                 // does this issue have a stale label?
-                let isStale = IssueProcessor.isLabeled(issue, staleLabel);
+                const isStale = IssueProcessor.isLabeled(issue, staleLabel);
                 // determine if this issue needs to be marked stale first
                 if (!isStale &&
                     !IssueProcessor.updatedSince(issue.updated_at, this.options.daysBeforeStale)) {
                     core.debug(`Marking ${issueType} stale because it was last updated on ${issue.updated_at} and it does not have a stale label`);
                     yield this.markStale(issue, staleMessage, staleLabel);
                     this.operationsLeft -= 2;
-                    isStale = true; // this issue is now considered stale
+                    continue; // If we just marked an issue stale we want to give users a chance to action them before closing
                 }
                 // process any issues marked stale (including the issue above, if it was marked)
                 if (isStale) {
@@ -8793,17 +8793,17 @@ class IssueProcessor {
             if (this.options.debugOnly) {
                 return;
             }
-            yield this.client.issues.addLabels({
-                owner: github.context.repo.owner,
-                repo: github.context.repo.repo,
-                issue_number: issue.number,
-                labels: [staleLabel]
-            });
             yield this.client.issues.createComment({
                 owner: github.context.repo.owner,
                 repo: github.context.repo.repo,
                 issue_number: issue.number,
                 body: staleMessage
+            });
+            yield this.client.issues.addLabels({
+                owner: github.context.repo.owner,
+                repo: github.context.repo.repo,
+                issue_number: issue.number,
+                labels: [staleLabel]
             });
         });
     }

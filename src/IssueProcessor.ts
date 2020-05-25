@@ -97,11 +97,6 @@ export class IssueProcessor {
   }
 
   async processIssues(page: number = 1): Promise<number> {
-    if (this.operationsLeft <= 0) {
-      core.warning('Reached max number of operations to process. Exiting.');
-      return 0;
-    }
-
     // get the next batch of issues
     const issues: Issue[] = await this.getIssues(page);
     this.operationsLeft -= 1;
@@ -176,6 +171,11 @@ export class IssueProcessor {
       if (isStale) {
         core.debug(`Found a stale ${issueType}`);
         await this.processStaleIssue(issue, issueType, staleLabel);
+      }
+
+      if (this.operationsLeft <= 0) {
+        core.warning('Reached max number of operations to process. Exiting.');
+        return 0;
       }
     }
 

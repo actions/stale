@@ -169,7 +169,6 @@ export class IssueProcessor {
           `Marking ${issueType} stale because it was last updated on ${issue.updated_at} and it does not have a stale label`
         );
         await this.markStale(issue, staleMessage, staleLabel);
-        this.operationsLeft -= 2;
         isStale = true; // this issue is now considered stale
       }
 

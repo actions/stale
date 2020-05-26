@@ -97,24 +97,19 @@ export class IssueProcessor {
   }
 
   async processIssues(page: number = 1): Promise<number> {
-    if (this.operationsLeft <= 0) {
-      core.warning('Reached max number of operations to process. Exiting.');
-      return 0;
-    }
-
     // get the next batch of issues
     const issues: Issue[] = await this.getIssues(page);
     this.operationsLeft -= 1;
 
     if (issues.length <= 0) {
-      core.debug('No more issues found to process. Exiting.');
+      core.info('No more issues found to process. Exiting.');
       return this.operationsLeft;
     }
 
     for (const issue of issues.values()) {
       const isPr = !!issue.pull_request;
 
-      core.debug(
+      core.info(
         `Found issue: issue #${issue.number} - ${issue.title} last updated ${issue.updated_at} (is pr? ${isPr})`
       );
 
@@ -131,17 +126,17 @@ export class IssueProcessor {
       const issueType: string = isPr ? 'pr' : 'issue';
 
       if (!staleMessage) {
-        core.debug(`Skipping ${issueType} due to empty stale message`);
+        core.info(`Skipping ${issueType} due to empty stale message`);
         continue;
       }
 
       if (issue.state === 'closed') {
-        core.debug(`Skipping ${issueType} because it is closed`);
+        core.info(`Skipping ${issueType} because it is closed`);
         continue; // don't process closed issues
       }
 
       if (issue.locked) {
-        core.debug(`Skipping ${issueType} because it is locked`);
+        core.info(`Skipping ${issueType} because it is locked`);
         continue; // don't process locked issues
       }
 
@@ -150,34 +145,38 @@ export class IssueProcessor {
           IssueProcessor.isLabeled(issue, exemptLabel)
         )
       ) {
-        core.debug(`Skipping ${issueType} because it has an exempt label`);
+        core.info(`Skipping ${issueType} because it has an exempt label`);
         continue; // don't process exempt issues
       }
 
       // does this issue have a stale label?
       let isStale = IssueProcessor.isLabeled(issue, staleLabel);
 
+      // should this issue be marked stale?
+      const shouldBeStale = !IssueProcessor.updatedSince(
+        issue.updated_at,
+        this.options.daysBeforeStale
+      );
+
       // determine if this issue needs to be marked stale first
-      if (
-        !isStale &&
-        !IssueProcessor.updatedSince(
-          issue.updated_at,
-          this.options.daysBeforeStale
-        )
-      ) {
-        core.debug(
+      if (!isStale && shouldBeStale) {
+        core.info(
           `Marking ${issueType} stale because it was last updated on ${issue.updated_at} and it does not have a stale label`
         );
         await this.markStale(issue, staleMessage, staleLabel);
-        this.operationsLeft -= 2;
         isStale = true; // this issue is now considered stale
       }
 
-      // process any issues marked stale (including the issue above, if it was marked)
+      // process the issue if it was marked stale
       if (isStale) {
-        core.debug(`Found a stale ${issueType}`);
+        core.info(`Found a stale ${issueType}`);
         await this.processStaleIssue(issue, issueType, staleLabel);
       }
+    }
+
+    if (this.operationsLeft <= 0) {
+      core.warning('Reached max number of operations to process. Exiting.');
+      return 0;
     }
 
     // do the next batch
@@ -190,74 +189,77 @@ export class IssueProcessor {
     issueType: string,
     staleLabel: string
   ) {
-    if (this.options.daysBeforeClose < 0) {
-      return; // nothing to do because we aren't closing stale issues
-    }
+    const markedStaleOn: string =
+      (await this.getLabelCreationDate(issue, staleLabel)) || issue.updated_at;
+    core.info(`Issue #${issue.number} marked stale on: ${markedStaleOn}`);
 
-    const markedStaleOn: string | undefined = await this.getLabelCreationDate(
+    const issueHasComments: boolean = await this.hasCommentsSince(
       issue,
-      staleLabel
+      markedStaleOn
     );
-    const issueHasComments: boolean = await this.isIssueStillStale(
-      issue,
-      markedStaleOn || issue.updated_at
+    core.info(
+      `Issue #${issue.number} has been commented on: ${issueHasComments}`
     );
+
     const issueHasUpdate: boolean = IssueProcessor.updatedSince(
       issue.updated_at,
       this.options.daysBeforeClose + (this.options.daysBeforeStale ?? 0)
     );
+    core.info(`Issue #${issue.number} has been updated: ${issueHasUpdate}`);
 
-    if (markedStaleOn) {
-      core.debug(`Issue #${issue.number} marked stale on: ${markedStaleOn}`);
-    } else {
-      core.debug(
-        `Issue #${issue.number} is not marked stale, but last update of ${issue.updated_at} is older than ${this.options.daysBeforeStale} days`
+    // should we un-stale this issue?
+    if (this.options.removeStaleWhenUpdated && issueHasComments) {
+      core.info(
+        `Issue #${issue.number} is no longer stale. Removing stale label.`
       );
+      await this.removeLabel(issue, staleLabel);
     }
-    core.debug(`Issue #${issue.number} has been updated: ${issueHasUpdate}`);
-    core.debug(
-      `Issue #${issue.number} has been commented on: ${issueHasComments}`
-    );
+
+    // now start closing logic
+    if (this.options.daysBeforeClose < 0) {
+      return; // nothing to do because we aren't closing stale issues
+    }
 
     if (!issueHasComments && !issueHasUpdate) {
-      core.debug(
+      core.info(
         `Closing ${issueType} because it was last updated on ${issue.updated_at}`
       );
       await this.closeIssue(issue);
     } else {
-      if (this.options.removeStaleWhenUpdated) {
-        await this.removeLabel(issue, staleLabel);
-      }
-      core.debug(`Ignoring stale ${issueType} because it was updated recently`);
+      core.info(
+        `Stale ${issueType} is not old enough to close yet (hasComments? ${issueHasComments}, hasUpdate? ${issueHasUpdate}`
+      );
     }
   }
 
   // checks to see if a given issue is still stale (has had activity on it)
-  private async isIssueStillStale(
+  private async hasCommentsSince(
     issue: Issue,
     sinceDate: string
   ): Promise<boolean> {
-    core.debug(
-      `Checking for comments on issue #${issue.number} since ${sinceDate} to see if it is still stale`
+    core.info(
+      `Checking for comments on issue #${issue.number} since ${sinceDate}`
     );
 
     if (!sinceDate) {
-      return true; // if no date was provided then the issue was marked stale a long time ago
+      return true;
     }
 
-    this.operationsLeft -= 1;
-
-    // find any comments since the stale label
+    // find any comments since the date
     const comments = await this.listIssueComments(issue.number, sinceDate);
 
-    // if there are any user comments returned, and they were not by this bot, the issue is not stale anymore
-    return (
-      comments.filter(
-        comment =>
-          comment.user.type === 'User' &&
-          comment.user.login !== github.context.actor
-      ).length > 0
+    const filteredComments = comments.filter(
+      comment =>
+        comment.user.type === 'User' &&
+        comment.user.login !== github.context.actor
     );
+
+    core.info(
+      `Comments not made by ${github.context.actor} or another bot: ${filteredComments.length}`
+    );
+
+    // if there are any user comments returned
+    return filteredComments.length > 0;
   }
 
   // grab comments for an issue since a given date
@@ -296,7 +298,7 @@ export class IssueProcessor {
     staleMessage: string,
     staleLabel: string
   ): Promise<void> {
-    core.debug(`Marking issue #${issue.number} - ${issue.title} as stale`);
+    core.info(`Marking issue #${issue.number} - ${issue.title} as stale`);
 
     this.staleIssues.push(issue);
 
@@ -323,7 +325,7 @@ export class IssueProcessor {
 
   // Close an issue based on staleness
   private async closeIssue(issue: Issue): Promise<void> {
-    core.debug(
+    core.info(
       `Closing issue #${issue.number} - ${issue.title} for being stale`
     );
 
@@ -345,7 +347,7 @@ export class IssueProcessor {
 
   // Remove a label from an issue
   private async removeLabel(issue: Issue, label: string): Promise<void> {
-    core.debug(
+    core.info(
       `Removing label ${label} from issue #${issue.number} - ${issue.title}`
     );
 
@@ -371,7 +373,7 @@ export class IssueProcessor {
     issue: Issue,
     label: string
   ): Promise<string | undefined> {
-    core.debug(`Checking for label ${label} on issue #${issue.number}`);
+    core.info(`Checking for label ${label} on issue #${issue.number}`);
 
     this.operationsLeft -= 1;
 

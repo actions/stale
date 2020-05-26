@@ -8514,7 +8514,6 @@ class IssueProcessor {
                 let isStale = IssueProcessor.isLabeled(issue, staleLabel);
                 // should this issue be marked stale?
                 const shouldBeStale = !IssueProcessor.updatedSince(issue.updated_at, this.options.daysBeforeStale);
-                // TODO: better stale calculation here not including bot comments
                 // determine if this issue needs to be marked stale first
                 if (!isStale && shouldBeStale) {
                     core.info(`Marking ${issueType} stale because it was last updated on ${issue.updated_at} and it does not have a stale label`);

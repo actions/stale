@@ -163,8 +163,6 @@ export class IssueProcessor {
         this.options.daysBeforeStale
       );
 
-      // TODO: better stale calculation here not including bot comments
-
       // determine if this issue needs to be marked stale first
       if (!isStale && shouldBeStale) {
         core.info(

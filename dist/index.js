@@ -8512,15 +8512,17 @@ class IssueProcessor {
                 }
                 // does this issue have a stale label?
                 let isStale = IssueProcessor.isLabeled(issue, staleLabel);
+                // should this issue be marked stale?
+                const shouldBeStale = !IssueProcessor.updatedSince(issue.updated_at, this.options.daysBeforeStale);
+                // TODO: better stale calculation here not including bot comments
                 // determine if this issue needs to be marked stale first
-                if (!isStale &&
-                    !IssueProcessor.updatedSince(issue.updated_at, this.options.daysBeforeStale)) {
+                if (!isStale && shouldBeStale) {
                     core.info(`Marking ${issueType} stale because it was last updated on ${issue.updated_at} and it does not have a stale label`);
                     yield this.markStale(issue, staleMessage, staleLabel);
                     this.operationsLeft -= 2;
                     isStale = true; // this issue is now considered stale
                 }
-                // process any issues marked stale (including the issue above, if it was marked)
+                // process the issue if it was marked stale
                 if (isStale) {
                     core.info(`Found a stale ${issueType}`);
                     yield this.processStaleIssue(issue, issueType, staleLabel);
@@ -8534,46 +8536,44 @@ class IssueProcessor {
     processStaleIssue(issue, issueType, staleLabel) {
         var _a;
         return __awaiter(this, void 0, void 0, function* () {
+            const markedStaleOn = (yield this.getLabelCreationDate(issue, staleLabel)) || issue.updated_at;
+            core.info(`Issue #${issue.number} marked stale on: ${markedStaleOn}`);
+            const issueHasComments = yield this.hasCommentsSince(issue, markedStaleOn);
+            core.info(`Issue #${issue.number} has been commented on: ${issueHasComments}`);
+            const issueHasUpdate = IssueProcessor.updatedSince(issue.updated_at, this.options.daysBeforeClose + ((_a = this.options.daysBeforeStale) !== null && _a !== void 0 ? _a : 0));
+            core.info(`Issue #${issue.number} has been updated: ${issueHasUpdate}`);
+            // should we un-stale this issue?
+            if (this.options.removeStaleWhenUpdated && issueHasComments) {
+                core.info(`Issue #${issue.number} is no longer stale. Removing stale label.`);
+                yield this.removeLabel(issue, staleLabel);
+            }
+            // now start closing logic
             if (this.options.daysBeforeClose < 0) {
                 return; // nothing to do because we aren't closing stale issues
             }
-            const markedStaleOn = yield this.getLabelCreationDate(issue, staleLabel);
-            const issueHasComments = yield this.isIssueStillStale(issue, markedStaleOn || issue.updated_at);
-            const issueHasUpdate = IssueProcessor.updatedSince(issue.updated_at, this.options.daysBeforeClose + ((_a = this.options.daysBeforeStale) !== null && _a !== void 0 ? _a : 0));
-            if (markedStaleOn) {
-                core.info(`Issue #${issue.number} marked stale on: ${markedStaleOn}`);
-            }
-            else {
-                core.info(`Issue #${issue.number} is not marked stale, but last update of ${issue.updated_at} is older than ${this.options.daysBeforeStale} days`);
-            }
-            core.info(`Issue #${issue.number} has been updated: ${issueHasUpdate}`);
-            core.info(`Issue #${issue.number} has been commented on: ${issueHasComments}`);
             if (!issueHasComments && !issueHasUpdate) {
                 core.info(`Closing ${issueType} because it was last updated on ${issue.updated_at}`);
                 yield this.closeIssue(issue);
             }
             else {
-                if (this.options.removeStaleWhenUpdated) {
-                    yield this.removeLabel(issue, staleLabel);
-                }
-                core.info(`Ignoring stale ${issueType} because it was updated recently`);
+                core.info(`Stale ${issueType} is not old enough to close yet (hasComments? ${issueHasComments}, hasUpdate? ${issueHasUpdate}`);
             }
         });
     }
     // checks to see if a given issue is still stale (has had activity on it)
-    isIssueStillStale(issue, sinceDate) {
+    hasCommentsSince(issue, sinceDate) {
         return __awaiter(this, void 0, void 0, function* () {
-            core.info(`Checking for comments on issue #${issue.number} since ${sinceDate} to see if it is still stale`);
+            core.info(`Checking for comments on issue #${issue.number} since ${sinceDate}`);
             if (!sinceDate) {
-                return true; // if no date was provided then the issue was marked stale a long time ago
+                return true;
             }
             this.operationsLeft -= 1;
-            // find any comments since the stale label
+            // find any comments since the date
             const comments = yield this.listIssueComments(issue.number, sinceDate);
             const filteredComments = comments.filter(comment => comment.user.type === 'User' &&
                 comment.user.login !== github.context.actor);
             core.info(`Comments not made by ${github.context.actor} or another bot: ${filteredComments.length}`);
-            // if there are any user comments returned, and they were not by this bot, the issue is not stale anymore
+            // if there are any user comments returned
             return filteredComments.length > 0;
         });
     }

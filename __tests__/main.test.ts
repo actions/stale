@@ -426,6 +426,7 @@ test('exempt issue labels will not be marked stale (multi issue label)', async (
 
   expect(processor.staleIssues.length).toEqual(0);
   expect(processor.closedIssues.length).toEqual(0);
+  expect(processor.removedLabelIssues.length).toEqual(0);
 });
 
 test('exempt pr labels will not be marked stale', async () => {
@@ -474,6 +475,7 @@ test('stale issues should not be closed if days is set to -1', async () => {
   await processor.processIssues(1);
 
   expect(processor.closedIssues.length).toEqual(0);
+  expect(processor.removedLabelIssues.length).toEqual(0);
 });
 
 test('stale label should be removed if a comment was added to a stale issue', async () => {
@@ -562,6 +564,7 @@ test('stale issues should not be closed until after the closed number of days', 
   await processor.processIssues(1);
 
   expect(processor.closedIssues.length).toEqual(0);
+  expect(processor.removedLabelIssues.length).toEqual(0);
   expect(processor.staleIssues.length).toEqual(1);
 });
 
@@ -593,6 +596,7 @@ test('stale issues should be closed if the closed nubmer of days (additive) is a
   await processor.processIssues(1);
 
   expect(processor.closedIssues.length).toEqual(1);
+  expect(processor.removedLabelIssues.length).toEqual(0);
   expect(processor.staleIssues.length).toEqual(0);
 });
 
@@ -623,5 +627,6 @@ test('stale issues should not be closed until after the closed number of days (l
   await processor.processIssues(1);
 
   expect(processor.closedIssues.length).toEqual(0);
+  expect(processor.removedLabelIssues.length).toEqual(0);
   expect(processor.staleIssues.length).toEqual(1);
 });

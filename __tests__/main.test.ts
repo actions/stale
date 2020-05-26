@@ -595,3 +595,33 @@ test('stale issues should be closed if the closed nubmer of days (additive) is a
   expect(processor.closedIssues.length).toEqual(1);
   expect(processor.staleIssues.length).toEqual(0);
 });
+
+test('stale issues should not be closed until after the closed number of days (long)', async () => {
+  let lastUpdate = new Date();
+  lastUpdate.setDate(lastUpdate.getDate() - 10);
+  const TestIssueList: Issue[] = [
+    generateIssue(
+      1,
+      'An issue that should be marked stale but not closed',
+      lastUpdate.toString(),
+      false
+    )
+  ];
+
+  const opts = DefaultProcessorOptions;
+  opts.daysBeforeStale = 5; // stale after 5 days
+  opts.daysBeforeClose = 20; // closes after 25 days
+
+  const processor = new IssueProcessor(
+    opts,
+    async p => (p == 1 ? TestIssueList : []),
+    async (num, dt) => [],
+    async (issue, label) => new Date().toDateString()
+  );
+
+  // process our fake issue list
+  await processor.processIssues(1);
+
+  expect(processor.closedIssues.length).toEqual(0);
+  expect(processor.staleIssues.length).toEqual(1);
+});

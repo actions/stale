@@ -107,14 +107,14 @@ export class IssueProcessor {
     this.operationsLeft -= 1;
 
     if (issues.length <= 0) {
-      core.debug('No more issues found to process. Exiting.');
+      core.info('No more issues found to process. Exiting.');
       return this.operationsLeft;
     }
 
     for (const issue of issues.values()) {
       const isPr = !!issue.pull_request;
 
-      core.debug(
+      core.info(
         `Found issue: issue #${issue.number} - ${issue.title} last updated ${issue.updated_at} (is pr? ${isPr})`
       );
 
@@ -131,17 +131,17 @@ export class IssueProcessor {
       const issueType: string = isPr ? 'pr' : 'issue';
 
       if (!staleMessage) {
-        core.debug(`Skipping ${issueType} due to empty stale message`);
+        core.info(`Skipping ${issueType} due to empty stale message`);
         continue;
       }
 
       if (issue.state === 'closed') {
-        core.debug(`Skipping ${issueType} because it is closed`);
+        core.info(`Skipping ${issueType} because it is closed`);
         continue; // don't process closed issues
       }
 
       if (issue.locked) {
-        core.debug(`Skipping ${issueType} because it is locked`);
+        core.info(`Skipping ${issueType} because it is locked`);
         continue; // don't process locked issues
       }
 
@@ -150,7 +150,7 @@ export class IssueProcessor {
           IssueProcessor.isLabeled(issue, exemptLabel)
         )
       ) {
-        core.debug(`Skipping ${issueType} because it has an exempt label`);
+        core.info(`Skipping ${issueType} because it has an exempt label`);
         continue; // don't process exempt issues
       }
 
@@ -165,7 +165,7 @@ export class IssueProcessor {
           this.options.daysBeforeStale
         )
       ) {
-        core.debug(
+        core.info(
           `Marking ${issueType} stale because it was last updated on ${issue.updated_at} and it does not have a stale label`
         );
         await this.markStale(issue, staleMessage, staleLabel);
@@ -175,7 +175,7 @@ export class IssueProcessor {
 
       // process any issues marked stale (including the issue above, if it was marked)
       if (isStale) {
-        core.debug(`Found a stale ${issueType}`);
+        core.info(`Found a stale ${issueType}`);
         await this.processStaleIssue(issue, issueType, staleLabel);
       }
     }
@@ -208,19 +208,19 @@ export class IssueProcessor {
     );
 
     if (markedStaleOn) {
-      core.debug(`Issue #${issue.number} marked stale on: ${markedStaleOn}`);
+      core.info(`Issue #${issue.number} marked stale on: ${markedStaleOn}`);
     } else {
-      core.debug(
+      core.info(
         `Issue #${issue.number} is not marked stale, but last update of ${issue.updated_at} is older than ${this.options.daysBeforeStale} days`
       );
     }
-    core.debug(`Issue #${issue.number} has been updated: ${issueHasUpdate}`);
-    core.debug(
+    core.info(`Issue #${issue.number} has been updated: ${issueHasUpdate}`);
+    core.info(
       `Issue #${issue.number} has been commented on: ${issueHasComments}`
     );
 
     if (!issueHasComments && !issueHasUpdate) {
-      core.debug(
+      core.info(
         `Closing ${issueType} because it was last updated on ${issue.updated_at}`
       );
       await this.closeIssue(issue);
@@ -228,7 +228,7 @@ export class IssueProcessor {
       if (this.options.removeStaleWhenUpdated) {
         await this.removeLabel(issue, staleLabel);
       }
-      core.debug(`Ignoring stale ${issueType} because it was updated recently`);
+      core.info(`Ignoring stale ${issueType} because it was updated recently`);
     }
   }
 
@@ -237,7 +237,7 @@ export class IssueProcessor {
     issue: Issue,
     sinceDate: string
   ): Promise<boolean> {
-    core.debug(
+    core.info(
       `Checking for comments on issue #${issue.number} since ${sinceDate} to see if it is still stale`
     );
 
@@ -250,14 +250,18 @@ export class IssueProcessor {
     // find any comments since the stale label
     const comments = await this.listIssueComments(issue.number, sinceDate);
 
-    // if there are any user comments returned, and they were not by this bot, the issue is not stale anymore
-    return (
-      comments.filter(
-        comment =>
-          comment.user.type === 'User' &&
-          comment.user.login !== github.context.actor
-      ).length > 0
+    const filteredComments = comments.filter(
+      comment =>
+        comment.user.type === 'User' &&
+        comment.user.login !== github.context.actor
     );
+
+    core.info(
+      `Comments not made by ${github.context.actor} or another bot: ${filteredComments.length}`
+    );
+
+    // if there are any user comments returned, and they were not by this bot, the issue is not stale anymore
+    return filteredComments.length > 0;
   }
 
   // grab comments for an issue since a given date
@@ -296,7 +300,7 @@ export class IssueProcessor {
     staleMessage: string,
     staleLabel: string
   ): Promise<void> {
-    core.debug(`Marking issue #${issue.number} - ${issue.title} as stale`);
+    core.info(`Marking issue #${issue.number} - ${issue.title} as stale`);
 
     this.staleIssues.push(issue);
 
@@ -323,7 +327,7 @@ export class IssueProcessor {
 
   // Close an issue based on staleness
   private async closeIssue(issue: Issue): Promise<void> {
-    core.debug(
+    core.info(
       `Closing issue #${issue.number} - ${issue.title} for being stale`
     );
 
@@ -345,7 +349,7 @@ export class IssueProcessor {
 
   // Remove a label from an issue
   private async removeLabel(issue: Issue, label: string): Promise<void> {
-    core.debug(
+    core.info(
       `Removing label ${label} from issue #${issue.number} - ${issue.title}`
     );
 
@@ -371,7 +375,7 @@ export class IssueProcessor {
     issue: Issue,
     label: string
   ): Promise<string | undefined> {
-    core.debug(`Checking for label ${label} on issue #${issue.number}`);
+    core.info(`Checking for label ${label} on issue #${issue.number}`);
 
     this.operationsLeft -= 1;
 

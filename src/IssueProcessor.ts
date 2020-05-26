@@ -97,11 +97,6 @@ export class IssueProcessor {
   }
 
   async processIssues(page: number = 1): Promise<number> {
-    if (this.operationsLeft <= 0) {
-      core.warning('Reached max number of operations to process. Exiting.');
-      return 0;
-    }
-
     // get the next batch of issues
     const issues: Issue[] = await this.getIssues(page);
     this.operationsLeft -= 1;
@@ -169,7 +164,6 @@ export class IssueProcessor {
           `Marking ${issueType} stale because it was last updated on ${issue.updated_at} and it does not have a stale label`
         );
         await this.markStale(issue, staleMessage, staleLabel);
-        this.operationsLeft -= 2;
         isStale = true; // this issue is now considered stale
       }
 
@@ -178,6 +172,11 @@ export class IssueProcessor {
         core.info(`Found a stale ${issueType}`);
         await this.processStaleIssue(issue, issueType, staleLabel);
       }
+    }
+
+    if (this.operationsLeft <= 0) {
+      core.warning('Reached max number of operations to process. Exiting.');
+      return 0;
     }
 
     // do the next batch
@@ -245,8 +244,6 @@ export class IssueProcessor {
     if (!sinceDate) {
       return true;
     }
-
-    this.operationsLeft -= 1;
 
     // find any comments since the date
     const comments = await this.listIssueComments(issue.number, sinceDate);

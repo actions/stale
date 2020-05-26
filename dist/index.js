@@ -8471,10 +8471,6 @@ class IssueProcessor {
     }
     processIssues(page = 1) {
         return __awaiter(this, void 0, void 0, function* () {
-            if (this.operationsLeft <= 0) {
-                core.warning('Reached max number of operations to process. Exiting.');
-                return 0;
-            }
             // get the next batch of issues
             const issues = yield this.getIssues(page);
             this.operationsLeft -= 1;
@@ -8518,7 +8514,6 @@ class IssueProcessor {
                 if (!isStale && shouldBeStale) {
                     core.info(`Marking ${issueType} stale because it was last updated on ${issue.updated_at} and it does not have a stale label`);
                     yield this.markStale(issue, staleMessage, staleLabel);
-                    this.operationsLeft -= 2;
                     isStale = true; // this issue is now considered stale
                 }
                 // process the issue if it was marked stale
@@ -8526,6 +8521,10 @@ class IssueProcessor {
                     core.info(`Found a stale ${issueType}`);
                     yield this.processStaleIssue(issue, issueType, staleLabel);
                 }
+            }
+            if (this.operationsLeft <= 0) {
+                core.warning('Reached max number of operations to process. Exiting.');
+                return 0;
             }
             // do the next batch
             return this.processIssues(page + 1);
@@ -8566,7 +8565,6 @@ class IssueProcessor {
             if (!sinceDate) {
                 return true;
             }
-            this.operationsLeft -= 1;
             // find any comments since the date
             const comments = yield this.listIssueComments(issue.number, sinceDate);
             const filteredComments = comments.filter(comment => comment.user.type === 'User' &&

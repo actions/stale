@@ -583,7 +583,7 @@ test('stale label should be removed if a comment was added to a stale issue', as
 });
 
 test('stale label should not be removed if a comment was added by the bot (and the issue should be closed)', async () => {
-  github.context.actor = 'abot';
+  octomock.context.actor = 'abot';
   const TestIssueList: Issue[] = [
     generateIssue(
       1,

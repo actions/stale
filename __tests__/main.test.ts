@@ -1,6 +1,6 @@
 /* global octomock */
 import * as core from '@actions/core';
-import {GitHub} from '@actions/github';
+import * as github from '@actions/github';
 import {Octokit} from '@octokit/rest';
 
 import {
@@ -583,7 +583,7 @@ test('stale label should be removed if a comment was added to a stale issue', as
 });
 
 test('stale label should not be removed if a comment was added by the bot (and the issue should be closed)', async () => {
-  octomock.context.actor = 'abot';
+  github.context.actor = 'abot';
   const TestIssueList: Issue[] = [
     generateIssue(
       1,

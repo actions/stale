@@ -139,10 +139,35 @@ test('empty issue list results in 1 operation', async () => {
   expect(operationsLeft).toEqual(99);
 });
 
-test('processing an issue with no label will make it stale but will not close it, even if it is old enough', async () => {
+test('processing an issue with no label will make it stale and close it, if it is old enough only if days-before-close is set to 0', async () => {
   const TestIssueList: Issue[] = [
     generateIssue(1, 'An issue with no label', '2020-01-01T17:00:00Z')
   ];
+
+  const opts = {...DefaultProcessorOptions};
+  opts.daysBeforeClose = 0;
+
+  const processor = new IssueProcessor(
+    opts,
+    async p => (p == 1 ? TestIssueList : []),
+    async (num, dt) => [],
+    async (issue, label) => new Date().toDateString()
+  );
+
+  // process our fake issue list
+  await processor.processIssues(1);
+
+  expect(processor.staleIssues.length).toEqual(1);
+  expect(processor.closedIssues.length).toEqual(0);
+});
+
+test('processing an issue with no label will make it stale and not close it if days-before-close is set to > 0', async () => {
+  const TestIssueList: Issue[] = [
+    generateIssue(1, 'An issue with no label', '2020-01-01T17:00:00Z')
+  ];
+
+  const opts = {...DefaultProcessorOptions};
+  opts.daysBeforeClose = 15;
 
   const processor = new IssueProcessor(
     DefaultProcessorOptions,

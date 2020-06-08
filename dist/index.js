@@ -8755,27 +8755,39 @@ class IssueProcessor {
     listIssueComments(issueNumber, sinceDate) {
         return __awaiter(this, void 0, void 0, function* () {
             // find any comments since date on the given issue
-            const comments = yield this.client.issues.listComments({
-                owner: github.context.repo.owner,
-                repo: github.context.repo.repo,
-                issue_number: issueNumber,
-                since: sinceDate
-            });
-            return comments.data;
+            try {
+                const comments = yield this.client.issues.listComments({
+                    owner: github.context.repo.owner,
+                    repo: github.context.repo.repo,
+                    issue_number: issueNumber,
+                    since: sinceDate
+                });
+                return comments.data;
+            }
+            catch (error) {
+                core.error(`List issue comments error: ${error.message}`);
+                return Promise.resolve([]);
+            }
         });
     }
     // grab issues from github in baches of 100
     getIssues(page) {
         return __awaiter(this, void 0, void 0, function* () {
-            const issueResult = yield this.client.issues.listForRepo({
-                owner: github.context.repo.owner,
-                repo: github.context.repo.repo,
-                state: 'open',
-                labels: this.options.onlyLabels,
-                per_page: 100,
-                page
-            });
-            return issueResult.data;
+            try {
+                const issueResult = yield this.client.issues.listForRepo({
+                    owner: github.context.repo.owner,
+                    repo: github.context.repo.repo,
+                    state: 'open',
+                    labels: this.options.onlyLabels,
+                    per_page: 100,
+                    page
+                });
+                return issueResult.data;
+            }
+            catch (error) {
+                core.error(`Get issues for repo error: ${error.message}`);
+                return Promise.resolve([]);
+            }
         });
     }
     // Mark an issue as stale with a comment and a label
@@ -8791,18 +8803,28 @@ class IssueProcessor {
             if (this.options.debugOnly) {
                 return;
             }
-            yield this.client.issues.createComment({
-                owner: github.context.repo.owner,
-                repo: github.context.repo.repo,
-                issue_number: issue.number,
-                body: staleMessage
-            });
-            yield this.client.issues.addLabels({
-                owner: github.context.repo.owner,
-                repo: github.context.repo.repo,
-                issue_number: issue.number,
-                labels: [staleLabel]
-            });
+            try {
+                yield this.client.issues.createComment({
+                    owner: github.context.repo.owner,
+                    repo: github.context.repo.repo,
+                    issue_number: issue.number,
+                    body: staleMessage
+                });
+            }
+            catch (error) {
+                core.error(`Error creating a comment: ${error.message}`);
+            }
+            try {
+                yield this.client.issues.addLabels({
+                    owner: github.context.repo.owner,
+                    repo: github.context.repo.repo,
+                    issue_number: issue.number,
+                    labels: [staleLabel]
+                });
+            }
+            catch (error) {
+                core.error(`Error adding a label: ${error.message}`);
+            }
         });
     }
     // Close an issue based on staleness
@@ -8814,12 +8836,17 @@ class IssueProcessor {
             if (this.options.debugOnly) {
                 return;
             }
-            yield this.client.issues.update({
-                owner: github.context.repo.owner,
-                repo: github.context.repo.repo,
-                issue_number: issue.number,
-                state: 'closed'
-            });
+            try {
+                yield this.client.issues.update({
+                    owner: github.context.repo.owner,
+                    repo: github.context.repo.repo,
+                    issue_number: issue.number,
+                    state: 'closed'
+                });
+            }
+            catch (error) {
+                core.error(`Error updating an issue: ${error.message}`);
+            }
         });
     }
     // Remove a label from an issue
@@ -8831,12 +8858,17 @@ class IssueProcessor {
             if (this.options.debugOnly) {
                 return;
             }
-            yield this.client.issues.removeLabel({
-                owner: github.context.repo.owner,
-                repo: github.context.repo.repo,
-                issue_number: issue.number,
-                name: encodeURIComponent(label) // A label can have a "?" in the name
-            });
+            try {
+                yield this.client.issues.removeLabel({
+                    owner: github.context.repo.owner,
+                    repo: github.context.repo.repo,
+                    issue_number: issue.number,
+                    name: encodeURIComponent(label) // A label can have a "?" in the name
+                });
+            }
+            catch (error) {
+                core.error(`Error removing a label: ${error.message}`);
+            }
         });
     }
     // returns the creation date of a given label on an issue (or nothing if no label existed)

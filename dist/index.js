@@ -8800,11 +8800,6 @@ class IssueProcessor {
             // so that close calculations work correctly
             const newUpdatedAtDate = new Date();
             issue.updated_at = newUpdatedAtDate.toString();
-            // of days to wait before actually closing the issue.
-            const daysBeforeStaleInMillis = 1000 * 60 * 60 * 24 * this.options.daysBeforeStale;
-            const newUpdatedAtDate = new Date();
-            newUpdatedAtDate.setTime(newUpdatedAtDate.getTime() - daysBeforeStaleInMillis);
-            issue.updated_at = newUpdatedAtDate.toString();
             if (this.options.debugOnly) {
                 return;
             }

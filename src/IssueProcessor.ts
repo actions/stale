@@ -268,28 +268,38 @@ export class IssueProcessor {
     sinceDate: string
   ): Promise<Comment[]> {
     // find any comments since date on the given issue
-    const comments = await this.client.issues.listComments({
-      owner: github.context.repo.owner,
-      repo: github.context.repo.repo,
-      issue_number: issueNumber,
-      since: sinceDate
-    });
-
-    return comments.data;
+    try {
+      const comments = await this.client.issues.listComments({
+        owner: github.context.repo.owner,
+        repo: github.context.repo.repo,
+        issue_number: issueNumber,
+        since: sinceDate
+      });
+      return comments.data;
+    } catch (error) {
+      core.error(`List issue comments error: ${error.message}`);
+      return Promise.resolve([]);
+    }
   }
 
   // grab issues from github in baches of 100
   private async getIssues(page: number): Promise<Issue[]> {
-    const issueResult: OctoKitIssueList = await this.client.issues.listForRepo({
-      owner: github.context.repo.owner,
-      repo: github.context.repo.repo,
-      state: 'open',
-      labels: this.options.onlyLabels,
-      per_page: 100,
-      page
-    });
-
-    return issueResult.data;
+    try {
+      const issueResult: OctoKitIssueList = await this.client.issues.listForRepo(
+        {
+          owner: github.context.repo.owner,
+          repo: github.context.repo.repo,
+          state: 'open',
+          labels: this.options.onlyLabels,
+          per_page: 100,
+          page
+        }
+      );
+      return issueResult.data;
+    } catch (error) {
+      core.error(`Get issues for repo error: ${error.message}`);
+      return Promise.resolve([]);
+    }
   }
 
   // Mark an issue as stale with a comment and a label
@@ -313,19 +323,27 @@ export class IssueProcessor {
       return;
     }
 
-    await this.client.issues.createComment({
-      owner: github.context.repo.owner,
-      repo: github.context.repo.repo,
-      issue_number: issue.number,
-      body: staleMessage
-    });
+    try {
+      await this.client.issues.createComment({
+        owner: github.context.repo.owner,
+        repo: github.context.repo.repo,
+        issue_number: issue.number,
+        body: staleMessage
+      });
+    } catch (error) {
+      core.error(`Error creating a comment: ${error.message}`);
+    }
 
-    await this.client.issues.addLabels({
-      owner: github.context.repo.owner,
-      repo: github.context.repo.repo,
-      issue_number: issue.number,
-      labels: [staleLabel]
-    });
+    try {
+      await this.client.issues.addLabels({
+        owner: github.context.repo.owner,
+        repo: github.context.repo.repo,
+        issue_number: issue.number,
+        labels: [staleLabel]
+      });
+    } catch (error) {
+      core.error(`Error adding a label: ${error.message}`);
+    }
   }
 
   // Close an issue based on staleness
@@ -342,12 +360,16 @@ export class IssueProcessor {
       return;
     }
 
-    await this.client.issues.update({
-      owner: github.context.repo.owner,
-      repo: github.context.repo.repo,
-      issue_number: issue.number,
-      state: 'closed'
-    });
+    try {
+      await this.client.issues.update({
+        owner: github.context.repo.owner,
+        repo: github.context.repo.repo,
+        issue_number: issue.number,
+        state: 'closed'
+      });
+    } catch (error) {
+      core.error(`Error updating an issue: ${error.message}`);
+    }
   }
 
   // Remove a label from an issue
@@ -364,12 +386,16 @@ export class IssueProcessor {
       return;
     }
 
-    await this.client.issues.removeLabel({
-      owner: github.context.repo.owner,
-      repo: github.context.repo.repo,
-      issue_number: issue.number,
-      name: encodeURIComponent(label) // A label can have a "?" in the name
-    });
+    try {
+      await this.client.issues.removeLabel({
+        owner: github.context.repo.owner,
+        repo: github.context.repo.repo,
+        issue_number: issue.number,
+        name: encodeURIComponent(label) // A label can have a "?" in the name
+      });
+    } catch (error) {
+      core.error(`Error removing a label: ${error.message}`);
+    }
   }
 
   // returns the creation date of a given label on an issue (or nothing if no label existed)

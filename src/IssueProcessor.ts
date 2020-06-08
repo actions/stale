@@ -203,7 +203,7 @@ export class IssueProcessor {
 
     const issueHasUpdate: boolean = IssueProcessor.updatedSince(
       issue.updated_at,
-      this.options.daysBeforeClose + (this.options.daysBeforeStale ?? 0)
+      this.options.daysBeforeClose
     );
     core.info(`Issue #${issue.number} has been updated: ${issueHasUpdate}`);
 
@@ -304,18 +304,9 @@ export class IssueProcessor {
 
     this.operationsLeft -= 2;
 
-    // We are about to modify the issue by adding a comment and applying a label, so update the modification timestamp
-    // to `days-before-stale` days ago to simulate as if we marked this issue stale on the very first day it actually
-    // became stale. This has the effect of respecting `days-before-close` no matter what value it is set to. The user
-    // can request to close the issue immediately by using `days-before-close` === 0, or they can set it to any number
-    // of days to wait before actually closing the issue.
-    const daysBeforeStaleInMillis =
-      1000 * 60 * 60 * 24 * this.options.daysBeforeStale;
+    // if the issue is being marked stale, the updated date should be changed to right now
+    // so that close calculations work correctly
     const newUpdatedAtDate: Date = new Date();
-    newUpdatedAtDate.setTime(
-      newUpdatedAtDate.getTime() - daysBeforeStaleInMillis
-    );
-
     issue.updated_at = newUpdatedAtDate.toString();
 
     if (this.options.debugOnly) {

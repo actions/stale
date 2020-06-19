@@ -44,7 +44,8 @@ const DefaultProcessorOptions: IssueProcessorOptions = {
   onlyLabels: '',
   operationsPerRun: 100,
   debugOnly: true,
-  removeStaleWhenUpdated: false
+  removeStaleWhenUpdated: false,
+  ascending: false
 };
 
 test('empty issue list results in 1 operation', async () => {

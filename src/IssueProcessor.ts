@@ -293,6 +293,7 @@ export class IssueProcessor {
           state: 'open',
           labels: this.options.onlyLabels,
           per_page: 2,
+          sort: 'created',
           direction: this.options.ascending ? 'asc' : 'desc',
           page
         }

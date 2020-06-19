@@ -47,6 +47,7 @@ export interface IssueProcessorOptions {
   operationsPerRun: number;
   removeStaleWhenUpdated: boolean;
   debugOnly: boolean;
+  ascending: boolean;
 }
 
 /***
@@ -291,7 +292,9 @@ export class IssueProcessor {
           repo: github.context.repo.repo,
           state: 'open',
           labels: this.options.onlyLabels,
-          per_page: 100,
+          per_page: 2,
+          sort: 'created',
+          direction: this.options.ascending ? 'asc' : 'desc',
           page
         }
       );

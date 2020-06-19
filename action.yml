@@ -39,6 +39,9 @@ inputs:
   debug-only:
     description: 'Run the processor in debug mode without actually performing any operations on live issues.'
     default: false
+  ascending:
+    description: 'The order to get issues or pull requests. Defaults to false, which is descending'
+    default: false
 runs:
   using: 'node12'
   main: 'dist/index.js'

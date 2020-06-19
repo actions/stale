@@ -292,8 +292,7 @@ export class IssueProcessor {
           repo: github.context.repo.repo,
           state: 'open',
           labels: this.options.onlyLabels,
-          per_page: 2,
-          sort: 'created',
+          per_page: 100,
           direction: this.options.ascending ? 'asc' : 'desc',
           page
         }

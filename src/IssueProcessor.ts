@@ -47,6 +47,7 @@ export interface IssueProcessorOptions {
   operationsPerRun: number;
   removeStaleWhenUpdated: boolean;
   debugOnly: boolean;
+  ascending: boolean;
 }
 
 /***
@@ -292,6 +293,7 @@ export class IssueProcessor {
           state: 'open',
           labels: this.options.onlyLabels,
           per_page: 100,
+          direction: this.options.ascending ? 'asc' : 'desc',
           page
         }
       );

@@ -35,7 +35,8 @@ function getAndValidateArgs(): IssueProcessorOptions {
     removeStaleWhenUpdated: !(
       core.getInput('remove-stale-when-updated') === 'false'
     ),
-    debugOnly: core.getInput('debug-only') === 'true'
+    debugOnly: core.getInput('debug-only') === 'true',
+    ascending: core.getInput('ascending') === 'true'
   };
 
   for (const numberInput of [

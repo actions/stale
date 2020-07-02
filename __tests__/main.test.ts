@@ -35,6 +35,8 @@ const DefaultProcessorOptions: IssueProcessorOptions = {
   repoToken: 'none',
   staleIssueMessage: 'This issue is stale',
   stalePrMessage: 'This PR is stale',
+  closeIssueMessage: 'This issue is being closed',
+  closePrMessage: 'This PR is being closed',
   daysBeforeStale: 1,
   daysBeforeClose: 30,
   staleIssueLabel: 'Stale',

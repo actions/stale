@@ -125,8 +125,9 @@ export class IssueProcessor {
         isPr ? this.options.exemptPrLabels : this.options.exemptIssueLabels
       );
       const issueType: string = isPr ? 'pr' : 'issue';
+      const shouldMarkWhenStale = this.options.daysBeforeStale > -1;
 
-      if (!staleMessage) {
+      if (!staleMessage && shouldMarkWhenStale) {
         core.info(`Skipping ${issueType} due to empty stale message`);
         continue;
       }
@@ -160,7 +161,7 @@ export class IssueProcessor {
       );
 
       // determine if this issue needs to be marked stale first
-      if (!isStale && shouldBeStale) {
+      if (!isStale && shouldBeStale && shouldMarkWhenStale) {
         core.info(
           `Marking ${issueType} stale because it was last updated on ${issue.updated_at} and it does not have a stale label`
         );

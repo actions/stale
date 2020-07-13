@@ -31,7 +31,7 @@ function generateIssue(
   };
 }
 
-const DefaultProcessorOptions: IssueProcessorOptions = {
+const DefaultProcessorOptions: IssueProcessorOptions = Object.freeze({
   repoToken: 'none',
   staleIssueMessage: 'This issue is stale',
   stalePrMessage: 'This PR is stale',
@@ -48,7 +48,7 @@ const DefaultProcessorOptions: IssueProcessorOptions = {
   debugOnly: true,
   removeStaleWhenUpdated: false,
   ascending: false
-};
+});
 
 test('empty issue list results in 1 operation', async () => {
   const processor = new IssueProcessor(
@@ -517,7 +517,7 @@ test('stale label should be removed if a comment was added to a stale issue', as
     )
   ];
 
-  const opts = DefaultProcessorOptions;
+  const opts = {...DefaultProcessorOptions};
   opts.removeStaleWhenUpdated = true;
 
   const processor = new IssueProcessor(
@@ -547,7 +547,7 @@ test('stale label should not be removed if a comment was added by the bot (and t
     )
   ];
 
-  const opts = DefaultProcessorOptions;
+  const opts = {...DefaultProcessorOptions};
   opts.removeStaleWhenUpdated = true;
 
   const processor = new IssueProcessor(
@@ -577,7 +577,7 @@ test('stale issues should not be closed until after the closed number of days', 
     )
   ];
 
-  const opts = DefaultProcessorOptions;
+  const opts = {...DefaultProcessorOptions};
   opts.daysBeforeStale = 5; // stale after 5 days
   opts.daysBeforeClose = 1; // closes after 6 days
 
@@ -609,7 +609,7 @@ test('stale issues should be closed if the closed nubmer of days (additive) is a
     )
   ];
 
-  const opts = DefaultProcessorOptions;
+  const opts = {...DefaultProcessorOptions};
   opts.daysBeforeStale = 5; // stale after 5 days
   opts.daysBeforeClose = 1; // closes after 6 days
 
@@ -640,7 +640,7 @@ test('stale issues should not be closed until after the closed number of days (l
     )
   ];
 
-  const opts = DefaultProcessorOptions;
+  const opts = {...DefaultProcessorOptions};
   opts.daysBeforeStale = 5; // stale after 5 days
   opts.daysBeforeClose = 20; // closes after 25 days
 

@@ -37,6 +37,8 @@ export interface IssueProcessorOptions {
   repoToken: string;
   staleIssueMessage: string;
   stalePrMessage: string;
+  closeIssueMessage: string;
+  closePrMessage: string;
   daysBeforeStale: number;
   daysBeforeClose: number;
   staleIssueLabel: string;
@@ -118,6 +120,9 @@ export class IssueProcessor {
       const staleMessage: string = isPr
         ? this.options.stalePrMessage
         : this.options.staleIssueMessage;
+      const closeMessage: string = isPr
+        ? this.options.closePrMessage
+        : this.options.closeIssueMessage;
       const staleLabel: string = isPr
         ? this.options.stalePrLabel
         : this.options.staleIssueLabel;
@@ -171,7 +176,12 @@ export class IssueProcessor {
       // process the issue if it was marked stale
       if (isStale) {
         core.info(`Found a stale ${issueType}`);
-        await this.processStaleIssue(issue, issueType, staleLabel);
+        await this.processStaleIssue(
+          issue,
+          issueType,
+          staleLabel,
+          closeMessage
+        );
       }
     }
 
@@ -188,7 +198,8 @@ export class IssueProcessor {
   private async processStaleIssue(
     issue: Issue,
     issueType: string,
-    staleLabel: string
+    staleLabel: string,
+    closeMessage?: string
   ) {
     const markedStaleOn: string =
       (await this.getLabelCreationDate(issue, staleLabel)) || issue.updated_at;
@@ -225,7 +236,7 @@ export class IssueProcessor {
       core.info(
         `Closing ${issueType} because it was last updated on ${issue.updated_at}`
       );
-      await this.closeIssue(issue);
+      await this.closeIssue(issue, closeMessage);
     } else {
       core.info(
         `Stale ${issueType} is not old enough to close yet (hasComments? ${issueHasComments}, hasUpdate? ${issueHasUpdate}`
@@ -349,7 +360,7 @@ export class IssueProcessor {
   }
 
   // Close an issue based on staleness
-  private async closeIssue(issue: Issue): Promise<void> {
+  private async closeIssue(issue: Issue, closeMessage?: string): Promise<void> {
     core.info(
       `Closing issue #${issue.number} - ${issue.title} for being stale`
     );
@@ -360,6 +371,19 @@ export class IssueProcessor {
 
     if (this.options.debugOnly) {
       return;
+    }
+
+    if (closeMessage) {
+      try {
+        await this.client.issues.createComment({
+          owner: github.context.repo.owner,
+          repo: github.context.repo.repo,
+          issue_number: issue.number,
+          body: closeMessage
+        });
+      } catch (error) {
+        core.error(`Error creating a comment: ${error.message}`);
+      }
     }
 
     try {

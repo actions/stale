@@ -1,6 +1,5 @@
 import * as core from '@actions/core';
 import {context, getOctokit} from '@actions/github';
-//import {Octokit} from '@octokit/rest';
 import {GetResponseTypeFromEndpointMethod} from '@octokit/types';
 
 export interface Issue {
@@ -57,7 +56,7 @@ export interface IssueProcessorOptions {
  * Handle processing of issues for staleness/closure.
  */
 export class IssueProcessor {
-  readonly client: any;
+  readonly client: any; // need to make this the correct type
   readonly options: IssueProcessorOptions;
   private operationsLeft = 0;
 

@@ -1,8 +1,7 @@
 import * as core from '@actions/core';
-import * as github from '@actions/github';
-import {Octokit} from '@octokit/rest';
-
-type OctoKitIssueList = Octokit.Response<Octokit.IssuesListForRepoResponse>;
+import {context, getOctokit} from '@actions/github';
+//import {Octokit} from '@octokit/rest';
+import {GetResponseTypeFromEndpointMethod} from '@octokit/types';
 
 export interface Issue {
   title: string;
@@ -58,9 +57,9 @@ export interface IssueProcessorOptions {
  * Handle processing of issues for staleness/closure.
  */
 export class IssueProcessor {
-  readonly client: github.GitHub;
+  readonly client: any;
   readonly options: IssueProcessorOptions;
-  private operationsLeft = 0;
+  private operationsLeft: number = 0;
 
   readonly staleIssues: Issue[] = [];
   readonly closedIssues: Issue[] = [];
@@ -80,7 +79,7 @@ export class IssueProcessor {
   ) {
     this.options = options;
     this.operationsLeft = options.operationsPerRun;
-    this.client = new github.GitHub(options.repoToken);
+    this.client = getOctokit(options.repoToken);
 
     if (getIssues) {
       this.getIssues = getIssues;
@@ -101,7 +100,7 @@ export class IssueProcessor {
     }
   }
 
-  async processIssues(page = 1): Promise<number> {
+  async processIssues(page: number = 1): Promise<number> {
     // get the next batch of issues
     const issues: Issue[] = await this.getIssues(page);
     this.operationsLeft -= 1;
@@ -268,12 +267,11 @@ export class IssueProcessor {
 
     const filteredComments = comments.filter(
       comment =>
-        comment.user.type === 'User' &&
-        comment.user.login !== github.context.actor
+        comment.user.type === 'User' && comment.user.login !== context.actor
     );
 
     core.info(
-      `Comments not made by ${github.context.actor} or another bot: ${filteredComments.length}`
+      `Comments not made by ${context.actor} or another bot: ${filteredComments.length}`
     );
 
     // if there are any user comments returned
@@ -288,8 +286,8 @@ export class IssueProcessor {
     // find any comments since date on the given issue
     try {
       const comments = await this.client.issues.listComments({
-        owner: github.context.repo.owner,
-        repo: github.context.repo.repo,
+        owner: context.repo.owner,
+        repo: context.repo.repo,
         issue_number: issueNumber,
         since: sinceDate
       });
@@ -302,11 +300,15 @@ export class IssueProcessor {
 
   // grab issues from github in baches of 100
   private async getIssues(page: number): Promise<Issue[]> {
+    // generate type for response
+    const endpoint = this.client.issues.listForRepo;
+    type OctoKitIssueList = GetResponseTypeFromEndpointMethod<typeof endpoint>;
+
     try {
       const issueResult: OctoKitIssueList = await this.client.issues.listForRepo(
         {
-          owner: github.context.repo.owner,
-          repo: github.context.repo.repo,
+          owner: context.repo.owner,
+          repo: context.repo.repo,
           state: 'open',
           labels: this.options.onlyLabels,
           per_page: 100,
@@ -346,8 +348,8 @@ export class IssueProcessor {
     if (!skipMessage) {
       try {
         await this.client.issues.createComment({
-          owner: github.context.repo.owner,
-          repo: github.context.repo.repo,
+          owner: context.repo.owner,
+          repo: context.repo.repo,
           issue_number: issue.number,
           body: staleMessage
         });
@@ -358,8 +360,8 @@ export class IssueProcessor {
 
     try {
       await this.client.issues.addLabels({
-        owner: github.context.repo.owner,
-        repo: github.context.repo.repo,
+        owner: context.repo.owner,
+        repo: context.repo.repo,
         issue_number: issue.number,
         labels: [staleLabel]
       });
@@ -385,8 +387,8 @@ export class IssueProcessor {
     if (closeMessage) {
       try {
         await this.client.issues.createComment({
-          owner: github.context.repo.owner,
-          repo: github.context.repo.repo,
+          owner: context.repo.owner,
+          repo: context.repo.repo,
           issue_number: issue.number,
           body: closeMessage
         });
@@ -397,8 +399,8 @@ export class IssueProcessor {
 
     try {
       await this.client.issues.update({
-        owner: github.context.repo.owner,
-        repo: github.context.repo.repo,
+        owner: context.repo.owner,
+        repo: context.repo.repo,
         issue_number: issue.number,
         state: 'closed'
       });
@@ -423,8 +425,8 @@ export class IssueProcessor {
 
     try {
       await this.client.issues.removeLabel({
-        owner: github.context.repo.owner,
-        repo: github.context.repo.repo,
+        owner: context.repo.owner,
+        repo: context.repo.repo,
         issue_number: issue.number,
         name: encodeURIComponent(label) // A label can have a "?" in the name
       });
@@ -444,8 +446,8 @@ export class IssueProcessor {
     this.operationsLeft -= 1;
 
     const options = this.client.issues.listEvents.endpoint.merge({
-      owner: github.context.repo.owner,
-      repo: github.context.repo.repo,
+      owner: context.repo.owner,
+      repo: context.repo.repo,
       per_page: 100,
       issue_number: issue.number
     });

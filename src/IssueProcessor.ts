@@ -60,7 +60,7 @@ export interface IssueProcessorOptions {
 export class IssueProcessor {
   readonly client: github.GitHub;
   readonly options: IssueProcessorOptions;
-  private operationsLeft: number = 0;
+  private operationsLeft = 0;
 
   readonly staleIssues: Issue[] = [];
   readonly closedIssues: Issue[] = [];
@@ -101,7 +101,7 @@ export class IssueProcessor {
     }
   }
 
-  async processIssues(page: number = 1): Promise<number> {
+  async processIssues(page = 1): Promise<number> {
     // get the next batch of issues
     const issues: Issue[] = await this.getIssues(page);
     this.operationsLeft -= 1;

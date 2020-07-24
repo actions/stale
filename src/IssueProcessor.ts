@@ -50,6 +50,8 @@ export interface IssueProcessorOptions {
   removeStaleWhenUpdated: boolean;
   debugOnly: boolean;
   ascending: boolean;
+  skipStaleIssueMessage: boolean;
+  skipStalePrMessage: boolean;
 }
 
 /***
@@ -129,6 +131,9 @@ export class IssueProcessor {
       const exemptLabels = IssueProcessor.parseCommaSeparatedString(
         isPr ? this.options.exemptPrLabels : this.options.exemptIssueLabels
       );
+      const skipMessage = isPr
+        ? this.options.skipStalePrMessage
+        : this.options.skipStaleIssueMessage;
       const issueType: string = isPr ? 'pr' : 'issue';
       const shouldMarkWhenStale = this.options.daysBeforeStale > -1;
 
@@ -170,7 +175,7 @@ export class IssueProcessor {
         core.info(
           `Marking ${issueType} stale because it was last updated on ${issue.updated_at} and it does not have a stale label`
         );
-        await this.markStale(issue, staleMessage, staleLabel);
+        await this.markStale(issue, staleMessage, staleLabel, skipMessage);
         isStale = true; // this issue is now considered stale
       }
 
@@ -320,7 +325,8 @@ export class IssueProcessor {
   private async markStale(
     issue: Issue,
     staleMessage: string,
-    staleLabel: string
+    staleLabel: string,
+    skipMessage: boolean
   ): Promise<void> {
     core.info(`Marking issue #${issue.number} - ${issue.title} as stale`);
 
@@ -337,15 +343,17 @@ export class IssueProcessor {
       return;
     }
 
-    try {
-      await this.client.issues.createComment({
-        owner: github.context.repo.owner,
-        repo: github.context.repo.repo,
-        issue_number: issue.number,
-        body: staleMessage
-      });
-    } catch (error) {
-      core.error(`Error creating a comment: ${error.message}`);
+    if (!skipMessage) {
+      try {
+        await this.client.issues.createComment({
+          owner: github.context.repo.owner,
+          repo: github.context.repo.repo,
+          issue_number: issue.number,
+          body: staleMessage
+        });
+      } catch (error) {
+        core.error(`Error creating a comment: ${error.message}`);
+      }
     }
 
     try {

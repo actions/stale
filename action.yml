@@ -46,6 +46,12 @@ inputs:
   ascending:
     description: 'The order to get issues or pull requests. Defaults to false, which is descending'
     default: false
+  skip-stale-pr-message:
+    description: 'Skip adding stale message when marking a pull request as stale.'
+    default: false
+  skip-stale-issue-message:
+    description: 'Skip adding stale message when marking an issue as stale.'
+    default: false
 runs:
   using: 'node12'
   main: 'dist/index.js'

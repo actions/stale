@@ -535,8 +535,10 @@ function getAndValidateArgs() {
         daysBeforeStale: parseInt(core.getInput('days-before-stale', { required: true })),
         daysBeforeClose: parseInt(core.getInput('days-before-close', { required: true })),
         staleIssueLabel: core.getInput('stale-issue-label', { required: true }),
+        closeIssueLabel: core.getInput('close-issue-label'),
         exemptIssueLabels: core.getInput('exempt-issue-labels'),
         stalePrLabel: core.getInput('stale-pr-label', { required: true }),
+        closePrLabel: core.getInput('close-pr-label'),
         exemptPrLabels: core.getInput('exempt-pr-labels'),
         onlyLabels: core.getInput('only-labels'),
         operationsPerRun: parseInt(core.getInput('operations-per-run', { required: true })),
@@ -4298,6 +4300,9 @@ class IssueProcessor {
                 const staleLabel = isPr
                     ? this.options.stalePrLabel
                     : this.options.staleIssueLabel;
+                const closeLabel = isPr
+                    ? this.options.closePrLabel
+                    : this.options.closeIssueLabel;
                 const exemptLabels = IssueProcessor.parseCommaSeparatedString(isPr ? this.options.exemptPrLabels : this.options.exemptIssueLabels);
                 const skipMessage = isPr
                     ? this.options.skipStalePrMessage
@@ -4333,7 +4338,7 @@ class IssueProcessor {
                 // process the issue if it was marked stale
                 if (isStale) {
                     core.info(`Found a stale ${issueType}`);
-                    yield this.processStaleIssue(issue, issueType, staleLabel, closeMessage);
+                    yield this.processStaleIssue(issue, issueType, staleLabel, closeMessage, closeLabel);
                 }
             }
             if (this.operationsLeft <= 0) {
@@ -4345,7 +4350,7 @@ class IssueProcessor {
         });
     }
     // handle all of the stale issue logic when we find a stale issue
-    processStaleIssue(issue, issueType, staleLabel, closeMessage) {
+    processStaleIssue(issue, issueType, staleLabel, closeMessage, closeLabel) {
         return __awaiter(this, void 0, void 0, function* () {
             const markedStaleOn = (yield this.getLabelCreationDate(issue, staleLabel)) || issue.updated_at;
             core.info(`Issue #${issue.number} marked stale on: ${markedStaleOn}`);
@@ -4364,7 +4369,7 @@ class IssueProcessor {
             }
             if (!issueHasComments && !issueHasUpdate) {
                 core.info(`Closing ${issueType} because it was last updated on ${issue.updated_at}`);
-                yield this.closeIssue(issue, closeMessage);
+                yield this.closeIssue(issue, closeMessage, closeLabel);
             }
             else {
                 core.info(`Stale ${issueType} is not old enough to close yet (hasComments? ${issueHasComments}, hasUpdate? ${issueHasUpdate}`);
@@ -4468,7 +4473,7 @@ class IssueProcessor {
         });
     }
     // Close an issue based on staleness
-    closeIssue(issue, closeMessage) {
+    closeIssue(issue, closeMessage, closeLabel) {
         return __awaiter(this, void 0, void 0, function* () {
             core.info(`Closing issue #${issue.number} - ${issue.title} for being stale`);
             this.closedIssues.push(issue);
@@ -4487,6 +4492,19 @@ class IssueProcessor {
                 }
                 catch (error) {
                     core.error(`Error creating a comment: ${error.message}`);
+                }
+            }
+            if (closeLabel) {
+                try {
+                    yield this.client.issues.addLabels({
+                        owner: github_1.context.repo.owner,
+                        repo: github_1.context.repo.repo,
+                        issue_number: issue.number,
+                        labels: [closeLabel]
+                    });
+                }
+                catch (error) {
+                    core.error(`Error adding a label: ${error.message}`);
                 }
             }
             try {

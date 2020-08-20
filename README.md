@@ -80,6 +80,7 @@ jobs:
         exempt-issue-labels: 'awaiting-approval,work-in-progress'
         stale-pr-label: 'no-pr-activity'
         exempt-pr-labels: 'awaiting-approval,work-in-progress'
+        only-labels: 'awaiting-feedback,awaiting-answers'
 ```
 
 ### Debugging

@@ -1,5 +1,6 @@
 name: "Stale issue handler"
 on:
+  workflow_dispatch:
   schedule:
   - cron: "0 0 * * *"
 

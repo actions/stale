@@ -152,7 +152,6 @@ export class IssueProcessor {
         continue; // don't process locked issues
       }
 
-      core.info(`is draft: ${issue.draft}`);
       if (issue.draft && !this.options.processDrafts) {
         core.info(`Skipping ${issueType} because it is a draft`);
         continue; // don't process drafts
@@ -323,6 +322,8 @@ export class IssueProcessor {
           page
         }
       );
+
+      core.info(`issue data: ${issueResult.data}`);
       return issueResult.data;
     } catch (error) {
       core.error(`Get issues for repo error: ${error.message}`);

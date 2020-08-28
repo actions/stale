@@ -1464,7 +1464,8 @@ function getAndValidateArgs() {
         debugOnly: core.getInput('debug-only') === 'true',
         ascending: core.getInput('ascending') === 'true',
         skipStalePrMessage: core.getInput('skip-stale-pr-message') === 'true',
-        skipStaleIssueMessage: core.getInput('skip-stale-issue-message') === 'true'
+        skipStaleIssueMessage: core.getInput('skip-stale-issue-message') === 'true',
+        processDrafts: core.getInput('process-drafts') === 'true'
     };
     for (const numberInput of [
         'days-before-stale',
@@ -2605,6 +2606,10 @@ class IssueProcessor {
                 if (issue.locked) {
                     core.info(`Skipping ${issueType} because it is locked`);
                     continue; // don't process locked issues
+                }
+                if (issue.draft && !this.options.processDrafts) {
+                    core.info(`Skipping ${issueType} because it is a draft`);
+                    continue; // don't process drafts
                 }
                 if (exemptLabels.some((exemptLabel) => IssueProcessor.isLabeled(issue, exemptLabel))) {
                     core.info(`Skipping ${issueType} because it has an exempt label`);

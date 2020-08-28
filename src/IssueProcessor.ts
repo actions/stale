@@ -323,7 +323,7 @@ export class IssueProcessor {
         }
       );
 
-      core.info(`issue data: ${issueResult.data}`);
+      core.info(`issue data: ${JSON.stringify(issueResult.data)}`);
       return issueResult.data;
     } catch (error) {
       core.error(`Get issues for repo error: ${error.message}`);

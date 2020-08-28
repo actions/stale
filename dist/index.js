@@ -2715,7 +2715,7 @@ class IssueProcessor {
                     direction: this.options.ascending ? 'asc' : 'desc',
                     page
                 });
-                core.info(`issue data: ${issueResult.data}`);
+                core.info(`issue data: ${JSON.stringify(issueResult.data)}`);
                 return issueResult.data;
             }
             catch (error) {

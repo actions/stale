@@ -2607,6 +2607,7 @@ class IssueProcessor {
                     core.info(`Skipping ${issueType} because it is locked`);
                     continue; // don't process locked issues
                 }
+                core.info(`is draft: ${issue.draft}`);
                 if (issue.draft && !this.options.processDrafts) {
                     core.info(`Skipping ${issueType} because it is a draft`);
                     continue; // don't process drafts

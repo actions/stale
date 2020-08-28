@@ -52,6 +52,9 @@ inputs:
   skip-stale-issue-message:
     description: 'Skip adding stale message when marking an issue as stale.'
     default: false
+  process-drafts:
+    description: 'Should the draft PRs be marked stale? If set to true, draft PRs will be included in processing.'
+    default: false
 runs:
   using: 'node12'
   main: 'dist/index.js'

@@ -10,6 +10,7 @@ export interface Issue {
   pull_request: any;
   state: string;
   locked: boolean;
+  draft: boolean;
 }
 
 export interface User {
@@ -50,6 +51,7 @@ export interface IssueProcessorOptions {
   ascending: boolean;
   skipStaleIssueMessage: boolean;
   skipStalePrMessage: boolean;
+  processDrafts: boolean;
 }
 
 /***
@@ -148,6 +150,11 @@ export class IssueProcessor {
       if (issue.locked) {
         core.info(`Skipping ${issueType} because it is locked`);
         continue; // don't process locked issues
+      }
+
+      if (issue.draft && !this.options.processDrafts) {
+        core.info(`Skipping ${issueType} because it is a draft`);
+        continue; // don't process drafts
       }
 
       if (

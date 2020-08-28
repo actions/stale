@@ -40,7 +40,8 @@ function getAndValidateArgs(): IssueProcessorOptions {
     debugOnly: core.getInput('debug-only') === 'true',
     ascending: core.getInput('ascending') === 'true',
     skipStalePrMessage: core.getInput('skip-stale-pr-message') === 'true',
-    skipStaleIssueMessage: core.getInput('skip-stale-issue-message') === 'true'
+    skipStaleIssueMessage: core.getInput('skip-stale-issue-message') === 'true',
+    processDrafts: core.getInput('process-drafts') === 'true'
   };
 
   for (const numberInput of [

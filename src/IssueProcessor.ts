@@ -40,8 +40,10 @@ export interface IssueProcessorOptions {
   daysBeforeStale: number;
   daysBeforeClose: number;
   staleIssueLabel: string;
+  closeIssueLabel: string;
   exemptIssueLabels: string;
   stalePrLabel: string;
+  closePrLabel: string;
   exemptPrLabels: string;
   onlyLabels: string;
   operationsPerRun: number;
@@ -126,6 +128,9 @@ export class IssueProcessor {
       const staleLabel: string = isPr
         ? this.options.stalePrLabel
         : this.options.staleIssueLabel;
+      const closeLabel: string = isPr
+        ? this.options.closePrLabel
+        : this.options.closeIssueLabel;
       const exemptLabels = IssueProcessor.parseCommaSeparatedString(
         isPr ? this.options.exemptPrLabels : this.options.exemptIssueLabels
       );
@@ -184,7 +189,8 @@ export class IssueProcessor {
           issue,
           issueType,
           staleLabel,
-          closeMessage
+          closeMessage,
+          closeLabel
         );
       }
     }
@@ -203,7 +209,8 @@ export class IssueProcessor {
     issue: Issue,
     issueType: string,
     staleLabel: string,
-    closeMessage?: string
+    closeMessage?: string,
+    closeLabel?: string
   ) {
     const markedStaleOn: string =
       (await this.getLabelCreationDate(issue, staleLabel)) || issue.updated_at;
@@ -240,7 +247,7 @@ export class IssueProcessor {
       core.info(
         `Closing ${issueType} because it was last updated on ${issue.updated_at}`
       );
-      await this.closeIssue(issue, closeMessage);
+      await this.closeIssue(issue, closeMessage, closeLabel);
     } else {
       core.info(
         `Stale ${issueType} is not old enough to close yet (hasComments? ${issueHasComments}, hasUpdate? ${issueHasUpdate}`
@@ -370,7 +377,11 @@ export class IssueProcessor {
   }
 
   // Close an issue based on staleness
-  private async closeIssue(issue: Issue, closeMessage?: string): Promise<void> {
+  private async closeIssue(
+    issue: Issue,
+    closeMessage?: string,
+    closeLabel?: string
+  ): Promise<void> {
     core.info(
       `Closing issue #${issue.number} - ${issue.title} for being stale`
     );
@@ -393,6 +404,19 @@ export class IssueProcessor {
         });
       } catch (error) {
         core.error(`Error creating a comment: ${error.message}`);
+      }
+    }
+
+    if (closeLabel) {
+      try {
+        await this.client.issues.addLabels({
+          owner: context.repo.owner,
+          repo: context.repo.repo,
+          issue_number: issue.number,
+          labels: [closeLabel]
+        });
+      } catch (error) {
+        core.error(`Error adding a label: ${error.message}`);
       }
     }
 

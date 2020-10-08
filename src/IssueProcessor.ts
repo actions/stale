@@ -12,6 +12,13 @@ export interface Issue {
   locked: boolean;
 }
 
+export interface PullRequest {
+  number: number;
+  head: {
+    ref: string;
+  };
+}
+
 export interface User {
   type: string;
   login: string;
@@ -52,6 +59,7 @@ export interface IssueProcessorOptions {
   ascending: boolean;
   skipStaleIssueMessage: boolean;
   skipStalePrMessage: boolean;
+  deleteBranch: boolean;
 }
 
 /***
@@ -64,6 +72,7 @@ export class IssueProcessor {
 
   readonly staleIssues: Issue[] = [];
   readonly closedIssues: Issue[] = [];
+  readonly deletedBranchIssues: Issue[] = [];
   readonly removedLabelIssues: Issue[] = [];
 
   constructor(
@@ -248,6 +257,14 @@ export class IssueProcessor {
         `Closing ${issueType} because it was last updated on ${issue.updated_at}`
       );
       await this.closeIssue(issue, closeMessage, closeLabel);
+
+      if (this.options.deleteBranch && issue.pull_request) {
+        core.info(
+          `Deleting branch for #${issue.number} as delete-branch option was specified`
+        );
+        await this.deleteBranch(issue);
+        this.deletedBranchIssues.push(issue);
+      }
     } else {
       core.info(
         `Stale ${issueType} is not old enough to close yet (hasComments? ${issueHasComments}, hasUpdate? ${issueHasUpdate}`
@@ -429,6 +446,61 @@ export class IssueProcessor {
       });
     } catch (error) {
       core.error(`Error updating an issue: ${error.message}`);
+    }
+  }
+
+  private async getPullRequest(
+    pullNumber: number
+  ): Promise<PullRequest | undefined> {
+    this.operationsLeft -= 1;
+
+    try {
+      const pullRequest = await this.client.pulls.get({
+        owner: context.repo.owner,
+        repo: context.repo.repo,
+        pull_number: pullNumber
+      });
+
+      return pullRequest.data;
+    } catch (error) {
+      core.error(`Error getting pull request ${pullNumber}: ${error.message}`);
+    }
+  }
+
+  // Delete the branch on closed pull request
+  private async deleteBranch(issue: Issue): Promise<void> {
+    core.info(
+      `Delete branch from closed issue #${issue.number} - ${issue.title}`
+    );
+
+    if (this.options.debugOnly) {
+      return;
+    }
+
+    const pullRequest = await this.getPullRequest(issue.number);
+
+    if (!pullRequest) {
+      core.info(
+        `Not deleting branch as pull request not found for issue ${issue.number}`
+      );
+      return;
+    }
+
+    const branch = pullRequest.head.ref;
+    core.info(`Deleting branch ${branch} from closed issue #${issue.number}`);
+
+    this.operationsLeft -= 1;
+
+    try {
+      await this.client.git.deleteRef({
+        owner: context.repo.owner,
+        repo: context.repo.repo,
+        ref: branch
+      });
+    } catch (error) {
+      core.error(
+        `Error deleting branch ${branch} from issue #${issue.number}: ${error.message}`
+      );
     }
   }
 

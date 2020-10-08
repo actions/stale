@@ -495,7 +495,7 @@ export class IssueProcessor {
       await this.client.git.deleteRef({
         owner: context.repo.owner,
         repo: context.repo.repo,
-        ref: branch
+        ref: `heads/${branch}`
       });
     } catch (error) {
       core.error(

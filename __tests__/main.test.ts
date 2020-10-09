@@ -618,8 +618,8 @@ test('stale label should be removed if a comment was added to a stale issue', as
   expect(processor.removedLabelIssues.length).toEqual(1);
 });
 
-test('stale label should not be removed if a comment was added by the bot (and the issue should be closed)', async () => {
-  github.context.actor = 'abot';
+test('stale label should be removed if a comment was added by the github actor (and the issue should not be closed)', async () => {
+  github.context.actor = 'person-who-scheduled-stale-action';
   const TestIssueList: Issue[] = [
     generateIssue(
       1,
@@ -636,16 +636,19 @@ test('stale label should not be removed if a comment was added by the bot (and t
   const processor = new IssueProcessor(
     opts,
     async p => (p == 1 ? TestIssueList : []),
-    async (num, dt) => [{user: {login: 'abot', type: 'User'}}], // return a fake comment to indicate there was an update by the bot
+    // return a fake comment to indicate there was an update by the github actor
+    async (num, dt) => [
+      {user: {login: 'person-who-scheduled-stale-action', type: 'User'}}
+    ],
     async (issue, label) => new Date().toDateString()
   );
 
   // process our fake issue list
   await processor.processIssues(1);
 
-  expect(processor.closedIssues.length).toEqual(1);
+  expect(processor.closedIssues.length).toEqual(0);
   expect(processor.staleIssues.length).toEqual(0);
-  expect(processor.removedLabelIssues.length).toEqual(0);
+  expect(processor.removedLabelIssues.length).toEqual(1);
 });
 
 test('stale issues should not be closed until after the closed number of days', async () => {

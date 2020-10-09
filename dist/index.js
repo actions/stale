@@ -171,7 +171,7 @@ class IssueProcessor {
             }
             // find any comments since the date
             const comments = yield this.listIssueComments(issue.number, sinceDate);
-            const filteredComments = comments.filter(comment => comment.user.type === 'User' && comment.user.login !== github_1.context.actor);
+            const filteredComments = comments.filter(comment => comment.user.type === 'User');
             core.info(`Comments not made by ${github_1.context.actor} or another bot: ${filteredComments.length}`);
             // if there are any user comments returned
             return filteredComments.length > 0;

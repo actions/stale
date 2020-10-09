@@ -272,8 +272,7 @@ export class IssueProcessor {
     const comments = await this.listIssueComments(issue.number, sinceDate);
 
     const filteredComments = comments.filter(
-      comment =>
-        comment.user.type === 'User' && comment.user.login !== context.actor
+      comment => comment.user.type === 'User'
     );
 
     core.info(

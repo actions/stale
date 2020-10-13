@@ -53,7 +53,7 @@ Basic:
 name: "Close stale issues"
 on:
   schedule:
-  - cron: "0 0 * * *"
+  - cron: "30 1 * * *"
 
 jobs:
   stale:
@@ -71,7 +71,7 @@ Configure stale timeouts:
 name: "Close stale issues"
 on:
   schedule:
-  - cron: "0 0 * * *"
+  - cron: "30 1 * * *"
 
 jobs:
   stale:
@@ -90,7 +90,7 @@ Configure labels:
 name: "Close stale issues"
 on:
   schedule:
-  - cron: "0 0 * * *"
+  - cron: "30 1 * * *"
 
 jobs:
   stale:

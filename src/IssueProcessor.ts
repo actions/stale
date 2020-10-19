@@ -1,6 +1,8 @@
 import * as core from '@actions/core';
 import {context, getOctokit} from '@actions/github';
 import {GetResponseTypeFromEndpointMethod} from '@octokit/types';
+import {isLabeled} from './functions/is-labeled';
+import {labelsToList} from './functions/labels-to-list';
 
 export interface Issue {
   title: string;
@@ -131,7 +133,7 @@ export class IssueProcessor {
       const closeLabel: string = isPr
         ? this.options.closePrLabel
         : this.options.closeIssueLabel;
-      const exemptLabels = IssueProcessor.parseCommaSeparatedString(
+      const exemptLabels: string[] = labelsToList(
         isPr ? this.options.exemptPrLabels : this.options.exemptIssueLabels
       );
       const skipMessage = isPr
@@ -157,7 +159,7 @@ export class IssueProcessor {
 
       if (
         exemptLabels.some((exemptLabel: string) =>
-          IssueProcessor.isLabeled(issue, exemptLabel)
+          isLabeled(issue, exemptLabel)
         )
       ) {
         core.info(`Skipping ${issueType} because it has an exempt label`);
@@ -165,7 +167,7 @@ export class IssueProcessor {
       }
 
       // does this issue have a stale label?
-      let isStale = IssueProcessor.isLabeled(issue, staleLabel);
+      let isStale = isLabeled(issue, staleLabel);
 
       // should this issue be marked stale?
       const shouldBeStale = !IssueProcessor.updatedSince(
@@ -490,24 +492,11 @@ export class IssueProcessor {
     return staleLabeledEvent.created_at;
   }
 
-  private static isLabeled(issue: Issue, label: string): boolean {
-    const labelComparer: (l: Label) => boolean = l =>
-      label.localeCompare(l.name, undefined, {sensitivity: 'accent'}) === 0;
-    return issue.labels.filter(labelComparer).length > 0;
-  }
-
   private static updatedSince(timestamp: string, num_days: number): boolean {
     const daysInMillis = 1000 * 60 * 60 * 24 * num_days;
     const millisSinceLastUpdated =
       new Date().getTime() - new Date(timestamp).getTime();
 
     return millisSinceLastUpdated <= daysInMillis;
-  }
-
-  private static parseCommaSeparatedString(s: string): string[] {
-    // String.prototype.split defaults to [''] when called on an empty string
-    // In this case, we'd prefer to just return an empty array indicating no labels
-    if (!s.length) return [];
-    return s.split(',').map(l => l.trim());
   }
 }

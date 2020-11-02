@@ -115,7 +115,7 @@ export class IssueProcessor {
       const isPr = !!issue.pull_request;
 
       core.info(
-        `Found issue: issue #${issue.number} - ${issue.title} last updated ${issue.updated_at} (is pr? ${isPr})`
+        `Found issue: issue #${issue.number} last updated ${issue.updated_at} (is pr? ${isPr})`
       );
 
       // calculate string based messages for this issue
@@ -277,7 +277,7 @@ export class IssueProcessor {
     );
 
     core.info(
-      `Comments not made by ${context.actor} or another bot: ${filteredComments.length}`
+      `Comments not made by actor or another bot: ${filteredComments.length}`
     );
 
     // if there are any user comments returned
@@ -336,7 +336,7 @@ export class IssueProcessor {
     staleLabel: string,
     skipMessage: boolean
   ): Promise<void> {
-    core.info(`Marking issue #${issue.number} - ${issue.title} as stale`);
+    core.info(`Marking issue #${issue.number} as stale`);
 
     this.staleIssues.push(issue);
 
@@ -382,9 +382,7 @@ export class IssueProcessor {
     closeMessage?: string,
     closeLabel?: string
   ): Promise<void> {
-    core.info(
-      `Closing issue #${issue.number} - ${issue.title} for being stale`
-    );
+    core.info(`Closing issue #${issue.number} for being stale`);
 
     this.closedIssues.push(issue);
 
@@ -434,9 +432,7 @@ export class IssueProcessor {
 
   // Remove a label from an issue
   private async removeLabel(issue: Issue, label: string): Promise<void> {
-    core.info(
-      `Removing label ${label} from issue #${issue.number} - ${issue.title}`
-    );
+    core.info(`Removing label from issue #${issue.number}`);
 
     this.removedLabelIssues.push(issue);
 
@@ -464,7 +460,7 @@ export class IssueProcessor {
     issue: Issue,
     label: string
   ): Promise<string | undefined> {
-    core.info(`Checking for label ${label} on issue #${issue.number}`);
+    core.info(`Checking for label on issue #${issue.number}`);
 
     this.operationsLeft -= 1;
 

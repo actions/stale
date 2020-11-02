@@ -75,7 +75,7 @@ class IssueProcessor {
             }
             for (const issue of issues.values()) {
                 const isPr = !!issue.pull_request;
-                core.info(`Found issue: issue #${issue.number} - ${issue.title} last updated ${issue.updated_at} (is pr? ${isPr})`);
+                core.info(`Found issue: issue #${issue.number} last updated ${issue.updated_at} (is pr? ${isPr})`);
                 // calculate string based messages for this issue
                 const staleMessage = isPr
                     ? this.options.stalePrMessage
@@ -172,7 +172,7 @@ class IssueProcessor {
             // find any comments since the date
             const comments = yield this.listIssueComments(issue.number, sinceDate);
             const filteredComments = comments.filter(comment => comment.user.type === 'User' && comment.user.login !== github_1.context.actor);
-            core.info(`Comments not made by ${github_1.context.actor} or another bot: ${filteredComments.length}`);
+            core.info(`Comments not made by actor or another bot: ${filteredComments.length}`);
             // if there are any user comments returned
             return filteredComments.length > 0;
         });
@@ -222,7 +222,7 @@ class IssueProcessor {
     // Mark an issue as stale with a comment and a label
     markStale(issue, staleMessage, staleLabel, skipMessage) {
         return __awaiter(this, void 0, void 0, function* () {
-            core.info(`Marking issue #${issue.number} - ${issue.title} as stale`);
+            core.info(`Marking issue #${issue.number} as stale`);
             this.staleIssues.push(issue);
             this.operationsLeft -= 2;
             // if the issue is being marked stale, the updated date should be changed to right now
@@ -261,7 +261,7 @@ class IssueProcessor {
     // Close an issue based on staleness
     closeIssue(issue, closeMessage, closeLabel) {
         return __awaiter(this, void 0, void 0, function* () {
-            core.info(`Closing issue #${issue.number} - ${issue.title} for being stale`);
+            core.info(`Closing issue #${issue.number} for being stale`);
             this.closedIssues.push(issue);
             this.operationsLeft -= 1;
             if (this.options.debugOnly) {
@@ -309,7 +309,7 @@ class IssueProcessor {
     // Remove a label from an issue
     removeLabel(issue, label) {
         return __awaiter(this, void 0, void 0, function* () {
-            core.info(`Removing label ${label} from issue #${issue.number} - ${issue.title}`);
+            core.info(`Removing label from issue #${issue.number}`);
             this.removedLabelIssues.push(issue);
             this.operationsLeft -= 1;
             if (this.options.debugOnly) {
@@ -332,7 +332,7 @@ class IssueProcessor {
     ///see https://developer.github.com/v3/activity/events/
     getLabelCreationDate(issue, label) {
         return __awaiter(this, void 0, void 0, function* () {
-            core.info(`Checking for label ${label} on issue #${issue.number}`);
+            core.info(`Checking for label on issue #${issue.number}`);
             this.operationsLeft -= 1;
             const options = this.client.issues.listEvents.endpoint.merge({
                 owner: github_1.context.repo.owner,

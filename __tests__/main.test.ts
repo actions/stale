@@ -46,6 +46,8 @@ const DefaultProcessorOptions: IssueProcessorOptions = Object.freeze({
   closePrLabel: '',
   exemptPrLabels: '',
   onlyLabels: '',
+  onlyIssueLabels: '',
+  onlyPrLabels: '',
   operationsPerRun: 100,
   debugOnly: true,
   removeStaleWhenUpdated: false,

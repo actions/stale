@@ -33,6 +33,8 @@ function getAndValidateArgs(): IssueProcessorOptions {
     closePrLabel: core.getInput('close-pr-label'),
     exemptPrLabels: core.getInput('exempt-pr-labels'),
     onlyLabels: core.getInput('only-labels'),
+    onlyIssueLabels: core.getInput('only-issue-labels'),
+    onlyPrLabels: core.getInput('only-issue-labels'),
     operationsPerRun: parseInt(
       core.getInput('operations-per-run', {required: true})
     ),

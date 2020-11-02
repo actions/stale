@@ -90,6 +90,7 @@ class IssueProcessor {
                     ? this.options.closePrLabel
                     : this.options.closeIssueLabel;
                 const exemptLabels = IssueProcessor.parseCommaSeparatedString(isPr ? this.options.exemptPrLabels : this.options.exemptIssueLabels);
+                const onlyLabels = IssueProcessor.parseCommaSeparatedString(isPr ? this.options.onlyPrLabels : this.options.onlyIssueLabels);
                 const skipMessage = isPr
                     ? this.options.skipStalePrMessage
                     : this.options.skipStaleIssueMessage;
@@ -110,6 +111,10 @@ class IssueProcessor {
                 if (exemptLabels.some((exemptLabel) => IssueProcessor.isLabeled(issue, exemptLabel))) {
                     core.info(`Skipping ${issueType} because it has an exempt label`);
                     continue; // don't process exempt issues
+                }
+                if (onlyLabels.length > 0 &&
+                    !onlyLabels.some((onlyLabel) => IssueProcessor.isLabeled(issue, onlyLabel))) {
+                    core.info(`Skipping ${issueType} because it doesn't have any of the mandatory labels`);
                 }
                 // does this issue have a stale label?
                 let isStale = IssueProcessor.isLabeled(issue, staleLabel);
@@ -437,6 +442,8 @@ function getAndValidateArgs() {
         closePrLabel: core.getInput('close-pr-label'),
         exemptPrLabels: core.getInput('exempt-pr-labels'),
         onlyLabels: core.getInput('only-labels'),
+        onlyIssueLabels: core.getInput('only-issue-labels'),
+        onlyPrLabels: core.getInput('only-issue-labels'),
         operationsPerRun: parseInt(core.getInput('operations-per-run', { required: true })),
         removeStaleWhenUpdated: !(core.getInput('remove-stale-when-updated') === 'false'),
         debugOnly: core.getInput('debug-only') === 'true',

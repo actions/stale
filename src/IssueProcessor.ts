@@ -46,6 +46,8 @@ export interface IssueProcessorOptions {
   closePrLabel: string;
   exemptPrLabels: string;
   onlyLabels: string;
+  onlyIssueLabels: string,
+  onlyPrLabels: string,
   operationsPerRun: number;
   removeStaleWhenUpdated: boolean;
   debugOnly: boolean;
@@ -134,6 +136,9 @@ export class IssueProcessor {
       const exemptLabels = IssueProcessor.parseCommaSeparatedString(
         isPr ? this.options.exemptPrLabels : this.options.exemptIssueLabels
       );
+      const onlyLabels = IssueProcessor.parseCommaSeparatedString(
+        isPr ? this.options.onlyPrLabels : this.options.onlyIssueLabels
+      );
       const skipMessage = isPr
         ? this.options.skipStalePrMessage
         : this.options.skipStaleIssueMessage;
@@ -162,6 +167,14 @@ export class IssueProcessor {
       ) {
         core.info(`Skipping ${issueType} because it has an exempt label`);
         continue; // don't process exempt issues
+      }
+
+      if (onlyLabels.length > 0 &&
+        !onlyLabels.some((onlyLabel: string) =>
+          IssueProcessor.isLabeled(issue, onlyLabel)
+        )
+      ) {
+        core.info(`Skipping ${issueType} because it doesn't have any of the mandatory labels`)
       }
 
       // does this issue have a stale label?

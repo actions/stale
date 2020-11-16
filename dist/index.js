@@ -113,8 +113,17 @@ class IssueProcessor {
                 }
                 // does this issue have a stale label?
                 let isStale = IssueProcessor.isLabeled(issue, staleLabel);
+                let timestamp = "";
+                switch (this.options.dateField) {
+                    case "updated_at":
+                        timestamp = issue.updated_at;
+                        break;
+                    case "created_at":
+                        timestamp = issue.created_at;
+                        break;
+                }
                 // should this issue be marked stale?
-                const shouldBeStale = !IssueProcessor.updatedSince(issue.updated_at, this.options.daysBeforeStale);
+                const shouldBeStale = timestamp != "" && !IssueProcessor.timestampSince(timestamp, this.options.daysBeforeStale);
                 // determine if this issue needs to be marked stale first
                 if (!isStale && shouldBeStale && shouldMarkWhenStale) {
                     core.info(`Marking ${issueType} stale because it was last updated on ${issue.updated_at} and it does not have a stale label`);
@@ -142,7 +151,7 @@ class IssueProcessor {
             core.info(`Issue #${issue.number} marked stale on: ${markedStaleOn}`);
             const issueHasComments = yield this.hasCommentsSince(issue, markedStaleOn);
             core.info(`Issue #${issue.number} has been commented on: ${issueHasComments}`);
-            const issueHasUpdate = IssueProcessor.updatedSince(issue.updated_at, this.options.daysBeforeClose);
+            const issueHasUpdate = IssueProcessor.timestampSince(issue.updated_at, this.options.daysBeforeClose);
             core.info(`Issue #${issue.number} has been updated: ${issueHasUpdate}`);
             // should we un-stale this issue?
             if (this.options.removeStaleWhenUpdated && issueHasComments) {
@@ -354,10 +363,10 @@ class IssueProcessor {
         const labelComparer = l => label.localeCompare(l.name, undefined, { sensitivity: 'accent' }) === 0;
         return issue.labels.filter(labelComparer).length > 0;
     }
-    static updatedSince(timestamp, num_days) {
+    static timestampSince(timestamp, num_days) {
         const daysInMillis = 1000 * 60 * 60 * 24 * num_days;
-        const millisSinceLastUpdated = new Date().getTime() - new Date(timestamp).getTime();
-        return millisSinceLastUpdated <= daysInMillis;
+        const millisSinceTimestamp = new Date().getTime() - new Date(timestamp).getTime();
+        return millisSinceTimestamp <= daysInMillis;
     }
     static parseCommaSeparatedString(s) {
         // String.prototype.split defaults to [''] when called on an empty string
@@ -430,6 +439,7 @@ function getAndValidateArgs() {
         closePrMessage: core.getInput('close-pr-message'),
         daysBeforeStale: parseInt(core.getInput('days-before-stale', { required: true })),
         daysBeforeClose: parseInt(core.getInput('days-before-close', { required: true })),
+        dateField: core.getInput('date-field', { required: false }),
         staleIssueLabel: core.getInput('stale-issue-label', { required: true }),
         closeIssueLabel: core.getInput('close-issue-label'),
         exemptIssueLabels: core.getInput('exempt-issue-labels'),
@@ -449,7 +459,7 @@ function getAndValidateArgs() {
         'days-before-close',
         'operations-per-run'
     ]) {
-        if (isNaN(parseInt(core.getInput(numberInput)))) {
+        if (!!core.getInput(numberInput) && isNaN(parseInt(core.getInput(numberInput)))) {
             throw Error(`input ${numberInput} did not parse to a valid integer`);
         }
     }

@@ -19,6 +19,9 @@ inputs:
   days-before-close:
     description: 'The number of days to wait to close an issue or pull request after it being marked stale. Set to -1 to never close stale issues.'
     default: 7
+  date-field:
+    description: 'The date field to evaluate'
+    default: 'updated_at'
   stale-issue-label:
     description: 'The label to apply when an issue is stale.'
     default: 'Stale'

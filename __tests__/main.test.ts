@@ -16,7 +16,8 @@ function generateIssue(
   isPullRequest: boolean = false,
   labels: string[] = [],
   isClosed: boolean = false,
-  isLocked: boolean = false
+  isLocked: boolean = false,
+  createdAt: string = ""
 ): Issue {
   return {
     number: id,
@@ -25,6 +26,7 @@ function generateIssue(
     }),
     title: title,
     updated_at: updatedAt,
+    created_at: createdAt,
     pull_request: isPullRequest ? {} : null,
     state: isClosed ? 'closed' : 'open',
     locked: isLocked
@@ -39,6 +41,7 @@ const DefaultProcessorOptions: IssueProcessorOptions = Object.freeze({
   closePrMessage: 'This PR is being closed',
   daysBeforeStale: 1,
   daysBeforeClose: 30,
+  dateField: "updated_at",
   staleIssueLabel: 'Stale',
   closeIssueLabel: '',
   exemptIssueLabels: '',
@@ -663,6 +666,41 @@ test('stale issues should not be closed until after the closed number of days', 
   const opts = {...DefaultProcessorOptions};
   opts.daysBeforeStale = 5; // stale after 5 days
   opts.daysBeforeClose = 1; // closes after 6 days
+
+  const processor = new IssueProcessor(
+    opts,
+    async p => (p == 1 ? TestIssueList : []),
+    async (num, dt) => [],
+    async (issue, label) => new Date().toDateString()
+  );
+
+  // process our fake issue list
+  await processor.processIssues(1);
+
+  expect(processor.closedIssues.length).toEqual(0);
+  expect(processor.removedLabelIssues.length).toEqual(0);
+  expect(processor.staleIssues.length).toEqual(1);
+});
+
+test('issues should be marked stale if dateField is set to created_at', async () => {
+  let lastUpdate = new Date();
+  let creationDate = new Date();
+  creationDate.setDate(creationDate.getDate() - 5);
+  const TestIssueList: Issue[] = [
+    generateIssue(
+      1,
+      'An issue that should be marked stale',
+      lastUpdate.toString(),
+      false,
+      [],
+      false,
+      false,
+      creationDate.toString()      
+    )
+  ];
+
+  const opts = {...DefaultProcessorOptions};
+  opts.dateField = "created_at"; // stale 5 days since creation
 
   const processor = new IssueProcessor(
     opts,

@@ -24,7 +24,8 @@ $ npm test
 | :---:     |     :---:   |    :---:   |
 | `repo-token`  | PAT(Personal Access Token) for authorizing repository. | *Required* |
 | `days-before-stale`  | Idle number of days before marking an issue/pr as stale. *Defaults to **60*** | Optional
-| `days-before-close`  | Idle number of days before closing an stale issue/pr. *Defaults to **7*** | Optional
+| `days-before-close`  | Idle number of days before closing a stale issue/pr. *Defaults to **7*** | Optional
+| `date-field`  | Which date field to evaluate - updated_at or created_at. *Defaults to **updated_at** | Optional
 | `stale-issue-message`  | Message to post on the stale issue. | Optional
 | `stale-pr-message`  | Message to post on the stale pr. | Optional
 | `close-issue-message` | Message to post on the stale issue while closing it. | Optional

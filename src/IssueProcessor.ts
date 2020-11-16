@@ -5,6 +5,7 @@ import {GetResponseTypeFromEndpointMethod} from '@octokit/types';
 export interface Issue {
   title: string;
   number: number;
+  created_at: string;
   updated_at: string;
   labels: Label[];
   pull_request: any;
@@ -39,6 +40,7 @@ export interface IssueProcessorOptions {
   closePrMessage: string;
   daysBeforeStale: number;
   daysBeforeClose: number;
+  dateField: string;
   staleIssueLabel: string;
   closeIssueLabel: string;
   exemptIssueLabels: string;
@@ -167,9 +169,20 @@ export class IssueProcessor {
       // does this issue have a stale label?
       let isStale = IssueProcessor.isLabeled(issue, staleLabel);
 
+      let timestamp = "";
+      switch (this.options.dateField) {
+        case "updated_at":
+          timestamp = issue.updated_at;
+          break;
+        case "created_at":
+          timestamp = issue.created_at;
+          break;
+      }
+
+
       // should this issue be marked stale?
-      const shouldBeStale = !IssueProcessor.updatedSince(
-        issue.updated_at,
+      const shouldBeStale = timestamp !== "" && !IssueProcessor.timestampSince(
+        timestamp,
         this.options.daysBeforeStale
       );
 
@@ -224,7 +237,7 @@ export class IssueProcessor {
       `Issue #${issue.number} has been commented on: ${issueHasComments}`
     );
 
-    const issueHasUpdate: boolean = IssueProcessor.updatedSince(
+    const issueHasUpdate: boolean = IssueProcessor.timestampSince(
       issue.updated_at,
       this.options.daysBeforeClose
     );
@@ -496,12 +509,12 @@ export class IssueProcessor {
     return issue.labels.filter(labelComparer).length > 0;
   }
 
-  private static updatedSince(timestamp: string, num_days: number): boolean {
+  private static timestampSince(timestamp: string, num_days: number): boolean {
     const daysInMillis = 1000 * 60 * 60 * 24 * num_days;
-    const millisSinceLastUpdated =
+    const millisSinceTimestamp =
       new Date().getTime() - new Date(timestamp).getTime();
 
-    return millisSinceLastUpdated <= daysInMillis;
+    return millisSinceTimestamp <= daysInMillis;
   }
 
   private static parseCommaSeparatedString(s: string): string[] {

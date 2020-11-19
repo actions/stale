@@ -201,6 +201,8 @@ class IssueProcessor {
         return __awaiter(this, void 0, void 0, function* () {
             // generate type for response
             const endpoint = this.client.issues.listForRepo;
+            const today = new Date();
+            const timeSince = new Date(new Date().setDate(today.getDate() - this.options.daysBeforeStale));
             try {
                 const issueResult = yield this.client.issues.listForRepo({
                     owner: github_1.context.repo.owner,
@@ -209,6 +211,7 @@ class IssueProcessor {
                     labels: this.options.onlyLabels,
                     per_page: 100,
                     direction: this.options.ascending ? 'asc' : 'desc',
+                    since: timeSince,
                     page
                 });
                 return issueResult.data;

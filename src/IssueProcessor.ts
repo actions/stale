@@ -309,6 +309,8 @@ export class IssueProcessor {
     // generate type for response
     const endpoint = this.client.issues.listForRepo;
     type OctoKitIssueList = GetResponseTypeFromEndpointMethod<typeof endpoint>;
+    const today: Date = new Date();
+    const timeSince: Date = new Date(new Date().setDate(today.getDate()-this.options.daysBeforeStale));
 
     try {
       const issueResult: OctoKitIssueList = await this.client.issues.listForRepo(
@@ -319,6 +321,7 @@ export class IssueProcessor {
           labels: this.options.onlyLabels,
           per_page: 100,
           direction: this.options.ascending ? 'asc' : 'desc',
+          since: timeSince.toString(),
           page
         }
       );

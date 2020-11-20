@@ -250,7 +250,7 @@ export class IssueProcessor {
       await this.closeIssue(issue, closeMessage, closeLabel);
     } else {
       core.info(
-        `Stale ${issueType} is not old enough to close yet (hasComments? ${issueHasComments}, hasUpdate? ${issueHasUpdate}`
+        `Stale ${issueType} is not old enough to close yet (hasComments? ${issueHasComments}, hasUpdate? ${issueHasUpdate})`
       );
     }
   }

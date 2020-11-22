@@ -1,5 +1,6 @@
 import * as core from '@actions/core';
 import {context, getOctokit} from '@actions/github';
+import {GitHub} from '@actions/github/lib/utils';
 import {GetResponseTypeFromEndpointMethod} from '@octokit/types';
 import {isLabeled} from './functions/is-labeled';
 import {labelsToList} from './functions/labels-to-list';
@@ -60,7 +61,7 @@ export interface IssueProcessorOptions {
  * Handle processing of issues for staleness/closure.
  */
 export class IssueProcessor {
-  readonly client: any; // need to make this the correct type
+  readonly client: InstanceType<typeof GitHub>;
   readonly options: IssueProcessorOptions;
   private operationsLeft = 0;
 
@@ -440,12 +441,13 @@ export class IssueProcessor {
 
   // Remove a label from an issue
   private async removeLabel(issue: Issue, label: string): Promise<void> {
-    core.info(`Removing label from issue #${issue.number}`);
+    core.info(`Removing label "${label}" from issue #${issue.number}`);
 
     this.removedLabelIssues.push(issue);
 
     this.operationsLeft -= 1;
 
+    // @todo remove the debug only to be able to test the code below
     if (this.options.debugOnly) {
       return;
     }

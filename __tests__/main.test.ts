@@ -1,11 +1,8 @@
-import * as core from '@actions/core';
 import * as github from '@actions/github';
-import {Octokit} from '@octokit/rest';
 
 import {
   IssueProcessor,
   Issue,
-  Label,
   IssueProcessorOptions
 } from '../src/IssueProcessor';
 
@@ -170,6 +167,56 @@ test('processing a stale issue will close it', async () => {
       '2020-01-01T17:00:00Z',
       false,
       ['Stale']
+    )
+  ];
+
+  const processor = new IssueProcessor(
+    DefaultProcessorOptions,
+    async p => (p == 1 ? TestIssueList : []),
+    async (num, dt) => [],
+    async (issue, label) => new Date().toDateString()
+  );
+
+  // process our fake issue list
+  await processor.processIssues(1);
+
+  expect(processor.staleIssues.length).toEqual(0);
+  expect(processor.closedIssues.length).toEqual(1);
+});
+
+test('processing a stale issue containing a space in the label will close it', async () => {
+  const TestIssueList: Issue[] = [
+    generateIssue(
+      1,
+      'A stale issue that should be closed',
+      '2020-01-01T17:00:00Z',
+      false,
+      ['state: stale']
+    )
+  ];
+
+  const processor = new IssueProcessor(
+    DefaultProcessorOptions,
+    async p => (p == 1 ? TestIssueList : []),
+    async (num, dt) => [],
+    async (issue, label) => new Date().toDateString()
+  );
+
+  // process our fake issue list
+  await processor.processIssues(1);
+
+  expect(processor.staleIssues.length).toEqual(0);
+  expect(processor.closedIssues.length).toEqual(1);
+});
+
+test('processing a stale issue containing a slash in the label will close it', async () => {
+  const TestIssueList: Issue[] = [
+    generateIssue(
+      1,
+      'A stale issue that should be closed',
+      '2020-01-01T17:00:00Z',
+      false,
+      ['lifecycle/stale']
     )
   ];
 

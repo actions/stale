@@ -1,6 +1,8 @@
 import deburr from 'lodash.deburr';
 import {Issue, Label} from '../IssueProcessor';
 
+type CleanLabel = string;
+
 /**
  * @description
  * Check if the label is listed as a label of the issue
@@ -19,6 +21,6 @@ export function isLabeled(
   });
 }
 
-function cleanLabel(label: Readonly<string>): string {
+function cleanLabel(label: Readonly<string>): CleanLabel {
   return deburr(label.toLowerCase());
 }

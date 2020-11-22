@@ -457,7 +457,7 @@ export class IssueProcessor {
         owner: context.repo.owner,
         repo: context.repo.repo,
         issue_number: issue.number,
-        name: encodeURIComponent(label) // A label can have a "?" in the name
+        name: label
       });
     } catch (error) {
       core.error(`Error removing a label: ${error.message}`);

@@ -28,7 +28,11 @@ $ npm test
 | :-------------------------: | :-------------------------------------------------------------------------------: | :------: |
 |        `repo-token`         |              PAT(Personal Access Token) for authorizing repository.               | Optional |
 |     `days-before-stale`     |  Idle number of days before marking an issue/pr as stale. \*Defaults to **60\***  | Optional |
-|     `days-before-close`     |    Idle number of days before closing an stale issue/pr. \*Defaults to **7\***    | Optional |
+|     `days-before-issue-stale`  | Idle number of days before marking an issue as stale (override `days-before-stale`). *Defaults to **60*** | Optional
+| `days-before-pr-stale`  | Idle number of days before marking an pr as stale (override `days-before-stale`). *Defaults to **60*** | Optional
+| `days-before-close`  | Idle number of days before closing an stale issue/pr. *Defaults to **7*** | Optional
+| `days-before-issue-close`     |    Idle number of days before closing an stale issue (override `days-before-close`). *Defaults to **7*** | Optional
+| `days-before-pr-close`  | Idle number of days before closing an stale pr (override `days-before-close`). \*Defaults to **7\***    | Optional |
 |    `stale-issue-message`    |                        Message to post on the stale issue.                        | Optional |
 |     `stale-pr-message`      |                         Message to post on the stale pr.                          | Optional |
 |    `close-issue-message`    |               Message to post on the stale issue while closing it.                | Optional |
@@ -54,7 +58,7 @@ See [action.yml](./action.yml) For comprehensive list of options.
 Basic:
 
 ```yaml
-name: 'Close stale issues'
+name: 'Close stale issues and PRs'
 on:
   schedule:
     - cron: '30 1 * * *'
@@ -72,7 +76,7 @@ jobs:
 Configure stale timeouts:
 
 ```yaml
-name: 'Close stale issues'
+name: 'Close stale issues and PRs'
 on:
   schedule:
     - cron: '30 1 * * *'
@@ -83,15 +87,39 @@ jobs:
     steps:
       - uses: actions/stale@v3
         with:
-          stale-issue-message: 'This issue is stale because it has been open 30 days with no activity. Remove stale label or comment or this will be closed in 5 days'
+          stale-issue-message: 'This issue is stale because it has been open 30 days with no activity. Remove stale label or comment or this will be closed in 5 days.'
           days-before-stale: 30
           days-before-close: 5
 ```
 
+Configure different stale timeouts:
+```yaml
+name: "Close stale issues and PRs"
+on:
+  schedule:
+  - cron: "30 1 * * *"
+
+jobs:
+  stale:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/stale@v3
+      with:
+        repo-token: ${{ secrets.GITHUB_TOKEN }}
+        stale-issue-message: 'This issue is stale because it has been open 30 days with no activity. Remove stale label or comment or this will be closed in 5 days.'
+        stale-pr-message: 'This pr is stale because it has been open 45 days with no activity. Remove stale label or comment or this will be closed in 10 days.'
+        close-issue-message: 'This issue was closed because it has been stalled for 5 days with no activity.'
+        close-pr-message: 'This pr was closed because it has been stalled for 10 days with no activity.'
+        days-before-issue-stale: 30
+        days-before-pr-stale: 45
+        days-before-issue-close: 5
+        days-before-pr-close: 10
+```
+ 
 Configure labels:
 
 ```yaml
-name: 'Close stale issues'
+name: 'Close stale issues and PRs'
 on:
   schedule:
     - cron: '30 1 * * *'

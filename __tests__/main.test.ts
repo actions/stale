@@ -195,8 +195,13 @@ test('processing a stale issue containing a space in the label will close it', a
     )
   ];
 
+  const opts: IssueProcessorOptions = {
+    ...DefaultProcessorOptions,
+    staleIssueLabel: 'state: stale'
+  };
+
   const processor = new IssueProcessor(
-    DefaultProcessorOptions,
+    opts,
     async p => (p == 1 ? TestIssueList : []),
     async (num, dt) => [],
     async (issue, label) => new Date().toDateString()
@@ -220,8 +225,13 @@ test('processing a stale issue containing a slash in the label will close it', a
     )
   ];
 
+  const opts: IssueProcessorOptions = {
+    ...DefaultProcessorOptions,
+    staleIssueLabel: 'lifecycle/stale'
+  };
+
   const processor = new IssueProcessor(
-    DefaultProcessorOptions,
+    opts,
     async p => (p == 1 ? TestIssueList : []),
     async (num, dt) => [],
     async (issue, label) => new Date().toDateString()

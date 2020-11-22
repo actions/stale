@@ -167,7 +167,13 @@ export class IssueProcessor {
       }
 
       // does this issue have a stale label?
-      let isStale = isLabeled(issue, staleLabel);
+      let isStale: boolean = isLabeled(issue, staleLabel);
+
+      if (isStale) {
+        core.info(`This issue has a stale label`);
+      } else {
+        core.info(`This issue hasn't a stale label`);
+      }
 
       // should this issue be marked stale?
       const shouldBeStale = !IssueProcessor.updatedSince(

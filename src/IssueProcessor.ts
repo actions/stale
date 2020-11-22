@@ -2,8 +2,12 @@ import * as core from '@actions/core';
 import {context, getOctokit} from '@actions/github';
 import {GitHub} from '@actions/github/lib/utils';
 import {GetResponseTypeFromEndpointMethod} from '@octokit/types';
+import {IssueTypeEnum} from './enums/issue-type.enum';
+import {getIssueType} from './functions/get-issue-type';
 import {isLabeled} from './functions/is-labeled';
+import {isPullRequest} from './functions/is-pull-request';
 import {labelsToList} from './functions/labels-to-list';
+import {shouldMarkWhenStale} from './functions/should-mark-when-stale';
 
 export interface Issue {
   title: string;
@@ -48,7 +52,11 @@ export interface IssueProcessorOptions {
   closeIssueMessage: string;
   closePrMessage: string;
   daysBeforeStale: number;
+  daysBeforeIssueStale: number; // Could be NaN
+  daysBeforePrStale: number; // Could be NaN
   daysBeforeClose: number;
+  daysBeforeIssueClose: number; // Could be NaN
+  daysBeforePrClose: number; // Could be NaN
   staleIssueLabel: string;
   closeIssueLabel: string;
   exemptIssueLabels: string;
@@ -69,14 +77,21 @@ export interface IssueProcessorOptions {
  * Handle processing of issues for staleness/closure.
  */
 export class IssueProcessor {
+  private static updatedSince(timestamp: string, num_days: number): boolean {
+    const daysInMillis = 1000 * 60 * 60 * 24 * num_days;
+    const millisSinceLastUpdated =
+      new Date().getTime() - new Date(timestamp).getTime();
+
+    return millisSinceLastUpdated <= daysInMillis;
+  }
+
   readonly client: InstanceType<typeof GitHub>;
   readonly options: IssueProcessorOptions;
-  private operationsLeft = 0;
-
   readonly staleIssues: Issue[] = [];
   readonly closedIssues: Issue[] = [];
   readonly deletedBranchIssues: Issue[] = [];
   readonly removedLabelIssues: Issue[] = [];
+  private operationsLeft = 0;
 
   constructor(
     options: IssueProcessorOptions,
@@ -131,7 +146,7 @@ export class IssueProcessor {
     }
 
     for (const issue of issues.values()) {
-      const isPr = !!issue.pull_request;
+      const isPr = isPullRequest(issue);
 
       core.info(
         `Found issue: issue #${issue.number} last updated ${issue.updated_at} (is pr? ${isPr})`
@@ -156,10 +171,22 @@ export class IssueProcessor {
       const skipMessage = isPr
         ? this.options.skipStalePrMessage
         : this.options.skipStaleIssueMessage;
-      const issueType: string = isPr ? 'pr' : 'issue';
-      const shouldMarkWhenStale = this.options.daysBeforeStale > -1;
+      const issueType: IssueTypeEnum = getIssueType(isPr);
+      const DAYS_BEFORE_STALE: number = isPr
+        ? this._getDaysBeforePrStale()
+        : this._getDaysBeforeIssueStale();
 
-      if (!staleMessage && shouldMarkWhenStale) {
+      if (isPr) {
+        core.info(`Days before pull request stale: ${DAYS_BEFORE_STALE}`);
+      } else {
+        core.info(`Days before issue stale: ${DAYS_BEFORE_STALE}`);
+      }
+
+      const SHOULD_MARK_WHEN_STALE: boolean = shouldMarkWhenStale(
+        DAYS_BEFORE_STALE
+      );
+
+      if (!staleMessage && SHOULD_MARK_WHEN_STALE) {
         core.info(`Skipping ${issueType} due to empty stale message`);
         continue;
       }
@@ -199,7 +226,7 @@ export class IssueProcessor {
       );
 
       // determine if this issue needs to be marked stale first
-      if (!isStale && shouldBeStale && shouldMarkWhenStale) {
+      if (!isStale && shouldBeStale && SHOULD_MARK_WHEN_STALE) {
         core.info(
           `Marking ${issueType} stale because it was last updated on ${issue.updated_at} and it does not have a stale label`
         );
@@ -233,7 +260,7 @@ export class IssueProcessor {
   // handle all of the stale issue logic when we find a stale issue
   private async processStaleIssue(
     issue: Issue,
-    issueType: string,
+    issueType: IssueTypeEnum,
     staleLabel: string,
     actor: string,
     closeMessage?: string,
@@ -252,9 +279,20 @@ export class IssueProcessor {
       `Issue #${issue.number} has been commented on: ${issueHasComments}`
     );
 
+    const IS_PR: boolean = isPullRequest(issue);
+    const daysBeforeClose: number = IS_PR
+      ? this._getDaysBeforePrClose()
+      : this._getDaysBeforeIssueClose();
+
+    if (IS_PR) {
+      core.info(`Days before pull request close: ${daysBeforeClose}`);
+    } else {
+      core.info(`Days before issue close: ${daysBeforeClose}`);
+    }
+
     const issueHasUpdate: boolean = IssueProcessor.updatedSince(
       issue.updated_at,
-      this.options.daysBeforeClose
+      daysBeforeClose
     );
     core.info(`Issue #${issue.number} has been updated: ${issueHasUpdate}`);
 
@@ -267,7 +305,7 @@ export class IssueProcessor {
     }
 
     // now start closing logic
-    if (this.options.daysBeforeClose < 0) {
+    if (daysBeforeClose < 0) {
       return; // nothing to do because we aren't closing stale issues
     }
 
@@ -590,11 +628,27 @@ export class IssueProcessor {
     return staleLabeledEvent.created_at;
   }
 
-  private static updatedSince(timestamp: string, num_days: number): boolean {
-    const daysInMillis = 1000 * 60 * 60 * 24 * num_days;
-    const millisSinceLastUpdated =
-      new Date().getTime() - new Date(timestamp).getTime();
+  private _getDaysBeforeIssueStale(): number {
+    return isNaN(this.options.daysBeforeIssueStale)
+      ? this.options.daysBeforeStale
+      : this.options.daysBeforeIssueStale;
+  }
 
-    return millisSinceLastUpdated <= daysInMillis;
+  private _getDaysBeforePrStale(): number {
+    return isNaN(this.options.daysBeforePrStale)
+      ? this.options.daysBeforeStale
+      : this.options.daysBeforePrStale;
+  }
+
+  private _getDaysBeforeIssueClose(): number {
+    return isNaN(this.options.daysBeforeIssueClose)
+      ? this.options.daysBeforeClose
+      : this.options.daysBeforeIssueClose;
+  }
+
+  private _getDaysBeforePrClose(): number {
+    return isNaN(this.options.daysBeforePrClose)
+      ? this.options.daysBeforeClose
+      : this.options.daysBeforePrClose;
   }
 }

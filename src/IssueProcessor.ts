@@ -70,6 +70,7 @@ export class IssueProcessor {
 
   constructor(
     options: IssueProcessorOptions,
+    getActor?: () => Promise<string>,
     getIssues?: (page: number) => Promise<Issue[]>,
     listIssueComments?: (
       issueNumber: number,
@@ -83,6 +84,10 @@ export class IssueProcessor {
     this.options = options;
     this.operationsLeft = options.operationsPerRun;
     this.client = getOctokit(options.repoToken);
+
+    if (getActor) {
+      this.getActor = getActor;
+    }
 
     if (getIssues) {
       this.getIssues = getIssues;
@@ -107,6 +112,8 @@ export class IssueProcessor {
     // get the next batch of issues
     const issues: Issue[] = await this.getIssues(page);
     this.operationsLeft -= 1;
+
+    const actor: string = await this.getActor();
 
     if (issues.length <= 0) {
       core.info('No more issues found to process. Exiting.');
@@ -191,6 +198,7 @@ export class IssueProcessor {
           issue,
           issueType,
           staleLabel,
+          actor,
           closeMessage,
           closeLabel
         );
@@ -211,6 +219,7 @@ export class IssueProcessor {
     issue: Issue,
     issueType: string,
     staleLabel: string,
+    actor: string,
     closeMessage?: string,
     closeLabel?: string
   ) {
@@ -220,7 +229,8 @@ export class IssueProcessor {
 
     const issueHasComments: boolean = await this.hasCommentsSince(
       issue,
-      markedStaleOn
+      markedStaleOn,
+      actor
     );
     core.info(
       `Issue #${issue.number} has been commented on: ${issueHasComments}`
@@ -260,7 +270,8 @@ export class IssueProcessor {
   // checks to see if a given issue is still stale (has had activity on it)
   private async hasCommentsSince(
     issue: Issue,
-    sinceDate: string
+    sinceDate: string,
+    actor: string
   ): Promise<boolean> {
     core.info(
       `Checking for comments on issue #${issue.number} since ${sinceDate}`
@@ -275,7 +286,7 @@ export class IssueProcessor {
 
     const filteredComments = comments.filter(
       comment =>
-        comment.user.type === 'User' && comment.user.login !== context.actor
+        comment.user.type === 'User' && comment.user.login !== actor
     );
 
     core.info(
@@ -304,6 +315,18 @@ export class IssueProcessor {
       core.error(`List issue comments error: ${error.message}`);
       return Promise.resolve([]);
     }
+  }
+
+  // get the actor from the GitHub token or context
+  private async getActor(): Promise<string> {
+    let actor;
+    try {
+      actor = await this.client.users.getAuthenticated();
+    } catch (error) {
+      return context.actor
+    }
+
+    return actor.data.login
   }
 
   // grab issues from github in baches of 100

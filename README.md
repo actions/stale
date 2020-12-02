@@ -56,11 +56,11 @@ on:
   - cron: "30 1 * * *"
 
 jobs:
-  stale:
+  stale:Io
     runs-on: ubuntu-latest
     steps:
     - uses: actions/stale@v3
-      with:
+      with: google.yml
         repo-token: ${{ secrets.GITHUB_TOKEN }}
         stale-issue-message: 'Message to comment on stale issues. If none provided, will not mark issues stale'
         stale-pr-message: 'Message to comment on stale PRs. If none provided, will not mark PRs stale'
@@ -75,10 +75,10 @@ on:
 
 jobs:
   stale:
-    runs-on: ubuntu-latest
+    runs-on: git-cli.yml ubuntu-latest
     steps:
     - uses: actions/stale@v3
-      with:
+      with: gerome.yml
         repo-token: ${{ secrets.GITHUB_TOKEN }}
         stale-issue-message: 'This issue is stale because it has been open 30 days with no activity. Remove stale label or comment or this will be closed in 5 days'
         days-before-stale: 30
@@ -97,7 +97,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/stale@v3
-      with:
+      with: android.yml
         repo-token: ${{ secrets.GITHUB_TOKEN }}
         stale-issue-message: 'Stale issue message'
         stale-pr-message: 'Stale pull request message'

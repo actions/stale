@@ -1,6 +1,8 @@
 import * as core from '@actions/core';
 import {context, getOctokit} from '@actions/github';
 import {GetResponseTypeFromEndpointMethod} from '@octokit/types';
+import {isLabeled} from './functions/is-labeled';
+import {labelsToList} from './functions/labels-to-list';
 
 export interface Issue {
   title: string;
@@ -117,7 +119,7 @@ export class IssueProcessor {
       const isPr = !!issue.pull_request;
 
       core.info(
-        `Found issue: issue #${issue.number} - ${issue.title} last updated ${issue.updated_at} (is pr? ${isPr})`
+        `Found issue: issue #${issue.number} last updated ${issue.updated_at} (is pr? ${isPr})`
       );
 
       // calculate string based messages for this issue
@@ -133,7 +135,7 @@ export class IssueProcessor {
       const closeLabel: string = isPr
         ? this.options.closePrLabel
         : this.options.closeIssueLabel;
-      const exemptLabels = IssueProcessor.parseCommaSeparatedString(
+      const exemptLabels: string[] = labelsToList(
         isPr ? this.options.exemptPrLabels : this.options.exemptIssueLabels
       );
       const skipMessage = isPr
@@ -159,7 +161,7 @@ export class IssueProcessor {
 
       if (
         exemptLabels.some((exemptLabel: string) =>
-          IssueProcessor.isLabeled(issue, exemptLabel)
+          isLabeled(issue, exemptLabel)
         )
       ) {
         core.info(`Skipping ${issueType} because it has an exempt label`);
@@ -167,7 +169,7 @@ export class IssueProcessor {
       }
 
       // does this issue have a stale label?
-      let isStale = IssueProcessor.isLabeled(issue, staleLabel);
+      let isStale = isLabeled(issue, staleLabel);
 
       let timestamp = "";
       switch (this.options.dateField) {
@@ -263,7 +265,7 @@ export class IssueProcessor {
       await this.closeIssue(issue, closeMessage, closeLabel);
     } else {
       core.info(
-        `Stale ${issueType} is not old enough to close yet (hasComments? ${issueHasComments}, hasUpdate? ${issueHasUpdate}`
+        `Stale ${issueType} is not old enough to close yet (hasComments? ${issueHasComments}, hasUpdate? ${issueHasUpdate})`
       );
     }
   }
@@ -290,7 +292,7 @@ export class IssueProcessor {
     );
 
     core.info(
-      `Comments not made by ${context.actor} or another bot: ${filteredComments.length}`
+      `Comments not made by actor or another bot: ${filteredComments.length}`
     );
 
     // if there are any user comments returned
@@ -349,7 +351,7 @@ export class IssueProcessor {
     staleLabel: string,
     skipMessage: boolean
   ): Promise<void> {
-    core.info(`Marking issue #${issue.number} - ${issue.title} as stale`);
+    core.info(`Marking issue #${issue.number} as stale`);
 
     this.staleIssues.push(issue);
 
@@ -395,9 +397,7 @@ export class IssueProcessor {
     closeMessage?: string,
     closeLabel?: string
   ): Promise<void> {
-    core.info(
-      `Closing issue #${issue.number} - ${issue.title} for being stale`
-    );
+    core.info(`Closing issue #${issue.number} for being stale`);
 
     this.closedIssues.push(issue);
 
@@ -447,9 +447,7 @@ export class IssueProcessor {
 
   // Remove a label from an issue
   private async removeLabel(issue: Issue, label: string): Promise<void> {
-    core.info(
-      `Removing label ${label} from issue #${issue.number} - ${issue.title}`
-    );
+    core.info(`Removing label from issue #${issue.number}`);
 
     this.removedLabelIssues.push(issue);
 
@@ -477,7 +475,7 @@ export class IssueProcessor {
     issue: Issue,
     label: string
   ): Promise<string | undefined> {
-    core.info(`Checking for label ${label} on issue #${issue.number}`);
+    core.info(`Checking for label on issue #${issue.number}`);
 
     this.operationsLeft -= 1;
 
@@ -515,12 +513,5 @@ export class IssueProcessor {
       new Date().getTime() - new Date(timestamp).getTime();
 
     return millisSinceTimestamp <= daysInMillis;
-  }
-
-  private static parseCommaSeparatedString(s: string): string[] {
-    // String.prototype.split defaults to [''] when called on an empty string
-    // In this case, we'd prefer to just return an empty array indicating no labels
-    if (!s.length) return [];
-    return s.split(',').map(l => l.trim());
   }
 }

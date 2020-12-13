@@ -4,7 +4,7 @@ author: 'GitHub'
 inputs:
   repo-token:
     description: 'Token for the repository. Can be passed in using `{{ secrets.GITHUB_TOKEN }}`.'
-    required: true
+    default: ${{ github.token }}
   stale-issue-message:
     description: 'The message to post on the issue when tagging it. If none provided, will not mark issues stale.'
   stale-pr-message:

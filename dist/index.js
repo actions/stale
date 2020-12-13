@@ -481,7 +481,7 @@ function run() {
 }
 function getAndValidateArgs() {
     const args = {
-        repoToken: core.getInput('repo-token', { required: true }),
+        repoToken: core.getInput('repo-token'),
         staleIssueMessage: core.getInput('stale-issue-message'),
         stalePrMessage: core.getInput('stale-pr-message'),
         closeIssueMessage: core.getInput('close-issue-message'),

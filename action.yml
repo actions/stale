@@ -58,4 +58,7 @@ inputs:
     default: false
 runs:
   using: 'node12'
-  main: 'dist/index.js'
+  main: 'dist/index.js'- name: Close Stale Issues
+  uses: actions/stale@v3.0.14
+
+

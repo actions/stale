@@ -25,7 +25,7 @@ inputs:
   close-issue-label:
     description: 'The label to apply when an issue is closed.'
   exempt-issue-labels:
-    description: 'The labels to apply when an issue is exempt from being marked stale. Separate multiple labels with commas (eg. "label1,label2")'
+    description: 'The labels that mean an issue is exempt from being marked stale. Separate multiple labels with commas (eg. "label1,label2")'
     default: ''
   stale-pr-label:
     description: 'The label to apply when a pull request is stale.'
@@ -33,7 +33,7 @@ inputs:
   close-pr-label:
     description: 'The label to apply when a pull request is closed.'
   exempt-pr-labels:
-    description: 'The labels to apply when a pull request is exempt from being marked stale. Separate multiple labels with commas (eg. "label1,label2")'
+    description: 'The labels that mean a pull request is exempt from being marked stale. Separate multiple labels with commas (eg. "label1,label2")'
     default: ''
   only-labels:
     description: 'Only issues or pull requests with all of these labels are checked if stale. Defaults to `[]` (disabled) and can be a comma-separated list of labels.'

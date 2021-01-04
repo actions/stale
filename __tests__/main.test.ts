@@ -65,8 +65,8 @@ test('empty issue list results in 1 operation', async () => {
   // process our fake issue list
   const operationsLeft = await processor.processIssues(1);
 
-  // processing an empty issue list should result in 1 operation
-  expect(operationsLeft).toEqual(99);
+  // processing an empty issue list should result in 0 operations
+  expect(operationsLeft).toEqual(100);
 });
 
 test('processing an issue with no label will make it stale and close it, if it is old enough only if days-before-close is set to 0', async () => {

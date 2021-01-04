@@ -106,7 +106,6 @@ export class IssueProcessor {
   async processIssues(page = 1): Promise<number> {
     // get the next batch of issues
     const issues: Issue[] = await this.getIssues(page);
-    this.operationsLeft -= 1;
 
     if (issues.length <= 0) {
       core.info('No more issues found to process. Exiting.');
@@ -306,7 +305,7 @@ export class IssueProcessor {
     }
   }
 
-  // grab issues from github in baches of 100
+  // grab issues from github in batches of 100
   private async getIssues(page: number): Promise<Issue[]> {
     // generate type for response
     const endpoint = this.client.issues.listForRepo;
@@ -342,7 +341,7 @@ export class IssueProcessor {
 
     this.staleIssues.push(issue);
 
-    this.operationsLeft -= 2;
+    this.operationsLeft -= 1;
 
     // if the issue is being marked stale, the updated date should be changed to right now
     // so that close calculations work correctly
@@ -438,8 +437,6 @@ export class IssueProcessor {
 
     this.removedLabelIssues.push(issue);
 
-    this.operationsLeft -= 1;
-
     if (this.options.debugOnly) {
       return;
     }
@@ -463,8 +460,6 @@ export class IssueProcessor {
     label: string
   ): Promise<string | undefined> {
     core.info(`Checking for label on issue #${issue.number}`);
-
-    this.operationsLeft -= 1;
 
     const options = this.client.issues.listEvents.endpoint.merge({
       owner: context.repo.owner,

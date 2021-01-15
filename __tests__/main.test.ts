@@ -210,6 +210,7 @@ test('processing a stale issue containing a space in the label will close it', a
 
   const processor = new IssueProcessor(
     opts,
+    async () => 'abot',
     async p => (p == 1 ? TestIssueList : []),
     async (num, dt) => [],
     async (issue, label) => new Date().toDateString()
@@ -240,6 +241,7 @@ test('processing a stale issue containing a slash in the label will close it', a
 
   const processor = new IssueProcessor(
     opts,
+    async () => 'abot',
     async p => (p == 1 ? TestIssueList : []),
     async (num, dt) => [],
     async (issue, label) => new Date().toDateString()
@@ -430,8 +432,8 @@ test('stale closed prs will not be closed', async () => {
     DefaultProcessorOptions,
     async () => 'abot',
     async p => (p == 1 ? TestIssueList : []),
-    async (num, dt) => [],
-    async (issue, label) => new Date().toDateString()
+    async (num: number, dt: string) => [],
+    async (issue: Issue, label: string) => new Date().toDateString()
   );
 
   // process our fake issue list
@@ -457,7 +459,7 @@ test('locked issues will not be marked stale', async () => {
   const processor = new IssueProcessor(
     DefaultProcessorOptions,
     async () => 'abot',
-    async p => p == 1 ? TestIssueList : []
+    async p => (p == 1 ? TestIssueList : [])
   );
 
   // process our fake issue list
@@ -484,8 +486,8 @@ test('stale locked issues will not be closed', async () => {
     DefaultProcessorOptions,
     async () => 'abot',
     async p => (p == 1 ? TestIssueList : []),
-    async (num, dt) => [],
-    async (issue, label) => new Date().toDateString()
+    async (num: number, dt: string) => [],
+    async (issue: Issue, label: string) => new Date().toDateString()
   );
 
   // process our fake issue list
@@ -511,7 +513,7 @@ test('locked prs will not be marked stale', async () => {
   const processor = new IssueProcessor(
     DefaultProcessorOptions,
     async () => 'abot',
-    async p => p == 1 ? TestIssueList : []
+    async p => (p == 1 ? TestIssueList : [])
   );
 
   // process our fake issue list
@@ -538,8 +540,8 @@ test('stale locked prs will not be closed', async () => {
     DefaultProcessorOptions,
     async () => 'abot',
     async p => (p == 1 ? TestIssueList : []),
-    async (num, dt) => [],
-    async (issue, label) => new Date().toDateString()
+    async (num: number, dt: string) => [],
+    async (issue: Issue, label: string) => new Date().toDateString()
   );
 
   // process our fake issue list
@@ -563,8 +565,8 @@ test('exempt issue labels will not be marked stale', async () => {
     opts,
     async () => 'abot',
     async p => (p == 1 ? TestIssueList : []),
-    async (num, dt) => [],
-    async (issue, label) => new Date().toDateString()
+    async (num: number, dt: string) => [],
+    async (issue: Issue, label: string) => new Date().toDateString()
   );
 
   // process our fake issue list
@@ -586,8 +588,8 @@ test('exempt issue labels will not be marked stale (multi issue label with space
     opts,
     async () => 'abot',
     async p => (p == 1 ? TestIssueList : []),
-    async (num, dt) => [],
-    async (issue, label) => new Date().toDateString()
+    async (num: number, dt: string) => [],
+    async (issue: Issue, label: string) => new Date().toDateString()
   );
 
   // process our fake issue list
@@ -609,8 +611,8 @@ test('exempt issue labels will not be marked stale (multi issue label)', async (
     opts,
     async () => 'abot',
     async p => (p == 1 ? TestIssueList : []),
-    async (num, dt) => [],
-    async (issue, label) => new Date().toDateString()
+    async (num: number, dt: string) => [],
+    async (issue: Issue, label: string) => new Date().toDateString()
   );
 
   // process our fake issue list
@@ -635,8 +637,8 @@ test('exempt pr labels will not be marked stale', async () => {
     opts,
     async () => 'abot',
     async p => (p == 1 ? TestIssueList : []),
-    async (num, dt) => [],
-    async (issue, label) => new Date().toDateString()
+    async (num: number, dt: string) => [],
+    async (issue: Issue, label: string) => new Date().toDateString()
   );
 
   // process our fake issue list
@@ -661,8 +663,8 @@ test('stale issues should not be closed if days is set to -1', async () => {
     opts,
     async () => 'abot',
     async p => (p == 1 ? TestIssueList : []),
-    async (num, dt) => [],
-    async (issue, label) => new Date().toDateString()
+    async (num: number, dt: string) => [],
+    async (issue: Issue, label: string) => new Date().toDateString()
   );
 
   // process our fake issue list
@@ -690,8 +692,8 @@ test('stale label should be removed if a comment was added to a stale issue', as
     opts,
     async () => 'abot',
     async p => (p == 1 ? TestIssueList : []),
-    async (num, dt) => [{user: {login: 'notme', type: 'User'}}], // return a fake comment to indicate there was an update
-    async (issue, label) => new Date().toDateString()
+    async (num: number, dt: string) => [{user: {login: 'notme', type: 'User'}}], // return a fake comment to indicate there was an update
+    async (issue: Issue, label: string) => new Date().toDateString()
   );
 
   // process our fake issue list
@@ -721,8 +723,8 @@ test('stale label should not be removed if a comment was added by the bot (and t
     opts,
     async () => 'abot',
     async p => (p == 1 ? TestIssueList : []),
-    async (num, dt) => [{user: {login: 'abot', type: 'User'}}], // return a fake comment to indicate there was an update by the bot
-    async (issue, label) => new Date().toDateString()
+    async (num: number, dt: string) => [{user: {login: 'abot', type: 'User'}}], // return a fake comment to indicate there was an update by the bot
+    async (issue: Issue, label: string) => new Date().toDateString()
   );
 
   // process our fake issue list
@@ -752,9 +754,10 @@ test('stale label containing a space should be removed if a comment was added to
 
   const processor = new IssueProcessor(
     opts,
+    async () => 'abot',
     async p => (p == 1 ? TestIssueList : []),
-    async (num, dt) => [{user: {login: 'notme', type: 'User'}}], // return a fake comment to indicate there was an update
-    async (issue, label) => new Date().toDateString()
+    async (num: number, dt: string) => [{user: {login: 'notme', type: 'User'}}], // return a fake comment to indicate there was an update
+    async (issue: Issue, label: string) => new Date().toDateString()
   );
 
   // process our fake issue list
@@ -818,8 +821,8 @@ test('stale issues should be closed if the closed nubmer of days (additive) is a
     opts,
     async () => 'abot',
     async p => (p == 1 ? TestIssueList : []),
-    async (num, dt) => [],
-    async (issue, label) => new Date().toDateString()
+    async (num: number, dt: string) => [],
+    async (issue: Issue, label: string) => new Date().toDateString()
   );
 
   // process our fake issue list
@@ -883,8 +886,8 @@ test('skips stale message on issues when skip-stale-issue-message is set', async
     opts,
     async () => 'abot',
     async p => (p == 1 ? TestIssueList : []),
-    async (num, dt) => [],
-    async (issue, label) => new Date().toDateString()
+    async (num: number, dt: string) => [],
+    async (issue: Issue, label: string) => new Date().toDateString()
   );
 
   // for sake of testing, mocking private function
@@ -928,8 +931,8 @@ test('skips stale message on prs when skip-stale-pr-message is set', async () =>
     opts,
     async () => 'abot',
     async p => (p == 1 ? TestIssueList : []),
-    async (num, dt) => [],
-    async (issue, label) => new Date().toDateString()
+    async (num: number, dt: string) => [],
+    async (issue: Issue, label: string) => new Date().toDateString()
   );
 
   // for sake of testing, mocking private function
@@ -974,8 +977,8 @@ test('not providing state takes precedence over skipStaleIssueMessage', async ()
     opts,
     async () => 'abot',
     async p => (p == 1 ? TestIssueList : []),
-    async (num, dt) => [],
-    async (issue, label) => new Date().toDateString()
+    async (num: number, dt: string) => [],
+    async (issue: Issue, label: string) => new Date().toDateString()
   );
 
   await processor.processIssues(1);
@@ -1008,8 +1011,8 @@ test('not providing stalePrMessage takes precedence over skipStalePrMessage', as
     opts,
     async () => 'abot',
     async p => (p == 1 ? TestIssueList : []),
-    async (num, dt) => [],
-    async (issue, label) => new Date().toDateString()
+    async (num: number, dt: string) => [],
+    async (issue: Issue, label: string) => new Date().toDateString()
   );
 
   await processor.processIssues(1);
@@ -1035,9 +1038,10 @@ test('git branch is deleted when option is enabled', async () => {
 
   const processor = new IssueProcessor(
     opts,
+    async () => 'abot',
     async p => (p == 1 ? TestIssueList : []),
-    async (num, dt) => [],
-    async (issue, label) => new Date().toDateString()
+    async (num: number, dt: string) => [],
+    async (issue: Issue, label: string) => new Date().toDateString()
   );
 
   await processor.processIssues(1);
@@ -1063,9 +1067,10 @@ test('git branch is not deleted when issue is not pull request', async () => {
 
   const processor = new IssueProcessor(
     opts,
+    async () => 'abot',
     async p => (p == 1 ? TestIssueList : []),
-    async (num, dt) => [],
-    async (issue, label) => new Date().toDateString()
+    async (num: number, dt: string) => [],
+    async (issue: Issue, label: string) => new Date().toDateString()
   );
 
   await processor.processIssues(1);

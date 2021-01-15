@@ -309,8 +309,7 @@ export class IssueProcessor {
     const comments = await this.listIssueComments(issue.number, sinceDate);
 
     const filteredComments = comments.filter(
-      comment =>
-        comment.user.type === 'User' && comment.user.login !== actor
+      comment => comment.user.type === 'User' && comment.user.login !== actor
     );
 
     core.info(
@@ -347,10 +346,10 @@ export class IssueProcessor {
     try {
       actor = await this.client.users.getAuthenticated();
     } catch (error) {
-      return context.actor
+      return context.actor;
     }
 
-    return actor.data.login
+    return actor.data.login;
   }
 
   // grab issues from github in baches of 100

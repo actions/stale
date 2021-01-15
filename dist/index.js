@@ -45,7 +45,7 @@ const labels_to_list_1 = __webpack_require__(107);
  * Handle processing of issues for staleness/closure.
  */
 class IssueProcessor {
-    constructor(options, getIssues, listIssueComments, getLabelCreationDate) {
+    constructor(options, getActor, getIssues, listIssueComments, getLabelCreationDate) {
         this.operationsLeft = 0;
         this.staleIssues = [];
         this.closedIssues = [];
@@ -53,6 +53,9 @@ class IssueProcessor {
         this.options = options;
         this.operationsLeft = options.operationsPerRun;
         this.client = github_1.getOctokit(options.repoToken);
+        if (getActor) {
+            this.getActor = getActor;
+        }
         if (getIssues) {
             this.getIssues = getIssues;
         }
@@ -71,6 +74,7 @@ class IssueProcessor {
             // get the next batch of issues
             const issues = yield this.getIssues(page);
             this.operationsLeft -= 1;
+            const actor = yield this.getActor();
             if (issues.length <= 0) {
                 core.info('No more issues found to process. Exiting.');
                 return this.operationsLeft;
@@ -126,7 +130,7 @@ class IssueProcessor {
                 // process the issue if it was marked stale
                 if (isStale) {
                     core.info(`Found a stale ${issueType}`);
-                    yield this.processStaleIssue(issue, issueType, staleLabel, closeMessage, closeLabel);
+                    yield this.processStaleIssue(issue, issueType, staleLabel, actor, closeMessage, closeLabel);
                 }
             }
             if (this.operationsLeft <= 0) {
@@ -138,11 +142,11 @@ class IssueProcessor {
         });
     }
     // handle all of the stale issue logic when we find a stale issue
-    processStaleIssue(issue, issueType, staleLabel, closeMessage, closeLabel) {
+    processStaleIssue(issue, issueType, staleLabel, actor, closeMessage, closeLabel) {
         return __awaiter(this, void 0, void 0, function* () {
             const markedStaleOn = (yield this.getLabelCreationDate(issue, staleLabel)) || issue.updated_at;
             core.info(`Issue #${issue.number} marked stale on: ${markedStaleOn}`);
-            const issueHasComments = yield this.hasCommentsSince(issue, markedStaleOn);
+            const issueHasComments = yield this.hasCommentsSince(issue, markedStaleOn, actor);
             core.info(`Issue #${issue.number} has been commented on: ${issueHasComments}`);
             const issueHasUpdate = IssueProcessor.updatedSince(issue.updated_at, this.options.daysBeforeClose);
             core.info(`Issue #${issue.number} has been updated: ${issueHasUpdate}`);
@@ -165,7 +169,7 @@ class IssueProcessor {
         });
     }
     // checks to see if a given issue is still stale (has had activity on it)
-    hasCommentsSince(issue, sinceDate) {
+    hasCommentsSince(issue, sinceDate, actor) {
         return __awaiter(this, void 0, void 0, function* () {
             core.info(`Checking for comments on issue #${issue.number} since ${sinceDate}`);
             if (!sinceDate) {
@@ -173,7 +177,7 @@ class IssueProcessor {
             }
             // find any comments since the date
             const comments = yield this.listIssueComments(issue.number, sinceDate);
-            const filteredComments = comments.filter(comment => comment.user.type === 'User' && comment.user.login !== github_1.context.actor);
+            const filteredComments = comments.filter(comment => comment.user.type === 'User' && comment.user.login !== actor);
             core.info(`Comments not made by actor or another bot: ${filteredComments.length}`);
             // if there are any user comments returned
             return filteredComments.length > 0;
@@ -196,6 +200,19 @@ class IssueProcessor {
                 core.error(`List issue comments error: ${error.message}`);
                 return Promise.resolve([]);
             }
+        });
+    }
+    // get the actor from the GitHub token or context
+    getActor() {
+        return __awaiter(this, void 0, void 0, function* () {
+            let actor;
+            try {
+                actor = yield this.client.users.getAuthenticated();
+            }
+            catch (error) {
+                return github_1.context.actor;
+            }
+            return actor.data.login;
         });
     }
     // grab issues from github in baches of 100

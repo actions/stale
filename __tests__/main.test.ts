@@ -1,11 +1,8 @@
-import * as core from '@actions/core';
 import * as github from '@actions/github';
-import {Octokit} from '@octokit/rest';
 
 import {
   IssueProcessor,
   Issue,
-  Label,
   IssueProcessorOptions
 } from '../src/IssueProcessor';
 
@@ -177,6 +174,66 @@ test('processing a stale issue will close it', async () => {
 
   const processor = new IssueProcessor(
     DefaultProcessorOptions,
+    async p => (p == 1 ? TestIssueList : []),
+    async (num, dt) => [],
+    async (issue, label) => new Date().toDateString()
+  );
+
+  // process our fake issue list
+  await processor.processIssues(1);
+
+  expect(processor.staleIssues.length).toEqual(0);
+  expect(processor.closedIssues.length).toEqual(1);
+});
+
+test('processing a stale issue containing a space in the label will close it', async () => {
+  const TestIssueList: Issue[] = [
+    generateIssue(
+      1,
+      'A stale issue that should be closed',
+      '2020-01-01T17:00:00Z',
+      false,
+      ['state: stale']
+    )
+  ];
+
+  const opts: IssueProcessorOptions = {
+    ...DefaultProcessorOptions,
+    staleIssueLabel: 'state: stale'
+  };
+
+  const processor = new IssueProcessor(
+    opts,
+    async p => (p == 1 ? TestIssueList : []),
+    async (num, dt) => [],
+    async (issue, label) => new Date().toDateString()
+  );
+
+  // process our fake issue list
+  await processor.processIssues(1);
+
+  expect(processor.staleIssues.length).toEqual(0);
+  expect(processor.closedIssues.length).toEqual(1);
+});
+
+test('processing a stale issue containing a slash in the label will close it', async () => {
+  const TestIssueList: Issue[] = [
+    generateIssue(
+      1,
+      'A stale issue that should be closed',
+      '2020-01-01T17:00:00Z',
+      false,
+      ['lifecycle/stale']
+    )
+  ];
+
+  const opts: IssueProcessorOptions = {
+    ...DefaultProcessorOptions,
+    staleIssueLabel: 'lifecycle/stale'
+  };
+
+  const processor = new IssueProcessor(
+    opts,
     async p => (p == 1 ? TestIssueList : []),
     async (num, dt) => [],
     async (issue, label) => new Date().toDateString()
@@ -648,6 +705,38 @@ test('stale label should not be removed if a comment was added by the bot (and t
   expect(processor.closedIssues.length).toEqual(1);
   expect(processor.staleIssues.length).toEqual(0);
   expect(processor.removedLabelIssues.length).toEqual(0);
+});
+
+test('stale label containing a space should be removed if a comment was added to a stale issue', async () => {
+  const TestIssueList: Issue[] = [
+    generateIssue(
+      1,
+      'An issue that should un-stale',
+      '2020-01-01T17:00:00Z',
+      false,
+      ['stat: stale']
+    )
+  ];
+
+  const opts: IssueProcessorOptions = {
+    ...DefaultProcessorOptions,
+    removeStaleWhenUpdated: true,
+    staleIssueLabel: 'stat: stale'
+  };
+
+  const processor = new IssueProcessor(
+    opts,
+    async p => (p == 1 ? TestIssueList : []),
+    async (num, dt) => [{user: {login: 'notme', type: 'User'}}], // return a fake comment to indicate there was an update
+    async (issue, label) => new Date().toDateString()
+  );
+
+  // process our fake issue list
+  await processor.processIssues(1);
+
+  expect(processor.closedIssues.length).toEqual(0);
+  expect(processor.staleIssues.length).toEqual(0);
+  expect(processor.removedLabelIssues.length).toEqual(1);
 });
 
 test('stale issues should not be closed until after the closed number of days', async () => {

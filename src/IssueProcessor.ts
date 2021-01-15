@@ -1,5 +1,6 @@
 import * as core from '@actions/core';
 import {context, getOctokit} from '@actions/github';
+import {GitHub} from '@actions/github/lib/utils';
 import {GetResponseTypeFromEndpointMethod} from '@octokit/types';
 import {isLabeled} from './functions/is-labeled';
 import {labelsToList} from './functions/labels-to-list';
@@ -68,7 +69,7 @@ export interface IssueProcessorOptions {
  * Handle processing of issues for staleness/closure.
  */
 export class IssueProcessor {
-  readonly client: any; // need to make this the correct type
+  readonly client: InstanceType<typeof GitHub>;
   readonly options: IssueProcessorOptions;
   private operationsLeft = 0;
 
@@ -176,7 +177,13 @@ export class IssueProcessor {
       }
 
       // does this issue have a stale label?
-      let isStale = isLabeled(issue, staleLabel);
+      let isStale: boolean = isLabeled(issue, staleLabel);
+
+      if (isStale) {
+        core.info(`This issue has a stale label`);
+      } else {
+        core.info(`This issue hasn't a stale label`);
+      }
 
       // should this issue be marked stale?
       const shouldBeStale = !IssueProcessor.updatedSince(
@@ -506,12 +513,13 @@ export class IssueProcessor {
 
   // Remove a label from an issue
   private async removeLabel(issue: Issue, label: string): Promise<void> {
-    core.info(`Removing label from issue #${issue.number}`);
+    core.info(`Removing label "${label}" from issue #${issue.number}`);
 
     this.removedLabelIssues.push(issue);
 
     this.operationsLeft -= 1;
 
+    // @todo remove the debug only to be able to test the code below
     if (this.options.debugOnly) {
       return;
     }
@@ -521,7 +529,7 @@ export class IssueProcessor {
         owner: context.repo.owner,
         repo: context.repo.repo,
         issue_number: issue.number,
-        name: encodeURIComponent(label) // A label can have a "?" in the name
+        name: label
       });
     } catch (error) {
       core.error(`Error removing a label: ${error.message}`);

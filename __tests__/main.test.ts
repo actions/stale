@@ -51,7 +51,8 @@ const DefaultProcessorOptions: IssueProcessorOptions = Object.freeze({
   removeStaleWhenUpdated: false,
   ascending: false,
   skipStaleIssueMessage: false,
-  skipStalePrMessage: false
+  skipStalePrMessage: false,
+  deleteBranch: false
 });
 
 test('empty issue list results in 1 operation', async () => {
@@ -89,6 +90,7 @@ test('processing an issue with no label will make it stale and close it, if it i
 
   expect(processor.staleIssues.length).toEqual(1);
   expect(processor.closedIssues.length).toEqual(1);
+  expect(processor.deletedBranchIssues.length).toEqual(0);
 });
 
 test('processing an issue with no label will make it stale and not close it if days-before-close is set to > 0', async () => {
@@ -894,4 +896,60 @@ test('not providing stalePrMessage takes precedence over skipStalePrMessage', as
   expect(processor.closedIssues.length).toEqual(0);
   expect(processor.removedLabelIssues.length).toEqual(0);
   expect(processor.staleIssues.length).toEqual(0);
+});
+
+test('git branch is deleted when option is enabled', async () => {
+  const opts = {...DefaultProcessorOptions, deleteBranch: true};
+  const isPullRequest = true;
+  const TestIssueList: Issue[] = [
+    generateIssue(
+      1,
+      'An issue that should have its branch deleted',
+      '2020-01-01T17:00:00Z',
+      isPullRequest,
+      ['Stale']
+    )
+  ];
+
+  const processor = new IssueProcessor(
+    opts,
+    async p => (p == 1 ? TestIssueList : []),
+    async (num, dt) => [],
+    async (issue, label) => new Date().toDateString()
+  );
+
+  await processor.processIssues(1);
+
+  expect(processor.closedIssues.length).toEqual(1);
+  expect(processor.removedLabelIssues.length).toEqual(0);
+  expect(processor.staleIssues.length).toEqual(0);
+  expect(processor.deletedBranchIssues.length).toEqual(1);
+});
+
+test('git branch is not deleted when issue is not pull request', async () => {
+  const opts = {...DefaultProcessorOptions, deleteBranch: true};
+  const isPullRequest = false;
+  const TestIssueList: Issue[] = [
+    generateIssue(
+      1,
+      'An issue that should not have its branch deleted',
+      '2020-01-01T17:00:00Z',
+      isPullRequest,
+      ['Stale']
+    )
+  ];
+
+  const processor = new IssueProcessor(
+    opts,
+    async p => (p == 1 ? TestIssueList : []),
+    async (num, dt) => [],
+    async (issue, label) => new Date().toDateString()
+  );
+
+  await processor.processIssues(1);
+
+  expect(processor.closedIssues.length).toEqual(1);
+  expect(processor.removedLabelIssues.length).toEqual(0);
+  expect(processor.staleIssues.length).toEqual(0);
+  expect(processor.deletedBranchIssues.length).toEqual(0);
 });

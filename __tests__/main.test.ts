@@ -84,6 +84,7 @@ test('processing an issue with no label will make it stale and close it, if it i
 
   const processor = new IssueProcessor(
     opts,
+    async () => 'abot',
     async p => (p == 1 ? TestIssueList : []),
     async (num, dt) => [],
     async (issue, label) => new Date().toDateString()
@@ -136,6 +137,7 @@ test('processing an issue with no label will make it stale and not close it, if 
 
   const processor = new IssueProcessor(
     opts,
+    async () => 'abot',
     async p => (p == 1 ? TestIssueList : []),
     async (num, dt) => [],
     async (issue, label) => new Date().toDateString()
@@ -160,6 +162,7 @@ test('processing an issue with no label will make it stale and not close it if d
 
   const processor = new IssueProcessor(
     opts,
+    async () => 'abot',
     async p => (p == 1 ? TestIssueList : []),
     async (num, dt) => [],
     async (issue, label) => new Date().toDateString()
@@ -211,6 +214,7 @@ test('processing an issue with no label will not make it stale if days-before-st
 
   const processor = new IssueProcessor(
     opts,
+    async () => 'abot',
     async p => (p == 1 ? TestIssueList : []),
     async (num, dt) => [],
     async (issue, label) => new Date().toDateString()

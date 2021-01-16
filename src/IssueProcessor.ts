@@ -13,6 +13,7 @@ import {isPullRequest} from './functions/is-pull-request';
 import {labelsToList} from './functions/labels-to-list';
 import {shouldMarkWhenStale} from './functions/should-mark-when-stale';
 import {IsoDateString} from './types/iso-date-string';
+import {IsoOrRfcDateString} from './types/iso-or-rfc-date-string';
 
 export interface Issue {
   title: string;
@@ -77,7 +78,7 @@ export interface IssueProcessorOptions {
   skipStaleIssueMessage: boolean;
   skipStalePrMessage: boolean;
   deleteBranch: boolean;
-  startDate: string | undefined; // Should be ISO 8601 or RFC 2822
+  startDate: IsoOrRfcDateString | undefined; // Should be ISO 8601 or RFC 2822
 }
 
 const logger: Logger = new Logger();

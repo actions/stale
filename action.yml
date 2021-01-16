@@ -7,58 +7,90 @@ inputs:
     default: ${{ github.token }}
   stale-issue-message:
     description: 'The message to post on the issue when tagging it. If none provided, will not mark issues stale.'
+    required: false
   stale-pr-message:
     description: 'The message to post on the pr when tagging it. If none provided, will not mark pull requests stale.'
+    required: false
   close-issue-message:
     description: 'The message to post on the issue when closing it. If none provided, will not comment when closing an issue.'
+    required: false
   close-pr-message:
     description: 'The message to post on the pr when closing it. If none provided, will not comment when closing a pull requests.'
+    required: false
   days-before-stale:
-    description: 'The number of days old an issue can be before marking it stale. Set to -1 to never mark issues or pull requests as stale automatically.'
-    default: 60
+    description: 'The number of days old an issue or a pull request can be before marking it stale. Set to -1 to never mark issues or pull requests as stale automatically.'
+    required: false
+    default: '60'
+  days-before-issue-stale:
+    description: 'The number of days old an issue can be before marking it stale. Set to -1 to never mark issues as stale automatically. Override "days-before-stale" option regarding the issues only.'
+    required: false
+  days-before-pr-stale:
+    description: 'The number of days old a pull request can be before marking it stale. Set to -1 to never mark pull requests as stale automatically. Override "days-before-stale" option regarding the pull requests only.'
+    required: false
   days-before-close:
-    description: 'The number of days to wait to close an issue or pull request after it being marked stale. Set to -1 to never close stale issues.'
-    default: 7
+    description: 'The number of days to wait to close an issue or a pull request after it being marked stale. Set to -1 to never close stale issues or pull requests.'
+    required: false
+    default: '7'
+  days-before-issue-close:
+    description: 'The number of days to wait to close an issue after it being marked stale. Set to -1 to never close stale issues. Override "days-before-close" option regarding the issues only.'
+    required: false
+  days-before-pr-close:
+    description: 'The number of days to wait to close a pull request after it being marked stale. Set to -1 to never close stale pull requests. Override "days-before-close" option regarding the pull requests only.'
+    required: false
   stale-issue-label:
     description: 'The label to apply when an issue is stale.'
+    required: false
     default: 'Stale'
   close-issue-label:
     description: 'The label to apply when an issue is closed.'
+    required: false
   exempt-issue-labels:
     description: 'The labels that mean an issue is exempt from being marked stale. Separate multiple labels with commas (eg. "label1,label2")'
     default: ''
+    required: false
   stale-pr-label:
     description: 'The label to apply when a pull request is stale.'
     default: 'Stale'
+    required: false
   close-pr-label:
     description: 'The label to apply when a pull request is closed.'
+    required: false
   exempt-pr-labels:
     description: 'The labels that mean a pull request is exempt from being marked stale. Separate multiple labels with commas (eg. "label1,label2")'
     default: ''
+    required: false
   only-labels:
     description: 'Only issues or pull requests with all of these labels are checked if stale. Defaults to `[]` (disabled) and can be a comma-separated list of labels.'
     default: ''
+    required: false
   operations-per-run:
     description: 'The maximum number of operations per run, used to control rate limiting.'
-    default: 30
+    default: '30'
+    required: false
   remove-stale-when-updated:
     description: 'Remove stale labels from issues when they are updated or commented on.'
-    default: true
+    default: 'true'
+    required: false
   debug-only:
     description: 'Run the processor in debug mode without actually performing any operations on live issues.'
-    default: false
+    default: 'false'
+    required: false
   ascending:
     description: 'The order to get issues or pull requests. Defaults to false, which is descending'
-    default: false
+    default: 'false'
+    required: false
   skip-stale-pr-message:
     description: 'Skip adding stale message when marking a pull request as stale.'
-    default: false
+    default: 'false'
+    required: false
   skip-stale-issue-message:
     description: 'Skip adding stale message when marking an issue as stale.'
-    default: false
+    default: 'false'
+    required: false
   delete-branch:
     description: 'Delete the git branch after closing a stale pull request.'
-    default: false
+    default: 'false'
+    required: false
 runs:
   using: 'node12'
   main: 'dist/index.js'

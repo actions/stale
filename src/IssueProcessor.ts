@@ -219,11 +219,13 @@ export class IssueProcessor {
         )
       ) {
         if (isStale) {
-          core.info(`An exempt label was added after the stale label.`);
+          issueLogger.info(`An exempt label was added after the stale label.`);
           await this._removeStaleLabel(issue, staleLabel);
         }
 
-        core.info(`Skipping ${issueType} because it has an exempt label`);
+        issueLogger.info(
+          `Skipping ${issueType} because it has an exempt label`
+        );
         continue; // don't process exempt issues
       }
 
@@ -532,7 +534,9 @@ export class IssueProcessor {
     }
   }
 
-  private async _getPullRequest(issue: Issue): Promise<PullRequest | undefined> {
+  private async _getPullRequest(
+    issue: Issue
+  ): Promise<PullRequest | undefined> {
     const issueLogger: IssueLogger = new IssueLogger(issue);
     this.operationsLeft -= 1;
 
@@ -681,7 +685,9 @@ export class IssueProcessor {
     issue: Readonly<Issue>,
     staleLabel: Readonly<string>
   ): Promise<void> {
-    core.info(
+    const issueLogger: IssueLogger = new IssueLogger(issue);
+
+    issueLogger.info(
       `Issue #${issue.number} is no longer stale. Removing stale label.`
     );
 

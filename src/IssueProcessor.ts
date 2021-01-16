@@ -1,9 +1,10 @@
-import * as core from '@actions/core';
 import {context, getOctokit} from '@actions/github';
 import {GitHub} from '@actions/github/lib/utils';
 import {GetResponseTypeFromEndpointMethod} from '@octokit/types';
 import {IssueType} from './enums/issue-type.enum';
 import {getIssueType} from './functions/get-issue-type';
+import {IssueLogger} from './classes/issue-logger';
+import {Logger} from './classes/logger';
 import {isLabeled} from './functions/is-labeled';
 import {isPullRequest} from './functions/is-pull-request';
 import {labelsToList} from './functions/labels-to-list';
@@ -73,6 +74,8 @@ export interface IssueProcessorOptions {
   deleteBranch: boolean;
 }
 
+const logger: Logger = new Logger();
+
 /***
  * Handle processing of issues for staleness/closure.
  */
@@ -127,7 +130,7 @@ export class IssueProcessor {
     }
 
     if (this.options.debugOnly) {
-      core.warning(
+      logger.warning(
         'Executing in debug mode. Debug output will be written but no issues will be processed.'
       );
     }
@@ -141,14 +144,16 @@ export class IssueProcessor {
     const actor: string = await this.getActor();
 
     if (issues.length <= 0) {
-      core.info('No more issues found to process. Exiting.');
+      logger.info('---');
+      logger.info('No more issues found to process. Exiting.');
       return this.operationsLeft;
     }
 
     for (const issue of issues.values()) {
+      const issueLogger: IssueLogger = new IssueLogger(issue);
       const isPr = isPullRequest(issue);
 
-      core.info(
+      issueLogger.info(
         `Found issue: issue #${issue.number} last updated ${issue.updated_at} (is pr? ${isPr})`
       );
 
@@ -177,25 +182,25 @@ export class IssueProcessor {
         : this._getDaysBeforeIssueStale();
 
       if (isPr) {
-        core.info(`Days before pull request stale: ${daysBeforeStale}`);
+        issueLogger.info(`Days before pull request stale: ${daysBeforeStale}`);
       } else {
-        core.info(`Days before issue stale: ${daysBeforeStale}`);
+        issueLogger.info(`Days before issue stale: ${daysBeforeStale}`);
       }
 
       const shouldMarkAsStale: boolean = shouldMarkWhenStale(daysBeforeStale);
 
       if (!staleMessage && shouldMarkAsStale) {
-        core.info(`Skipping ${issueType} due to empty stale message`);
+        issueLogger.info(`Skipping ${issueType} due to empty stale message`);
         continue;
       }
 
       if (issue.state === 'closed') {
-        core.info(`Skipping ${issueType} because it is closed`);
+        issueLogger.info(`Skipping ${issueType} because it is closed`);
         continue; // don't process closed issues
       }
 
       if (issue.locked) {
-        core.info(`Skipping ${issueType} because it is locked`);
+        issueLogger.info(`Skipping ${issueType} because it is locked`);
         continue; // don't process locked issues
       }
 
@@ -204,7 +209,9 @@ export class IssueProcessor {
           isLabeled(issue, exemptLabel)
         )
       ) {
-        core.info(`Skipping ${issueType} because it has an exempt label`);
+        issueLogger.info(
+          `Skipping ${issueType} because it has an exempt label`
+        );
         continue; // don't process exempt issues
       }
 
@@ -212,9 +219,9 @@ export class IssueProcessor {
       let isStale: boolean = isLabeled(issue, staleLabel);
 
       if (isStale) {
-        core.info(`This issue has a stale label`);
+        issueLogger.info(`This issue has a stale label`);
       } else {
-        core.info(`This issue hasn't a stale label`);
+        issueLogger.info(`This issue hasn't a stale label`);
       }
 
       // should this issue be marked stale?
@@ -225,7 +232,7 @@ export class IssueProcessor {
 
       // determine if this issue needs to be marked stale first
       if (!isStale && shouldBeStale && shouldMarkAsStale) {
-        core.info(
+        issueLogger.info(
           `Marking ${issueType} stale because it was last updated on ${issue.updated_at} and it does not have a stale label`
         );
         await this.markStale(issue, staleMessage, staleLabel, skipMessage);
@@ -234,7 +241,7 @@ export class IssueProcessor {
 
       // process the issue if it was marked stale
       if (isStale) {
-        core.info(`Found a stale ${issueType}`);
+        issueLogger.info(`Found a stale ${issueType}`);
         await this.processStaleIssue(
           issue,
           issueType,
@@ -247,7 +254,7 @@ export class IssueProcessor {
     }
 
     if (this.operationsLeft <= 0) {
-      core.warning('Reached max number of operations to process. Exiting.');
+      logger.warning('Reached max number of operations to process. Exiting.');
       return 0;
     }
 
@@ -264,16 +271,19 @@ export class IssueProcessor {
     closeMessage?: string,
     closeLabel?: string
   ) {
+    const issueLogger: IssueLogger = new IssueLogger(issue);
     const markedStaleOn: string =
       (await this.getLabelCreationDate(issue, staleLabel)) || issue.updated_at;
-    core.info(`Issue #${issue.number} marked stale on: ${markedStaleOn}`);
+    issueLogger.info(
+      `Issue #${issue.number} marked stale on: ${markedStaleOn}`
+    );
 
     const issueHasComments: boolean = await this.hasCommentsSince(
       issue,
       markedStaleOn,
       actor
     );
-    core.info(
+    issueLogger.info(
       `Issue #${issue.number} has been commented on: ${issueHasComments}`
     );
 
@@ -283,20 +293,22 @@ export class IssueProcessor {
       : this._getDaysBeforeIssueClose();
 
     if (isPr) {
-      core.info(`Days before pull request close: ${daysBeforeClose}`);
+      issueLogger.info(`Days before pull request close: ${daysBeforeClose}`);
     } else {
-      core.info(`Days before issue close: ${daysBeforeClose}`);
+      issueLogger.info(`Days before issue close: ${daysBeforeClose}`);
     }
 
     const issueHasUpdate: boolean = IssueProcessor.updatedSince(
       issue.updated_at,
       daysBeforeClose
     );
-    core.info(`Issue #${issue.number} has been updated: ${issueHasUpdate}`);
+    issueLogger.info(
+      `Issue #${issue.number} has been updated: ${issueHasUpdate}`
+    );
 
     // should we un-stale this issue?
     if (this.options.removeStaleWhenUpdated && issueHasComments) {
-      core.info(
+      issueLogger.info(
         `Issue #${issue.number} is no longer stale. Removing stale label.`
       );
       await this.removeLabel(issue, staleLabel);
@@ -308,20 +320,20 @@ export class IssueProcessor {
     }
 
     if (!issueHasComments && !issueHasUpdate) {
-      core.info(
+      issueLogger.info(
         `Closing ${issueType} because it was last updated on ${issue.updated_at}`
       );
       await this.closeIssue(issue, closeMessage, closeLabel);
 
       if (this.options.deleteBranch && issue.pull_request) {
-        core.info(
+        issueLogger.info(
           `Deleting branch for #${issue.number} as delete-branch option was specified`
         );
         await this.deleteBranch(issue);
         this.deletedBranchIssues.push(issue);
       }
     } else {
-      core.info(
+      issueLogger.info(
         `Stale ${issueType} is not old enough to close yet (hasComments? ${issueHasComments}, hasUpdate? ${issueHasUpdate})`
       );
     }
@@ -333,7 +345,9 @@ export class IssueProcessor {
     sinceDate: string,
     actor: string
   ): Promise<boolean> {
-    core.info(
+    const issueLogger: IssueLogger = new IssueLogger(issue);
+
+    issueLogger.info(
       `Checking for comments on issue #${issue.number} since ${sinceDate}`
     );
 
@@ -348,7 +362,7 @@ export class IssueProcessor {
       comment => comment.user.type === 'User' && comment.user.login !== actor
     );
 
-    core.info(
+    issueLogger.info(
       `Comments not made by actor or another bot: ${filteredComments.length}`
     );
 
@@ -371,7 +385,7 @@ export class IssueProcessor {
       });
       return comments.data;
     } catch (error) {
-      core.error(`List issue comments error: ${error.message}`);
+      logger.error(`List issue comments error: ${error.message}`);
       return Promise.resolve([]);
     }
   }
@@ -408,7 +422,7 @@ export class IssueProcessor {
       );
       return issueResult.data;
     } catch (error) {
-      core.error(`Get issues for repo error: ${error.message}`);
+      logger.error(`Get issues for repo error: ${error.message}`);
       return Promise.resolve([]);
     }
   }
@@ -420,7 +434,9 @@ export class IssueProcessor {
     staleLabel: string,
     skipMessage: boolean
   ): Promise<void> {
-    core.info(`Marking issue #${issue.number} as stale`);
+    const issueLogger: IssueLogger = new IssueLogger(issue);
+
+    issueLogger.info(`Marking issue #${issue.number} as stale`);
 
     this.staleIssues.push(issue);
 
@@ -444,7 +460,7 @@ export class IssueProcessor {
           body: staleMessage
         });
       } catch (error) {
-        core.error(`Error creating a comment: ${error.message}`);
+        issueLogger.error(`Error creating a comment: ${error.message}`);
       }
     }
 
@@ -456,7 +472,7 @@ export class IssueProcessor {
         labels: [staleLabel]
       });
     } catch (error) {
-      core.error(`Error adding a label: ${error.message}`);
+      issueLogger.error(`Error adding a label: ${error.message}`);
     }
   }
 
@@ -466,7 +482,9 @@ export class IssueProcessor {
     closeMessage?: string,
     closeLabel?: string
   ): Promise<void> {
-    core.info(`Closing issue #${issue.number} for being stale`);
+    const issueLogger: IssueLogger = new IssueLogger(issue);
+
+    issueLogger.info(`Closing issue #${issue.number} for being stale`);
 
     this.closedIssues.push(issue);
 
@@ -485,7 +503,7 @@ export class IssueProcessor {
           body: closeMessage
         });
       } catch (error) {
-        core.error(`Error creating a comment: ${error.message}`);
+        issueLogger.error(`Error creating a comment: ${error.message}`);
       }
     }
 
@@ -498,7 +516,7 @@ export class IssueProcessor {
           labels: [closeLabel]
         });
       } catch (error) {
-        core.error(`Error adding a label: ${error.message}`);
+        issueLogger.error(`Error adding a label: ${error.message}`);
       }
     }
 
@@ -510,31 +528,35 @@ export class IssueProcessor {
         state: 'closed'
       });
     } catch (error) {
-      core.error(`Error updating an issue: ${error.message}`);
+      issueLogger.error(`Error updating an issue: ${error.message}`);
     }
   }
 
-  private async getPullRequest(
-    pullNumber: number
-  ): Promise<PullRequest | undefined> {
+  private async getPullRequest(issue: Issue): Promise<PullRequest | undefined> {
+    const issueLogger: IssueLogger = new IssueLogger(issue);
+
     this.operationsLeft -= 1;
 
     try {
       const pullRequest = await this.client.pulls.get({
         owner: context.repo.owner,
         repo: context.repo.repo,
-        pull_number: pullNumber
+        pull_number: issue.number
       });
 
       return pullRequest.data;
     } catch (error) {
-      core.error(`Error getting pull request ${pullNumber}: ${error.message}`);
+      issueLogger.error(
+        `Error getting pull request ${issue.number}: ${error.message}`
+      );
     }
   }
 
   // Delete the branch on closed pull request
   private async deleteBranch(issue: Issue): Promise<void> {
-    core.info(
+    const issueLogger: IssueLogger = new IssueLogger(issue);
+
+    issueLogger.info(
       `Delete branch from closed issue #${issue.number} - ${issue.title}`
     );
 
@@ -542,17 +564,19 @@ export class IssueProcessor {
       return;
     }
 
-    const pullRequest = await this.getPullRequest(issue.number);
+    const pullRequest = await this.getPullRequest(issue);
 
     if (!pullRequest) {
-      core.info(
+      issueLogger.info(
         `Not deleting branch as pull request not found for issue ${issue.number}`
       );
       return;
     }
 
     const branch = pullRequest.head.ref;
-    core.info(`Deleting branch ${branch} from closed issue #${issue.number}`);
+    issueLogger.info(
+      `Deleting branch ${branch} from closed issue #${issue.number}`
+    );
 
     this.operationsLeft -= 1;
 
@@ -563,7 +587,7 @@ export class IssueProcessor {
         ref: `heads/${branch}`
       });
     } catch (error) {
-      core.error(
+      issueLogger.error(
         `Error deleting branch ${branch} from issue #${issue.number}: ${error.message}`
       );
     }
@@ -571,7 +595,9 @@ export class IssueProcessor {
 
   // Remove a label from an issue
   private async removeLabel(issue: Issue, label: string): Promise<void> {
-    core.info(`Removing label "${label}" from issue #${issue.number}`);
+    const issueLogger: IssueLogger = new IssueLogger(issue);
+
+    issueLogger.info(`Removing label "${label}" from issue #${issue.number}`);
 
     this.removedLabelIssues.push(issue);
 
@@ -590,7 +616,7 @@ export class IssueProcessor {
         name: label
       });
     } catch (error) {
-      core.error(`Error removing a label: ${error.message}`);
+      issueLogger.error(`Error removing a label: ${error.message}`);
     }
   }
 
@@ -600,7 +626,9 @@ export class IssueProcessor {
     issue: Issue,
     label: string
   ): Promise<string | undefined> {
-    core.info(`Checking for label on issue #${issue.number}`);
+    const issueLogger: IssueLogger = new IssueLogger(issue);
+
+    issueLogger.info(`Checking for label on issue #${issue.number}`);
 
     this.operationsLeft -= 1;
 

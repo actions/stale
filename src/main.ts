@@ -23,9 +23,13 @@ function getAndValidateArgs(): IssueProcessorOptions {
     daysBeforeStale: parseInt(
       core.getInput('days-before-stale', {required: true})
     ),
+    daysBeforeIssueStale: parseInt(core.getInput('days-before-issue-stale')),
+    daysBeforePrStale: parseInt(core.getInput('days-before-pr-stale')),
     daysBeforeClose: parseInt(
       core.getInput('days-before-close', {required: true})
     ),
+    daysBeforeIssueClose: parseInt(core.getInput('days-before-issue-close')),
+    daysBeforePrClose: parseInt(core.getInput('days-before-pr-close')),
     staleIssueLabel: core.getInput('stale-issue-label', {required: true}),
     closeIssueLabel: core.getInput('close-issue-label'),
     exemptIssueLabels: core.getInput('exempt-issue-labels'),
@@ -48,7 +52,11 @@ function getAndValidateArgs(): IssueProcessorOptions {
 
   for (const numberInput of [
     'days-before-stale',
+    'days-before-issue-stale',
+    'days-before-pr-stale',
     'days-before-close',
+    'days-before-issue-close',
+    'days-before-pr-close',
     'operations-per-run'
   ]) {
     if (isNaN(parseInt(core.getInput(numberInput)))) {

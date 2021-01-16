@@ -1,6 +1,7 @@
 import * as core from '@actions/core';
 import {Issue} from '../IssueProcessor';
 import {Logger} from './logger';
+
 export class IssueLogger implements Logger {
   private readonly _issue: Issue;
 

@@ -308,10 +308,7 @@ export class IssueProcessor {
 
     // should we un-stale this issue?
     if (this.options.removeStaleWhenUpdated && issueHasComments) {
-      issueLogger.info(
-        `Issue #${issue.number} is no longer stale. Removing stale label.`
-      );
-      await this.removeLabel(issue, staleLabel);
+      await this._removeStaleLabel(issue, staleLabel);
     }
 
     // now start closing logic
@@ -676,5 +673,16 @@ export class IssueProcessor {
     return isNaN(this.options.daysBeforePrClose)
       ? this.options.daysBeforeClose
       : this.options.daysBeforePrClose;
+  }
+
+  private async _removeStaleLabel(
+    issue: Readonly<Issue>,
+    staleLabel: Readonly<string>
+  ): Promise<void> {
+    core.info(
+      `Issue #${issue.number} is no longer stale. Removing stale label.`
+    );
+
+    return this.removeLabel(issue, staleLabel);
   }
 }

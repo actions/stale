@@ -8,8 +8,8 @@
     "build": "tsc",
     "format": "prettier --write **/*.ts",
     "format-check": "prettier --check **/*.ts",
-    "lint": "eslint src/**/*.ts",
-    "lint:fix": "eslint src/**/*.ts --fix",
+    "lint": "prettier --check --ignore-unknown **/*.{md,json,yml,ts} && eslint src/**/*.ts",
+    "lint:fix": "prettier --write --ignore-unknown **/*.{md,json,yml,ts} && eslint src/**/*.ts --fix",
     "pack": "ncc build",
     "test": "jest",
     "all": "npm run build && npm run format && npm run lint && npm run pack && npm test"

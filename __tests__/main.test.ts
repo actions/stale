@@ -286,7 +286,7 @@ test('processing a stale issue will close it', async () => {
       'A stale issue that should be closed',
       '2020-01-01T17:00:00Z',
       false,
-      [ 'Stale' ]
+      ['Stale']
     )
   ];
 
@@ -379,7 +379,7 @@ test('processing a stale issue will close it when days-before-issue-stale overri
       'A stale issue that should be closed',
       '2020-01-01T17:00:00Z',
       false,
-      [ 'Stale' ]
+      ['Stale']
     )
   ];
 
@@ -411,7 +411,7 @@ test('processing a stale PR will close it', async () => {
       'A stale PR that should be closed',
       '2020-01-01T17:00:00Z',
       true,
-      [ 'Stale' ]
+      ['Stale']
     )
   ];
 
@@ -442,7 +442,7 @@ test('processing a stale PR will close it when days-before-pr-stale override day
       'A stale PR that should be closed',
       '2020-01-01T17:00:00Z',
       true,
-      [ 'Stale' ]
+      ['Stale']
     )
   ];
 
@@ -614,7 +614,7 @@ test('stale closed issues will not be closed', async () => {
       'A stale closed issue',
       '2020-01-01T17:00:00Z',
       false,
-      [ 'Stale' ],
+      ['Stale'],
       true
     )
   ];
@@ -668,7 +668,7 @@ test('stale closed prs will not be closed', async () => {
       'A stale closed PR that will not be closed again',
       '2020-01-01T17:00:00Z',
       true,
-      [ 'Stale' ],
+      ['Stale'],
       true
     )
   ];
@@ -721,7 +721,7 @@ test('stale locked issues will not be closed', async () => {
       'A stale locked issue that will not be closed',
       '2020-01-01T17:00:00Z',
       false,
-      [ 'Stale' ],
+      ['Stale'],
       false,
       true
     )
@@ -775,7 +775,7 @@ test('stale locked prs will not be closed', async () => {
       'A stale locked PR that will not be closed',
       '2020-01-01T17:00:00Z',
       true,
-      [ 'Stale' ],
+      ['Stale'],
       false,
       true
     )
@@ -823,7 +823,7 @@ test('exempt issue labels will not be marked stale', async () => {
 
 test('exempt issue labels will not be marked stale (multi issue label with spaces)', async () => {
   const TestIssueList: Issue[] = [
-    generateIssue(1, 'My first issue', '2020-01-01T17:00:00Z', false, [ 'Cool' ])
+    generateIssue(1, 'My first issue', '2020-01-01T17:00:00Z', false, ['Cool'])
   ];
 
   const opts = {...DefaultProcessorOptions};
@@ -846,7 +846,7 @@ test('exempt issue labels will not be marked stale (multi issue label with space
 
 test('exempt issue labels will not be marked stale (multi issue label)', async () => {
   const TestIssueList: Issue[] = [
-    generateIssue(1, 'My first issue', '2020-01-01T17:00:00Z', false, [ 'Cool' ])
+    generateIssue(1, 'My first issue', '2020-01-01T17:00:00Z', false, ['Cool'])
   ];
 
   const opts = {...DefaultProcessorOptions};
@@ -870,8 +870,8 @@ test('exempt issue labels will not be marked stale (multi issue label)', async (
 
 test('exempt pr labels will not be marked stale', async () => {
   const TestIssueList: Issue[] = [
-    generateIssue(1, 'My first issue', '2020-01-01T17:00:00Z', false, [ 'Cool' ]),
-    generateIssue(2, 'My first PR', '2020-01-01T17:00:00Z', true, [ 'Cool' ]),
+    generateIssue(1, 'My first issue', '2020-01-01T17:00:00Z', false, ['Cool']),
+    generateIssue(2, 'My first PR', '2020-01-01T17:00:00Z', true, ['Cool']),
     generateIssue(3, 'Another issue', '2020-01-01T17:00:00Z', false)
   ];
 
@@ -897,8 +897,8 @@ test('stale issues should not be closed if days is set to -1', async () => {
     generateIssue(1, 'My first issue', '2020-01-01T17:00:00Z', false, [
       'Stale'
     ]),
-    generateIssue(2, 'My first PR', '2020-01-01T17:00:00Z', true, [ 'Stale' ]),
-    generateIssue(3, 'Another issue', '2020-01-01T17:00:00Z', false, [ 'Stale' ])
+    generateIssue(2, 'My first PR', '2020-01-01T17:00:00Z', true, ['Stale']),
+    generateIssue(3, 'Another issue', '2020-01-01T17:00:00Z', false, ['Stale'])
   ];
 
   const opts = {...DefaultProcessorOptions};
@@ -926,7 +926,7 @@ test('stale label should be removed if a comment was added to a stale issue', as
       'An issue that should un-stale',
       '2020-01-01T17:00:00Z',
       false,
-      [ 'Stale' ]
+      ['Stale']
     )
   ];
 
@@ -964,7 +964,7 @@ test('stale label should not be removed if a comment was added by the bot (and t
       'An issue that should stay stale',
       '2020-01-01T17:00:00Z',
       false,
-      [ 'Stale' ]
+      ['Stale']
     )
   ];
 
@@ -1068,7 +1068,7 @@ test('stale issues should be closed if the closed nubmer of days (additive) is a
       'An issue that should be stale and closed',
       lastUpdate.toString(),
       false,
-      [ 'Stale' ]
+      ['Stale']
     )
   ];
 
@@ -1161,7 +1161,7 @@ test('skips stale message on issues when skip-stale-issue-message is set', async
 
   // comment should not be created
   expect(markSpy).toHaveBeenCalledWith(
-    TestIssueList[ 0 ],
+    TestIssueList[0],
     opts.staleIssueMessage,
     opts.staleIssueLabel,
     // this option is skipMessage
@@ -1206,7 +1206,7 @@ test('skips stale message on prs when skip-stale-pr-message is set', async () =>
 
   // comment should not be created
   expect(markSpy).toHaveBeenCalledWith(
-    TestIssueList[ 0 ],
+    TestIssueList[0],
     opts.stalePrMessage,
     opts.stalePrLabel,
     // this option is skipMessage

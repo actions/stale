@@ -818,36 +818,9 @@ test('exempt issue labels will not be marked stale', async () => {
   // process our fake issue list
   await processor.processIssues(1);
 
-  expect(processor.staleIssues.length).toEqual(0);
-  expect(processor.closedIssues.length).toEqual(0);
-  expect(processor.removedLabelIssues.length).toEqual(0);
-});
-
-test('exempt issue labels will not be marked stale and will remove the existing stale label', async () => {
-  expect.assertions(3);
-  const opts = {...DefaultProcessorOptions};
-  opts.exemptIssueLabels = 'Exempt';
-
-  const TestIssueList: Issue[] = [
-    generateIssue(1, 'My first issue', '2020-01-01T17:00:00Z', false, [
-      opts.exemptIssueLabels, opts.staleIssueLabel
-    ])
-  ];
-
-  const processor = new IssueProcessor(
-    opts,
-    async () => 'abot',
-    async p => (p == 1 ? TestIssueList : []),
-    async (num: number, dt: string) => [],
-    async (issue: Issue, label: string) => new Date().toDateString()
-  );
-
-  // process our fake issue list
-  await processor.processIssues(1);
-
-  expect(processor.staleIssues.length).toEqual(0);
-  expect(processor.closedIssues.length).toEqual(0);
-  expect(processor.removedLabelIssues.length).toEqual(1);
+  expect(processor.staleIssues.length).toStrictEqual(0);
+  expect(processor.closedIssues.length).toStrictEqual(0);
+  expect(processor.removedLabelIssues.length).toStrictEqual(0);
 });
 
 test('exempt issue labels will not be marked stale (multi issue label with spaces)', async () => {
@@ -919,6 +892,42 @@ test('exempt pr labels will not be marked stale', async () => {
   await processor.processIssues(1);
 
   expect(processor.staleIssues.length).toEqual(2); // PR should get processed even though it has an exempt **issue** label
+});
+
+test('exempt issue labels will not be marked stale and will remove the existing stale label', async () => {
+  expect.assertions(3);
+
+  const TestIssueList: Issue[] = [
+    generateIssue(1, 'My first issue', '2020-01-01T17:00:00Z', false, [
+      'Exempt',
+      'Stale'
+    ])
+  ];
+
+  const opts = {...DefaultProcessorOptions};
+  opts.exemptIssueLabels = 'Exempt';
+
+  const processor = new IssueProcessor(
+    opts,
+    async () => 'abot',
+    async p => (p == 1 ? TestIssueList : []),
+    async (num: number, dt: string) => [
+      {
+        user: {
+          login: 'notme',
+          type: 'User'
+        }
+      }
+    ], // return a fake comment to indicate there was an update
+    async (issue: Issue, label: string) => new Date().toDateString()
+  );
+
+  // process our fake issue list
+  await processor.processIssues(1);
+
+  expect(processor.staleIssues.length).toStrictEqual(0);
+  expect(processor.closedIssues.length).toStrictEqual(0);
+  expect(processor.removedLabelIssues.length).toStrictEqual(1);
 });
 
 test('stale issues should not be closed if days is set to -1', async () => {

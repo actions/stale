@@ -172,21 +172,19 @@ export class IssueProcessor {
         ? this.options.skipStalePrMessage
         : this.options.skipStaleIssueMessage;
       const issueType: IssueType = getIssueType(isPr);
-      const DAYS_BEFORE_STALE: number = isPr
+      const daysBeforeStale: number = isPr
         ? this._getDaysBeforePrStale()
         : this._getDaysBeforeIssueStale();
 
       if (isPr) {
-        core.info(`Days before pull request stale: ${DAYS_BEFORE_STALE}`);
+        core.info(`Days before pull request stale: ${daysBeforeStale}`);
       } else {
-        core.info(`Days before issue stale: ${DAYS_BEFORE_STALE}`);
+        core.info(`Days before issue stale: ${daysBeforeStale}`);
       }
 
-      const SHOULD_MARK_WHEN_STALE: boolean = shouldMarkWhenStale(
-        DAYS_BEFORE_STALE
-      );
+      const shouldMarkAsStale: boolean = shouldMarkWhenStale(daysBeforeStale);
 
-      if (!staleMessage && SHOULD_MARK_WHEN_STALE) {
+      if (!staleMessage && shouldMarkAsStale) {
         core.info(`Skipping ${issueType} due to empty stale message`);
         continue;
       }
@@ -226,7 +224,7 @@ export class IssueProcessor {
       );
 
       // determine if this issue needs to be marked stale first
-      if (!isStale && shouldBeStale && SHOULD_MARK_WHEN_STALE) {
+      if (!isStale && shouldBeStale && shouldMarkAsStale) {
         core.info(
           `Marking ${issueType} stale because it was last updated on ${issue.updated_at} and it does not have a stale label`
         );
@@ -279,12 +277,12 @@ export class IssueProcessor {
       `Issue #${issue.number} has been commented on: ${issueHasComments}`
     );
 
-    const IS_PR: boolean = isPullRequest(issue);
-    const daysBeforeClose: number = IS_PR
+    const isPr: boolean = isPullRequest(issue);
+    const daysBeforeClose: number = isPr
       ? this._getDaysBeforePrClose()
       : this._getDaysBeforeIssueClose();
 
-    if (IS_PR) {
+    if (isPr) {
       core.info(`Days before pull request close: ${daysBeforeClose}`);
     } else {
       core.info(`Days before issue close: ${daysBeforeClose}`);

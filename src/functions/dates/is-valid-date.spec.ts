@@ -31,9 +31,23 @@ describe('isValidDate()', (): void => {
     });
   });
 
-  describe('when the given date is a custom and valid date', (): void => {
+  describe('when the given date is an ISO and valid date', (): void => {
     beforeEach((): void => {
       date = new Date('2011-04-22T13:33:48Z');
+    });
+
+    it('should return true', (): void => {
+      expect.assertions(1);
+
+      const result = isValidDate(date);
+
+      expect(result).toStrictEqual(true);
+    });
+  });
+
+  describe('when the given date is an ISO with ms and valid date', (): void => {
+    beforeEach((): void => {
+      date = new Date('2011-10-05T14:48:00.000Z');
     });
 
     it('should return true', (): void => {

@@ -2,7 +2,7 @@ import * as core from '@actions/core';
 import {context, getOctokit} from '@actions/github';
 import {GitHub} from '@actions/github/lib/utils';
 import {GetResponseTypeFromEndpointMethod} from '@octokit/types';
-import {IssueTypeEnum} from './enums/issue-type.enum';
+import {IssueType} from './enums/issue-type.enum';
 import {getIssueType} from './functions/get-issue-type';
 import {isLabeled} from './functions/is-labeled';
 import {isPullRequest} from './functions/is-pull-request';
@@ -171,7 +171,7 @@ export class IssueProcessor {
       const skipMessage = isPr
         ? this.options.skipStalePrMessage
         : this.options.skipStaleIssueMessage;
-      const issueType: IssueTypeEnum = getIssueType(isPr);
+      const issueType: IssueType = getIssueType(isPr);
       const DAYS_BEFORE_STALE: number = isPr
         ? this._getDaysBeforePrStale()
         : this._getDaysBeforeIssueStale();
@@ -260,7 +260,7 @@ export class IssueProcessor {
   // handle all of the stale issue logic when we find a stale issue
   private async processStaleIssue(
     issue: Issue,
-    issueType: IssueTypeEnum,
+    issueType: IssueType,
     staleLabel: string,
     actor: string,
     closeMessage?: string,

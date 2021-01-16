@@ -51,7 +51,6 @@ $ npm test
 | `skip-stale-issue-message` | Skip adding stale message on stale issue. *Defaults to **false*** | Optional
 | `skip-stale-pr-message` | Skip adding stale message on stale pr. *Defaults to **false*** | Optional
 
-
 ### Usage
 
 See [action.yml](./action.yml) For comprehensive list of options.

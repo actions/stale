@@ -1,5 +1,5 @@
-import {IssueTypeEnum} from '../enums/issue-type.enum';
+import {IssueType} from '../enums/issue-type.enum';
 
-export function getIssueType(isPullRequest: Readonly<boolean>): IssueTypeEnum {
-  return isPullRequest ? IssueTypeEnum.PULL_REQUEST : IssueTypeEnum.ISSUE;
+export function getIssueType(isPullRequest: Readonly<boolean>): IssueType {
+  return isPullRequest ? IssueType.PULL_REQUEST : IssueType.ISSUE;
 }

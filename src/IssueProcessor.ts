@@ -80,7 +80,7 @@ const logger: Logger = new Logger();
  * Handle processing of issues for staleness/closure.
  */
 export class IssueProcessor {
-  private static updatedSince(timestamp: string, num_days: number): boolean {
+  private static _updatedSince(timestamp: string, num_days: number): boolean {
     const daysInMillis = 1000 * 60 * 60 * 24 * num_days;
     const millisSinceLastUpdated =
       new Date().getTime() - new Date(timestamp).getTime();
@@ -114,19 +114,19 @@ export class IssueProcessor {
     this.client = getOctokit(options.repoToken);
 
     if (getActor) {
-      this.getActor = getActor;
+      this._getActor = getActor;
     }
 
     if (getIssues) {
-      this.getIssues = getIssues;
+      this._getIssues = getIssues;
     }
 
     if (listIssueComments) {
-      this.listIssueComments = listIssueComments;
+      this._listIssueComments = listIssueComments;
     }
 
     if (getLabelCreationDate) {
-      this.getLabelCreationDate = getLabelCreationDate;
+      this._getLabelCreationDate = getLabelCreationDate;
     }
 
     if (this.options.debugOnly) {
@@ -138,10 +138,10 @@ export class IssueProcessor {
 
   async processIssues(page = 1): Promise<number> {
     // get the next batch of issues
-    const issues: Issue[] = await this.getIssues(page);
+    const issues: Issue[] = await this._getIssues(page);
     this.operationsLeft -= 1;
 
-    const actor: string = await this.getActor();
+    const actor: string = await this._getActor();
 
     if (issues.length <= 0) {
       logger.info('---');
@@ -225,7 +225,7 @@ export class IssueProcessor {
       }
 
       // should this issue be marked stale?
-      const shouldBeStale = !IssueProcessor.updatedSince(
+      const shouldBeStale = !IssueProcessor._updatedSince(
         issue.updated_at,
         this.options.daysBeforeStale
       );
@@ -235,14 +235,14 @@ export class IssueProcessor {
         issueLogger.info(
           `Marking ${issueType} stale because it was last updated on ${issue.updated_at} and it does not have a stale label`
         );
-        await this.markStale(issue, staleMessage, staleLabel, skipMessage);
+        await this._markStale(issue, staleMessage, staleLabel, skipMessage);
         isStale = true; // this issue is now considered stale
       }
 
       // process the issue if it was marked stale
       if (isStale) {
         issueLogger.info(`Found a stale ${issueType}`);
-        await this.processStaleIssue(
+        await this._processStaleIssue(
           issue,
           issueType,
           staleLabel,
@@ -263,7 +263,7 @@ export class IssueProcessor {
   }
 
   // handle all of the stale issue logic when we find a stale issue
-  private async processStaleIssue(
+  private async _processStaleIssue(
     issue: Issue,
     issueType: IssueType,
     staleLabel: string,
@@ -273,12 +273,12 @@ export class IssueProcessor {
   ) {
     const issueLogger: IssueLogger = new IssueLogger(issue);
     const markedStaleOn: string =
-      (await this.getLabelCreationDate(issue, staleLabel)) || issue.updated_at;
+      (await this._getLabelCreationDate(issue, staleLabel)) || issue.updated_at;
     issueLogger.info(
       `Issue #${issue.number} marked stale on: ${markedStaleOn}`
     );
 
-    const issueHasComments: boolean = await this.hasCommentsSince(
+    const issueHasComments: boolean = await this._hasCommentsSince(
       issue,
       markedStaleOn,
       actor
@@ -298,7 +298,7 @@ export class IssueProcessor {
       issueLogger.info(`Days before issue close: ${daysBeforeClose}`);
     }
 
-    const issueHasUpdate: boolean = IssueProcessor.updatedSince(
+    const issueHasUpdate: boolean = IssueProcessor._updatedSince(
       issue.updated_at,
       daysBeforeClose
     );
@@ -320,13 +320,13 @@ export class IssueProcessor {
       issueLogger.info(
         `Closing ${issueType} because it was last updated on ${issue.updated_at}`
       );
-      await this.closeIssue(issue, closeMessage, closeLabel);
+      await this._closeIssue(issue, closeMessage, closeLabel);
 
       if (this.options.deleteBranch && issue.pull_request) {
         issueLogger.info(
           `Deleting branch for #${issue.number} as delete-branch option was specified`
         );
-        await this.deleteBranch(issue);
+        await this._deleteBranch(issue);
         this.deletedBranchIssues.push(issue);
       }
     } else {
@@ -337,7 +337,7 @@ export class IssueProcessor {
   }
 
   // checks to see if a given issue is still stale (has had activity on it)
-  private async hasCommentsSince(
+  private async _hasCommentsSince(
     issue: Issue,
     sinceDate: string,
     actor: string
@@ -353,7 +353,7 @@ export class IssueProcessor {
     }
 
     // find any comments since the date
-    const comments = await this.listIssueComments(issue.number, sinceDate);
+    const comments = await this._listIssueComments(issue.number, sinceDate);
 
     const filteredComments = comments.filter(
       comment => comment.user.type === 'User' && comment.user.login !== actor
@@ -368,7 +368,7 @@ export class IssueProcessor {
   }
 
   // grab comments for an issue since a given date
-  private async listIssueComments(
+  private async _listIssueComments(
     issueNumber: number,
     sinceDate: string
   ): Promise<Comment[]> {
@@ -388,7 +388,7 @@ export class IssueProcessor {
   }
 
   // get the actor from the GitHub token or context
-  private async getActor(): Promise<string> {
+  private async _getActor(): Promise<string> {
     let actor;
     try {
       actor = await this.client.users.getAuthenticated();
@@ -400,7 +400,7 @@ export class IssueProcessor {
   }
 
   // grab issues from github in baches of 100
-  private async getIssues(page: number): Promise<Issue[]> {
+  private async _getIssues(page: number): Promise<Issue[]> {
     // generate type for response
     const endpoint = this.client.issues.listForRepo;
     type OctoKitIssueList = GetResponseTypeFromEndpointMethod<typeof endpoint>;
@@ -425,7 +425,7 @@ export class IssueProcessor {
   }
 
   // Mark an issue as stale with a comment and a label
-  private async markStale(
+  private async _markStale(
     issue: Issue,
     staleMessage: string,
     staleLabel: string,
@@ -474,7 +474,7 @@ export class IssueProcessor {
   }
 
   // Close an issue based on staleness
-  private async closeIssue(
+  private async _closeIssue(
     issue: Issue,
     closeMessage?: string,
     closeLabel?: string
@@ -529,9 +529,8 @@ export class IssueProcessor {
     }
   }
 
-  private async getPullRequest(issue: Issue): Promise<PullRequest | undefined> {
+  private async _getPullRequest(issue: Issue): Promise<PullRequest | undefined> {
     const issueLogger: IssueLogger = new IssueLogger(issue);
-
     this.operationsLeft -= 1;
 
     try {
@@ -550,7 +549,7 @@ export class IssueProcessor {
   }
 
   // Delete the branch on closed pull request
-  private async deleteBranch(issue: Issue): Promise<void> {
+  private async _deleteBranch(issue: Issue): Promise<void> {
     const issueLogger: IssueLogger = new IssueLogger(issue);
 
     issueLogger.info(
@@ -561,7 +560,7 @@ export class IssueProcessor {
       return;
     }
 
-    const pullRequest = await this.getPullRequest(issue);
+    const pullRequest = await this._getPullRequest(issue);
 
     if (!pullRequest) {
       issueLogger.info(
@@ -591,7 +590,7 @@ export class IssueProcessor {
   }
 
   // Remove a label from an issue
-  private async removeLabel(issue: Issue, label: string): Promise<void> {
+  private async _removeLabel(issue: Issue, label: string): Promise<void> {
     const issueLogger: IssueLogger = new IssueLogger(issue);
 
     issueLogger.info(`Removing label "${label}" from issue #${issue.number}`);
@@ -619,7 +618,7 @@ export class IssueProcessor {
 
   // returns the creation date of a given label on an issue (or nothing if no label existed)
   ///see https://developer.github.com/v3/activity/events/
-  private async getLabelCreationDate(
+  private async _getLabelCreationDate(
     issue: Issue,
     label: string
   ): Promise<string | undefined> {
@@ -683,6 +682,6 @@ export class IssueProcessor {
       `Issue #${issue.number} is no longer stale. Removing stale label.`
     );
 
-    return this.removeLabel(issue, staleLabel);
+    return this._removeLabel(issue, staleLabel);
   }
 }

@@ -44,7 +44,7 @@ $ npm test
 | `exempt-issue-labels`       | Labels on an issue exempted from being marked as stale.                              | Optional |
 | `exempt-pr-labels`          | Labels on the pr exempted from being marked as stale.                                | Optional |
 | `only-labels`               | Only labels checked for stale issue/pr.                                              | Optional |
-| `operations-per-run`        | Maximum number of operations per run. _Defaults to **30**_                           | Optional |
+| `operations-per-run`        | Maximum number of operations per run (GitHub API CRUD related). _Defaults to **30**_                           | Optional |
 | `remove-stale-when-updated` | Remove stale label from issue/pr on updates or comments. _Defaults to **true**_      | Optional |
 | `debug-only`                | Dry-run on action. _Defaults to **false**_                                           | Optional |
 | `ascending`                 | Order to get issues/pr. _Defaults to **false**_                                      | Optional |

@@ -64,7 +64,7 @@ inputs:
     default: ''
     required: false
   operations-per-run:
-    description: 'The maximum number of operations per run, used to control rate limiting.'
+    description: 'The maximum number of operations per run, used to control rate limiting (GitHub API CRUD related).'
     default: '30'
     required: false
   remove-stale-when-updated:

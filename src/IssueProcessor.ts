@@ -1,5 +1,6 @@
 import * as core from '@actions/core';
 import {context, getOctokit} from '@actions/github';
+import {GitHub} from '@actions/github/lib/utils';
 import {GetResponseTypeFromEndpointMethod} from '@octokit/types';
 import {isLabeled} from './functions/is-labeled';
 import {labelsToList} from './functions/labels-to-list';
@@ -12,6 +13,13 @@ export interface Issue {
   pull_request: any;
   state: string;
   locked: boolean;
+}
+
+export interface PullRequest {
+  number: number;
+  head: {
+    ref: string;
+  };
 }
 
 export interface User {
@@ -54,22 +62,25 @@ export interface IssueProcessorOptions {
   ascending: boolean;
   skipStaleIssueMessage: boolean;
   skipStalePrMessage: boolean;
+  deleteBranch: boolean;
 }
 
 /***
  * Handle processing of issues for staleness/closure.
  */
 export class IssueProcessor {
-  readonly client: any; // need to make this the correct type
+  readonly client: InstanceType<typeof GitHub>;
   readonly options: IssueProcessorOptions;
   private operationsLeft = 0;
 
   readonly staleIssues: Issue[] = [];
   readonly closedIssues: Issue[] = [];
+  readonly deletedBranchIssues: Issue[] = [];
   readonly removedLabelIssues: Issue[] = [];
 
   constructor(
     options: IssueProcessorOptions,
+    getActor?: () => Promise<string>,
     getIssues?: (page: number) => Promise<Issue[]>,
     listIssueComments?: (
       issueNumber: number,
@@ -83,6 +94,10 @@ export class IssueProcessor {
     this.options = options;
     this.operationsLeft = options.operationsPerRun;
     this.client = getOctokit(options.repoToken);
+
+    if (getActor) {
+      this.getActor = getActor;
+    }
 
     if (getIssues) {
       this.getIssues = getIssues;
@@ -107,6 +122,8 @@ export class IssueProcessor {
     // get the next batch of issues
     const issues: Issue[] = await this.getIssues(page);
     this.operationsLeft -= 1;
+
+    const actor: string = await this.getActor();
 
     if (issues.length <= 0) {
       core.info('No more issues found to process. Exiting.');
@@ -167,7 +184,13 @@ export class IssueProcessor {
       }
 
       // does this issue have a stale label?
-      let isStale = isLabeled(issue, staleLabel);
+      let isStale: boolean = isLabeled(issue, staleLabel);
+
+      if (isStale) {
+        core.info(`This issue has a stale label`);
+      } else {
+        core.info(`This issue hasn't a stale label`);
+      }
 
       // should this issue be marked stale?
       const shouldBeStale = !IssueProcessor.updatedSince(
@@ -191,6 +214,7 @@ export class IssueProcessor {
           issue,
           issueType,
           staleLabel,
+          actor,
           closeMessage,
           closeLabel
         );
@@ -211,6 +235,7 @@ export class IssueProcessor {
     issue: Issue,
     issueType: string,
     staleLabel: string,
+    actor: string,
     closeMessage?: string,
     closeLabel?: string
   ) {
@@ -220,7 +245,8 @@ export class IssueProcessor {
 
     const issueHasComments: boolean = await this.hasCommentsSince(
       issue,
-      markedStaleOn
+      markedStaleOn,
+      actor
     );
     core.info(
       `Issue #${issue.number} has been commented on: ${issueHasComments}`
@@ -250,6 +276,14 @@ export class IssueProcessor {
         `Closing ${issueType} because it was last updated on ${issue.updated_at}`
       );
       await this.closeIssue(issue, closeMessage, closeLabel);
+
+      if (this.options.deleteBranch && issue.pull_request) {
+        core.info(
+          `Deleting branch for #${issue.number} as delete-branch option was specified`
+        );
+        await this.deleteBranch(issue);
+        this.deletedBranchIssues.push(issue);
+      }
     } else {
       core.info(
         `Stale ${issueType} is not old enough to close yet (hasComments? ${issueHasComments}, hasUpdate? ${issueHasUpdate})`
@@ -260,7 +294,8 @@ export class IssueProcessor {
   // checks to see if a given issue is still stale (has had activity on it)
   private async hasCommentsSince(
     issue: Issue,
-    sinceDate: string
+    sinceDate: string,
+    actor: string
   ): Promise<boolean> {
     core.info(
       `Checking for comments on issue #${issue.number} since ${sinceDate}`
@@ -274,8 +309,7 @@ export class IssueProcessor {
     const comments = await this.listIssueComments(issue.number, sinceDate);
 
     const filteredComments = comments.filter(
-      comment =>
-        comment.user.type === 'User' && comment.user.login !== context.actor
+      comment => comment.user.type === 'User' && comment.user.login !== actor
     );
 
     core.info(
@@ -304,6 +338,18 @@ export class IssueProcessor {
       core.error(`List issue comments error: ${error.message}`);
       return Promise.resolve([]);
     }
+  }
+
+  // get the actor from the GitHub token or context
+  private async getActor(): Promise<string> {
+    let actor;
+    try {
+      actor = await this.client.users.getAuthenticated();
+    } catch (error) {
+      return context.actor;
+    }
+
+    return actor.data.login;
   }
 
   // grab issues from github in baches of 100
@@ -432,14 +478,70 @@ export class IssueProcessor {
     }
   }
 
+  private async getPullRequest(
+    pullNumber: number
+  ): Promise<PullRequest | undefined> {
+    this.operationsLeft -= 1;
+
+    try {
+      const pullRequest = await this.client.pulls.get({
+        owner: context.repo.owner,
+        repo: context.repo.repo,
+        pull_number: pullNumber
+      });
+
+      return pullRequest.data;
+    } catch (error) {
+      core.error(`Error getting pull request ${pullNumber}: ${error.message}`);
+    }
+  }
+
+  // Delete the branch on closed pull request
+  private async deleteBranch(issue: Issue): Promise<void> {
+    core.info(
+      `Delete branch from closed issue #${issue.number} - ${issue.title}`
+    );
+
+    if (this.options.debugOnly) {
+      return;
+    }
+
+    const pullRequest = await this.getPullRequest(issue.number);
+
+    if (!pullRequest) {
+      core.info(
+        `Not deleting branch as pull request not found for issue ${issue.number}`
+      );
+      return;
+    }
+
+    const branch = pullRequest.head.ref;
+    core.info(`Deleting branch ${branch} from closed issue #${issue.number}`);
+
+    this.operationsLeft -= 1;
+
+    try {
+      await this.client.git.deleteRef({
+        owner: context.repo.owner,
+        repo: context.repo.repo,
+        ref: `heads/${branch}`
+      });
+    } catch (error) {
+      core.error(
+        `Error deleting branch ${branch} from issue #${issue.number}: ${error.message}`
+      );
+    }
+  }
+
   // Remove a label from an issue
   private async removeLabel(issue: Issue, label: string): Promise<void> {
-    core.info(`Removing label from issue #${issue.number}`);
+    core.info(`Removing label "${label}" from issue #${issue.number}`);
 
     this.removedLabelIssues.push(issue);
 
     this.operationsLeft -= 1;
 
+    // @todo remove the debug only to be able to test the code below
     if (this.options.debugOnly) {
       return;
     }
@@ -449,7 +551,7 @@ export class IssueProcessor {
         owner: context.repo.owner,
         repo: context.repo.repo,
         issue_number: issue.number,
-        name: encodeURIComponent(label) // A label can have a "?" in the name
+        name: label
       });
     } catch (error) {
       core.error(`Error removing a label: ${error.message}`);

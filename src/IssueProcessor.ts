@@ -1,7 +1,10 @@
 import {context, getOctokit} from '@actions/github';
 import {GitHub} from '@actions/github/lib/utils';
 import {GetResponseTypeFromEndpointMethod} from '@octokit/types';
-import {IssueType} from './enums/issue-type.enum';
+import {IssueType} from './enums/issue-type';
+import {getHumanizedDate} from './functions/dates/get-humanized-date';
+import {isDateMoreRecentThan} from './functions/dates/is-date-more-recent-than';
+import {isValidDate} from './functions/dates/is-valid-date';
 import {getIssueType} from './functions/get-issue-type';
 import {IssueLogger} from './classes/issue-logger';
 import {Logger} from './classes/logger';
@@ -9,11 +12,13 @@ import {isLabeled} from './functions/is-labeled';
 import {isPullRequest} from './functions/is-pull-request';
 import {labelsToList} from './functions/labels-to-list';
 import {shouldMarkWhenStale} from './functions/should-mark-when-stale';
+import {IsoDateString} from './types/iso-date-string';
 
 export interface Issue {
   title: string;
   number: number;
-  updated_at: string;
+  created_at: IsoDateString;
+  updated_at: IsoDateString;
   labels: Label[];
   pull_request: any;
   state: string;
@@ -72,6 +77,7 @@ export interface IssueProcessorOptions {
   skipStaleIssueMessage: boolean;
   skipStalePrMessage: boolean;
   deleteBranch: boolean;
+  startDate: string | undefined; // Should be ISO 8601 or RFC 2822
 }
 
 const logger: Logger = new Logger();
@@ -202,6 +208,50 @@ export class IssueProcessor {
       if (issue.locked) {
         issueLogger.info(`Skipping ${issueType} because it is locked`);
         continue; // don't process locked issues
+      }
+
+      if (this.options.startDate) {
+        const startDate: Date = new Date(this.options.startDate);
+        const createdAt: Date = new Date(issue.created_at);
+
+        issueLogger.info(
+          `A start date was specified for the ${getHumanizedDate(startDate)} (${
+            this.options.startDate
+          })`
+        );
+
+        // Expecting that GitHub will always set a creation date on the issues and PRs
+        // But you never know!
+        if (!isValidDate(createdAt)) {
+          throw new Error(
+            `Invalid issue field: "created_at". Expected a valid date`
+          );
+        }
+
+        issueLogger.info(
+          `Issue created the ${getHumanizedDate(createdAt)} (${
+            issue.created_at
+          })`
+        );
+
+        if (!isDateMoreRecentThan(createdAt, startDate)) {
+          issueLogger.info(
+            `Skipping ${issueType} because it was created before the specified start date`
+          );
+
+          continue; // don't process issues which were created before the start date
+        }
+      }
+
+      if (
+        exemptLabels.some((exemptLabel: string) =>
+          isLabeled(issue, exemptLabel)
+        )
+      ) {
+        issueLogger.info(
+          `Skipping ${issueType} because it has an exempt label`
+        );
+        continue; // don't process exempt issues
       }
 
       // Does this issue have a stale label?

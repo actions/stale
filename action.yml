@@ -4,6 +4,7 @@ author: 'GitHub'
 inputs:
   repo-token:
     description: 'Token for the repository. Can be passed in using `{{ secrets.GITHUB_TOKEN }}`.'
+    required: false
     default: ${{ github.token }}
   stale-issue-message:
     description: 'The message to post on the issue when tagging it. If none provided, will not mark issues stale.'
@@ -90,6 +91,10 @@ inputs:
   delete-branch:
     description: 'Delete the git branch after closing a stale pull request.'
     default: 'false'
+    required: false
+  start-date:
+    description: 'The date used to skip the stale action on issue/pr created before it (ISO 8601 or RFC 2822).'
+    default: ''
     required: false
 runs:
   using: 'node12'

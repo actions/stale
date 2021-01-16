@@ -1,4 +1,5 @@
 import * as core from '@actions/core';
+import {isValidDate} from './functions/dates/is-valid-date';
 import {IssueProcessor, IssueProcessorOptions} from './IssueProcessor';
 
 async function run(): Promise<void> {
@@ -14,7 +15,7 @@ async function run(): Promise<void> {
 }
 
 function getAndValidateArgs(): IssueProcessorOptions {
-  const args = {
+  const args: IssueProcessorOptions = {
     repoToken: core.getInput('repo-token'),
     staleIssueMessage: core.getInput('stale-issue-message'),
     stalePrMessage: core.getInput('stale-pr-message'),
@@ -47,7 +48,11 @@ function getAndValidateArgs(): IssueProcessorOptions {
     ascending: core.getInput('ascending') === 'true',
     skipStalePrMessage: core.getInput('skip-stale-pr-message') === 'true',
     skipStaleIssueMessage: core.getInput('skip-stale-issue-message') === 'true',
-    deleteBranch: core.getInput('delete-branch') === 'true'
+    deleteBranch: core.getInput('delete-branch') === 'true',
+    startDate:
+      core.getInput('start-date') !== ''
+        ? core.getInput('start-date')
+        : undefined
   };
 
   for (const numberInput of [
@@ -61,6 +66,17 @@ function getAndValidateArgs(): IssueProcessorOptions {
   ]) {
     if (isNaN(parseInt(core.getInput(numberInput)))) {
       throw Error(`input ${numberInput} did not parse to a valid integer`);
+    }
+  }
+
+  for (const optionalDateInput of ['start-date']) {
+    // Ignore empty dates because it is considered as the right type for a default value (so a valid one)
+    if (core.getInput(optionalDateInput) !== '') {
+      if (!isValidDate(new Date(core.getInput(optionalDateInput)))) {
+        throw new Error(
+          `input ${optionalDateInput} did not parse to a valid date`
+        );
+      }
     }
   }
 

@@ -204,24 +204,27 @@ export class IssueProcessor {
         continue; // don't process locked issues
       }
 
-      if (
-        exemptLabels.some((exemptLabel: string) =>
-          isLabeled(issue, exemptLabel)
-        )
-      ) {
-        issueLogger.info(
-          `Skipping ${issueType} because it has an exempt label`
-        );
-        continue; // don't process exempt issues
-      }
-
-      // does this issue have a stale label?
+      // Does this issue have a stale label?
       let isStale: boolean = isLabeled(issue, staleLabel);
 
       if (isStale) {
         issueLogger.info(`This issue has a stale label`);
       } else {
         issueLogger.info(`This issue hasn't a stale label`);
+      }
+
+      if (
+        exemptLabels.some((exemptLabel: Readonly<string>): boolean =>
+          isLabeled(issue, exemptLabel)
+        )
+      ) {
+        if (isStale) {
+          core.info(`An exempt label was added after the stale label.`);
+          await this._removeStaleLabel(issue, staleLabel);
+        }
+
+        core.info(`Skipping ${issueType} because it has an exempt label`);
+        continue; // don't process exempt issues
       }
 
       // should this issue be marked stale?

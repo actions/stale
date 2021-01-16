@@ -42,7 +42,9 @@
       "@typescript-eslint/restrict-plus-operands": "error",
       "semi": "off",
       "@typescript-eslint/type-annotation-spacing": "error",
-      "@typescript-eslint/unbound-method": "off"
+      "@typescript-eslint/unbound-method": "off",
+      "no-shadow": "off",
+      "@typescript-eslint/no-shadow": "error"
     },
     "env": {
       "node": true,

@@ -5,7 +5,7 @@ describe('getHumanizedDate()', (): void => {
 
   describe('when the given date is the 1st of april 2020', (): void => {
     beforeEach((): void => {
-      date = new Date('2020-04-01');
+      date = new Date(2020, 3, 1);
     });
 
     it('should return the date formatted as DD-MM-YYYY', (): void => {
@@ -19,7 +19,7 @@ describe('getHumanizedDate()', (): void => {
 
   describe('when the given date is the 18st of december 2020', (): void => {
     beforeEach((): void => {
-      date = new Date('2020-12-18');
+      date = new Date(2020, 11, 18);
     });
 
     it('should return the date formatted as DD-MM-YYYY', (): void => {

@@ -27,29 +27,29 @@ $ npm test
 | Input                       | Description                                                                          | Usage    |
 | --------------------------- | ------------------------------------------------------------------------------------ | -------- |
 | `repo-token`                | PAT(Personal Access Token) for authorizing repository.                               | Optional |
-| `days-before-stale`         | Idle number of days before marking an issue/pr as stale. \*Defaults to **60**        | Optional |
+| `days-before-stale`         | Idle number of days before marking an issue/pr as stale. _Defaults to **60**_        | Optional |
 | `days-before-issue-stale`   | Idle number of days before marking an issue as stale (override `days-before-stale`). | Optional |
 | `days-before-pr-stale`      | Idle number of days before marking an pr as stale (override `days-before-stale`).    | Optional |
-| `days-before-close`         | Idle number of days before closing an stale issue/pr. \*Defaults to **7\***          | Optional |
+| `days-before-close`         | Idle number of days before closing an stale issue/pr. _Defaults to **7**_            | Optional |
 | `days-before-issue-close`   | Idle number of days before closing an stale issue (override `days-before-close`).    | Optional |
 | `days-before-pr-close`      | Idle number of days before closing an stale pr (override `days-before-close`).       | Optional |
 | `stale-issue-message`       | Message to post on the stale issue.                                                  | Optional |
 | `stale-pr-message`          | Message to post on the stale pr.                                                     | Optional |
 | `close-issue-message`       | Message to post on the stale issue while closing it.                                 | Optional |
 | `close-pr-message`          | Message to post on the stale pr while closing it.                                    | Optional |
-| `stale-issue-label`         | Label to apply on the stale issue. \*Defaults to **stale\***                         | Optional |
+| `stale-issue-label`         | Label to apply on the stale issue. _Defaults to **stale**_                           | Optional |
 | `close-issue-label`         | Label to apply on closing issue.                                                     | Optional |
 | `stale-pr-label`            | Label to apply on the stale pr.                                                      | Optional |
 | `close-pr-label`            | Label to apply on the closing pr.                                                    | Optional |
 | `exempt-issue-labels`       | Labels on an issue exempted from being marked as stale.                              | Optional |
 | `exempt-pr-labels`          | Labels on the pr exempted from being marked as stale.                                | Optional |
 | `only-labels`               | Only labels checked for stale issue/pr.                                              | Optional |
-| `operations-per-run`        | Maximum number of operations per run. \*Defaults to **30\***                         | Optional |
-| `remove-stale-when-updated` | Remove stale label from issue/pr on updates or comments. \*Defaults to **true\***    | Optional |
-| `debug-only`                | Dry-run on action. \*Defaults to **false\***                                         | Optional |
-| `ascending`                 | Order to get issues/pr. \*Defaults to **false\***                                    | Optional |
-| `skip-stale-issue-message`  | Skip adding stale message on stale issue. \*Defaults to **false\***                  | Optional |
-| `skip-stale-pr-message`     | Skip adding stale message on stale pr. \*Defaults to **false\***                     | Optional |
+| `operations-per-run`        | Maximum number of operations per run. _Defaults to **30**_                           | Optional |
+| `remove-stale-when-updated` | Remove stale label from issue/pr on updates or comments. _Defaults to **true**_      | Optional |
+| `debug-only`                | Dry-run on action. _Defaults to **false**_                                           | Optional |
+| `ascending`                 | Order to get issues/pr. _Defaults to **false**_                                      | Optional |
+| `skip-stale-issue-message`  | Skip adding stale message on stale issue. _Defaults to **false**_                    | Optional |
+| `skip-stale-pr-message`     | Skip adding stale message on stale pr. _Defaults to **false**_                       | Optional |
 
 ### Usage
 

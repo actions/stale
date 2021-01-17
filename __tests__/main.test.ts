@@ -1220,17 +1220,18 @@ test('exempt pr labels will not be marked stale', async () => {
 
 test('exempt issue labels will not be marked stale and will remove the existing stale label', async () => {
   expect.assertions(3);
-
   const TestIssueList: Issue[] = [
-    generateIssue(1, 'My first issue', '2020-01-01T17:00:00Z', false, [
-      'Exempt',
-      'Stale'
-    ])
+    generateIssue(
+      1,
+      'My first issue',
+      '2020-01-01T17:00:00Z',
+      '2020-01-01T17:00:00Z',
+      false,
+      ['Exempt', 'Stale']
+    )
   ];
-
   const opts = {...DefaultProcessorOptions};
   opts.exemptIssueLabels = 'Exempt';
-
   const processor = new IssueProcessor(
     opts,
     async () => 'abot',

@@ -244,17 +244,6 @@ export class IssueProcessor {
         }
       }
 
-      if (
-        exemptLabels.some((exemptLabel: string) =>
-          isLabeled(issue, exemptLabel)
-        )
-      ) {
-        issueLogger.info(
-          `Skipping ${issueType} because it has an exempt label`
-        );
-        continue; // don't process exempt issues
-      }
-
       // Does this issue have a stale label?
       let isStale: boolean = isLabeled(issue, staleLabel);
 

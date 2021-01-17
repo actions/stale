@@ -1,11 +1,11 @@
 import * as core from '@actions/core';
-import {Issue} from '../IssueProcessor';
+import {Issue} from '../issue';
 import {Logger} from './logger';
 
 export class IssueLogger implements Logger {
   private readonly _issue: Issue;
 
-  constructor(issue: Readonly<Issue>) {
+  constructor(issue: Issue) {
     this._issue = issue;
   }
 

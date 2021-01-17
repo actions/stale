@@ -52,7 +52,10 @@ function getAndValidateArgs(): IssueProcessorOptions {
     startDate:
       core.getInput('start-date') !== ''
         ? core.getInput('start-date')
-        : undefined
+        : undefined,
+    exemptMilestones: core.getInput('exempt-milestones'),
+    exemptIssueMilestones: core.getInput('exempt-issue-milestones'),
+    exemptPrMilestones: core.getInput('exempt-pr-milestones')
   };
 
   for (const numberInput of [

@@ -1,5 +1,6 @@
 import deburr from 'lodash.deburr';
-import {Issue, Label} from '../IssueProcessor';
+import {Issue} from '../classes/issue';
+import {Label} from '../IssueProcessor';
 import {CleanLabel} from '../types/clean-label';
 
 /**

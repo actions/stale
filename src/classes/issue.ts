@@ -10,13 +10,13 @@ export class Issue implements IIssue {
   readonly number: number;
   updated_at: string;
   readonly labels: Label[];
-  readonly pull_request: any;
+  readonly pull_request: Object | undefined;
   readonly state: string;
   readonly locked: boolean;
   readonly milestone: IMilestone;
   readonly isPullRequest: boolean;
-  isStale: boolean;
   readonly staleLabel: string;
+  isStale: boolean;
 
   constructor(
     options: Readonly<IssueProcessorOptions>,

@@ -6,7 +6,7 @@ export interface IIssue {
   number: number;
   updated_at: string;
   labels: Label[];
-  pull_request: any;
+  pull_request: Object | undefined;
   state: string;
   locked: boolean;
   milestone: IMilestone;

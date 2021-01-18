@@ -60,11 +60,7 @@ function getAndValidateArgs(): IssueProcessorOptions {
 
   for (const numberInput of [
     'days-before-stale',
-    'days-before-issue-stale',
-    'days-before-pr-stale',
     'days-before-close',
-    'days-before-issue-close',
-    'days-before-pr-close',
     'operations-per-run'
   ]) {
     if (isNaN(parseInt(core.getInput(numberInput)))) {

@@ -30,7 +30,7 @@
     "@actions/github": "^4.0.0",
     "@octokit/rest": "^18.0.9",
     "lodash.deburr": "^4.1.0",
-    "semver": "^7.3.2"
+    "semver": "^7.3.4"
   },
   "devDependencies": {
     "@types/jest": "^26.0.15",

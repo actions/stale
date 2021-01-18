@@ -16,6 +16,7 @@ describe('Issue', (): void => {
     issueInterface = {
       title: 'dummy-title',
       number: 8,
+      created_at: 'dummy-created-at',
       updated_at: 'dummy-updated-at',
       labels: [
         {
@@ -45,6 +46,12 @@ describe('Issue', (): void => {
       expect.assertions(1);
 
       expect(issue.number).toStrictEqual(8);
+    });
+
+    it('should set the created_at with the given issue created_at', (): void => {
+      expect.assertions(1);
+
+      expect(issue.created_at).toStrictEqual('dummy-created-at');
     });
 
     it('should set the updated_at with the given issue updated_at', (): void => {

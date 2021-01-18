@@ -3,14 +3,16 @@ import {isPullRequest} from '../functions/is-pull-request';
 import {IIssue} from '../interfaces/issue';
 import {IMilestone} from '../interfaces/milestone';
 import {IssueProcessorOptions, Label} from '../IssueProcessor';
+import {IsoDateString} from '../types/iso-date-string';
 
 export class Issue implements IIssue {
   private readonly _options: IssueProcessorOptions;
   readonly title: string;
   readonly number: number;
-  updated_at: string;
+  created_at: IsoDateString;
+  updated_at: IsoDateString;
   readonly labels: Label[];
-  readonly pull_request: Object | undefined;
+  readonly pull_request: Object | null | undefined;
   readonly state: string;
   readonly locked: boolean;
   readonly milestone: IMilestone;
@@ -25,6 +27,7 @@ export class Issue implements IIssue {
     this._options = options;
     this.title = issue.title;
     this.number = issue.number;
+    this.created_at = issue.created_at;
     this.updated_at = issue.updated_at;
     this.labels = issue.labels;
     this.pull_request = issue.pull_request;

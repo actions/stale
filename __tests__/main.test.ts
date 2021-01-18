@@ -106,20 +106,21 @@ test('processing an issue with no label will make it stale and close it, if it i
 
 test('processing an issue with no label and a start date as ECMAScript epoch in seconds being before the issue creation date will not make it stale nor close it when it is old enough and days-before-close is set to 0', async () => {
   expect.assertions(2);
-  const TestIssueList: Issue[] = [
-    generateIssue(
-      1,
-      'An issue with no label',
-      '2020-01-01T17:00:00Z',
-      '2020-01-01T17:00:00Z'
-    )
-  ];
   const january2000 = 946681200000;
   const opts: IssueProcessorOptions = {
     ...DefaultProcessorOptions,
     daysBeforeClose: 0,
     startDate: january2000.toString()
   };
+  const TestIssueList: Issue[] = [
+    generateIssue(
+      opts,
+      1,
+      'An issue with no label',
+      '2020-01-01T17:00:00Z',
+      '2020-01-01T17:00:00Z'
+    )
+  ];
   const processor = new IssueProcessor(
     opts,
     async () => 'abot',
@@ -137,20 +138,21 @@ test('processing an issue with no label and a start date as ECMAScript epoch in 
 
 test('processing an issue with no label and a start date as ECMAScript epoch in seconds being after the issue creation date will not make it stale nor close it when it is old enough and days-before-close is set to 0', async () => {
   expect.assertions(2);
-  const TestIssueList: Issue[] = [
-    generateIssue(
-      1,
-      'An issue with no label',
-      '2020-01-01T17:00:00Z',
-      '2020-01-01T17:00:00Z'
-    )
-  ];
   const january2021 = 1609455600000;
   const opts: IssueProcessorOptions = {
     ...DefaultProcessorOptions,
     daysBeforeClose: 0,
     startDate: january2021.toString()
   };
+  const TestIssueList: Issue[] = [
+    generateIssue(
+      opts,
+      1,
+      'An issue with no label',
+      '2020-01-01T17:00:00Z',
+      '2020-01-01T17:00:00Z'
+    )
+  ];
   const processor = new IssueProcessor(
     opts,
     async () => 'abot',
@@ -168,20 +170,21 @@ test('processing an issue with no label and a start date as ECMAScript epoch in 
 
 test('processing an issue with no label and a start date as ECMAScript epoch in milliseconds being before the issue creation date will not make it stale nor close it when it is old enough and days-before-close is set to 0', async () => {
   expect.assertions(2);
-  const TestIssueList: Issue[] = [
-    generateIssue(
-      1,
-      'An issue with no label',
-      '2020-01-01T17:00:00Z',
-      '2020-01-01T17:00:00Z'
-    )
-  ];
   const january2000 = 946681200000000;
   const opts: IssueProcessorOptions = {
     ...DefaultProcessorOptions,
     daysBeforeClose: 0,
     startDate: january2000.toString()
   };
+  const TestIssueList: Issue[] = [
+    generateIssue(
+      opts,
+      1,
+      'An issue with no label',
+      '2020-01-01T17:00:00Z',
+      '2020-01-01T17:00:00Z'
+    )
+  ];
   const processor = new IssueProcessor(
     opts,
     async () => 'abot',
@@ -199,20 +202,21 @@ test('processing an issue with no label and a start date as ECMAScript epoch in 
 
 test('processing an issue with no label and a start date as ECMAScript epoch in milliseconds being after the issue creation date will not make it stale nor close it when it is old enough and days-before-close is set to 0', async () => {
   expect.assertions(2);
-  const TestIssueList: Issue[] = [
-    generateIssue(
-      1,
-      'An issue with no label',
-      '2020-01-01T17:00:00Z',
-      '2020-01-01T17:00:00Z'
-    )
-  ];
   const january2021 = 1609455600000;
   const opts: IssueProcessorOptions = {
     ...DefaultProcessorOptions,
     daysBeforeClose: 0,
     startDate: january2021.toString()
   };
+  const TestIssueList: Issue[] = [
+    generateIssue(
+      opts,
+      1,
+      'An issue with no label',
+      '2020-01-01T17:00:00Z',
+      '2020-01-01T17:00:00Z'
+    )
+  ];
   const processor = new IssueProcessor(
     opts,
     async () => 'abot',
@@ -230,20 +234,21 @@ test('processing an issue with no label and a start date as ECMAScript epoch in 
 
 test('processing an issue with no label and a start date as ISO 8601 being before the issue creation date will make it stale and close it when it is old enough and days-before-close is set to 0', async () => {
   expect.assertions(2);
-  const TestIssueList: Issue[] = [
-    generateIssue(
-      1,
-      'An issue with no label',
-      '2020-01-01T17:00:00Z',
-      '2020-01-01T17:00:00Z'
-    )
-  ];
   const january2000 = '2000-01-01T00:00:00Z';
   const opts: IssueProcessorOptions = {
     ...DefaultProcessorOptions,
     daysBeforeClose: 0,
     startDate: january2000.toString()
   };
+  const TestIssueList: Issue[] = [
+    generateIssue(
+      opts,
+      1,
+      'An issue with no label',
+      '2020-01-01T17:00:00Z',
+      '2020-01-01T17:00:00Z'
+    )
+  ];
   const processor = new IssueProcessor(
     opts,
     async () => 'abot',
@@ -261,20 +266,21 @@ test('processing an issue with no label and a start date as ISO 8601 being befor
 
 test('processing an issue with no label and a start date as ISO 8601 being after the issue creation date will not make it stale nor close it when it is old enough and days-before-close is set to 0', async () => {
   expect.assertions(2);
-  const TestIssueList: Issue[] = [
-    generateIssue(
-      1,
-      'An issue with no label',
-      '2020-01-01T17:00:00Z',
-      '2020-01-01T17:00:00Z'
-    )
-  ];
   const january2021 = '2021-01-01T00:00:00Z';
   const opts: IssueProcessorOptions = {
     ...DefaultProcessorOptions,
     daysBeforeClose: 0,
     startDate: january2021.toString()
   };
+  const TestIssueList: Issue[] = [
+    generateIssue(
+      opts,
+      1,
+      'An issue with no label',
+      '2020-01-01T17:00:00Z',
+      '2020-01-01T17:00:00Z'
+    )
+  ];
   const processor = new IssueProcessor(
     opts,
     async () => 'abot',
@@ -292,20 +298,21 @@ test('processing an issue with no label and a start date as ISO 8601 being after
 
 test('processing an issue with no label and a start date as RFC 2822 being before the issue creation date will make it stale and close it when it is old enough and days-before-close is set to 0', async () => {
   expect.assertions(2);
-  const TestIssueList: Issue[] = [
-    generateIssue(
-      1,
-      'An issue with no label',
-      '2020-01-01T17:00:00Z',
-      '2020-01-01T17:00:00Z'
-    )
-  ];
   const january2000 = 'January 1, 2000 00:00:00';
   const opts: IssueProcessorOptions = {
     ...DefaultProcessorOptions,
     daysBeforeClose: 0,
     startDate: january2000.toString()
   };
+  const TestIssueList: Issue[] = [
+    generateIssue(
+      opts,
+      1,
+      'An issue with no label',
+      '2020-01-01T17:00:00Z',
+      '2020-01-01T17:00:00Z'
+    )
+  ];
   const processor = new IssueProcessor(
     opts,
     async () => 'abot',
@@ -323,20 +330,21 @@ test('processing an issue with no label and a start date as RFC 2822 being befor
 
 test('processing an issue with no label and a start date as RFC 2822 being after the issue creation date will not make it stale nor close it when it is old enough and days-before-close is set to 0', async () => {
   expect.assertions(2);
-  const TestIssueList: Issue[] = [
-    generateIssue(
-      1,
-      'An issue with no label',
-      '2020-01-01T17:00:00Z',
-      '2020-01-01T17:00:00Z'
-    )
-  ];
   const january2021 = 'January 1, 2021 00:00:00';
   const opts: IssueProcessorOptions = {
     ...DefaultProcessorOptions,
     daysBeforeClose: 0,
     startDate: january2021.toString()
   };
+  const TestIssueList: Issue[] = [
+    generateIssue(
+      opts,
+      1,
+      'An issue with no label',
+      '2020-01-01T17:00:00Z',
+      '2020-01-01T17:00:00Z'
+    )
+  ];
   const processor = new IssueProcessor(
     opts,
     async () => 'abot',
@@ -1071,9 +1079,15 @@ test('exempt issue labels will not be marked stale', async () => {
   const opts = {...DefaultProcessorOptions};
   opts.exemptIssueLabels = 'Exempt';
   const TestIssueList: Issue[] = [
-    generateIssue(opts, 1, 'My first issue', '2020-01-01T17:00:00Z', '2020-01-01T17:00:00Z', false, [
-      'Exempt'
-    ])
+    generateIssue(
+      opts,
+      1,
+      'My first issue',
+      '2020-01-01T17:00:00Z',
+      '2020-01-01T17:00:00Z',
+      false,
+      ['Exempt']
+    )
   ];
   const processor = new IssueProcessor(
     opts,
@@ -1095,9 +1109,15 @@ test('exempt issue labels will not be marked stale (multi issue label with space
   const opts = {...DefaultProcessorOptions};
   opts.exemptIssueLabels = 'Exempt, Cool, None';
   const TestIssueList: Issue[] = [
-    generateIssue(opts, 1, 'My first issue', '2020-01-01T17:00:00Z','2020-01-01T17:00:00Z', false, [
-      'Cool'
-    ])
+    generateIssue(
+      opts,
+      1,
+      'My first issue',
+      '2020-01-01T17:00:00Z',
+      '2020-01-01T17:00:00Z',
+      false,
+      ['Cool']
+    )
   ];
   const processor = new IssueProcessor(
     opts,
@@ -1118,9 +1138,15 @@ test('exempt issue labels will not be marked stale (multi issue label)', async (
   const opts = {...DefaultProcessorOptions};
   opts.exemptIssueLabels = 'Exempt,Cool,None';
   const TestIssueList: Issue[] = [
-    generateIssue(opts, 1, 'My first issue', '2020-01-01T17:00:00Z','2020-01-01T17:00:00Z', false, [
-      'Cool'
-    ])
+    generateIssue(
+      opts,
+      1,
+      'My first issue',
+      '2020-01-01T17:00:00Z',
+      '2020-01-01T17:00:00Z',
+      false,
+      ['Cool']
+    )
   ];
   const processor = new IssueProcessor(
     opts,
@@ -1142,13 +1168,32 @@ test('exempt pr labels will not be marked stale', async () => {
   const opts = {...DefaultProcessorOptions};
   opts.exemptIssueLabels = 'Cool';
   const TestIssueList: Issue[] = [
-    generateIssue(opts, 1, 'My first issue', '2020-01-01T17:00:00Z','2020-01-01T17:00:00Z', false, [
-      'Cool'
-    ]),
-    generateIssue(opts, 2, 'My first PR', '2020-01-01T17:00:00Z','2020-01-01T17:00:00Z', true, [
-      'Cool'
-    ]),
-    generateIssue(opts, 3, 'Another issue', '2020-01-01T17:00:00Z','2020-01-01T17:00:00Z', false)
+    generateIssue(
+      opts,
+      1,
+      'My first issue',
+      '2020-01-01T17:00:00Z',
+      '2020-01-01T17:00:00Z',
+      false,
+      ['Cool']
+    ),
+    generateIssue(
+      opts,
+      2,
+      'My first PR',
+      '2020-01-01T17:00:00Z',
+      '2020-01-01T17:00:00Z',
+      true,
+      ['Cool']
+    ),
+    generateIssue(
+      opts,
+      3,
+      'Another issue',
+      '2020-01-01T17:00:00Z',
+      '2020-01-01T17:00:00Z',
+      false
+    )
   ];
   const processor = new IssueProcessor(
     opts,
@@ -1170,7 +1215,11 @@ test('exempt issue labels will not be marked stale and will remove the existing 
   opts.exemptIssueLabels = 'Exempt';
   const TestIssueList: Issue[] = [
     generateIssue(
-      opts, 1, 'My first issue', '2020-01-01T17:00:00Z','2020-01-01T17:00:00Z',
+      opts,
+      1,
+      'My first issue',
+      '2020-01-01T17:00:00Z',
+      '2020-01-01T17:00:00Z',
       false,
       ['Exempt', 'Stale']
     )
@@ -1203,19 +1252,32 @@ test('stale issues should not be closed if days is set to -1', async () => {
   opts.daysBeforeClose = -1;
   const TestIssueList: Issue[] = [
     generateIssue(
-      opts, 1, 'My first issue', '2020-01-01T17:00:00Z','2020-01-01T17:00:00Z',
+      opts,
+      1,
+      'My first issue',
+      '2020-01-01T17:00:00Z',
+      '2020-01-01T17:00:00Z',
       false,
       ['Stale']
     ),
     generateIssue(
-      opts, 2, 'My first PR','2020-01-01T17:00:00Z', '2020-01-01T17:00:00Z', true, [
-      'Stale'
-    ]
+      opts,
+      2,
+      'My first PR',
+      '2020-01-01T17:00:00Z',
+      '2020-01-01T17:00:00Z',
+      true,
+      ['Stale']
     ),
     generateIssue(
-      opts, 3, 'Another issue', '2020-01-01T17:00:00Z','2020-01-01T17:00:00Z', false, [
-      'Stale'
-    ])
+      opts,
+      3,
+      'Another issue',
+      '2020-01-01T17:00:00Z',
+      '2020-01-01T17:00:00Z',
+      false,
+      ['Stale']
+    )
   ];
   const processor = new IssueProcessor(
     opts,
@@ -1658,7 +1720,18 @@ test('git branch is not deleted when issue is not pull request', async () => {
 test('an issue without a milestone will be marked as stale', async () => {
   expect.assertions(3);
   const TestIssueList: Issue[] = [
-    generateIssue(DefaultProcessorOptions, 1, 'My first issue', '2020-01-01T17:00:00Z', false, undefined, undefined, undefined, '')
+    generateIssue(
+      DefaultProcessorOptions,
+      1,
+      'My first issue',
+      '2020-01-01T17:00:00Z',
+      '2020-01-01T17:00:00Z',
+      false,
+      undefined,
+      undefined,
+      undefined,
+      ''
+    )
   ];
   const processor = new IssueProcessor(
     DefaultProcessorOptions,
@@ -1681,7 +1754,18 @@ test('an issue without an exempted milestone will be marked as stale', async () 
   const opts = {...DefaultProcessorOptions};
   opts.exemptMilestones = 'Milestone1';
   const TestIssueList: Issue[] = [
-    generateIssue(opts, 1, 'My first issue', '2020-01-01T17:00:00Z', false, undefined, undefined, undefined, 'Milestone')
+    generateIssue(
+      opts,
+      1,
+      'My first issue',
+      '2020-01-01T17:00:00Z',
+      '2020-01-01T17:00:00Z',
+      false,
+      undefined,
+      undefined,
+      undefined,
+      'Milestone'
+    )
   ];
   const processor = new IssueProcessor(
     opts,
@@ -1704,7 +1788,18 @@ test('an issue with an exempted milestone will not be marked as stale', async ()
   const opts = {...DefaultProcessorOptions};
   opts.exemptMilestones = 'Milestone1';
   const TestIssueList: Issue[] = [
-    generateIssue(opts, 1, 'My first issue', '2020-01-01T17:00:00Z', false, undefined, undefined, undefined, 'Milestone1')
+    generateIssue(
+      opts,
+      1,
+      'My first issue',
+      '2020-01-01T17:00:00Z',
+      '2020-01-01T17:00:00Z',
+      false,
+      undefined,
+      undefined,
+      undefined,
+      'Milestone1'
+    )
   ];
   const processor = new IssueProcessor(
     opts,
@@ -1727,7 +1822,18 @@ test('an issue with an exempted milestone will not be marked as stale (multi mil
   const opts = {...DefaultProcessorOptions};
   opts.exemptMilestones = 'Milestone1, Milestone2';
   const TestIssueList: Issue[] = [
-    generateIssue(opts, 1, 'My first issue', '2020-01-01T17:00:00Z', false, undefined, undefined, undefined, 'Milestone2')
+    generateIssue(
+      opts,
+      1,
+      'My first issue',
+      '2020-01-01T17:00:00Z',
+      '2020-01-01T17:00:00Z',
+      false,
+      undefined,
+      undefined,
+      undefined,
+      'Milestone2'
+    )
   ];
   const processor = new IssueProcessor(
     opts,
@@ -1750,7 +1856,18 @@ test('an issue with an exempted milestone will not be marked as stale (multi mil
   const opts = {...DefaultProcessorOptions};
   opts.exemptMilestones = 'Milestone1,Milestone2';
   const TestIssueList: Issue[] = [
-    generateIssue(opts, 1, 'My first issue', '2020-01-01T17:00:00Z', false, undefined, undefined, undefined, 'Milestone2')
+    generateIssue(
+      opts,
+      1,
+      'My first issue',
+      '2020-01-01T17:00:00Z',
+      '2020-01-01T17:00:00Z',
+      false,
+      undefined,
+      undefined,
+      undefined,
+      'Milestone2'
+    )
   ];
   const processor = new IssueProcessor(
     opts,
@@ -1774,7 +1891,18 @@ test('an issue with an exempted milestone but without an exempted issue mileston
   opts.exemptMilestones = 'Milestone1';
   opts.exemptIssueMilestones = '';
   const TestIssueList: Issue[] = [
-    generateIssue(opts, 1, 'My first issue', '2020-01-01T17:00:00Z', false, undefined, undefined, undefined, 'Milestone1')
+    generateIssue(
+      opts,
+      1,
+      'My first issue',
+      '2020-01-01T17:00:00Z',
+      '2020-01-01T17:00:00Z',
+      false,
+      undefined,
+      undefined,
+      undefined,
+      'Milestone1'
+    )
   ];
   const processor = new IssueProcessor(
     opts,
@@ -1798,7 +1926,18 @@ test('an issue with an exempted milestone but with another exempted issue milest
   opts.exemptMilestones = 'Milestone1';
   opts.exemptIssueMilestones = 'Milestone2';
   const TestIssueList: Issue[] = [
-    generateIssue(opts, 1, 'My first issue', '2020-01-01T17:00:00Z', false, undefined, undefined, undefined, 'Milestone1')
+    generateIssue(
+      opts,
+      1,
+      'My first issue',
+      '2020-01-01T17:00:00Z',
+      '2020-01-01T17:00:00Z',
+      false,
+      undefined,
+      undefined,
+      undefined,
+      'Milestone1'
+    )
   ];
   const processor = new IssueProcessor(
     opts,
@@ -1822,7 +1961,18 @@ test('an issue with an exempted milestone and with an exempted issue milestone w
   opts.exemptMilestones = 'Milestone1';
   opts.exemptIssueMilestones = 'Milestone1';
   const TestIssueList: Issue[] = [
-    generateIssue(opts, 1, 'My first issue', '2020-01-01T17:00:00Z', false, undefined, undefined, undefined, 'Milestone1')
+    generateIssue(
+      opts,
+      1,
+      'My first issue',
+      '2020-01-01T17:00:00Z',
+      '2020-01-01T17:00:00Z',
+      false,
+      undefined,
+      undefined,
+      undefined,
+      'Milestone1'
+    )
   ];
   const processor = new IssueProcessor(
     opts,
@@ -1843,7 +1993,18 @@ test('an issue with an exempted milestone and with an exempted issue milestone w
 test('a PR without a milestone will be marked as stale', async () => {
   expect.assertions(3);
   const TestIssueList: Issue[] = [
-    generateIssue(DefaultProcessorOptions, 1, 'My first issue', '2020-01-01T17:00:00Z', true, undefined, undefined, undefined, '')
+    generateIssue(
+      DefaultProcessorOptions,
+      1,
+      'My first issue',
+      '2020-01-01T17:00:00Z',
+      '2020-01-01T17:00:00Z',
+      true,
+      undefined,
+      undefined,
+      undefined,
+      ''
+    )
   ];
   const processor = new IssueProcessor(
     DefaultProcessorOptions,
@@ -1866,7 +2027,18 @@ test('a PR without an exempted milestone will be marked as stale', async () => {
   const opts = {...DefaultProcessorOptions};
   opts.exemptMilestones = 'Milestone1';
   const TestIssueList: Issue[] = [
-    generateIssue(opts, 1, 'My first issue', '2020-01-01T17:00:00Z', true, undefined, undefined, undefined, 'Milestone')
+    generateIssue(
+      opts,
+      1,
+      'My first issue',
+      '2020-01-01T17:00:00Z',
+      '2020-01-01T17:00:00Z',
+      true,
+      undefined,
+      undefined,
+      undefined,
+      'Milestone'
+    )
   ];
   const processor = new IssueProcessor(
     opts,
@@ -1889,7 +2061,18 @@ test('a PR with an exempted milestone will not be marked as stale', async () => 
   const opts = {...DefaultProcessorOptions};
   opts.exemptMilestones = 'Milestone1';
   const TestIssueList: Issue[] = [
-    generateIssue(opts, 1, 'My first issue', '2020-01-01T17:00:00Z', true, undefined, undefined, undefined, 'Milestone1')
+    generateIssue(
+      opts,
+      1,
+      'My first issue',
+      '2020-01-01T17:00:00Z',
+      '2020-01-01T17:00:00Z',
+      true,
+      undefined,
+      undefined,
+      undefined,
+      'Milestone1'
+    )
   ];
   const processor = new IssueProcessor(
     opts,
@@ -1912,7 +2095,18 @@ test('a PR with an exempted milestone will not be marked as stale (multi milesto
   const opts = {...DefaultProcessorOptions};
   opts.exemptMilestones = 'Milestone1, Milestone2';
   const TestIssueList: Issue[] = [
-    generateIssue(opts, 1, 'My first issue', '2020-01-01T17:00:00Z', true, undefined, undefined, undefined, 'Milestone2')
+    generateIssue(
+      opts,
+      1,
+      'My first issue',
+      '2020-01-01T17:00:00Z',
+      '2020-01-01T17:00:00Z',
+      true,
+      undefined,
+      undefined,
+      undefined,
+      'Milestone2'
+    )
   ];
   const processor = new IssueProcessor(
     opts,
@@ -1935,7 +2129,18 @@ test('a PR with an exempted milestone will not be marked as stale (multi milesto
   const opts = {...DefaultProcessorOptions};
   opts.exemptMilestones = 'Milestone1,Milestone2';
   const TestIssueList: Issue[] = [
-    generateIssue(opts, 1, 'My first issue', '2020-01-01T17:00:00Z', true, undefined, undefined, undefined, 'Milestone2')
+    generateIssue(
+      opts,
+      1,
+      'My first issue',
+      '2020-01-01T17:00:00Z',
+      '2020-01-01T17:00:00Z',
+      true,
+      undefined,
+      undefined,
+      undefined,
+      'Milestone2'
+    )
   ];
   const processor = new IssueProcessor(
     opts,
@@ -1959,7 +2164,18 @@ test('a PR with an exempted milestone but without an exempted issue milestone wi
   opts.exemptMilestones = 'Milestone1';
   opts.exemptPrMilestones = '';
   const TestIssueList: Issue[] = [
-    generateIssue(opts, 1, 'My first issue', '2020-01-01T17:00:00Z', true, undefined, undefined, undefined, 'Milestone1')
+    generateIssue(
+      opts,
+      1,
+      'My first issue',
+      '2020-01-01T17:00:00Z',
+      '2020-01-01T17:00:00Z',
+      true,
+      undefined,
+      undefined,
+      undefined,
+      'Milestone1'
+    )
   ];
   const processor = new IssueProcessor(
     opts,
@@ -1983,7 +2199,18 @@ test('a PR with an exempted milestone but with another exempted issue milestone 
   opts.exemptMilestones = 'Milestone1';
   opts.exemptPrMilestones = 'Milestone2';
   const TestIssueList: Issue[] = [
-    generateIssue(opts, 1, 'My first issue', '2020-01-01T17:00:00Z', true, undefined, undefined, undefined, 'Milestone1')
+    generateIssue(
+      opts,
+      1,
+      'My first issue',
+      '2020-01-01T17:00:00Z',
+      '2020-01-01T17:00:00Z',
+      true,
+      undefined,
+      undefined,
+      undefined,
+      'Milestone1'
+    )
   ];
   const processor = new IssueProcessor(
     opts,
@@ -2007,7 +2234,18 @@ test('a PR with an exempted milestone and with an exempted issue milestone will 
   opts.exemptMilestones = 'Milestone1';
   opts.exemptPrMilestones = 'Milestone1';
   const TestIssueList: Issue[] = [
-    generateIssue(opts, 1, 'My first issue', '2020-01-01T17:00:00Z', true, undefined, undefined, undefined, 'Milestone1')
+    generateIssue(
+      opts,
+      1,
+      'My first issue',
+      '2020-01-01T17:00:00Z',
+      '2020-01-01T17:00:00Z',
+      true,
+      undefined,
+      undefined,
+      undefined,
+      'Milestone1'
+    )
   ];
   const processor = new IssueProcessor(
     opts,

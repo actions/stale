@@ -43,9 +43,9 @@ $ npm test
 | `close-pr-label`            | Label to apply on the closing pr.                                                            | Optional |
 | `exempt-issue-labels`       | Labels on an issue exempted from being marked as stale.                                      | Optional |
 | `exempt-pr-labels`          | Labels on the pr exempted from being marked as stale.                                        | Optional |
-| `exempt-milestones`         | Milestones on an issue or a pr exempted from being marked as stale.                        | Optional |
-| `exempt-issue-milestones`   | Milestones on an issue exempted from being marked as stale (override `exempt-milestones`). | Optional |
-| `exempt-pr-milestones`      | Milestones on the pr exempted from being marked as stale (override `exempt-milestones`).   | Optional |
+| `exempt-milestones`         | Milestones on an issue or a pr exempted from being marked as stale.                          | Optional |
+| `exempt-issue-milestones`   | Milestones on an issue exempted from being marked as stale (override `exempt-milestones`).   | Optional |
+| `exempt-pr-milestones`      | Milestones on the pr exempted from being marked as stale (override `exempt-milestones`).     | Optional |
 | `only-labels`               | Only labels checked for stale issue/pr.                                                      | Optional |
 | `operations-per-run`        | Maximum number of operations per run (GitHub API CRUD related). _Defaults to **30**_         | Optional |
 | `remove-stale-when-updated` | Remove stale label from issue/pr on updates or comments. _Defaults to **true**_              | Optional |

@@ -13,7 +13,6 @@ import {getIssueType} from './functions/get-issue-type';
 import {isLabeled} from './functions/is-labeled';
 import {isPullRequest} from './functions/is-pull-request';
 import {shouldMarkWhenStale} from './functions/should-mark-when-stale';
-import {IsoDateString} from './types/iso-date-string';
 import {IsoOrRfcDateString} from './types/iso-or-rfc-date-string';
 import {wordsToList} from './functions/words-to-list';
 import {IIssue} from './interfaces/issue';

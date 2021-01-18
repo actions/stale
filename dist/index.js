@@ -19,29 +19,31 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.IssueProcessor = void 0;
 const github_1 = __nccwpck_require__(5438);
+const issue_1 = __nccwpck_require__(4783);
+const issue_logger_1 = __nccwpck_require__(2984);
+const logger_1 = __nccwpck_require__(6212);
+const milestones_1 = __nccwpck_require__(4601);
 const get_humanized_date_1 = __nccwpck_require__(965);
 const is_date_more_recent_than_1 = __nccwpck_require__(1473);
 const is_valid_date_1 = __nccwpck_require__(891);
 const get_issue_type_1 = __nccwpck_require__(5153);
-const issue_logger_1 = __nccwpck_require__(1699);
-const logger_1 = __nccwpck_require__(8236);
 const is_labeled_1 = __nccwpck_require__(6792);
 const is_pull_request_1 = __nccwpck_require__(5400);
-const labels_to_list_1 = __nccwpck_require__(9107);
 const should_mark_when_stale_1 = __nccwpck_require__(2461);
-const logger = new logger_1.Logger();
+const words_to_list_1 = __nccwpck_require__(1883);
 /***
  * Handle processing of issues for staleness/closure.
  */
 class IssueProcessor {
     constructor(options, getActor, getIssues, listIssueComments, getLabelCreationDate) {
+        this._logger = new logger_1.Logger();
+        this._operationsLeft = 0;
         this.staleIssues = [];
         this.closedIssues = [];
         this.deletedBranchIssues = [];
         this.removedLabelIssues = [];
-        this.operationsLeft = 0;
         this.options = options;
-        this.operationsLeft = options.operationsPerRun;
+        this._operationsLeft = options.operationsPerRun;
         this.client = github_1.getOctokit(options.repoToken);
         if (getActor) {
             this._getActor = getActor;
@@ -56,7 +58,7 @@ class IssueProcessor {
             this._getLabelCreationDate = getLabelCreationDate;
         }
         if (this.options.debugOnly) {
-            logger.warning('Executing in debug mode. Debug output will be written but no issues will be processed.');
+            this._logger.warning('Executing in debug mode. Debug output will be written but no issues will be processed.');
         }
     }
     static _updatedSince(timestamp, num_days) {
@@ -68,39 +70,37 @@ class IssueProcessor {
         return __awaiter(this, void 0, void 0, function* () {
             // get the next batch of issues
             const issues = yield this._getIssues(page);
-            this.operationsLeft -= 1;
+            this._operationsLeft -= 1;
             const actor = yield this._getActor();
             if (issues.length <= 0) {
-                logger.info('---');
-                logger.info('No more issues found to process. Exiting.');
-                return this.operationsLeft;
+                this._logger.info('---');
+                this._logger.info('No more issues found to process. Exiting.');
+                return this._operationsLeft;
             }
             for (const issue of issues.values()) {
                 const issueLogger = new issue_logger_1.IssueLogger(issue);
-                const isPr = is_pull_request_1.isPullRequest(issue);
-                issueLogger.info(`Found issue: issue #${issue.number} last updated ${issue.updated_at} (is pr? ${isPr})`);
+                issueLogger.info(`Found issue: issue #${issue.number} last updated ${issue.updated_at} (is pr? ${issue.isPullRequest})`);
                 // calculate string based messages for this issue
-                const staleMessage = isPr
+                const staleMessage = issue.isPullRequest
                     ? this.options.stalePrMessage
                     : this.options.staleIssueMessage;
-                const closeMessage = isPr
+                const closeMessage = issue.isPullRequest
                     ? this.options.closePrMessage
                     : this.options.closeIssueMessage;
-                const staleLabel = isPr
+                const staleLabel = issue.isPullRequest
                     ? this.options.stalePrLabel
                     : this.options.staleIssueLabel;
-                const closeLabel = isPr
+                const closeLabel = issue.isPullRequest
                     ? this.options.closePrLabel
                     : this.options.closeIssueLabel;
-                const exemptLabels = labels_to_list_1.labelsToList(isPr ? this.options.exemptPrLabels : this.options.exemptIssueLabels);
-                const skipMessage = isPr
+                const skipMessage = issue.isPullRequest
                     ? this.options.skipStalePrMessage
                     : this.options.skipStaleIssueMessage;
-                const issueType = get_issue_type_1.getIssueType(isPr);
-                const daysBeforeStale = isPr
+                const issueType = get_issue_type_1.getIssueType(issue.isPullRequest);
+                const daysBeforeStale = issue.isPullRequest
                     ? this._getDaysBeforePrStale()
                     : this._getDaysBeforeIssueStale();
-                if (isPr) {
+                if (issue.isPullRequest) {
                     issueLogger.info(`Days before pull request stale: ${daysBeforeStale}`);
                 }
                 else {
@@ -134,38 +134,44 @@ class IssueProcessor {
                         continue; // don't process issues which were created before the start date
                     }
                 }
-                // Does this issue have a stale label?
-                let isStale = is_labeled_1.isLabeled(issue, staleLabel);
-                if (isStale) {
+                if (issue.isStale) {
                     issueLogger.info(`This issue has a stale label`);
                 }
                 else {
                     issueLogger.info(`This issue hasn't a stale label`);
                 }
+                const exemptLabels = words_to_list_1.wordsToList(issue.isPullRequest
+                    ? this.options.exemptPrLabels
+                    : this.options.exemptIssueLabels);
                 if (exemptLabels.some((exemptLabel) => is_labeled_1.isLabeled(issue, exemptLabel))) {
-                    if (isStale) {
+                    if (issue.isStale) {
                         issueLogger.info(`An exempt label was added after the stale label.`);
                         yield this._removeStaleLabel(issue, staleLabel);
                     }
                     issueLogger.info(`Skipping ${issueType} because it has an exempt label`);
                     continue; // don't process exempt issues
                 }
+                const milestones = new milestones_1.Milestones(this.options, issue);
+                if (milestones.shouldExemptMilestones()) {
+                    issueLogger.info(`Skipping ${issueType} because it has an exempt milestone`);
+                    continue; // don't process exempt milestones
+                }
                 // should this issue be marked stale?
                 const shouldBeStale = !IssueProcessor._updatedSince(issue.updated_at, this.options.daysBeforeStale);
                 // determine if this issue needs to be marked stale first
-                if (!isStale && shouldBeStale && shouldMarkAsStale) {
+                if (!issue.isStale && shouldBeStale && shouldMarkAsStale) {
                     issueLogger.info(`Marking ${issueType} stale because it was last updated on ${issue.updated_at} and it does not have a stale label`);
                     yield this._markStale(issue, staleMessage, staleLabel, skipMessage);
-                    isStale = true; // this issue is now considered stale
+                    issue.isStale = true; // this issue is now considered stale
                 }
                 // process the issue if it was marked stale
-                if (isStale) {
+                if (issue.isStale) {
                     issueLogger.info(`Found a stale ${issueType}`);
                     yield this._processStaleIssue(issue, issueType, staleLabel, actor, closeMessage, closeLabel);
                 }
             }
-            if (this.operationsLeft <= 0) {
-                logger.warning('Reached max number of operations to process. Exiting.');
+            if (this._operationsLeft <= 0) {
+                this._logger.warning('Reached max number of operations to process. Exiting.');
                 return 0;
             }
             // do the next batch
@@ -244,7 +250,7 @@ class IssueProcessor {
                 return comments.data;
             }
             catch (error) {
-                logger.error(`List issue comments error: ${error.message}`);
+                this._logger.error(`List issue comments error: ${error.message}`);
                 return Promise.resolve([]);
             }
         });
@@ -262,7 +268,7 @@ class IssueProcessor {
             return actor.data.login;
         });
     }
-    // grab issues from github in baches of 100
+    // grab issues from github in batches of 100
     _getIssues(page) {
         return __awaiter(this, void 0, void 0, function* () {
             // generate type for response
@@ -277,10 +283,10 @@ class IssueProcessor {
                     direction: this.options.ascending ? 'asc' : 'desc',
                     page
                 });
-                return issueResult.data;
+                return issueResult.data.map((issue) => new issue_1.Issue(this.options, issue));
             }
             catch (error) {
-                logger.error(`Get issues for repo error: ${error.message}`);
+                this._logger.error(`Get issues for repo error: ${error.message}`);
                 return Promise.resolve([]);
             }
         });
@@ -291,7 +297,7 @@ class IssueProcessor {
             const issueLogger = new issue_logger_1.IssueLogger(issue);
             issueLogger.info(`Marking issue #${issue.number} as stale`);
             this.staleIssues.push(issue);
-            this.operationsLeft -= 2;
+            this._operationsLeft -= 2;
             // if the issue is being marked stale, the updated date should be changed to right now
             // so that close calculations work correctly
             const newUpdatedAtDate = new Date();
@@ -331,7 +337,7 @@ class IssueProcessor {
             const issueLogger = new issue_logger_1.IssueLogger(issue);
             issueLogger.info(`Closing issue #${issue.number} for being stale`);
             this.closedIssues.push(issue);
-            this.operationsLeft -= 1;
+            this._operationsLeft -= 1;
             if (this.options.debugOnly) {
                 return;
             }
@@ -377,7 +383,7 @@ class IssueProcessor {
     _getPullRequest(issue) {
         return __awaiter(this, void 0, void 0, function* () {
             const issueLogger = new issue_logger_1.IssueLogger(issue);
-            this.operationsLeft -= 1;
+            this._operationsLeft -= 1;
             try {
                 const pullRequest = yield this.client.pulls.get({
                     owner: github_1.context.repo.owner,
@@ -406,7 +412,7 @@ class IssueProcessor {
             }
             const branch = pullRequest.head.ref;
             issueLogger.info(`Deleting branch ${branch} from closed issue #${issue.number}`);
-            this.operationsLeft -= 1;
+            this._operationsLeft -= 1;
             try {
                 yield this.client.git.deleteRef({
                     owner: github_1.context.repo.owner,
@@ -425,7 +431,7 @@ class IssueProcessor {
             const issueLogger = new issue_logger_1.IssueLogger(issue);
             issueLogger.info(`Removing label "${label}" from issue #${issue.number}`);
             this.removedLabelIssues.push(issue);
-            this.operationsLeft -= 1;
+            this._operationsLeft -= 1;
             // @todo remove the debug only to be able to test the code below
             if (this.options.debugOnly) {
                 return;
@@ -449,7 +455,7 @@ class IssueProcessor {
         return __awaiter(this, void 0, void 0, function* () {
             const issueLogger = new issue_logger_1.IssueLogger(issue);
             issueLogger.info(`Checking for label on issue #${issue.number}`);
-            this.operationsLeft -= 1;
+            this._operationsLeft -= 1;
             const options = this.client.issues.listEvents.endpoint.merge({
                 owner: github_1.context.repo.owner,
                 repo: github_1.context.repo.repo,
@@ -499,7 +505,43 @@ exports.IssueProcessor = IssueProcessor;
 
 /***/ }),
 
-/***/ 1699:
+/***/ 4783:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.Issue = void 0;
+const is_labeled_1 = __nccwpck_require__(6792);
+const is_pull_request_1 = __nccwpck_require__(5400);
+class Issue {
+    constructor(options, issue) {
+        this._options = options;
+        this.title = issue.title;
+        this.number = issue.number;
+        this.created_at = issue.created_at;
+        this.updated_at = issue.updated_at;
+        this.labels = issue.labels;
+        this.pull_request = issue.pull_request;
+        this.state = issue.state;
+        this.locked = issue.locked;
+        this.milestone = issue.milestone;
+        this.isPullRequest = is_pull_request_1.isPullRequest(this);
+        this.staleLabel = this._getStaleLabel();
+        this.isStale = is_labeled_1.isLabeled(this, this.staleLabel);
+    }
+    _getStaleLabel() {
+        return this.isPullRequest
+            ? this._options.stalePrLabel
+            : this._options.staleIssueLabel;
+    }
+}
+exports.Issue = Issue;
+
+
+/***/ }),
+
+/***/ 2984:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
@@ -551,7 +593,7 @@ exports.IssueLogger = IssueLogger;
 
 /***/ }),
 
-/***/ 8236:
+/***/ 6212:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
@@ -590,6 +632,55 @@ class Logger {
     }
 }
 exports.Logger = Logger;
+
+
+/***/ }),
+
+/***/ 4601:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.Milestones = void 0;
+const lodash_deburr_1 = __importDefault(__nccwpck_require__(1601));
+const words_to_list_1 = __nccwpck_require__(1883);
+class Milestones {
+    constructor(options, issue) {
+        this._options = options;
+        this._issue = issue;
+    }
+    static _cleanMilestone(label) {
+        return lodash_deburr_1.default(label.toLowerCase());
+    }
+    shouldExemptMilestones() {
+        const exemptMilestones = this._getExemptMilestones();
+        return exemptMilestones.some((exemptMilestone) => this._hasMilestone(exemptMilestone));
+    }
+    _getExemptMilestones() {
+        return words_to_list_1.wordsToList(this._issue.isPullRequest
+            ? this._getExemptPullRequestMilestones()
+            : this._getExemptIssueMilestones());
+    }
+    _getExemptIssueMilestones() {
+        return this._options.exemptIssueMilestones !== ''
+            ? this._options.exemptIssueMilestones
+            : this._options.exemptMilestones;
+    }
+    _getExemptPullRequestMilestones() {
+        return this._options.exemptPrMilestones !== ''
+            ? this._options.exemptPrMilestones
+            : this._options.exemptMilestones;
+    }
+    _hasMilestone(milestone) {
+        return (Milestones._cleanMilestone(milestone) ===
+            Milestones._cleanMilestone(this._issue.milestone.title));
+    }
+}
+exports.Milestones = Milestones;
 
 
 /***/ }),
@@ -742,40 +833,6 @@ exports.isPullRequest = isPullRequest;
 
 /***/ }),
 
-/***/ 9107:
-/***/ ((__unused_webpack_module, exports) => {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.labelsToList = void 0;
-/**
- * @description
- * Transform a string of comma separated labels
- * to an array of labels
- *
- * @example
- * labelsToList('label') => ['label']
- * labelsToList('label,label') => ['label', 'label']
- * labelsToList('kebab-label') => ['kebab-label']
- * labelsToList('kebab%20label') => ['kebab%20label']
- * labelsToList('label with words') => ['label with words']
- *
- * @param {Readonly<string>} labels A string of comma separated labels
- *
- * @return {string[]} A list of labels
- */
-function labelsToList(labels) {
-    if (!labels.length) {
-        return [];
-    }
-    return labels.split(',').map(l => l.trim());
-}
-exports.labelsToList = labelsToList;
-
-
-/***/ }),
-
 /***/ 2461:
 /***/ ((__unused_webpack_module, exports) => {
 
@@ -787,6 +844,40 @@ function shouldMarkWhenStale(daysBeforeStale) {
     return daysBeforeStale >= 0;
 }
 exports.shouldMarkWhenStale = shouldMarkWhenStale;
+
+
+/***/ }),
+
+/***/ 1883:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.wordsToList = void 0;
+/**
+ * @description
+ * Transform a string of comma separated words
+ * to an array of words
+ *
+ * @example
+ * wordsToList('label') => ['label']
+ * wordsToList('label,label') => ['label', 'label']
+ * wordsToList('kebab-label') => ['kebab-label']
+ * wordsToList('kebab%20label') => ['kebab%20label']
+ * wordsToList('label with words') => ['label with words']
+ *
+ * @param {Readonly<string>} words A string of comma separated words
+ *
+ * @return {string[]} A list of words
+ */
+function wordsToList(words) {
+    if (!words.length) {
+        return [];
+    }
+    return words.split(',').map((word) => word.trim());
+}
+exports.wordsToList = wordsToList;
 
 
 /***/ }),
@@ -870,7 +961,10 @@ function getAndValidateArgs() {
         deleteBranch: core.getInput('delete-branch') === 'true',
         startDate: core.getInput('start-date') !== ''
             ? core.getInput('start-date')
-            : undefined
+            : undefined,
+        exemptMilestones: core.getInput('exempt-milestones'),
+        exemptIssueMilestones: core.getInput('exempt-issue-milestones'),
+        exemptPrMilestones: core.getInput('exempt-pr-milestones')
     };
     for (const numberInput of [
         'days-before-stale',

@@ -1,7 +1,6 @@
 import deburr from 'lodash.deburr';
 import {Issue, Label} from '../IssueProcessor';
-
-type CleanLabel = string;
+import {CleanLabel} from '../types/clean-label';
 
 /**
  * @description

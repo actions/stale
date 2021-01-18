@@ -2,7 +2,504 @@ module.exports =
 /******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
-/***/ 407:
+/***/ 4407:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.IssueProcessor = void 0;
+const github_1 = __nccwpck_require__(5438);
+const get_humanized_date_1 = __nccwpck_require__(965);
+const is_date_more_recent_than_1 = __nccwpck_require__(1473);
+const is_valid_date_1 = __nccwpck_require__(891);
+const get_issue_type_1 = __nccwpck_require__(5153);
+const issue_logger_1 = __nccwpck_require__(1699);
+const logger_1 = __nccwpck_require__(8236);
+const is_labeled_1 = __nccwpck_require__(6792);
+const is_pull_request_1 = __nccwpck_require__(5400);
+const labels_to_list_1 = __nccwpck_require__(9107);
+const should_mark_when_stale_1 = __nccwpck_require__(2461);
+const logger = new logger_1.Logger();
+/***
+ * Handle processing of issues for staleness/closure.
+ */
+class IssueProcessor {
+    constructor(options, getActor, getIssues, listIssueComments, getLabelCreationDate) {
+        this.staleIssues = [];
+        this.closedIssues = [];
+        this.deletedBranchIssues = [];
+        this.removedLabelIssues = [];
+        this.operationsLeft = 0;
+        this.options = options;
+        this.operationsLeft = options.operationsPerRun;
+        this.client = github_1.getOctokit(options.repoToken);
+        if (getActor) {
+            this._getActor = getActor;
+        }
+        if (getIssues) {
+            this._getIssues = getIssues;
+        }
+        if (listIssueComments) {
+            this._listIssueComments = listIssueComments;
+        }
+        if (getLabelCreationDate) {
+            this._getLabelCreationDate = getLabelCreationDate;
+        }
+        if (this.options.debugOnly) {
+            logger.warning('Executing in debug mode. Debug output will be written but no issues will be processed.');
+        }
+    }
+    static _updatedSince(timestamp, num_days) {
+        const daysInMillis = 1000 * 60 * 60 * 24 * num_days;
+        const millisSinceLastUpdated = new Date().getTime() - new Date(timestamp).getTime();
+        return millisSinceLastUpdated <= daysInMillis;
+    }
+    processIssues(page = 1) {
+        return __awaiter(this, void 0, void 0, function* () {
+            // get the next batch of issues
+            const issues = yield this._getIssues(page);
+            this.operationsLeft -= 1;
+            const actor = yield this._getActor();
+            if (issues.length <= 0) {
+                logger.info('---');
+                logger.info('No more issues found to process. Exiting.');
+                return this.operationsLeft;
+            }
+            for (const issue of issues.values()) {
+                const issueLogger = new issue_logger_1.IssueLogger(issue);
+                const isPr = is_pull_request_1.isPullRequest(issue);
+                issueLogger.info(`Found issue: issue #${issue.number} last updated ${issue.updated_at} (is pr? ${isPr})`);
+                // calculate string based messages for this issue
+                const staleMessage = isPr
+                    ? this.options.stalePrMessage
+                    : this.options.staleIssueMessage;
+                const closeMessage = isPr
+                    ? this.options.closePrMessage
+                    : this.options.closeIssueMessage;
+                const staleLabel = isPr
+                    ? this.options.stalePrLabel
+                    : this.options.staleIssueLabel;
+                const closeLabel = isPr
+                    ? this.options.closePrLabel
+                    : this.options.closeIssueLabel;
+                const exemptLabels = labels_to_list_1.labelsToList(isPr ? this.options.exemptPrLabels : this.options.exemptIssueLabels);
+                const skipMessage = isPr
+                    ? this.options.skipStalePrMessage
+                    : this.options.skipStaleIssueMessage;
+                const issueType = get_issue_type_1.getIssueType(isPr);
+                const daysBeforeStale = isPr
+                    ? this._getDaysBeforePrStale()
+                    : this._getDaysBeforeIssueStale();
+                if (isPr) {
+                    issueLogger.info(`Days before pull request stale: ${daysBeforeStale}`);
+                }
+                else {
+                    issueLogger.info(`Days before issue stale: ${daysBeforeStale}`);
+                }
+                const shouldMarkAsStale = should_mark_when_stale_1.shouldMarkWhenStale(daysBeforeStale);
+                if (!staleMessage && shouldMarkAsStale) {
+                    issueLogger.info(`Skipping ${issueType} due to empty stale message`);
+                    continue;
+                }
+                if (issue.state === 'closed') {
+                    issueLogger.info(`Skipping ${issueType} because it is closed`);
+                    continue; // don't process closed issues
+                }
+                if (issue.locked) {
+                    issueLogger.info(`Skipping ${issueType} because it is locked`);
+                    continue; // don't process locked issues
+                }
+                if (this.options.startDate) {
+                    const startDate = new Date(this.options.startDate);
+                    const createdAt = new Date(issue.created_at);
+                    issueLogger.info(`A start date was specified for the ${get_humanized_date_1.getHumanizedDate(startDate)} (${this.options.startDate})`);
+                    // Expecting that GitHub will always set a creation date on the issues and PRs
+                    // But you never know!
+                    if (!is_valid_date_1.isValidDate(createdAt)) {
+                        throw new Error(`Invalid issue field: "created_at". Expected a valid date`);
+                    }
+                    issueLogger.info(`Issue created the ${get_humanized_date_1.getHumanizedDate(createdAt)} (${issue.created_at})`);
+                    if (!is_date_more_recent_than_1.isDateMoreRecentThan(createdAt, startDate)) {
+                        issueLogger.info(`Skipping ${issueType} because it was created before the specified start date`);
+                        continue; // don't process issues which were created before the start date
+                    }
+                }
+                // Does this issue have a stale label?
+                let isStale = is_labeled_1.isLabeled(issue, staleLabel);
+                if (isStale) {
+                    issueLogger.info(`This issue has a stale label`);
+                }
+                else {
+                    issueLogger.info(`This issue hasn't a stale label`);
+                }
+                if (exemptLabels.some((exemptLabel) => is_labeled_1.isLabeled(issue, exemptLabel))) {
+                    if (isStale) {
+                        issueLogger.info(`An exempt label was added after the stale label.`);
+                        yield this._removeStaleLabel(issue, staleLabel);
+                    }
+                    issueLogger.info(`Skipping ${issueType} because it has an exempt label`);
+                    continue; // don't process exempt issues
+                }
+                // should this issue be marked stale?
+                const shouldBeStale = !IssueProcessor._updatedSince(issue.updated_at, this.options.daysBeforeStale);
+                // determine if this issue needs to be marked stale first
+                if (!isStale && shouldBeStale && shouldMarkAsStale) {
+                    issueLogger.info(`Marking ${issueType} stale because it was last updated on ${issue.updated_at} and it does not have a stale label`);
+                    yield this._markStale(issue, staleMessage, staleLabel, skipMessage);
+                    isStale = true; // this issue is now considered stale
+                }
+                // process the issue if it was marked stale
+                if (isStale) {
+                    issueLogger.info(`Found a stale ${issueType}`);
+                    yield this._processStaleIssue(issue, issueType, staleLabel, actor, closeMessage, closeLabel);
+                }
+            }
+            if (this.operationsLeft <= 0) {
+                logger.warning('Reached max number of operations to process. Exiting.');
+                return 0;
+            }
+            // do the next batch
+            return this.processIssues(page + 1);
+        });
+    }
+    // handle all of the stale issue logic when we find a stale issue
+    _processStaleIssue(issue, issueType, staleLabel, actor, closeMessage, closeLabel) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const issueLogger = new issue_logger_1.IssueLogger(issue);
+            const markedStaleOn = (yield this._getLabelCreationDate(issue, staleLabel)) || issue.updated_at;
+            issueLogger.info(`Issue #${issue.number} marked stale on: ${markedStaleOn}`);
+            const issueHasComments = yield this._hasCommentsSince(issue, markedStaleOn, actor);
+            issueLogger.info(`Issue #${issue.number} has been commented on: ${issueHasComments}`);
+            const isPr = is_pull_request_1.isPullRequest(issue);
+            const daysBeforeClose = isPr
+                ? this._getDaysBeforePrClose()
+                : this._getDaysBeforeIssueClose();
+            if (isPr) {
+                issueLogger.info(`Days before pull request close: ${daysBeforeClose}`);
+            }
+            else {
+                issueLogger.info(`Days before issue close: ${daysBeforeClose}`);
+            }
+            const issueHasUpdate = IssueProcessor._updatedSince(issue.updated_at, daysBeforeClose);
+            issueLogger.info(`Issue #${issue.number} has been updated: ${issueHasUpdate}`);
+            // should we un-stale this issue?
+            if (this.options.removeStaleWhenUpdated && issueHasComments) {
+                yield this._removeStaleLabel(issue, staleLabel);
+            }
+            // now start closing logic
+            if (daysBeforeClose < 0) {
+                return; // nothing to do because we aren't closing stale issues
+            }
+            if (!issueHasComments && !issueHasUpdate) {
+                issueLogger.info(`Closing ${issueType} because it was last updated on ${issue.updated_at}`);
+                yield this._closeIssue(issue, closeMessage, closeLabel);
+                if (this.options.deleteBranch && issue.pull_request) {
+                    issueLogger.info(`Deleting branch for #${issue.number} as delete-branch option was specified`);
+                    yield this._deleteBranch(issue);
+                    this.deletedBranchIssues.push(issue);
+                }
+            }
+            else {
+                issueLogger.info(`Stale ${issueType} is not old enough to close yet (hasComments? ${issueHasComments}, hasUpdate? ${issueHasUpdate})`);
+            }
+        });
+    }
+    // checks to see if a given issue is still stale (has had activity on it)
+    _hasCommentsSince(issue, sinceDate, actor) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const issueLogger = new issue_logger_1.IssueLogger(issue);
+            issueLogger.info(`Checking for comments on issue #${issue.number} since ${sinceDate}`);
+            if (!sinceDate) {
+                return true;
+            }
+            // find any comments since the date
+            const comments = yield this._listIssueComments(issue.number, sinceDate);
+            const filteredComments = comments.filter(comment => comment.user.type === 'User' && comment.user.login !== actor);
+            issueLogger.info(`Comments not made by actor or another bot: ${filteredComments.length}`);
+            // if there are any user comments returned
+            return filteredComments.length > 0;
+        });
+    }
+    // grab comments for an issue since a given date
+    _listIssueComments(issueNumber, sinceDate) {
+        return __awaiter(this, void 0, void 0, function* () {
+            // find any comments since date on the given issue
+            try {
+                const comments = yield this.client.issues.listComments({
+                    owner: github_1.context.repo.owner,
+                    repo: github_1.context.repo.repo,
+                    issue_number: issueNumber,
+                    since: sinceDate
+                });
+                return comments.data;
+            }
+            catch (error) {
+                logger.error(`List issue comments error: ${error.message}`);
+                return Promise.resolve([]);
+            }
+        });
+    }
+    // get the actor from the GitHub token or context
+    _getActor() {
+        return __awaiter(this, void 0, void 0, function* () {
+            let actor;
+            try {
+                actor = yield this.client.users.getAuthenticated();
+            }
+            catch (error) {
+                return github_1.context.actor;
+            }
+            return actor.data.login;
+        });
+    }
+    // grab issues from github in baches of 100
+    _getIssues(page) {
+        return __awaiter(this, void 0, void 0, function* () {
+            // generate type for response
+            const endpoint = this.client.issues.listForRepo;
+            try {
+                const issueResult = yield this.client.issues.listForRepo({
+                    owner: github_1.context.repo.owner,
+                    repo: github_1.context.repo.repo,
+                    state: 'open',
+                    labels: this.options.onlyLabels,
+                    per_page: 100,
+                    direction: this.options.ascending ? 'asc' : 'desc',
+                    page
+                });
+                return issueResult.data;
+            }
+            catch (error) {
+                logger.error(`Get issues for repo error: ${error.message}`);
+                return Promise.resolve([]);
+            }
+        });
+    }
+    // Mark an issue as stale with a comment and a label
+    _markStale(issue, staleMessage, staleLabel, skipMessage) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const issueLogger = new issue_logger_1.IssueLogger(issue);
+            issueLogger.info(`Marking issue #${issue.number} as stale`);
+            this.staleIssues.push(issue);
+            this.operationsLeft -= 2;
+            // if the issue is being marked stale, the updated date should be changed to right now
+            // so that close calculations work correctly
+            const newUpdatedAtDate = new Date();
+            issue.updated_at = newUpdatedAtDate.toString();
+            if (this.options.debugOnly) {
+                return;
+            }
+            if (!skipMessage) {
+                try {
+                    yield this.client.issues.createComment({
+                        owner: github_1.context.repo.owner,
+                        repo: github_1.context.repo.repo,
+                        issue_number: issue.number,
+                        body: staleMessage
+                    });
+                }
+                catch (error) {
+                    issueLogger.error(`Error creating a comment: ${error.message}`);
+                }
+            }
+            try {
+                yield this.client.issues.addLabels({
+                    owner: github_1.context.repo.owner,
+                    repo: github_1.context.repo.repo,
+                    issue_number: issue.number,
+                    labels: [staleLabel]
+                });
+            }
+            catch (error) {
+                issueLogger.error(`Error adding a label: ${error.message}`);
+            }
+        });
+    }
+    // Close an issue based on staleness
+    _closeIssue(issue, closeMessage, closeLabel) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const issueLogger = new issue_logger_1.IssueLogger(issue);
+            issueLogger.info(`Closing issue #${issue.number} for being stale`);
+            this.closedIssues.push(issue);
+            this.operationsLeft -= 1;
+            if (this.options.debugOnly) {
+                return;
+            }
+            if (closeMessage) {
+                try {
+                    yield this.client.issues.createComment({
+                        owner: github_1.context.repo.owner,
+                        repo: github_1.context.repo.repo,
+                        issue_number: issue.number,
+                        body: closeMessage
+                    });
+                }
+                catch (error) {
+                    issueLogger.error(`Error creating a comment: ${error.message}`);
+                }
+            }
+            if (closeLabel) {
+                try {
+                    yield this.client.issues.addLabels({
+                        owner: github_1.context.repo.owner,
+                        repo: github_1.context.repo.repo,
+                        issue_number: issue.number,
+                        labels: [closeLabel]
+                    });
+                }
+                catch (error) {
+                    issueLogger.error(`Error adding a label: ${error.message}`);
+                }
+            }
+            try {
+                yield this.client.issues.update({
+                    owner: github_1.context.repo.owner,
+                    repo: github_1.context.repo.repo,
+                    issue_number: issue.number,
+                    state: 'closed'
+                });
+            }
+            catch (error) {
+                issueLogger.error(`Error updating an issue: ${error.message}`);
+            }
+        });
+    }
+    _getPullRequest(issue) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const issueLogger = new issue_logger_1.IssueLogger(issue);
+            this.operationsLeft -= 1;
+            try {
+                const pullRequest = yield this.client.pulls.get({
+                    owner: github_1.context.repo.owner,
+                    repo: github_1.context.repo.repo,
+                    pull_number: issue.number
+                });
+                return pullRequest.data;
+            }
+            catch (error) {
+                issueLogger.error(`Error getting pull request ${issue.number}: ${error.message}`);
+            }
+        });
+    }
+    // Delete the branch on closed pull request
+    _deleteBranch(issue) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const issueLogger = new issue_logger_1.IssueLogger(issue);
+            issueLogger.info(`Delete branch from closed issue #${issue.number} - ${issue.title}`);
+            if (this.options.debugOnly) {
+                return;
+            }
+            const pullRequest = yield this._getPullRequest(issue);
+            if (!pullRequest) {
+                issueLogger.info(`Not deleting branch as pull request not found for issue ${issue.number}`);
+                return;
+            }
+            const branch = pullRequest.head.ref;
+            issueLogger.info(`Deleting branch ${branch} from closed issue #${issue.number}`);
+            this.operationsLeft -= 1;
+            try {
+                yield this.client.git.deleteRef({
+                    owner: github_1.context.repo.owner,
+                    repo: github_1.context.repo.repo,
+                    ref: `heads/${branch}`
+                });
+            }
+            catch (error) {
+                issueLogger.error(`Error deleting branch ${branch} from issue #${issue.number}: ${error.message}`);
+            }
+        });
+    }
+    // Remove a label from an issue
+    _removeLabel(issue, label) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const issueLogger = new issue_logger_1.IssueLogger(issue);
+            issueLogger.info(`Removing label "${label}" from issue #${issue.number}`);
+            this.removedLabelIssues.push(issue);
+            this.operationsLeft -= 1;
+            // @todo remove the debug only to be able to test the code below
+            if (this.options.debugOnly) {
+                return;
+            }
+            try {
+                yield this.client.issues.removeLabel({
+                    owner: github_1.context.repo.owner,
+                    repo: github_1.context.repo.repo,
+                    issue_number: issue.number,
+                    name: label
+                });
+            }
+            catch (error) {
+                issueLogger.error(`Error removing a label: ${error.message}`);
+            }
+        });
+    }
+    // returns the creation date of a given label on an issue (or nothing if no label existed)
+    ///see https://developer.github.com/v3/activity/events/
+    _getLabelCreationDate(issue, label) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const issueLogger = new issue_logger_1.IssueLogger(issue);
+            issueLogger.info(`Checking for label on issue #${issue.number}`);
+            this.operationsLeft -= 1;
+            const options = this.client.issues.listEvents.endpoint.merge({
+                owner: github_1.context.repo.owner,
+                repo: github_1.context.repo.repo,
+                per_page: 100,
+                issue_number: issue.number
+            });
+            const events = yield this.client.paginate(options);
+            const reversedEvents = events.reverse();
+            const staleLabeledEvent = reversedEvents.find(event => event.event === 'labeled' && event.label.name === label);
+            if (!staleLabeledEvent) {
+                // Must be old rather than labeled
+                return undefined;
+            }
+            return staleLabeledEvent.created_at;
+        });
+    }
+    _getDaysBeforeIssueStale() {
+        return isNaN(this.options.daysBeforeIssueStale)
+            ? this.options.daysBeforeStale
+            : this.options.daysBeforeIssueStale;
+    }
+    _getDaysBeforePrStale() {
+        return isNaN(this.options.daysBeforePrStale)
+            ? this.options.daysBeforeStale
+            : this.options.daysBeforePrStale;
+    }
+    _getDaysBeforeIssueClose() {
+        return isNaN(this.options.daysBeforeIssueClose)
+            ? this.options.daysBeforeClose
+            : this.options.daysBeforeIssueClose;
+    }
+    _getDaysBeforePrClose() {
+        return isNaN(this.options.daysBeforePrClose)
+            ? this.options.daysBeforeClose
+            : this.options.daysBeforePrClose;
+    }
+    _removeStaleLabel(issue, staleLabel) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const issueLogger = new issue_logger_1.IssueLogger(issue);
+            issueLogger.info(`Issue #${issue.number} is no longer stale. Removing stale label.`);
+            return this._removeLabel(issue, staleLabel);
+        });
+    }
+}
+exports.IssueProcessor = IssueProcessor;
+
+
+/***/ }),
+
+/***/ 1699:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
@@ -26,417 +523,178 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.IssueProcessor = void 0;
-const core = __importStar(__nccwpck_require__(186));
-const github_1 = __nccwpck_require__(438);
-const is_labeled_1 = __nccwpck_require__(792);
-const labels_to_list_1 = __nccwpck_require__(107);
-/***
- * Handle processing of issues for staleness/closure.
- */
-class IssueProcessor {
-    constructor(options, getActor, getIssues, listIssueComments, getLabelCreationDate) {
-        this.operationsLeft = 0;
-        this.staleIssues = [];
-        this.closedIssues = [];
-        this.deletedBranchIssues = [];
-        this.removedLabelIssues = [];
-        this.options = options;
-        this.operationsLeft = options.operationsPerRun;
-        this.client = github_1.getOctokit(options.repoToken);
-        if (getActor) {
-            this.getActor = getActor;
-        }
-        if (getIssues) {
-            this.getIssues = getIssues;
-        }
-        if (listIssueComments) {
-            this.listIssueComments = listIssueComments;
-        }
-        if (getLabelCreationDate) {
-            this.getLabelCreationDate = getLabelCreationDate;
-        }
-        if (this.options.debugOnly) {
-            core.warning('Executing in debug mode. Debug output will be written but no issues will be processed.');
-        }
+exports.IssueLogger = void 0;
+const core = __importStar(__nccwpck_require__(2186));
+class IssueLogger {
+    constructor(issue) {
+        this._issue = issue;
     }
-    processIssues(page = 1) {
-        return __awaiter(this, void 0, void 0, function* () {
-            // get the next batch of issues
-            const issues = yield this.getIssues(page);
-            this.operationsLeft -= 1;
-            const actor = yield this.getActor();
-            if (issues.length <= 0) {
-                core.info('No more issues found to process. Exiting.');
-                return this.operationsLeft;
-            }
-            for (const issue of issues.values()) {
-                const isPr = !!issue.pull_request;
-                core.info(`Found issue: issue #${issue.number} last updated ${issue.updated_at} (is pr? ${isPr})`);
-                // calculate string based messages for this issue
-                const staleMessage = isPr
-                    ? this.options.stalePrMessage
-                    : this.options.staleIssueMessage;
-                const closeMessage = isPr
-                    ? this.options.closePrMessage
-                    : this.options.closeIssueMessage;
-                const staleLabel = isPr
-                    ? this.options.stalePrLabel
-                    : this.options.staleIssueLabel;
-                const closeLabel = isPr
-                    ? this.options.closePrLabel
-                    : this.options.closeIssueLabel;
-                const exemptLabels = labels_to_list_1.labelsToList(isPr ? this.options.exemptPrLabels : this.options.exemptIssueLabels);
-                const skipMessage = isPr
-                    ? this.options.skipStalePrMessage
-                    : this.options.skipStaleIssueMessage;
-                const issueType = isPr ? 'pr' : 'issue';
-                const shouldMarkWhenStale = this.options.daysBeforeStale > -1;
-                if (!staleMessage && shouldMarkWhenStale) {
-                    core.info(`Skipping ${issueType} due to empty stale message`);
-                    continue;
-                }
-                if (issue.state === 'closed') {
-                    core.info(`Skipping ${issueType} because it is closed`);
-                    continue; // don't process closed issues
-                }
-                if (issue.locked) {
-                    core.info(`Skipping ${issueType} because it is locked`);
-                    continue; // don't process locked issues
-                }
-                if (exemptLabels.some((exemptLabel) => is_labeled_1.isLabeled(issue, exemptLabel))) {
-                    core.info(`Skipping ${issueType} because it has an exempt label`);
-                    continue; // don't process exempt issues
-                }
-                // does this issue have a stale label?
-                let isStale = is_labeled_1.isLabeled(issue, staleLabel);
-                if (isStale) {
-                    core.info(`This issue has a stale label`);
-                }
-                else {
-                    core.info(`This issue hasn't a stale label`);
-                }
-                // should this issue be marked stale?
-                const shouldBeStale = !IssueProcessor.updatedSince(issue.updated_at, this.options.daysBeforeStale);
-                // determine if this issue needs to be marked stale first
-                if (!isStale && shouldBeStale && shouldMarkWhenStale) {
-                    core.info(`Marking ${issueType} stale because it was last updated on ${issue.updated_at} and it does not have a stale label`);
-                    yield this.markStale(issue, staleMessage, staleLabel, skipMessage);
-                    isStale = true; // this issue is now considered stale
-                }
-                // process the issue if it was marked stale
-                if (isStale) {
-                    core.info(`Found a stale ${issueType}`);
-                    yield this.processStaleIssue(issue, issueType, staleLabel, actor, closeMessage, closeLabel);
-                }
-            }
-            if (this.operationsLeft <= 0) {
-                core.warning('Reached max number of operations to process. Exiting.');
-                return 0;
-            }
-            // do the next batch
-            return this.processIssues(page + 1);
-        });
+    warning(message) {
+        core.warning(this._prefixWithIssueNumber(message));
     }
-    // handle all of the stale issue logic when we find a stale issue
-    processStaleIssue(issue, issueType, staleLabel, actor, closeMessage, closeLabel) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const markedStaleOn = (yield this.getLabelCreationDate(issue, staleLabel)) || issue.updated_at;
-            core.info(`Issue #${issue.number} marked stale on: ${markedStaleOn}`);
-            const issueHasComments = yield this.hasCommentsSince(issue, markedStaleOn, actor);
-            core.info(`Issue #${issue.number} has been commented on: ${issueHasComments}`);
-            const issueHasUpdate = IssueProcessor.updatedSince(issue.updated_at, this.options.daysBeforeClose);
-            core.info(`Issue #${issue.number} has been updated: ${issueHasUpdate}`);
-            // should we un-stale this issue?
-            if (this.options.removeStaleWhenUpdated && issueHasComments) {
-                core.info(`Issue #${issue.number} is no longer stale. Removing stale label.`);
-                yield this.removeLabel(issue, staleLabel);
-            }
-            // now start closing logic
-            if (this.options.daysBeforeClose < 0) {
-                return; // nothing to do because we aren't closing stale issues
-            }
-            if (!issueHasComments && !issueHasUpdate) {
-                core.info(`Closing ${issueType} because it was last updated on ${issue.updated_at}`);
-                yield this.closeIssue(issue, closeMessage, closeLabel);
-                if (this.options.deleteBranch && issue.pull_request) {
-                    core.info(`Deleting branch for #${issue.number} as delete-branch option was specified`);
-                    yield this.deleteBranch(issue);
-                    this.deletedBranchIssues.push(issue);
-                }
-            }
-            else {
-                core.info(`Stale ${issueType} is not old enough to close yet (hasComments? ${issueHasComments}, hasUpdate? ${issueHasUpdate})`);
-            }
-        });
+    info(message) {
+        core.info(this._prefixWithIssueNumber(message));
     }
-    // checks to see if a given issue is still stale (has had activity on it)
-    hasCommentsSince(issue, sinceDate, actor) {
-        return __awaiter(this, void 0, void 0, function* () {
-            core.info(`Checking for comments on issue #${issue.number} since ${sinceDate}`);
-            if (!sinceDate) {
-                return true;
-            }
-            // find any comments since the date
-            const comments = yield this.listIssueComments(issue.number, sinceDate);
-            const filteredComments = comments.filter(comment => comment.user.type === 'User' && comment.user.login !== actor);
-            core.info(`Comments not made by actor or another bot: ${filteredComments.length}`);
-            // if there are any user comments returned
-            return filteredComments.length > 0;
-        });
+    error(message) {
+        core.error(this._prefixWithIssueNumber(message));
     }
-    // grab comments for an issue since a given date
-    listIssueComments(issueNumber, sinceDate) {
-        return __awaiter(this, void 0, void 0, function* () {
-            // find any comments since date on the given issue
-            try {
-                const comments = yield this.client.issues.listComments({
-                    owner: github_1.context.repo.owner,
-                    repo: github_1.context.repo.repo,
-                    issue_number: issueNumber,
-                    since: sinceDate
-                });
-                return comments.data;
-            }
-            catch (error) {
-                core.error(`List issue comments error: ${error.message}`);
-                return Promise.resolve([]);
-            }
-        });
+    _prefixWithIssueNumber(message) {
+        return `[#${this._getIssueNumber()}] ${message}`;
     }
-    // get the actor from the GitHub token or context
-    getActor() {
-        return __awaiter(this, void 0, void 0, function* () {
-            let actor;
-            try {
-                actor = yield this.client.users.getAuthenticated();
-            }
-            catch (error) {
-                return github_1.context.actor;
-            }
-            return actor.data.login;
-        });
-    }
-    // grab issues from github in baches of 100
-    getIssues(page) {
-        return __awaiter(this, void 0, void 0, function* () {
-            // generate type for response
-            const endpoint = this.client.issues.listForRepo;
-            try {
-                const issueResult = yield this.client.issues.listForRepo({
-                    owner: github_1.context.repo.owner,
-                    repo: github_1.context.repo.repo,
-                    state: 'open',
-                    labels: this.options.onlyLabels,
-                    per_page: 100,
-                    direction: this.options.ascending ? 'asc' : 'desc',
-                    page
-                });
-                return issueResult.data;
-            }
-            catch (error) {
-                core.error(`Get issues for repo error: ${error.message}`);
-                return Promise.resolve([]);
-            }
-        });
-    }
-    // Mark an issue as stale with a comment and a label
-    markStale(issue, staleMessage, staleLabel, skipMessage) {
-        return __awaiter(this, void 0, void 0, function* () {
-            core.info(`Marking issue #${issue.number} as stale`);
-            this.staleIssues.push(issue);
-            this.operationsLeft -= 2;
-            // if the issue is being marked stale, the updated date should be changed to right now
-            // so that close calculations work correctly
-            const newUpdatedAtDate = new Date();
-            issue.updated_at = newUpdatedAtDate.toString();
-            if (this.options.debugOnly) {
-                return;
-            }
-            if (!skipMessage) {
-                try {
-                    yield this.client.issues.createComment({
-                        owner: github_1.context.repo.owner,
-                        repo: github_1.context.repo.repo,
-                        issue_number: issue.number,
-                        body: staleMessage
-                    });
-                }
-                catch (error) {
-                    core.error(`Error creating a comment: ${error.message}`);
-                }
-            }
-            try {
-                yield this.client.issues.addLabels({
-                    owner: github_1.context.repo.owner,
-                    repo: github_1.context.repo.repo,
-                    issue_number: issue.number,
-                    labels: [staleLabel]
-                });
-            }
-            catch (error) {
-                core.error(`Error adding a label: ${error.message}`);
-            }
-        });
-    }
-    // Close an issue based on staleness
-    closeIssue(issue, closeMessage, closeLabel) {
-        return __awaiter(this, void 0, void 0, function* () {
-            core.info(`Closing issue #${issue.number} for being stale`);
-            this.closedIssues.push(issue);
-            this.operationsLeft -= 1;
-            if (this.options.debugOnly) {
-                return;
-            }
-            if (closeMessage) {
-                try {
-                    yield this.client.issues.createComment({
-                        owner: github_1.context.repo.owner,
-                        repo: github_1.context.repo.repo,
-                        issue_number: issue.number,
-                        body: closeMessage
-                    });
-                }
-                catch (error) {
-                    core.error(`Error creating a comment: ${error.message}`);
-                }
-            }
-            if (closeLabel) {
-                try {
-                    yield this.client.issues.addLabels({
-                        owner: github_1.context.repo.owner,
-                        repo: github_1.context.repo.repo,
-                        issue_number: issue.number,
-                        labels: [closeLabel]
-                    });
-                }
-                catch (error) {
-                    core.error(`Error adding a label: ${error.message}`);
-                }
-            }
-            try {
-                yield this.client.issues.update({
-                    owner: github_1.context.repo.owner,
-                    repo: github_1.context.repo.repo,
-                    issue_number: issue.number,
-                    state: 'closed'
-                });
-            }
-            catch (error) {
-                core.error(`Error updating an issue: ${error.message}`);
-            }
-        });
-    }
-    getPullRequest(pullNumber) {
-        return __awaiter(this, void 0, void 0, function* () {
-            this.operationsLeft -= 1;
-            try {
-                const pullRequest = yield this.client.pulls.get({
-                    owner: github_1.context.repo.owner,
-                    repo: github_1.context.repo.repo,
-                    pull_number: pullNumber
-                });
-                return pullRequest.data;
-            }
-            catch (error) {
-                core.error(`Error getting pull request ${pullNumber}: ${error.message}`);
-            }
-        });
-    }
-    // Delete the branch on closed pull request
-    deleteBranch(issue) {
-        return __awaiter(this, void 0, void 0, function* () {
-            core.info(`Delete branch from closed issue #${issue.number} - ${issue.title}`);
-            if (this.options.debugOnly) {
-                return;
-            }
-            const pullRequest = yield this.getPullRequest(issue.number);
-            if (!pullRequest) {
-                core.info(`Not deleting branch as pull request not found for issue ${issue.number}`);
-                return;
-            }
-            const branch = pullRequest.head.ref;
-            core.info(`Deleting branch ${branch} from closed issue #${issue.number}`);
-            this.operationsLeft -= 1;
-            try {
-                yield this.client.git.deleteRef({
-                    owner: github_1.context.repo.owner,
-                    repo: github_1.context.repo.repo,
-                    ref: `heads/${branch}`
-                });
-            }
-            catch (error) {
-                core.error(`Error deleting branch ${branch} from issue #${issue.number}: ${error.message}`);
-            }
-        });
-    }
-    // Remove a label from an issue
-    removeLabel(issue, label) {
-        return __awaiter(this, void 0, void 0, function* () {
-            core.info(`Removing label "${label}" from issue #${issue.number}`);
-            this.removedLabelIssues.push(issue);
-            this.operationsLeft -= 1;
-            // @todo remove the debug only to be able to test the code below
-            if (this.options.debugOnly) {
-                return;
-            }
-            try {
-                yield this.client.issues.removeLabel({
-                    owner: github_1.context.repo.owner,
-                    repo: github_1.context.repo.repo,
-                    issue_number: issue.number,
-                    name: label
-                });
-            }
-            catch (error) {
-                core.error(`Error removing a label: ${error.message}`);
-            }
-        });
-    }
-    // returns the creation date of a given label on an issue (or nothing if no label existed)
-    ///see https://developer.github.com/v3/activity/events/
-    getLabelCreationDate(issue, label) {
-        return __awaiter(this, void 0, void 0, function* () {
-            core.info(`Checking for label on issue #${issue.number}`);
-            this.operationsLeft -= 1;
-            const options = this.client.issues.listEvents.endpoint.merge({
-                owner: github_1.context.repo.owner,
-                repo: github_1.context.repo.repo,
-                per_page: 100,
-                issue_number: issue.number
-            });
-            const events = yield this.client.paginate(options);
-            const reversedEvents = events.reverse();
-            const staleLabeledEvent = reversedEvents.find(event => event.event === 'labeled' && event.label.name === label);
-            if (!staleLabeledEvent) {
-                // Must be old rather than labeled
-                return undefined;
-            }
-            return staleLabeledEvent.created_at;
-        });
-    }
-    static updatedSince(timestamp, num_days) {
-        const daysInMillis = 1000 * 60 * 60 * 24 * num_days;
-        const millisSinceLastUpdated = new Date().getTime() - new Date(timestamp).getTime();
-        return millisSinceLastUpdated <= daysInMillis;
+    _getIssueNumber() {
+        return this._issue.number;
     }
 }
-exports.IssueProcessor = IssueProcessor;
+exports.IssueLogger = IssueLogger;
 
 
 /***/ }),
 
-/***/ 792:
+/***/ 8236:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.Logger = void 0;
+const core = __importStar(__nccwpck_require__(2186));
+class Logger {
+    warning(message) {
+        core.warning(message);
+    }
+    info(message) {
+        core.info(message);
+    }
+    error(message) {
+        core.error(message);
+    }
+}
+exports.Logger = Logger;
+
+
+/***/ }),
+
+/***/ 9639:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.IssueType = void 0;
+var IssueType;
+(function (IssueType) {
+    IssueType["Issue"] = "issue";
+    IssueType["PullRequest"] = "pr";
+})(IssueType = exports.IssueType || (exports.IssueType = {}));
+
+
+/***/ }),
+
+/***/ 965:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.getHumanizedDate = void 0;
+function getHumanizedDate(date) {
+    const year = date.getFullYear();
+    let month = `${date.getMonth() + 1}`;
+    let day = `${date.getDate()}`;
+    if (month.length < 2) {
+        month = `0${month}`;
+    }
+    if (day.length < 2) {
+        day = `0${day}`;
+    }
+    return [day, month, year].join('-');
+}
+exports.getHumanizedDate = getHumanizedDate;
+
+
+/***/ }),
+
+/***/ 1473:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.isDateMoreRecentThan = void 0;
+function isDateMoreRecentThan(date, comparedDate) {
+    return date > comparedDate;
+}
+exports.isDateMoreRecentThan = isDateMoreRecentThan;
+
+
+/***/ }),
+
+/***/ 891:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.isValidDate = void 0;
+/**
+ * @description
+ * Check if a date is valid
+ *
+ * @see
+ * https://stackoverflow.com/a/1353711/4440414
+ *
+ * @param {Readonly<Date>} date The date to check
+ *
+ * @returns {boolean} true when the given date is valid
+ */
+function isValidDate(date) {
+    if (Object.prototype.toString.call(date) === '[object Date]') {
+        return !isNaN(date.getTime());
+    }
+    return false;
+}
+exports.isValidDate = isValidDate;
+
+
+/***/ }),
+
+/***/ 5153:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.getIssueType = void 0;
+const issue_type_1 = __nccwpck_require__(9639);
+function getIssueType(isPullRequest) {
+    return isPullRequest ? issue_type_1.IssueType.PullRequest : issue_type_1.IssueType.Issue;
+}
+exports.getIssueType = getIssueType;
+
+
+/***/ }),
+
+/***/ 6792:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
@@ -446,7 +704,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.isLabeled = void 0;
-const lodash_deburr_1 = __importDefault(__nccwpck_require__(601));
+const lodash_deburr_1 = __importDefault(__nccwpck_require__(1601));
 /**
  * @description
  * Check if the label is listed as a label of the issue
@@ -469,7 +727,22 @@ function cleanLabel(label) {
 
 /***/ }),
 
-/***/ 107:
+/***/ 5400:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.isPullRequest = void 0;
+function isPullRequest(issue) {
+    return !!issue.pull_request;
+}
+exports.isPullRequest = isPullRequest;
+
+
+/***/ }),
+
+/***/ 9107:
 /***/ ((__unused_webpack_module, exports) => {
 
 "use strict";
@@ -503,7 +776,22 @@ exports.labelsToList = labelsToList;
 
 /***/ }),
 
-/***/ 109:
+/***/ 2461:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.shouldMarkWhenStale = void 0;
+function shouldMarkWhenStale(daysBeforeStale) {
+    return daysBeforeStale >= 0;
+}
+exports.shouldMarkWhenStale = shouldMarkWhenStale;
+
+
+/***/ }),
+
+/***/ 3109:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
@@ -537,8 +825,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-const core = __importStar(__nccwpck_require__(186));
-const IssueProcessor_1 = __nccwpck_require__(407);
+const core = __importStar(__nccwpck_require__(2186));
+const is_valid_date_1 = __nccwpck_require__(891);
+const IssueProcessor_1 = __nccwpck_require__(4407);
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -560,7 +849,11 @@ function getAndValidateArgs() {
         closeIssueMessage: core.getInput('close-issue-message'),
         closePrMessage: core.getInput('close-pr-message'),
         daysBeforeStale: parseInt(core.getInput('days-before-stale', { required: true })),
+        daysBeforeIssueStale: parseInt(core.getInput('days-before-issue-stale')),
+        daysBeforePrStale: parseInt(core.getInput('days-before-pr-stale')),
         daysBeforeClose: parseInt(core.getInput('days-before-close', { required: true })),
+        daysBeforeIssueClose: parseInt(core.getInput('days-before-issue-close')),
+        daysBeforePrClose: parseInt(core.getInput('days-before-pr-close')),
         staleIssueLabel: core.getInput('stale-issue-label', { required: true }),
         closeIssueLabel: core.getInput('close-issue-label'),
         exemptIssueLabels: core.getInput('exempt-issue-labels'),
@@ -574,15 +867,30 @@ function getAndValidateArgs() {
         ascending: core.getInput('ascending') === 'true',
         skipStalePrMessage: core.getInput('skip-stale-pr-message') === 'true',
         skipStaleIssueMessage: core.getInput('skip-stale-issue-message') === 'true',
-        deleteBranch: core.getInput('delete-branch') === 'true'
+        deleteBranch: core.getInput('delete-branch') === 'true',
+        startDate: core.getInput('start-date') !== ''
+            ? core.getInput('start-date')
+            : undefined
     };
     for (const numberInput of [
         'days-before-stale',
+        'days-before-issue-stale',
+        'days-before-pr-stale',
         'days-before-close',
+        'days-before-issue-close',
+        'days-before-pr-close',
         'operations-per-run'
     ]) {
         if (isNaN(parseInt(core.getInput(numberInput)))) {
             throw Error(`input ${numberInput} did not parse to a valid integer`);
+        }
+    }
+    for (const optionalDateInput of ['start-date']) {
+        // Ignore empty dates because it is considered as the right type for a default value (so a valid one)
+        if (core.getInput(optionalDateInput) !== '') {
+            if (!is_valid_date_1.isValidDate(new Date(core.getInput(optionalDateInput)))) {
+                throw new Error(`input ${optionalDateInput} did not parse to a valid date`);
+            }
         }
     }
     return args;
@@ -592,7 +900,7 @@ run();
 
 /***/ }),
 
-/***/ 351:
+/***/ 7351:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
@@ -605,8 +913,8 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-const os = __importStar(__nccwpck_require__(87));
-const utils_1 = __nccwpck_require__(278);
+const os = __importStar(__nccwpck_require__(2087));
+const utils_1 = __nccwpck_require__(5278);
 /**
  * Commands
  *
@@ -678,7 +986,7 @@ function escapeProperty(s) {
 
 /***/ }),
 
-/***/ 186:
+/***/ 2186:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
@@ -700,11 +1008,11 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-const command_1 = __nccwpck_require__(351);
+const command_1 = __nccwpck_require__(7351);
 const file_command_1 = __nccwpck_require__(717);
-const utils_1 = __nccwpck_require__(278);
-const os = __importStar(__nccwpck_require__(87));
-const path = __importStar(__nccwpck_require__(622));
+const utils_1 = __nccwpck_require__(5278);
+const os = __importStar(__nccwpck_require__(2087));
+const path = __importStar(__nccwpck_require__(5622));
 /**
  * The code to exit an action
  */
@@ -939,9 +1247,9 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 // We use any as a valid input type
 /* eslint-disable @typescript-eslint/no-explicit-any */
-const fs = __importStar(__nccwpck_require__(747));
-const os = __importStar(__nccwpck_require__(87));
-const utils_1 = __nccwpck_require__(278);
+const fs = __importStar(__nccwpck_require__(5747));
+const os = __importStar(__nccwpck_require__(2087));
+const utils_1 = __nccwpck_require__(5278);
 function issueCommand(command, message) {
     const filePath = process.env[`GITHUB_${command}`];
     if (!filePath) {
@@ -959,7 +1267,7 @@ exports.issueCommand = issueCommand;
 
 /***/ }),
 
-/***/ 278:
+/***/ 5278:
 /***/ ((__unused_webpack_module, exports) => {
 
 "use strict";
@@ -985,15 +1293,15 @@ exports.toCommandValue = toCommandValue;
 
 /***/ }),
 
-/***/ 53:
+/***/ 4087:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.Context = void 0;
-const fs_1 = __nccwpck_require__(747);
-const os_1 = __nccwpck_require__(87);
+const fs_1 = __nccwpck_require__(5747);
+const os_1 = __nccwpck_require__(2087);
 class Context {
     /**
      * Hydrate the context from the environment
@@ -1042,7 +1350,7 @@ exports.Context = Context;
 
 /***/ }),
 
-/***/ 438:
+/***/ 5438:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
@@ -1068,8 +1376,8 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.getOctokit = exports.context = void 0;
-const Context = __importStar(__nccwpck_require__(53));
-const utils_1 = __nccwpck_require__(30);
+const Context = __importStar(__nccwpck_require__(4087));
+const utils_1 = __nccwpck_require__(3030);
 exports.context = new Context.Context();
 /**
  * Returns a hydrated octokit ready to use for GitHub Actions
@@ -1085,7 +1393,7 @@ exports.getOctokit = getOctokit;
 
 /***/ }),
 
-/***/ 914:
+/***/ 7914:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
@@ -1111,7 +1419,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.getApiBaseUrl = exports.getProxyAgent = exports.getAuthString = void 0;
-const httpClient = __importStar(__nccwpck_require__(925));
+const httpClient = __importStar(__nccwpck_require__(9925));
 function getAuthString(token, options) {
     if (!token && !options.auth) {
         throw new Error('Parameter token or opts.auth is required');
@@ -1135,7 +1443,7 @@ exports.getApiBaseUrl = getApiBaseUrl;
 
 /***/ }),
 
-/***/ 30:
+/***/ 3030:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
@@ -1161,12 +1469,12 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.getOctokitOptions = exports.GitHub = exports.context = void 0;
-const Context = __importStar(__nccwpck_require__(53));
-const Utils = __importStar(__nccwpck_require__(914));
+const Context = __importStar(__nccwpck_require__(4087));
+const Utils = __importStar(__nccwpck_require__(7914));
 // octokit + plugins
-const core_1 = __nccwpck_require__(762);
-const plugin_rest_endpoint_methods_1 = __nccwpck_require__(44);
-const plugin_paginate_rest_1 = __nccwpck_require__(193);
+const core_1 = __nccwpck_require__(6762);
+const plugin_rest_endpoint_methods_1 = __nccwpck_require__(3044);
+const plugin_paginate_rest_1 = __nccwpck_require__(4193);
 exports.context = new Context.Context();
 const baseUrl = Utils.getApiBaseUrl();
 const defaults = {
@@ -1196,16 +1504,16 @@ exports.getOctokitOptions = getOctokitOptions;
 
 /***/ }),
 
-/***/ 925:
+/***/ 9925:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-const url = __nccwpck_require__(835);
-const http = __nccwpck_require__(605);
-const https = __nccwpck_require__(211);
-const pm = __nccwpck_require__(443);
+const url = __nccwpck_require__(8835);
+const http = __nccwpck_require__(8605);
+const https = __nccwpck_require__(7211);
+const pm = __nccwpck_require__(6443);
 let tunnel;
 var HttpCodes;
 (function (HttpCodes) {
@@ -1615,7 +1923,7 @@ class HttpClient {
         if (useProxy) {
             // If using proxy, need tunnel
             if (!tunnel) {
-                tunnel = __nccwpck_require__(294);
+                tunnel = __nccwpck_require__(4294);
             }
             const agentOptions = {
                 maxSockets: maxSockets,
@@ -1735,13 +2043,13 @@ exports.HttpClient = HttpClient;
 
 /***/ }),
 
-/***/ 443:
+/***/ 6443:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-const url = __nccwpck_require__(835);
+const url = __nccwpck_require__(8835);
 function getProxyUrl(reqUrl) {
     let usingSsl = reqUrl.protocol === 'https:';
     let proxyUrl;
@@ -1858,7 +2166,7 @@ exports.createTokenAuth = createTokenAuth;
 
 /***/ }),
 
-/***/ 762:
+/***/ 6762:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
 "use strict";
@@ -1866,10 +2174,10 @@ exports.createTokenAuth = createTokenAuth;
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 
-var universalUserAgent = __nccwpck_require__(429);
-var beforeAfterHook = __nccwpck_require__(682);
-var request = __nccwpck_require__(234);
-var graphql = __nccwpck_require__(668);
+var universalUserAgent = __nccwpck_require__(5030);
+var beforeAfterHook = __nccwpck_require__(3682);
+var request = __nccwpck_require__(6234);
+var graphql = __nccwpck_require__(8467);
 var authToken = __nccwpck_require__(334);
 
 function _defineProperty(obj, key, value) {
@@ -2042,7 +2350,7 @@ exports.Octokit = Octokit;
 
 /***/ }),
 
-/***/ 440:
+/***/ 9440:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
 "use strict";
@@ -2052,8 +2360,8 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 
 function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
 
-var isPlainObject = _interopDefault(__nccwpck_require__(840));
-var universalUserAgent = __nccwpck_require__(429);
+var isPlainObject = _interopDefault(__nccwpck_require__(8840));
+var universalUserAgent = __nccwpck_require__(5030);
 
 function lowercaseKeys(object) {
   if (!object) {
@@ -2429,7 +2737,7 @@ exports.endpoint = endpoint;
 
 /***/ }),
 
-/***/ 668:
+/***/ 8467:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
 "use strict";
@@ -2437,8 +2745,8 @@ exports.endpoint = endpoint;
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 
-var request = __nccwpck_require__(234);
-var universalUserAgent = __nccwpck_require__(429);
+var request = __nccwpck_require__(6234);
+var universalUserAgent = __nccwpck_require__(5030);
 
 const VERSION = "4.5.2";
 
@@ -2522,7 +2830,7 @@ exports.withCustomRequest = withCustomRequest;
 
 /***/ }),
 
-/***/ 193:
+/***/ 4193:
 /***/ ((__unused_webpack_module, exports) => {
 
 "use strict";
@@ -2660,7 +2968,7 @@ exports.paginateRest = paginateRest;
 
 /***/ }),
 
-/***/ 44:
+/***/ 3044:
 /***/ ((__unused_webpack_module, exports) => {
 
 "use strict";
@@ -3885,8 +4193,8 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 
 function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
 
-var deprecation = __nccwpck_require__(932);
-var once = _interopDefault(__nccwpck_require__(223));
+var deprecation = __nccwpck_require__(8932);
+var once = _interopDefault(__nccwpck_require__(1223));
 
 const logOnce = once(deprecation => console.warn(deprecation));
 /**
@@ -3938,7 +4246,7 @@ exports.RequestError = RequestError;
 
 /***/ }),
 
-/***/ 234:
+/***/ 6234:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
 "use strict";
@@ -3948,9 +4256,9 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 
 function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
 
-var endpoint = __nccwpck_require__(440);
-var universalUserAgent = __nccwpck_require__(429);
-var isPlainObject = _interopDefault(__nccwpck_require__(840));
+var endpoint = __nccwpck_require__(9440);
+var universalUserAgent = __nccwpck_require__(5030);
+var isPlainObject = _interopDefault(__nccwpck_require__(8840));
 var nodeFetch = _interopDefault(__nccwpck_require__(467));
 var requestError = __nccwpck_require__(537);
 
@@ -4094,12 +4402,12 @@ exports.request = request;
 
 /***/ }),
 
-/***/ 682:
+/***/ 3682:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
-var register = __nccwpck_require__(670)
-var addHook = __nccwpck_require__(549)
-var removeHook = __nccwpck_require__(819)
+var register = __nccwpck_require__(4670)
+var addHook = __nccwpck_require__(5549)
+var removeHook = __nccwpck_require__(6819)
 
 // bind with array of arguments: https://stackoverflow.com/a/21792913
 var bind = Function.bind
@@ -4158,7 +4466,7 @@ module.exports.Collection = Hook.Collection
 
 /***/ }),
 
-/***/ 549:
+/***/ 5549:
 /***/ ((module) => {
 
 module.exports = addHook
@@ -4211,7 +4519,7 @@ function addHook (state, kind, name, hook) {
 
 /***/ }),
 
-/***/ 670:
+/***/ 4670:
 /***/ ((module) => {
 
 module.exports = register
@@ -4246,7 +4554,7 @@ function register (state, name, method, options) {
 
 /***/ }),
 
-/***/ 819:
+/***/ 6819:
 /***/ ((module) => {
 
 module.exports = removeHook
@@ -4270,7 +4578,7 @@ function removeHook (state, name, method) {
 
 /***/ }),
 
-/***/ 932:
+/***/ 8932:
 /***/ ((__unused_webpack_module, exports) => {
 
 "use strict";
@@ -4298,7 +4606,7 @@ exports.Deprecation = Deprecation;
 
 /***/ }),
 
-/***/ 840:
+/***/ 8840:
 /***/ ((module) => {
 
 "use strict";
@@ -4342,7 +4650,7 @@ module.exports = isPlainObject;
 
 /***/ }),
 
-/***/ 601:
+/***/ 1601:
 /***/ ((module) => {
 
 /**
@@ -4616,11 +4924,11 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 
 function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
 
-var Stream = _interopDefault(__nccwpck_require__(413));
-var http = _interopDefault(__nccwpck_require__(605));
-var Url = _interopDefault(__nccwpck_require__(835));
-var https = _interopDefault(__nccwpck_require__(211));
-var zlib = _interopDefault(__nccwpck_require__(761));
+var Stream = _interopDefault(__nccwpck_require__(2413));
+var http = _interopDefault(__nccwpck_require__(8605));
+var Url = _interopDefault(__nccwpck_require__(8835));
+var https = _interopDefault(__nccwpck_require__(7211));
+var zlib = _interopDefault(__nccwpck_require__(8761));
 
 // Based on https://github.com/tmpvar/jsdom/blob/aa85b2abf07766ff7bf5c1f6daafb3726f2f2db5/lib/jsdom/living/blob.js
 
@@ -4771,7 +5079,7 @@ FetchError.prototype.name = 'FetchError';
 
 let convert;
 try {
-	convert = __nccwpck_require__(877).convert;
+	convert = __nccwpck_require__(2877).convert;
 } catch (e) {}
 
 const INTERNALS = Symbol('Body internals');
@@ -6263,10 +6571,10 @@ exports.FetchError = FetchError;
 
 /***/ }),
 
-/***/ 223:
+/***/ 1223:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
-var wrappy = __nccwpck_require__(940)
+var wrappy = __nccwpck_require__(2940)
 module.exports = wrappy(once)
 module.exports.strict = wrappy(onceStrict)
 
@@ -6312,27 +6620,27 @@ function onceStrict (fn) {
 
 /***/ }),
 
-/***/ 294:
+/***/ 4294:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
-module.exports = __nccwpck_require__(219);
+module.exports = __nccwpck_require__(4219);
 
 
 /***/ }),
 
-/***/ 219:
+/***/ 4219:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
 "use strict";
 
 
-var net = __nccwpck_require__(631);
-var tls = __nccwpck_require__(16);
-var http = __nccwpck_require__(605);
-var https = __nccwpck_require__(211);
-var events = __nccwpck_require__(614);
-var assert = __nccwpck_require__(357);
-var util = __nccwpck_require__(669);
+var net = __nccwpck_require__(1631);
+var tls = __nccwpck_require__(4016);
+var http = __nccwpck_require__(8605);
+var https = __nccwpck_require__(7211);
+var events = __nccwpck_require__(8614);
+var assert = __nccwpck_require__(2357);
+var util = __nccwpck_require__(1669);
 
 
 exports.httpOverHttp = httpOverHttp;
@@ -6592,7 +6900,7 @@ exports.debug = debug; // for test
 
 /***/ }),
 
-/***/ 429:
+/***/ 5030:
 /***/ ((__unused_webpack_module, exports) => {
 
 "use strict";
@@ -6618,7 +6926,7 @@ exports.getUserAgent = getUserAgent;
 
 /***/ }),
 
-/***/ 940:
+/***/ 2940:
 /***/ ((module) => {
 
 // Returns a wrapper function that returns a wrapped callback
@@ -6658,7 +6966,7 @@ function wrappy (fn, cb) {
 
 /***/ }),
 
-/***/ 877:
+/***/ 2877:
 /***/ ((module) => {
 
 module.exports = eval("require")("encoding");
@@ -6666,7 +6974,7 @@ module.exports = eval("require")("encoding");
 
 /***/ }),
 
-/***/ 357:
+/***/ 2357:
 /***/ ((module) => {
 
 "use strict";
@@ -6674,7 +6982,7 @@ module.exports = require("assert");;
 
 /***/ }),
 
-/***/ 614:
+/***/ 8614:
 /***/ ((module) => {
 
 "use strict";
@@ -6682,7 +6990,7 @@ module.exports = require("events");;
 
 /***/ }),
 
-/***/ 747:
+/***/ 5747:
 /***/ ((module) => {
 
 "use strict";
@@ -6690,7 +6998,7 @@ module.exports = require("fs");;
 
 /***/ }),
 
-/***/ 605:
+/***/ 8605:
 /***/ ((module) => {
 
 "use strict";
@@ -6698,7 +7006,7 @@ module.exports = require("http");;
 
 /***/ }),
 
-/***/ 211:
+/***/ 7211:
 /***/ ((module) => {
 
 "use strict";
@@ -6706,7 +7014,7 @@ module.exports = require("https");;
 
 /***/ }),
 
-/***/ 631:
+/***/ 1631:
 /***/ ((module) => {
 
 "use strict";
@@ -6714,7 +7022,7 @@ module.exports = require("net");;
 
 /***/ }),
 
-/***/ 87:
+/***/ 2087:
 /***/ ((module) => {
 
 "use strict";
@@ -6722,7 +7030,7 @@ module.exports = require("os");;
 
 /***/ }),
 
-/***/ 622:
+/***/ 5622:
 /***/ ((module) => {
 
 "use strict";
@@ -6730,7 +7038,7 @@ module.exports = require("path");;
 
 /***/ }),
 
-/***/ 413:
+/***/ 2413:
 /***/ ((module) => {
 
 "use strict";
@@ -6738,7 +7046,7 @@ module.exports = require("stream");;
 
 /***/ }),
 
-/***/ 16:
+/***/ 4016:
 /***/ ((module) => {
 
 "use strict";
@@ -6746,7 +7054,7 @@ module.exports = require("tls");;
 
 /***/ }),
 
-/***/ 835:
+/***/ 8835:
 /***/ ((module) => {
 
 "use strict";
@@ -6754,7 +7062,7 @@ module.exports = require("url");;
 
 /***/ }),
 
-/***/ 669:
+/***/ 1669:
 /***/ ((module) => {
 
 "use strict";
@@ -6762,7 +7070,7 @@ module.exports = require("util");;
 
 /***/ }),
 
-/***/ 761:
+/***/ 8761:
 /***/ ((module) => {
 
 "use strict";
@@ -6808,6 +7116,6 @@ module.exports = require("zlib");;
 /******/ 	// module exports must be returned from runtime so entry inlining is disabled
 /******/ 	// startup
 /******/ 	// Load entry module and return exports
-/******/ 	return __nccwpck_require__(109);
+/******/ 	return __nccwpck_require__(3109);
 /******/ })()
 ;

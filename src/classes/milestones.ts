@@ -47,6 +47,10 @@ export class Milestones {
   }
 
   private _hasMilestone(milestone: Readonly<string>): boolean {
+    if (!this._issue.milestone) {
+      return false;
+    }
+
     return (
       Milestones._cleanMilestone(milestone) ===
       Milestones._cleanMilestone(this._issue.milestone.title)

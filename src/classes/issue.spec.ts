@@ -10,9 +10,36 @@ describe('Issue', (): void => {
 
   beforeEach((): void => {
     optionsInterface = {
+      ascending: false,
+      closeIssueLabel: '',
+      closeIssueMessage: '',
+      closePrLabel: '',
+      closePrMessage: '',
+      daysBeforeClose: 0,
+      daysBeforeIssueClose: 0,
+      daysBeforeIssueStale: 0,
+      daysBeforePrClose: 0,
+      daysBeforePrStale: 0,
+      daysBeforeStale: 0,
+      debugOnly: false,
+      deleteBranch: false,
+      exemptIssueLabels: '',
+      exemptIssueMilestones: '',
+      exemptMilestones: '',
+      exemptPrLabels: '',
+      exemptPrMilestones: '',
+      onlyLabels: '',
+      operationsPerRun: 0,
+      removeStaleWhenUpdated: false,
+      repoToken: '',
+      skipStaleIssueMessage: false,
+      skipStalePrMessage: false,
+      staleIssueMessage: '',
+      stalePrMessage: '',
+      startDate: undefined,
       stalePrLabel: 'dummy-stale-pr-label',
       staleIssueLabel: 'dummy-stale-issue-label'
-    } as IssueProcessorOptions;
+    };
     issueInterface = {
       title: 'dummy-title',
       number: 8,
@@ -34,8 +61,6 @@ describe('Issue', (): void => {
   });
 
   describe('constructor()', (): void => {
-    beforeEach((): void => {});
-
     it('should set the title with the given issue title', (): void => {
       expect.assertions(1);
 

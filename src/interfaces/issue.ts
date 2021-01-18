@@ -11,5 +11,5 @@ export interface IIssue {
   pull_request: Object | null | undefined;
   state: string;
   locked: boolean;
-  milestone: IMilestone;
+  milestone: IMilestone | undefined;
 }

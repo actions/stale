@@ -15,7 +15,7 @@ export class Issue implements IIssue {
   readonly pull_request: Object | null | undefined;
   readonly state: string;
   readonly locked: boolean;
-  readonly milestone: IMilestone;
+  readonly milestone: IMilestone | undefined;
   readonly isPullRequest: boolean;
   readonly staleLabel: string;
   isStale: boolean;

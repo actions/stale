@@ -43,6 +43,9 @@ $ npm test
 | `close-pr-label`            | Label to apply on the closing pr.                                                            | Optional |
 | `exempt-issue-labels`       | Labels on an issue exempted from being marked as stale.                                      | Optional |
 | `exempt-pr-labels`          | Labels on the pr exempted from being marked as stale.                                        | Optional |
+| `exempt-milestones`         | Milestones on an issue or a pr exempted from being marked as stale.                          | Optional |
+| `exempt-issue-milestones`   | Milestones on an issue exempted from being marked as stale (override `exempt-milestones`).   | Optional |
+| `exempt-pr-milestones`      | Milestones on the pr exempted from being marked as stale (override `exempt-milestones`).     | Optional |
 | `only-labels`               | Only labels checked for stale issue/pr.                                                      | Optional |
 | `operations-per-run`        | Maximum number of operations per run (GitHub API CRUD related). _Defaults to **30**_         | Optional |
 | `remove-stale-when-updated` | Remove stale label from issue/pr on updates or comments. _Defaults to **true**_              | Optional |
@@ -179,6 +182,24 @@ jobs:
       - uses: actions/stale@v3
         with:
           start-date: '2020-18-04T00:00:00Z' // ISO 8601 or RFC 2822
+```
+
+Avoid stale for specific milestones:
+
+```yaml
+name: 'Close stale issues and PRs'
+on:
+  schedule:
+    - cron: '30 1 * * *'
+
+jobs:
+  stale:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/stale@v3
+        with:
+          exempt-issue-milestones: 'future,alpha,beta'
+          exempt-pr-milestones: 'bugfix,improvement'
 ```
 
 ### Debugging

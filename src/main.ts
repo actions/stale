@@ -52,16 +52,15 @@ function getAndValidateArgs(): IssueProcessorOptions {
     startDate:
       core.getInput('start-date') !== ''
         ? core.getInput('start-date')
-        : undefined
+        : undefined,
+    exemptMilestones: core.getInput('exempt-milestones'),
+    exemptIssueMilestones: core.getInput('exempt-issue-milestones'),
+    exemptPrMilestones: core.getInput('exempt-pr-milestones')
   };
 
   for (const numberInput of [
     'days-before-stale',
-    'days-before-issue-stale',
-    'days-before-pr-stale',
     'days-before-close',
-    'days-before-issue-close',
-    'days-before-pr-close',
     'operations-per-run'
   ]) {
     if (isNaN(parseInt(core.getInput(numberInput)))) {

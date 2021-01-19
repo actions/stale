@@ -1,4 +1,4 @@
-import {Issue} from '../IssueProcessor';
+import {Issue} from '../classes/issue';
 import {isLabeled} from './is-labeled';
 
 describe('isLabeled()', (): void => {

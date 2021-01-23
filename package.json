@@ -14,7 +14,8 @@
     "lint:all:fix": "npm run format && npm run lint:fix",
     "pack": "ncc build",
     "test": "jest",
-    "all": "npm run build && npm run format && npm run lint && npm run pack && npm test"
+    "all": "npm run build && npm run format && npm run lint && npm run pack && npm test",
+    "semver": "semantic-release"
   },
   "repository": {
     "type": "git",
@@ -35,6 +36,12 @@
     "semver": "^7.3.4"
   },
   "devDependencies": {
+    "@semantic-release/changelog": "^5.0.1",
+    "@semantic-release/commit-analyzer": "^8.0.1",
+    "@semantic-release/git": "^9.0.0",
+    "@semantic-release/github": "^7.2.0",
+    "@semantic-release/npm": "^7.0.10",
+    "@semantic-release/release-notes-generator": "^9.0.1",
     "@types/jest": "^26.0.20",
     "@types/lodash.deburr": "^4.1.6",
     "@types/node": "^14.14.26",
@@ -49,6 +56,7 @@
     "jest-circus": "^26.6.3",
     "js-yaml": "^4.0.0",
     "prettier": "^2.2.1",
+    "semantic-release": "^17.3.7",
     "ts-jest": "^26.4.4",
     "typescript": "^4.1.3"
   }

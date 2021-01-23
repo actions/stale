@@ -1,0 +1,61 @@
+{
+  "branches": ["master"],
+  "plugins": [
+    [
+      "@semantic-release/commit-analyzer",
+      {
+        "preset": "angular"
+      }
+    ],
+    [
+      "@semantic-release/release-notes-generator",
+      {
+        "preset": "angular",
+        "writerOpts": {
+          "commitsSort": ["subject", "scope"]
+        },
+        "linkCompare": true,
+        "linkReferences": true,
+        "commit": "commit",
+        "issue": "issues"
+      }
+    ],
+    [
+      "@semantic-release/changelog",
+      {
+        "changelogFile": "CHANGELOG.md",
+        "changelogTitle": "# Semantic Versioning Changelog"
+      }
+    ],
+    [
+      "@semantic-release/npm",
+      {
+        "npmPublish": true
+      }
+    ],
+    [
+      "@semantic-release/git",
+      {
+        "assets": ["package.json", "package-lock.json", "CHANGELOG.md"],
+        "message": "build(release): new version ${nextRelease.version}"
+      }
+    ],
+    [
+      "@semantic-release/github",
+      {
+        "assets": [
+          {
+            "path": "dist/index.js",
+            "name": "stale-v${nextRelease.gitTag}.js",
+            "label": "Stale v${nextRelease.gitTag} release"
+          }
+        ],
+        "addReleases": "bottom"
+      }
+    ]
+  ],
+  "dryRun": false,
+  "ci": true,
+  "debug": false,
+  "tagFormat": "v${version}"
+}

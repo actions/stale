@@ -1,5 +1,11 @@
 {
-  "branches": ["master"],
+  "branches": [
+    "master",
+    {
+      "name": "alpha",
+      "prerelease": true
+    }
+  ],
   "plugins": [
     [
       "@semantic-release/commit-analyzer",
@@ -12,7 +18,10 @@
       {
         "preset": "angular",
         "writerOpts": {
-          "commitsSort": ["subject", "scope"]
+          "commitsSort": [
+            "subject",
+            "scope"
+          ]
         },
         "linkCompare": true,
         "linkReferences": true,
@@ -30,7 +39,11 @@
     [
       "@semantic-release/git",
       {
-        "assets": ["package.json", "package-lock.json", "CHANGELOG.md"],
+        "assets": [
+          "package.json",
+          "package-lock.json",
+          "CHANGELOG.md"
+        ],
         "message": "build(release): new version ${nextRelease.version}"
       }
     ],

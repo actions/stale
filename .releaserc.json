@@ -48,7 +48,7 @@
       }
     ]
   ],
-  "dryRun": true,
+  "dryRun": false,
   "ci": true,
   "debug": false,
   "tagFormat": "v${version}"

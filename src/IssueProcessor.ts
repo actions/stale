@@ -1,30 +1,21 @@
 import {context, getOctokit} from '@actions/github';
 import {GitHub} from '@actions/github/lib/utils';
 import {GetResponseTypeFromEndpointMethod} from '@octokit/types';
+import {Issue} from './classes/issue';
+import {IssueLogger} from './classes/loggers/issue-logger';
+import {Logger} from './classes/loggers/logger';
+import {Milestones} from './classes/milestones';
 import {IssueType} from './enums/issue-type';
 import {getHumanizedDate} from './functions/dates/get-humanized-date';
 import {isDateMoreRecentThan} from './functions/dates/is-date-more-recent-than';
 import {isValidDate} from './functions/dates/is-valid-date';
 import {getIssueType} from './functions/get-issue-type';
-import {IssueLogger} from './classes/issue-logger';
-import {Logger} from './classes/logger';
 import {isLabeled} from './functions/is-labeled';
 import {isPullRequest} from './functions/is-pull-request';
-import {labelsToList} from './functions/labels-to-list';
 import {shouldMarkWhenStale} from './functions/should-mark-when-stale';
-import {IsoDateString} from './types/iso-date-string';
 import {IsoOrRfcDateString} from './types/iso-or-rfc-date-string';
-
-export interface Issue {
-  title: string;
-  number: number;
-  created_at: IsoDateString;
-  updated_at: IsoDateString;
-  labels: Label[];
-  pull_request: any;
-  state: string;
-  locked: boolean;
-}
+import {wordsToList} from './functions/words-to-list';
+import {IIssue} from './interfaces/issue';
 
 export interface PullRequest {
   number: number;
@@ -79,9 +70,10 @@ export interface IssueProcessorOptions {
   skipStalePrMessage: boolean;
   deleteBranch: boolean;
   startDate: IsoOrRfcDateString | undefined; // Should be ISO 8601 or RFC 2822
+  exemptMilestones: string;
+  exemptIssueMilestones: string;
+  exemptPrMilestones: string;
 }
-
-const logger: Logger = new Logger();
 
 /***
  * Handle processing of issues for staleness/closure.
@@ -95,13 +87,14 @@ export class IssueProcessor {
     return millisSinceLastUpdated <= daysInMillis;
   }
 
+  private readonly _logger: Logger = new Logger();
+  private _operationsLeft = 0;
   readonly client: InstanceType<typeof GitHub>;
   readonly options: IssueProcessorOptions;
   readonly staleIssues: Issue[] = [];
   readonly closedIssues: Issue[] = [];
   readonly deletedBranchIssues: Issue[] = [];
   readonly removedLabelIssues: Issue[] = [];
-  private operationsLeft = 0;
 
   constructor(
     options: IssueProcessorOptions,
@@ -117,7 +110,7 @@ export class IssueProcessor {
     ) => Promise<string | undefined>
   ) {
     this.options = options;
-    this.operationsLeft = options.operationsPerRun;
+    this._operationsLeft = options.operationsPerRun;
     this.client = getOctokit(options.repoToken);
 
     if (getActor) {
@@ -137,7 +130,7 @@ export class IssueProcessor {
     }
 
     if (this.options.debugOnly) {
-      logger.warning(
+      this._logger.warning(
         'Executing in debug mode. Debug output will be written but no issues will be processed.'
       );
     }
@@ -146,49 +139,45 @@ export class IssueProcessor {
   async processIssues(page = 1): Promise<number> {
     // get the next batch of issues
     const issues: Issue[] = await this._getIssues(page);
-    this.operationsLeft -= 1;
+    this._operationsLeft -= 1;
 
     const actor: string = await this._getActor();
 
     if (issues.length <= 0) {
-      logger.info('---');
-      logger.info('No more issues found to process. Exiting.');
-      return this.operationsLeft;
+      this._logger.info('---');
+      this._logger.info('No more issues found to process. Exiting.');
+      return this._operationsLeft;
     }
 
     for (const issue of issues.values()) {
       const issueLogger: IssueLogger = new IssueLogger(issue);
-      const isPr = isPullRequest(issue);
 
       issueLogger.info(
-        `Found issue: issue #${issue.number} last updated ${issue.updated_at} (is pr? ${isPr})`
+        `Found issue: issue #${issue.number} last updated ${issue.updated_at} (is pr? ${issue.isPullRequest})`
       );
 
       // calculate string based messages for this issue
-      const staleMessage: string = isPr
+      const staleMessage: string = issue.isPullRequest
         ? this.options.stalePrMessage
         : this.options.staleIssueMessage;
-      const closeMessage: string = isPr
+      const closeMessage: string = issue.isPullRequest
         ? this.options.closePrMessage
         : this.options.closeIssueMessage;
-      const staleLabel: string = isPr
+      const staleLabel: string = issue.isPullRequest
         ? this.options.stalePrLabel
         : this.options.staleIssueLabel;
-      const closeLabel: string = isPr
+      const closeLabel: string = issue.isPullRequest
         ? this.options.closePrLabel
         : this.options.closeIssueLabel;
-      const exemptLabels: string[] = labelsToList(
-        isPr ? this.options.exemptPrLabels : this.options.exemptIssueLabels
-      );
-      const skipMessage = isPr
+      const skipMessage = issue.isPullRequest
         ? this.options.skipStalePrMessage
         : this.options.skipStaleIssueMessage;
-      const issueType: IssueType = getIssueType(isPr);
-      const daysBeforeStale: number = isPr
+      const issueType: IssueType = getIssueType(issue.isPullRequest);
+      const daysBeforeStale: number = issue.isPullRequest
         ? this._getDaysBeforePrStale()
         : this._getDaysBeforeIssueStale();
 
-      if (isPr) {
+      if (issue.isPullRequest) {
         issueLogger.info(`Days before pull request stale: ${daysBeforeStale}`);
       } else {
         issueLogger.info(`Days before issue stale: ${daysBeforeStale}`);
@@ -244,21 +233,24 @@ export class IssueProcessor {
         }
       }
 
-      // Does this issue have a stale label?
-      let isStale: boolean = isLabeled(issue, staleLabel);
-
-      if (isStale) {
+      if (issue.isStale) {
         issueLogger.info(`This issue has a stale label`);
       } else {
         issueLogger.info(`This issue hasn't a stale label`);
       }
+
+      const exemptLabels: string[] = wordsToList(
+        issue.isPullRequest
+          ? this.options.exemptPrLabels
+          : this.options.exemptIssueLabels
+      );
 
       if (
         exemptLabels.some((exemptLabel: Readonly<string>): boolean =>
           isLabeled(issue, exemptLabel)
         )
       ) {
-        if (isStale) {
+        if (issue.isStale) {
           issueLogger.info(`An exempt label was added after the stale label.`);
           await this._removeStaleLabel(issue, staleLabel);
         }
@@ -269,6 +261,15 @@ export class IssueProcessor {
         continue; // don't process exempt issues
       }
 
+      const milestones: Milestones = new Milestones(this.options, issue);
+
+      if (milestones.shouldExemptMilestones()) {
+        issueLogger.info(
+          `Skipping ${issueType} because it has an exempt milestone`
+        );
+        continue; // don't process exempt milestones
+      }
+
       // should this issue be marked stale?
       const shouldBeStale = !IssueProcessor._updatedSince(
         issue.updated_at,
@@ -276,16 +277,16 @@ export class IssueProcessor {
       );
 
       // determine if this issue needs to be marked stale first
-      if (!isStale && shouldBeStale && shouldMarkAsStale) {
+      if (!issue.isStale && shouldBeStale && shouldMarkAsStale) {
         issueLogger.info(
           `Marking ${issueType} stale because it was last updated on ${issue.updated_at} and it does not have a stale label`
         );
         await this._markStale(issue, staleMessage, staleLabel, skipMessage);
-        isStale = true; // this issue is now considered stale
+        issue.isStale = true; // this issue is now considered stale
       }
 
       // process the issue if it was marked stale
-      if (isStale) {
+      if (issue.isStale) {
         issueLogger.info(`Found a stale ${issueType}`);
         await this._processStaleIssue(
           issue,
@@ -298,8 +299,10 @@ export class IssueProcessor {
       }
     }
 
-    if (this.operationsLeft <= 0) {
-      logger.warning('Reached max number of operations to process. Exiting.');
+    if (this._operationsLeft <= 0) {
+      this._logger.warning(
+        'Reached max number of operations to process. Exiting.'
+      );
       return 0;
     }
 
@@ -427,7 +430,7 @@ export class IssueProcessor {
       });
       return comments.data;
     } catch (error) {
-      logger.error(`List issue comments error: ${error.message}`);
+      this._logger.error(`List issue comments error: ${error.message}`);
       return Promise.resolve([]);
     }
   }
@@ -444,7 +447,7 @@ export class IssueProcessor {
     return actor.data.login;
   }
 
-  // grab issues from github in baches of 100
+  // grab issues from github in batches of 100
   private async _getIssues(page: number): Promise<Issue[]> {
     // generate type for response
     const endpoint = this.client.issues.listForRepo;
@@ -462,9 +465,12 @@ export class IssueProcessor {
           page
         }
       );
-      return issueResult.data;
+
+      return issueResult.data.map(
+        (issue: Readonly<IIssue>): Issue => new Issue(this.options, issue)
+      );
     } catch (error) {
-      logger.error(`Get issues for repo error: ${error.message}`);
+      this._logger.error(`Get issues for repo error: ${error.message}`);
       return Promise.resolve([]);
     }
   }
@@ -482,7 +488,7 @@ export class IssueProcessor {
 
     this.staleIssues.push(issue);
 
-    this.operationsLeft -= 2;
+    this._operationsLeft -= 2;
 
     // if the issue is being marked stale, the updated date should be changed to right now
     // so that close calculations work correctly
@@ -530,7 +536,7 @@ export class IssueProcessor {
 
     this.closedIssues.push(issue);
 
-    this.operationsLeft -= 1;
+    this._operationsLeft -= 1;
 
     if (this.options.debugOnly) {
       return;
@@ -578,7 +584,7 @@ export class IssueProcessor {
     issue: Issue
   ): Promise<PullRequest | undefined> {
     const issueLogger: IssueLogger = new IssueLogger(issue);
-    this.operationsLeft -= 1;
+    this._operationsLeft -= 1;
 
     try {
       const pullRequest = await this.client.pulls.get({
@@ -621,7 +627,7 @@ export class IssueProcessor {
       `Deleting branch ${branch} from closed issue #${issue.number}`
     );
 
-    this.operationsLeft -= 1;
+    this._operationsLeft -= 1;
 
     try {
       await this.client.git.deleteRef({
@@ -644,7 +650,7 @@ export class IssueProcessor {
 
     this.removedLabelIssues.push(issue);
 
-    this.operationsLeft -= 1;
+    this._operationsLeft -= 1;
 
     // @todo remove the debug only to be able to test the code below
     if (this.options.debugOnly) {
@@ -673,7 +679,7 @@ export class IssueProcessor {
 
     issueLogger.info(`Checking for label on issue #${issue.number}`);
 
-    this.operationsLeft -= 1;
+    this._operationsLeft -= 1;
 
     const options = this.client.issues.listEvents.endpoint.merge({
       owner: context.repo.owner,
@@ -722,7 +728,7 @@ export class IssueProcessor {
   }
 
   private async _removeStaleLabel(
-    issue: Readonly<Issue>,
+    issue: Issue,
     staleLabel: Readonly<string>
   ): Promise<void> {
     const issueLogger: IssueLogger = new IssueLogger(issue);

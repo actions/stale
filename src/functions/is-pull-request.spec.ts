@@ -1,4 +1,4 @@
-import {Issue} from '../IssueProcessor';
+import {Issue} from '../classes/issue';
 import {isPullRequest} from './is-pull-request';
 
 describe('isPullRequest()', (): void => {

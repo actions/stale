@@ -1,4 +1,4 @@
-import {Issue} from '../IssueProcessor';
+import {Issue} from '../issue';
 import {IssueLogger} from './issue-logger';
 import * as core from '@actions/core';
 

@@ -77,12 +77,12 @@ inputs:
     default: 'false'
     required: false
   exempt-all-issue-milestones:
-    description: 'Exempt all issues with milestones from being marked as stale. Override "exempt-all-milestones" option regarding only the issues. Default to false.'
-    default: 'false'
+    description: 'Exempt all issues with milestones from being marked as stale. Override "exempt-all-milestones" option regarding only the issues.'
+    default: ''
     required: false
   exempt-all-pr-milestones:
-    description: 'Exempt all pull requests with milestones from being marked as stale. Override "exempt-all-milestones" option regarding only the pull requests. Default to false.'
-    default: 'false'
+    description: 'Exempt all pull requests with milestones from being marked as stale. Override "exempt-all-milestones" option regarding only the pull requests.'
+    default: ''
     required: false
   only-labels:
     description: 'Only issues or pull requests with all of these labels are checked if stale. Defaults to `[]` (disabled) and can be a comma-separated list of labels.'

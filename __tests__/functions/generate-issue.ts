@@ -12,7 +12,7 @@ export function generateIssue(
   labels: string[] = [],
   isClosed = false,
   isLocked = false,
-  milestone = ''
+  milestone: string | undefined = undefined
 ): Issue {
   return new Issue(options, {
     number: id,
@@ -25,8 +25,10 @@ export function generateIssue(
     pull_request: isPullRequest ? {} : null,
     state: isClosed ? 'closed' : 'open',
     locked: isLocked,
-    milestone: {
-      title: milestone
-    }
+    milestone: milestone
+      ? {
+          title: milestone
+        }
+      : undefined
   });
 }

@@ -1,6 +1,6 @@
 import deburr from 'lodash.deburr';
 import {wordsToList} from '../functions/words-to-list';
-import {IssueProcessorOptions} from '../IssueProcessor';
+import {IIssuesProcessorOptions} from '../interfaces/issues-processor-options';
 import {Issue} from './issue';
 
 type CleanMilestone = string;
@@ -10,10 +10,10 @@ export class Milestones {
     return deburr(label.toLowerCase());
   }
 
-  private readonly _options: IssueProcessorOptions;
+  private readonly _options: IIssuesProcessorOptions;
   private readonly _issue: Issue;
 
-  constructor(options: Readonly<IssueProcessorOptions>, issue: Issue) {
+  constructor(options: Readonly<IIssuesProcessorOptions>, issue: Issue) {
     this._options = options;
     this._issue = issue;
   }

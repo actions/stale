@@ -1,11 +1,12 @@
 import {IIssue} from '../interfaces/issue';
+import {IIssuesProcessorOptions} from '../interfaces/issues-processor-options';
+import {ILabel} from '../interfaces/label';
 import {IMilestone} from '../interfaces/milestone';
-import {IssueProcessorOptions, Label} from '../IssueProcessor';
 import {Issue} from './issue';
 
 describe('Issue', (): void => {
   let issue: Issue;
-  let optionsInterface: IssueProcessorOptions;
+  let optionsInterface: IIssuesProcessorOptions;
   let issueInterface: IIssue;
 
   beforeEach((): void => {
@@ -91,7 +92,7 @@ describe('Issue', (): void => {
       expect(issue.labels).toStrictEqual([
         {
           name: 'dummy-name'
-        } as Label
+        } as ILabel
       ]);
     });
 
@@ -193,7 +194,7 @@ describe('Issue', (): void => {
         issueInterface.labels = [
           {
             name: 'dummy-stale-issue-label'
-          } as Label
+          } as ILabel
         ];
         issue = new Issue(optionsInterface, issueInterface);
       });

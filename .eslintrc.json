@@ -14,7 +14,9 @@
     "@typescript-eslint/no-unused-vars": "error",
     "@typescript-eslint/explicit-member-accessibility": [
       "error",
-      {"accessibility": "no-public"}
+      {
+        "accessibility": "no-public"
+      }
     ],
     "@typescript-eslint/no-require-imports": "error",
     "@typescript-eslint/array-type": "error",

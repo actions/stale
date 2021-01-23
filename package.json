@@ -1,6 +1,6 @@
 {
   "name": "stale-action",
-  "version": "2.0.0",
+  "version": "3.0.15",
   "private": true,
   "description": "Marks old issues and PRs as stale",
   "main": "lib/main.js",
@@ -21,6 +21,9 @@
     "type": "git",
     "url": "git+https://github.com/actions/stale.git"
   },
+  "bugs": {
+    "url": "git+https://github.com/actions/stale/issues"
+  },
   "keywords": [
     "actions",
     "node",
@@ -40,7 +43,6 @@
     "@semantic-release/commit-analyzer": "^8.0.1",
     "@semantic-release/git": "^9.0.0",
     "@semantic-release/github": "^7.2.0",
-    "@semantic-release/npm": "^7.0.10",
     "@semantic-release/release-notes-generator": "^9.0.1",
     "@types/jest": "^26.0.20",
     "@types/lodash.deburr": "^4.1.6",

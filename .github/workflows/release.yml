@@ -91,6 +91,4 @@ jobs:
             This PR was generated after the creation of the version v${{ steps.latest-tag.outputs.tag }}
 
             The release is available on:
-            - [GitHub release](https://github.com/Sonia-corporation/sonia-discord/releases/tag/${{ steps.latest-tag.outputs.tag }})
-
-            Your **github-actions** bot :rocket:
+            - [GitHub release](https://github.com/actions/stale/releases/tag/${{ steps.latest-tag.outputs.tag }})

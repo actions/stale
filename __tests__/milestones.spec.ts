@@ -469,6 +469,156 @@ describe('milestones options', (): void => {
       });
     });
 
+    describe('when all the issues milestones is not configured', (): void => {
+      beforeEach((): void => {
+        opts.exemptAllIssueMilestones = undefined;
+      });
+
+      describe('when the issue does not have a milestone', (): void => {
+        beforeEach((): void => {
+          testIssueList = [
+            generateIssue(
+              opts,
+              1,
+              'My first issue',
+              '2020-01-01T17:00:00Z',
+              '2020-01-01T17:00:00Z',
+              false,
+              undefined,
+              undefined,
+              undefined,
+              ''
+            )
+          ];
+          processor = new IssuesProcessor(
+            opts,
+            async () => 'abot',
+            async p => (p === 1 ? testIssueList : []),
+            async () => [],
+            async () => new Date().toDateString()
+          );
+        });
+
+        test('should be marked as stale', async () => {
+          expect.assertions(3);
+
+          await processor.processIssues(1);
+
+          expect(processor.staleIssues.length).toStrictEqual(1);
+          expect(processor.closedIssues.length).toStrictEqual(0);
+          expect(processor.removedLabelIssues.length).toStrictEqual(0);
+        });
+      });
+
+      describe('when the issue does have a milestone', (): void => {
+        beforeEach((): void => {
+          testIssueList = [
+            generateIssue(
+              opts,
+              1,
+              'My first issue',
+              '2020-01-01T17:00:00Z',
+              '2020-01-01T17:00:00Z',
+              false,
+              undefined,
+              undefined,
+              undefined,
+              'dummy-milestone'
+            )
+          ];
+          processor = new IssuesProcessor(
+            opts,
+            async () => 'abot',
+            async p => (p === 1 ? testIssueList : []),
+            async () => [],
+            async () => new Date().toDateString()
+          );
+        });
+
+        test('should be marked as stale', async () => {
+          expect.assertions(3);
+
+          await processor.processIssues(1);
+
+          expect(processor.staleIssues.length).toStrictEqual(1);
+          expect(processor.closedIssues.length).toStrictEqual(0);
+          expect(processor.removedLabelIssues.length).toStrictEqual(0);
+        });
+      });
+
+      describe('when the PR does not have a milestone', (): void => {
+        beforeEach((): void => {
+          testIssueList = [
+            generateIssue(
+              opts,
+              1,
+              'My first issue',
+              '2020-01-01T17:00:00Z',
+              '2020-01-01T17:00:00Z',
+              true,
+              undefined,
+              undefined,
+              undefined,
+              ''
+            )
+          ];
+          processor = new IssuesProcessor(
+            opts,
+            async () => 'abot',
+            async p => (p === 1 ? testIssueList : []),
+            async () => [],
+            async () => new Date().toDateString()
+          );
+        });
+
+        test('should be marked as stale', async () => {
+          expect.assertions(3);
+
+          await processor.processIssues(1);
+
+          expect(processor.staleIssues.length).toStrictEqual(1);
+          expect(processor.closedIssues.length).toStrictEqual(0);
+          expect(processor.removedLabelIssues.length).toStrictEqual(0);
+        });
+      });
+
+      describe('when the PR does have a milestone', (): void => {
+        beforeEach((): void => {
+          testIssueList = [
+            generateIssue(
+              opts,
+              1,
+              'My first issue',
+              '2020-01-01T17:00:00Z',
+              '2020-01-01T17:00:00Z',
+              true,
+              undefined,
+              undefined,
+              undefined,
+              'dummy-milestone'
+            )
+          ];
+          processor = new IssuesProcessor(
+            opts,
+            async () => 'abot',
+            async p => (p === 1 ? testIssueList : []),
+            async () => [],
+            async () => new Date().toDateString()
+          );
+        });
+
+        test('should be marked as stale', async () => {
+          expect.assertions(3);
+
+          await processor.processIssues(1);
+
+          expect(processor.staleIssues.length).toStrictEqual(1);
+          expect(processor.closedIssues.length).toStrictEqual(0);
+          expect(processor.removedLabelIssues.length).toStrictEqual(0);
+        });
+      });
+    });
+
     describe('when all the issues milestones should not exempt', (): void => {
       beforeEach((): void => {
         opts.exemptAllIssueMilestones = false;
@@ -691,6 +841,156 @@ describe('milestones options', (): void => {
           await processor.processIssues(1);
 
           expect(processor.staleIssues.length).toStrictEqual(0);
+          expect(processor.closedIssues.length).toStrictEqual(0);
+          expect(processor.removedLabelIssues.length).toStrictEqual(0);
+        });
+      });
+
+      describe('when the PR does not have a milestone', (): void => {
+        beforeEach((): void => {
+          testIssueList = [
+            generateIssue(
+              opts,
+              1,
+              'My first issue',
+              '2020-01-01T17:00:00Z',
+              '2020-01-01T17:00:00Z',
+              true,
+              undefined,
+              undefined,
+              undefined,
+              ''
+            )
+          ];
+          processor = new IssuesProcessor(
+            opts,
+            async () => 'abot',
+            async p => (p === 1 ? testIssueList : []),
+            async () => [],
+            async () => new Date().toDateString()
+          );
+        });
+
+        test('should be marked as stale', async () => {
+          expect.assertions(3);
+
+          await processor.processIssues(1);
+
+          expect(processor.staleIssues.length).toStrictEqual(1);
+          expect(processor.closedIssues.length).toStrictEqual(0);
+          expect(processor.removedLabelIssues.length).toStrictEqual(0);
+        });
+      });
+
+      describe('when the PR does have a milestone', (): void => {
+        beforeEach((): void => {
+          testIssueList = [
+            generateIssue(
+              opts,
+              1,
+              'My first issue',
+              '2020-01-01T17:00:00Z',
+              '2020-01-01T17:00:00Z',
+              true,
+              undefined,
+              undefined,
+              undefined,
+              'dummy-milestone'
+            )
+          ];
+          processor = new IssuesProcessor(
+            opts,
+            async () => 'abot',
+            async p => (p === 1 ? testIssueList : []),
+            async () => [],
+            async () => new Date().toDateString()
+          );
+        });
+
+        test('should be marked as stale', async () => {
+          expect.assertions(3);
+
+          await processor.processIssues(1);
+
+          expect(processor.staleIssues.length).toStrictEqual(1);
+          expect(processor.closedIssues.length).toStrictEqual(0);
+          expect(processor.removedLabelIssues.length).toStrictEqual(0);
+        });
+      });
+    });
+
+    describe('when all the pull requests milestones is not configured', (): void => {
+      beforeEach((): void => {
+        opts.exemptAllPrMilestones = undefined;
+      });
+
+      describe('when the issue does not have a milestone', (): void => {
+        beforeEach((): void => {
+          testIssueList = [
+            generateIssue(
+              opts,
+              1,
+              'My first issue',
+              '2020-01-01T17:00:00Z',
+              '2020-01-01T17:00:00Z',
+              false,
+              undefined,
+              undefined,
+              undefined,
+              ''
+            )
+          ];
+          processor = new IssuesProcessor(
+            opts,
+            async () => 'abot',
+            async p => (p === 1 ? testIssueList : []),
+            async () => [],
+            async () => new Date().toDateString()
+          );
+        });
+
+        test('should be marked as stale', async () => {
+          expect.assertions(3);
+
+          await processor.processIssues(1);
+
+          expect(processor.staleIssues.length).toStrictEqual(1);
+          expect(processor.closedIssues.length).toStrictEqual(0);
+          expect(processor.removedLabelIssues.length).toStrictEqual(0);
+        });
+      });
+
+      describe('when the issue does have a milestone', (): void => {
+        beforeEach((): void => {
+          testIssueList = [
+            generateIssue(
+              opts,
+              1,
+              'My first issue',
+              '2020-01-01T17:00:00Z',
+              '2020-01-01T17:00:00Z',
+              false,
+              undefined,
+              undefined,
+              undefined,
+              'dummy-milestone'
+            )
+          ];
+          processor = new IssuesProcessor(
+            opts,
+            async () => 'abot',
+            async p => (p === 1 ? testIssueList : []),
+            async () => [],
+            async () => new Date().toDateString()
+          );
+        });
+
+        test('should be marked as stale', async () => {
+          expect.assertions(3);
+
+          await processor.processIssues(1);
+
+          expect(processor.staleIssues.length).toStrictEqual(1);
           expect(processor.closedIssues.length).toStrictEqual(0);
           expect(processor.removedLabelIssues.length).toStrictEqual(0);
         });
@@ -1219,6 +1519,156 @@ describe('milestones options', (): void => {
       });
     });
 
+    describe('when all the issues milestones is not configured', (): void => {
+      beforeEach((): void => {
+        opts.exemptAllIssueMilestones = undefined;
+      });
+
+      describe('when the issue does not have a milestone', (): void => {
+        beforeEach((): void => {
+          testIssueList = [
+            generateIssue(
+              opts,
+              1,
+              'My first issue',
+              '2020-01-01T17:00:00Z',
+              '2020-01-01T17:00:00Z',
+              false,
+              undefined,
+              undefined,
+              undefined,
+              ''
+            )
+          ];
+          processor = new IssuesProcessor(
+            opts,
+            async () => 'abot',
+            async p => (p === 1 ? testIssueList : []),
+            async () => [],
+            async () => new Date().toDateString()
+          );
+        });
+
+        test('should be marked as stale', async () => {
+          expect.assertions(3);
+
+          await processor.processIssues(1);
+
+          expect(processor.staleIssues.length).toStrictEqual(1);
+          expect(processor.closedIssues.length).toStrictEqual(0);
+          expect(processor.removedLabelIssues.length).toStrictEqual(0);
+        });
+      });
+
+      describe('when the issue does have a milestone', (): void => {
+        beforeEach((): void => {
+          testIssueList = [
+            generateIssue(
+              opts,
+              1,
+              'My first issue',
+              '2020-01-01T17:00:00Z',
+              '2020-01-01T17:00:00Z',
+              false,
+              undefined,
+              undefined,
+              undefined,
+              'dummy-milestone'
+            )
+          ];
+          processor = new IssuesProcessor(
+            opts,
+            async () => 'abot',
+            async p => (p === 1 ? testIssueList : []),
+            async () => [],
+            async () => new Date().toDateString()
+          );
+        });
+
+        test('should not be marked as stale', async () => {
+          expect.assertions(3);
+
+          await processor.processIssues(1);
+
+          expect(processor.staleIssues.length).toStrictEqual(0);
+          expect(processor.closedIssues.length).toStrictEqual(0);
+          expect(processor.removedLabelIssues.length).toStrictEqual(0);
+        });
+      });
+
+      describe('when the PR does not have a milestone', (): void => {
+        beforeEach((): void => {
+          testIssueList = [
+            generateIssue(
+              opts,
+              1,
+              'My first issue',
+              '2020-01-01T17:00:00Z',
+              '2020-01-01T17:00:00Z',
+              true,
+              undefined,
+              undefined,
+              undefined,
+              ''
+            )
+          ];
+          processor = new IssuesProcessor(
+            opts,
+            async () => 'abot',
+            async p => (p === 1 ? testIssueList : []),
+            async () => [],
+            async () => new Date().toDateString()
+          );
+        });
+
+        test('should be marked as stale', async () => {
+          expect.assertions(3);
+
+          await processor.processIssues(1);
+
+          expect(processor.staleIssues.length).toStrictEqual(1);
+          expect(processor.closedIssues.length).toStrictEqual(0);
+          expect(processor.removedLabelIssues.length).toStrictEqual(0);
+        });
+      });
+
+      describe('when the PR does have a milestone', (): void => {
+        beforeEach((): void => {
+          testIssueList = [
+            generateIssue(
+              opts,
+              1,
+              'My first issue',
+              '2020-01-01T17:00:00Z',
+              '2020-01-01T17:00:00Z',
+              true,
+              undefined,
+              undefined,
+              undefined,
+              'dummy-milestone'
+            )
+          ];
+          processor = new IssuesProcessor(
+            opts,
+            async () => 'abot',
+            async p => (p === 1 ? testIssueList : []),
+            async () => [],
+            async () => new Date().toDateString()
+          );
+        });
+
+        test('should not be marked as stale', async () => {
+          expect.assertions(3);
+
+          await processor.processIssues(1);
+
+          expect(processor.staleIssues.length).toStrictEqual(0);
+          expect(processor.closedIssues.length).toStrictEqual(0);
+          expect(processor.removedLabelIssues.length).toStrictEqual(0);
+        });
+      });
+    });
+
     describe('when all the issues milestones should not exempt', (): void => {
       beforeEach((): void => {
         opts.exemptAllIssueMilestones = false;
@@ -1372,6 +1822,156 @@ describe('milestones options', (): void => {
     describe('when all the issues milestones should exempt', (): void => {
       beforeEach((): void => {
         opts.exemptAllIssueMilestones = true;
+      });
+
+      describe('when the issue does not have a milestone', (): void => {
+        beforeEach((): void => {
+          testIssueList = [
+            generateIssue(
+              opts,
+              1,
+              'My first issue',
+              '2020-01-01T17:00:00Z',
+              '2020-01-01T17:00:00Z',
+              false,
+              undefined,
+              undefined,
+              undefined,
+              ''
+            )
+          ];
+          processor = new IssuesProcessor(
+            opts,
+            async () => 'abot',
+            async p => (p === 1 ? testIssueList : []),
+            async () => [],
+            async () => new Date().toDateString()
+          );
+        });
+
+        test('should be marked as stale', async () => {
+          expect.assertions(3);
+
+          await processor.processIssues(1);
+
+          expect(processor.staleIssues.length).toStrictEqual(1);
+          expect(processor.closedIssues.length).toStrictEqual(0);
+          expect(processor.removedLabelIssues.length).toStrictEqual(0);
+        });
+      });
+
+      describe('when the issue does have a milestone', (): void => {
+        beforeEach((): void => {
+          testIssueList = [
+            generateIssue(
+              opts,
+              1,
+              'My first issue',
+              '2020-01-01T17:00:00Z',
+              '2020-01-01T17:00:00Z',
+              false,
+              undefined,
+              undefined,
+              undefined,
+              'dummy-milestone'
+            )
+          ];
+          processor = new IssuesProcessor(
+            opts,
+            async () => 'abot',
+            async p => (p === 1 ? testIssueList : []),
+            async () => [],
+            async () => new Date().toDateString()
+          );
+        });
+
+        test('should not be marked as stale', async () => {
+          expect.assertions(3);
+
+          await processor.processIssues(1);
+
+          expect(processor.staleIssues.length).toStrictEqual(0);
+          expect(processor.closedIssues.length).toStrictEqual(0);
+          expect(processor.removedLabelIssues.length).toStrictEqual(0);
+        });
+      });
+
+      describe('when the PR does not have a milestone', (): void => {
+        beforeEach((): void => {
+          testIssueList = [
+            generateIssue(
+              opts,
+              1,
+              'My first issue',
+              '2020-01-01T17:00:00Z',
+              '2020-01-01T17:00:00Z',
+              true,
+              undefined,
+              undefined,
+              undefined,
+              ''
+            )
+          ];
+          processor = new IssuesProcessor(
+            opts,
+            async () => 'abot',
+            async p => (p === 1 ? testIssueList : []),
+            async () => [],
+            async () => new Date().toDateString()
+          );
+        });
+
+        test('should be marked as stale', async () => {
+          expect.assertions(3);
+
+          await processor.processIssues(1);
+
+          expect(processor.staleIssues.length).toStrictEqual(1);
+          expect(processor.closedIssues.length).toStrictEqual(0);
+          expect(processor.removedLabelIssues.length).toStrictEqual(0);
+        });
+      });
+
+      describe('when the PR does have a milestone', (): void => {
+        beforeEach((): void => {
+          testIssueList = [
+            generateIssue(
+              opts,
+              1,
+              'My first issue',
+              '2020-01-01T17:00:00Z',
+              '2020-01-01T17:00:00Z',
+              true,
+              undefined,
+              undefined,
+              undefined,
+              'dummy-milestone'
+            )
+          ];
+          processor = new IssuesProcessor(
+            opts,
+            async () => 'abot',
+            async p => (p === 1 ? testIssueList : []),
+            async () => [],
+            async () => new Date().toDateString()
+          );
+        });
+
+        test('should not be marked as stale', async () => {
+          expect.assertions(3);
+
+          await processor.processIssues(1);
+
+          expect(processor.staleIssues.length).toStrictEqual(0);
+          expect(processor.closedIssues.length).toStrictEqual(0);
+          expect(processor.removedLabelIssues.length).toStrictEqual(0);
+        });
+      });
+    });
+
+    describe('when all the pull requests milestones is not configured', (): void => {
+      beforeEach((): void => {
+        opts.exemptAllPrMilestones = undefined;
       });
 
       describe('when the issue does not have a milestone', (): void => {

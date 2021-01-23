@@ -1,0 +1,96 @@
+name: Release
+on:
+  push:
+    branches:
+      - master
+jobs:
+  CurrentTag:
+    runs-on: ubuntu-latest
+    outputs:
+      CURRENT_TAG: ${{ steps.save-current-tag.outputs.CURRENT_TAG }}
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v2
+        with:
+          ref: main
+      - name: Reset branch
+        run: |
+          git fetch origin master:master
+          git reset --hard master
+      - name: Get current tag
+        id: current-tag
+        uses: WyriHaximus/github-action-get-previous-tag@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Save current tag
+        id: save-current-tag
+        run: echo '::set-output name=CURRENT_TAG::${{ steps.current-tag.outputs.tag }}'
+  Release:
+    runs-on: ubuntu-latest
+    needs: [CurrentTag]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: Cache node_modules
+        if: github.event_name == 'push' || github.event_name == 'pull_request'
+        uses: actions/cache@v2
+        env:
+          cache-name: cache-node-modules
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-build-${{ env.cache-name }}-
+            ${{ runner.os }}-build-
+            ${{ runner.os }}-
+      - name: Install dependencies
+        run: npm ci
+      - name: Release
+        run: npm run semver
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+  PR:
+    runs-on: ubuntu-latest
+    needs: [CurrentTag, Release]
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v2
+        with:
+          ref: main
+      - name: Reset branch
+        run: |
+          git fetch origin master:master
+          git reset --hard master
+      - name: Get latest tag
+        id: latest-tag
+        uses: WyriHaximus/github-action-get-previous-tag@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Show current tag
+        run: echo 'The current tag is ${{ needs.CurrentTag.outputs.CURRENT_TAG }}'
+      - name: Has new tag
+        if: needs.CurrentTag.outputs.CURRENT_TAG != steps.latest-tag.outputs.tag
+        run: echo 'The current tag is not the same after the release. A new tag has been created'
+      - name: Has same tag
+        if: needs.CurrentTag.outputs.CURRENT_TAG == steps.latest-tag.outputs.tag
+        run: echo 'The current tag did not change'
+      - name: Create PR from master to main
+        if: needs.CurrentTag.outputs.CURRENT_TAG != steps.latest-tag.outputs.tag
+        uses: peter-evans/create-pull-request@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          title: 'chore(main): merge master into main due to new version v${{ steps.latest-tag.outputs.tag }}'
+          branch: feature/merge-master-into-main
+          commit-message: 'chore(main): merge master into main'
+          body: |
+            This PR was generated after the creation of the version v${{ steps.latest-tag.outputs.tag }}
+
+            The release is available on:
+            - [GitHub release](https://github.com/Sonia-corporation/sonia-discord/releases/tag/${{ steps.latest-tag.outputs.tag }})
+
+            Your **github-actions** bot :rocket:

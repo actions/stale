@@ -5,7 +5,7 @@
   "description": "Marks old issues and PRs as stale",
   "main": "lib/main.js",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc --project tsconfig.app.json",
     "format": "prettier --write --ignore-unknown **/*.{md,json,yml,ts}",
     "format-check": "prettier --check --ignore-unknown **/*.{md,json,yml,ts}",
     "lint": "eslint src/**/*.ts",

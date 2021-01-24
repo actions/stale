@@ -116,7 +116,7 @@ describe('milestones options', (): void => {
       });
     });
 
-    describe('when all the issues milestones is not configured to exempt', (): void => {
+    describe('when all the issues milestones are not configured to exempt', (): void => {
       beforeEach((): void => {
         opts.exemptAllIssueMilestones = undefined;
       });
@@ -2930,7 +2930,7 @@ describe('milestones options', (): void => {
       });
     });
 
-    describe('when all the pull requests milestones is not configured to exempt', (): void => {
+    describe('when all the pull requests milestones are not configured to exempt', (): void => {
       beforeEach((): void => {
         opts.exemptAllPrMilestones = undefined;
       });
@@ -3239,7 +3239,7 @@ describe('milestones options', (): void => {
       });
     });
 
-    describe('when all the issues milestones is not configured to exempt', (): void => {
+    describe('when all the issues milestones are not configured to exempt', (): void => {
       beforeEach((): void => {
         opts.exemptAllIssueMilestones = undefined;
       });
@@ -3461,7 +3461,7 @@ describe('milestones options', (): void => {
       });
     });
 
-    describe('when all the pull requests milestones is not configured to exempt', (): void => {
+    describe('when all the pull requests milestones are not configured to exempt', (): void => {
       beforeEach((): void => {
         opts.exemptAllPrMilestones = undefined;
       });

@@ -33,7 +33,7 @@
       "@semantic-release/changelog",
       {
         "changelogFile": "CHANGELOG.md",
-        "changelogTitle": "# Semantic Versioning Changelog"
+        "changelogTitle": "# Stale Changelog"
       }
     ],
     [
@@ -44,7 +44,7 @@
           "package-lock.json",
           "CHANGELOG.md"
         ],
-        "message": "build(release): new version ${nextRelease.version}"
+        "message": "build(release): new version v${nextRelease.version}"
       }
     ],
     [
@@ -53,8 +53,8 @@
         "assets": [
           {
             "path": "dist/index.js",
-            "name": "stale-v${nextRelease.gitTag}.js",
-            "label": "Stale v${nextRelease.gitTag} release"
+            "name": "stale-${nextRelease.gitTag}.js",
+            "label": "Stale ${nextRelease.gitTag} release"
           }
         ],
         "addReleases": "bottom"

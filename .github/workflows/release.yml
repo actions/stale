@@ -53,7 +53,6 @@ jobs:
         run: npm run semver
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
   PR:
     runs-on: ubuntu-latest
     needs: [CurrentTag, Release]

@@ -4,6 +4,14 @@ import {IIssuesProcessorOptions} from '../src/interfaces/issues-processor-option
 import {DefaultProcessorOptions} from './constants/default-processor-options';
 import {generateIssue} from './functions/generate-issue';
 
+interface ITestData {
+  isPullRequest: boolean;
+  milestone: string;
+  name: string;
+  shouldStale: boolean;
+  exemptAllMilestones: boolean;
+}
+
 describe('milestones options', (): void => {
   let opts: IIssuesProcessorOptions;
   let testIssueList: Issue[];
@@ -48,394 +56,146 @@ describe('milestones options', (): void => {
       opts.exemptAllMilestones = false;
     });
 
-    describe('when the issue does not have a milestone', (): void => {
-      beforeEach((): void => {
-        setTestIssueList(false, '');
-        setProcessor();
-      });
+    describe.each`
+      isPullRequest | milestone            | name                                     | shouldStale
+      ${false}      | ${''}                | ${'the issue does not have a milestone'} | ${true}
+      ${false}      | ${'dummy-milestone'} | ${'the issue does have a milestone'}     | ${true}
+      ${true}       | ${''}                | ${'the PR does not have a milestone'}    | ${true}
+      ${true}       | ${'dummy-milestone'} | ${'the PR does have a milestone'}        | ${true}
+    `(
+      'when $name',
+      ({isPullRequest, milestone, shouldStale}: ITestData): void => {
+        beforeEach((): void => {
+          setTestIssueList(isPullRequest, milestone);
+          setProcessor();
+        });
 
-      test('should be marked as stale', async () => {
-        expect.assertions(3);
+        test(`should${
+          shouldStale ? '' : ' not'
+        } be marked as stale`, async () => {
+          expect.assertions(3);
 
-        await processor.processIssues(1);
+          await processor.processIssues(1);
 
-        expect(processor.staleIssues.length).toStrictEqual(1);
-        expect(processor.closedIssues.length).toStrictEqual(0);
-        expect(processor.removedLabelIssues.length).toStrictEqual(0);
-      });
-    });
-
-    describe('when the issue does have a milestone', (): void => {
-      beforeEach((): void => {
-        setTestIssueList(false, 'dummy-milestone');
-        setProcessor();
-      });
-
-      test('should be marked as stale', async () => {
-        expect.assertions(3);
-
-        await processor.processIssues(1);
-
-        expect(processor.staleIssues.length).toStrictEqual(1);
-        expect(processor.closedIssues.length).toStrictEqual(0);
-        expect(processor.removedLabelIssues.length).toStrictEqual(0);
-      });
-    });
-
-    describe('when the PR does not have a milestone', (): void => {
-      beforeEach((): void => {
-        setTestIssueList(true, '');
-        setProcessor();
-      });
-
-      test('should be marked as stale', async () => {
-        expect.assertions(3);
-
-        await processor.processIssues(1);
-
-        expect(processor.staleIssues.length).toStrictEqual(1);
-        expect(processor.closedIssues.length).toStrictEqual(0);
-        expect(processor.removedLabelIssues.length).toStrictEqual(0);
-      });
-    });
-
-    describe('when the PR does have a milestone', (): void => {
-      beforeEach((): void => {
-        setTestIssueList(true, 'dummy-milestone');
-        setProcessor();
-      });
-
-      test('should be marked as stale', async () => {
-        expect.assertions(3);
-
-        await processor.processIssues(1);
-
-        expect(processor.staleIssues.length).toStrictEqual(1);
-        expect(processor.closedIssues.length).toStrictEqual(0);
-        expect(processor.removedLabelIssues.length).toStrictEqual(0);
-      });
-    });
+          expect(processor.staleIssues.length).toStrictEqual(
+            shouldStale ? 1 : 0
+          );
+          expect(processor.closedIssues.length).toStrictEqual(0);
+          expect(processor.removedLabelIssues.length).toStrictEqual(0);
+        });
+      }
+    );
 
     describe('when all the issues milestones are not configured to exempt', (): void => {
       beforeEach((): void => {
         opts.exemptAllIssueMilestones = undefined;
       });
 
-      describe('when the issue does not have a milestone', (): void => {
-        beforeEach((): void => {
-          setTestIssueList(false, '');
-          setProcessor();
-        });
+      describe.each`
+        isPullRequest | milestone            | name                                     | shouldStale
+        ${false}      | ${''}                | ${'the issue does not have a milestone'} | ${true}
+        ${false}      | ${'dummy-milestone'} | ${'the issue does have a milestone'}     | ${true}
+        ${true}       | ${''}                | ${'the PR does not have a milestone'}    | ${true}
+        ${true}       | ${'dummy-milestone'} | ${'the PR does have a milestone'}        | ${true}
+      `(
+        'when $name',
+        ({isPullRequest, milestone, shouldStale}: ITestData): void => {
+          beforeEach((): void => {
+            setTestIssueList(isPullRequest, milestone);
+            setProcessor();
+          });
 
-        test('should be marked as stale', async () => {
-          expect.assertions(3);
+          test(`should${
+            shouldStale ? '' : ' not'
+          } be marked as stale`, async () => {
+            expect.assertions(3);
 
-          await processor.processIssues(1);
+            await processor.processIssues(1);
 
-          expect(processor.staleIssues.length).toStrictEqual(1);
-          expect(processor.closedIssues.length).toStrictEqual(0);
-          expect(processor.removedLabelIssues.length).toStrictEqual(0);
-        });
-      });
-
-      describe('when the issue does have a milestone', (): void => {
-        beforeEach((): void => {
-          setTestIssueList(false, 'dummy-milestone');
-          setProcessor();
-        });
-
-        test('should be marked as stale', async () => {
-          expect.assertions(3);
-
-          await processor.processIssues(1);
-
-          expect(processor.staleIssues.length).toStrictEqual(1);
-          expect(processor.closedIssues.length).toStrictEqual(0);
-          expect(processor.removedLabelIssues.length).toStrictEqual(0);
-        });
-      });
-
-      describe('when the PR does not have a milestone', (): void => {
-        beforeEach((): void => {
-          setTestIssueList(true, '');
-          setProcessor();
-        });
-
-        test('should be marked as stale', async () => {
-          expect.assertions(3);
-
-          await processor.processIssues(1);
-
-          expect(processor.staleIssues.length).toStrictEqual(1);
-          expect(processor.closedIssues.length).toStrictEqual(0);
-          expect(processor.removedLabelIssues.length).toStrictEqual(0);
-        });
-      });
-
-      describe('when the PR does have a milestone', (): void => {
-        beforeEach((): void => {
-          setTestIssueList(true, 'dummy-milestone');
-          setProcessor();
-        });
-
-        test('should be marked as stale', async () => {
-          expect.assertions(3);
-
-          await processor.processIssues(1);
-
-          expect(processor.staleIssues.length).toStrictEqual(1);
-          expect(processor.closedIssues.length).toStrictEqual(0);
-          expect(processor.removedLabelIssues.length).toStrictEqual(0);
-        });
-      });
+            expect(processor.staleIssues.length).toStrictEqual(
+              shouldStale ? 1 : 0
+            );
+            expect(processor.closedIssues.length).toStrictEqual(0);
+            expect(processor.removedLabelIssues.length).toStrictEqual(0);
+          });
+        }
+      );
 
       describe('when all the issues and pull requests milestones should exempt a specific milestone', (): void => {
         beforeEach((): void => {
           opts.exemptMilestones = 'dummy-milestone';
         });
 
-        describe('when the issue does not have a milestone', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(false, '');
-            setProcessor();
-          });
+        describe.each`
+          isPullRequest | milestone                         | name                                                                            | shouldStale
+          ${false}      | ${''}                             | ${'the issue does not have a milestone'}                                        | ${true}
+          ${false}      | ${'dummy-milestone-not-exempted'} | ${'the issue does have a milestone but not matching the specific exempted one'} | ${true}
+          ${false}      | ${'dummy-milestone'}              | ${'the issue does have a milestone matching the specific exempted one'}         | ${false}
+          ${true}       | ${''}                             | ${'the PR does not have a milestone'}                                           | ${true}
+          ${true}       | ${'dummy-milestone-not-exempted'} | ${'the PR does have a milestone but not matching the specific exempted one'}    | ${true}
+          ${true}       | ${'dummy-milestone'}              | ${'the PR does have a milestone matching the specific exempted one'}            | ${false}
+        `(
+          'when $name',
+          ({isPullRequest, milestone, shouldStale}: ITestData): void => {
+            beforeEach((): void => {
+              setTestIssueList(isPullRequest, milestone);
+              setProcessor();
+            });
 
-          test('should be marked as stale', async () => {
-            expect.assertions(3);
+            test(`should${
+              shouldStale ? '' : ' not'
+            } be marked as stale`, async () => {
+              expect.assertions(3);
 
-            await processor.processIssues(1);
+              await processor.processIssues(1);
 
-            expect(processor.staleIssues.length).toStrictEqual(1);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
-
-        describe('when the issue does have a milestone but not matching the specific exempted one', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(false, 'dummy-milestone-not-exempted');
-            setProcessor();
-          });
-
-          test('should be marked as stale', async () => {
-            expect.assertions(3);
-
-            await processor.processIssues(1);
-
-            expect(processor.staleIssues.length).toStrictEqual(1);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
-
-        describe('when the issue does have a milestone matching the specific exempted one', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(false, 'dummy-milestone');
-            setProcessor();
-          });
-
-          test('should not be marked as stale', async () => {
-            expect.assertions(3);
-
-            await processor.processIssues(1);
-
-            expect(processor.staleIssues.length).toStrictEqual(0);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
-
-        describe('when the PR does not have a milestone', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(true, '');
-            setProcessor();
-          });
-
-          test('should be marked as stale', async () => {
-            expect.assertions(3);
-
-            await processor.processIssues(1);
-
-            expect(processor.staleIssues.length).toStrictEqual(1);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
-
-        describe('when the PR does have a milestone but not matching the specific exempted one', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(true, 'dummy-milestone-not-exempted');
-            setProcessor();
-          });
-
-          test('should be marked as stale', async () => {
-            expect.assertions(3);
-
-            await processor.processIssues(1);
-
-            expect(processor.staleIssues.length).toStrictEqual(1);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
-
-        describe('when the PR does have a milestone matching the specific exempted one', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(true, 'dummy-milestone');
-            setProcessor();
-          });
-
-          test('should not be marked as stale', async () => {
-            expect.assertions(3);
-
-            await processor.processIssues(1);
-
-            expect(processor.staleIssues.length).toStrictEqual(0);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
+              expect(processor.staleIssues.length).toStrictEqual(
+                shouldStale ? 1 : 0
+              );
+              expect(processor.closedIssues.length).toStrictEqual(0);
+              expect(processor.removedLabelIssues.length).toStrictEqual(0);
+            });
+          }
+        );
 
         describe('when all the issues milestones should exempt a specific milestone', (): void => {
           beforeEach((): void => {
             opts.exemptIssueMilestones = 'dummy-issue-milestone';
           });
 
-          describe('when the issue does not have a milestone', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, '');
-              setProcessor();
-            });
+          describe.each`
+            isPullRequest | milestone                         | name                                                                                  | shouldStale
+            ${false}      | ${''}                             | ${'the issue does not have a milestone'}                                              | ${true}
+            ${false}      | ${'dummy-milestone-not-exempted'} | ${'the issue does have a milestone but not matching the specific issue exempted one'} | ${true}
+            ${false}      | ${'dummy-issue-milestone'}        | ${'the issue does have a milestone matching the specific issue exempted one'}         | ${false}
+            ${false}      | ${'dummy-milestone'}              | ${'the issue does have a milestone matching the specific exempted one'}               | ${true}
+            ${true}       | ${''}                             | ${'the PR does not have a milestone'}                                                 | ${true}
+            ${true}       | ${'dummy-milestone-not-exempted'} | ${'the PR does have a milestone but not matching the specific issue exempted one'}    | ${true}
+            ${true}       | ${'dummy-issue-milestone'}        | ${'the PR does have a milestone matching the specific issue exempted one'}            | ${true}
+            ${true}       | ${'dummy-milestone'}              | ${'the PR does have a milestone matching the specific exempted one'}                  | ${false}
+          `(
+            'when $name',
+            ({isPullRequest, milestone, shouldStale}: ITestData): void => {
+              beforeEach((): void => {
+                setTestIssueList(isPullRequest, milestone);
+                setProcessor();
+              });
 
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
+              test(`should${
+                shouldStale ? '' : ' not'
+              } be marked as stale`, async () => {
+                expect.assertions(3);
 
-              await processor.processIssues(1);
+                await processor.processIssues(1);
 
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone but not matching the specific issue exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-milestone-not-exempted');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone matching the specific issue exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-issue-milestone');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone matching the specific exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-milestone');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does not have a milestone', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, '');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone but not matching the specific issue exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-milestone-not-exempted');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone matching the specific issue exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-issue-milestone');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone matching the specific exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-milestone');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
+                expect(processor.staleIssues.length).toStrictEqual(
+                  shouldStale ? 1 : 0
+                );
+                expect(processor.closedIssues.length).toStrictEqual(0);
+                expect(processor.removedLabelIssues.length).toStrictEqual(0);
+              });
+            }
+          );
         });
 
         describe('when all the pull requests milestones should exempt a specific milestone', (): void => {
@@ -443,141 +203,39 @@ describe('milestones options', (): void => {
             opts.exemptPrMilestones = 'dummy-pull-request-milestone';
           });
 
-          describe('when the issue does not have a milestone', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, '');
-              setProcessor();
-            });
+          describe.each`
+            isPullRequest | milestone                         | name                                                                                         | shouldStale
+            ${false}      | ${''}                             | ${'the issue does not have a milestone'}                                                     | ${true}
+            ${false}      | ${'dummy-milestone-not-exempted'} | ${'the issue does have a milestone but not matching the specific pull request exempted one'} | ${true}
+            ${false}      | ${'dummy-pull-request-milestone'} | ${'the issue does have a milestone matching the specific pull request exempted one'}         | ${true}
+            ${false}      | ${'dummy-milestone'}              | ${'the issue does have a milestone matching the specific exempted one'}                      | ${false}
+            ${true}       | ${''}                             | ${'the PR does not have a milestone'}                                                        | ${true}
+            ${true}       | ${'dummy-milestone-not-exempted'} | ${'the PR does have a milestone but not matching the specific pull request exempted one'}    | ${true}
+            ${true}       | ${'dummy-pull-request-milestone'} | ${'the PR does have a milestone matching the specific pull request exempted one'}            | ${false}
+            ${true}       | ${'dummy-milestone'}              | ${'the PR does have a milestone matching the specific exempted one'}                         | ${true}
+          `(
+            'when $name',
+            ({isPullRequest, milestone, shouldStale}: ITestData): void => {
+              beforeEach((): void => {
+                setTestIssueList(isPullRequest, milestone);
+                setProcessor();
+              });
 
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
+              test(`should${
+                shouldStale ? '' : ' not'
+              } be marked as stale`, async () => {
+                expect.assertions(3);
 
-              await processor.processIssues(1);
+                await processor.processIssues(1);
 
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone but not matching the specific pull request exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-milestone-not-exempted');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone matching the specific pull request exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-pull-request-milestone');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone matching the specific exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-milestone');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does not have a milestone', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, '');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone but not matching the specific pull request exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-milestone-not-exempted');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone matching the specific pull request exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-pull-request-milestone');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone matching the specific exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-milestone');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
+                expect(processor.staleIssues.length).toStrictEqual(
+                  shouldStale ? 1 : 0
+                );
+                expect(processor.closedIssues.length).toStrictEqual(0);
+                expect(processor.removedLabelIssues.length).toStrictEqual(0);
+              });
+            }
+          );
         });
       });
 
@@ -586,107 +244,37 @@ describe('milestones options', (): void => {
           opts.exemptMilestones = 'dummy-milestone1, dummy-milestone2';
         });
 
-        describe('when the issue does not have a milestone', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(false, '');
-            setProcessor();
-          });
+        describe.each`
+          isPullRequest | milestone                         | name                                                                            | shouldStale
+          ${false}      | ${''}                             | ${'the issue does not have a milestone'}                                        | ${true}
+          ${false}      | ${'dummy-milestone-not-exempted'} | ${'the issue does have a milestone but not matching the specific exempted one'} | ${true}
+          ${false}      | ${'dummy-milestone2'}             | ${'the issue does have a milestone matching the specific exempted one'}         | ${false}
+          ${true}       | ${''}                             | ${'the PR does not have a milestone'}                                           | ${true}
+          ${true}       | ${'dummy-milestone-not-exempted'} | ${'the PR does have a milestone but not matching the specific exempted one'}    | ${true}
+          ${true}       | ${'dummy-milestone2'}             | ${'the PR does have a milestone matching the specific exempted one'}            | ${false}
+        `(
+          'when $name',
+          ({isPullRequest, milestone, shouldStale}: ITestData): void => {
+            beforeEach((): void => {
+              setTestIssueList(isPullRequest, milestone);
+              setProcessor();
+            });
 
-          test('should be marked as stale', async () => {
-            expect.assertions(3);
+            test(`should${
+              shouldStale ? '' : ' not'
+            } be marked as stale`, async () => {
+              expect.assertions(3);
 
-            await processor.processIssues(1);
+              await processor.processIssues(1);
 
-            expect(processor.staleIssues.length).toStrictEqual(1);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
-
-        describe('when the issue does have a milestone but not matching the specific exempted one', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(false, 'dummy-milestone-not-exempted');
-            setProcessor();
-          });
-
-          test('should be marked as stale', async () => {
-            expect.assertions(3);
-
-            await processor.processIssues(1);
-
-            expect(processor.staleIssues.length).toStrictEqual(1);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
-
-        describe('when the issue does have a milestone matching the specific exempted one', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(false, 'dummy-milestone2');
-            setProcessor();
-          });
-
-          test('should not be marked as stale', async () => {
-            expect.assertions(3);
-
-            await processor.processIssues(1);
-
-            expect(processor.staleIssues.length).toStrictEqual(0);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
-
-        describe('when the PR does not have a milestone', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(true, '');
-            setProcessor();
-          });
-
-          test('should be marked as stale', async () => {
-            expect.assertions(3);
-
-            await processor.processIssues(1);
-
-            expect(processor.staleIssues.length).toStrictEqual(1);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
-
-        describe('when the PR does have a milestone but not matching the specific exempted one', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(true, 'dummy-milestone-not-exempted');
-            setProcessor();
-          });
-
-          test('should be marked as stale', async () => {
-            expect.assertions(3);
-
-            await processor.processIssues(1);
-
-            expect(processor.staleIssues.length).toStrictEqual(1);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
-
-        describe('when the PR does have a milestone matching the specific exempted one', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(true, 'dummy-milestone2');
-            setProcessor();
-          });
-
-          test('should not be marked as stale', async () => {
-            expect.assertions(3);
-
-            await processor.processIssues(1);
-
-            expect(processor.staleIssues.length).toStrictEqual(0);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
+              expect(processor.staleIssues.length).toStrictEqual(
+                shouldStale ? 1 : 0
+              );
+              expect(processor.closedIssues.length).toStrictEqual(0);
+              expect(processor.removedLabelIssues.length).toStrictEqual(0);
+            });
+          }
+        );
 
         describe('when all the issues milestones should exempt a specific milestone', (): void => {
           beforeEach((): void => {
@@ -694,141 +282,39 @@ describe('milestones options', (): void => {
               'dummy-issue-milestone1, dummy-issue-milestone2';
           });
 
-          describe('when the issue does not have a milestone', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, '');
-              setProcessor();
-            });
+          describe.each`
+            isPullRequest | milestone                         | name                                                                                  | shouldStale
+            ${false}      | ${''}                             | ${'the issue does not have a milestone'}                                              | ${true}
+            ${false}      | ${'dummy-milestone-not-exempted'} | ${'the issue does have a milestone but not matching the specific issue exempted one'} | ${true}
+            ${false}      | ${'dummy-issue-milestone2'}       | ${'the issue does have a milestone matching the specific issue exempted one'}         | ${false}
+            ${false}      | ${'dummy-milestone2'}             | ${'the issue does have a milestone matching the specific exempted one'}               | ${true}
+            ${true}       | ${''}                             | ${'the PR does not have a milestone'}                                                 | ${true}
+            ${true}       | ${'dummy-milestone-not-exempted'} | ${'the PR does have a milestone but not matching the specific issue exempted one'}    | ${true}
+            ${true}       | ${'dummy-issue-milestone2'}       | ${'the PR does have a milestone matching the specific issue exempted one'}            | ${true}
+            ${true}       | ${'dummy-milestone2'}             | ${'the PR does have a milestone matching the specific exempted one'}                  | ${false}
+          `(
+            'when $name',
+            ({isPullRequest, milestone, shouldStale}: ITestData): void => {
+              beforeEach((): void => {
+                setTestIssueList(isPullRequest, milestone);
+                setProcessor();
+              });
 
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
+              test(`should${
+                shouldStale ? '' : ' not'
+              } be marked as stale`, async () => {
+                expect.assertions(3);
 
-              await processor.processIssues(1);
+                await processor.processIssues(1);
 
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone but not matching the specific issue exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-milestone-not-exempted');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone matching the specific issue exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-issue-milestone2');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone matching the specific exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-milestone2');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does not have a milestone', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, '');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone but not matching the specific issue exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-milestone-not-exempted');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone matching the specific issue exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-issue-milestone2');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone matching the specific exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-milestone2');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
+                expect(processor.staleIssues.length).toStrictEqual(
+                  shouldStale ? 1 : 0
+                );
+                expect(processor.closedIssues.length).toStrictEqual(0);
+                expect(processor.removedLabelIssues.length).toStrictEqual(0);
+              });
+            }
+          );
         });
 
         describe('when all the pull requests milestones should exempt a specific milestone', (): void => {
@@ -837,141 +323,39 @@ describe('milestones options', (): void => {
               'dummy-pull-request-milestone1, dummy-pull-request-milestone2';
           });
 
-          describe('when the issue does not have a milestone', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, '');
-              setProcessor();
-            });
+          describe.each`
+            isPullRequest | milestone                          | name                                                                                         | shouldStale
+            ${false}      | ${''}                              | ${'the issue does not have a milestone'}                                                     | ${true}
+            ${false}      | ${'dummy-milestone-not-exempted'}  | ${'the issue does have a milestone but not matching the specific pull request exempted one'} | ${true}
+            ${false}      | ${'dummy-pull-request-milestone2'} | ${'the issue does have a milestone matching the specific pull request exempted one'}         | ${true}
+            ${false}      | ${'dummy-milestone2'}              | ${'the issue does have a milestone matching the specific exempted one'}                      | ${false}
+            ${true}       | ${''}                              | ${'the PR does not have a milestone'}                                                        | ${true}
+            ${true}       | ${'dummy-milestone-not-exempted'}  | ${'the PR does have a milestone but not matching the specific pull request exempted one'}    | ${true}
+            ${true}       | ${'dummy-pull-request-milestone2'} | ${'the PR does have a milestone matching the specific pull request exempted one'}            | ${false}
+            ${true}       | ${'dummy-milestone2'}              | ${'the PR does have a milestone matching the specific exempted one'}                         | ${true}
+          `(
+            'when $name',
+            ({isPullRequest, milestone, shouldStale}: ITestData): void => {
+              beforeEach((): void => {
+                setTestIssueList(isPullRequest, milestone);
+                setProcessor();
+              });
 
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
+              test(`should${
+                shouldStale ? '' : ' not'
+              } be marked as stale`, async () => {
+                expect.assertions(3);
 
-              await processor.processIssues(1);
+                await processor.processIssues(1);
 
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone but not matching the specific pull request exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-milestone-not-exempted');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone matching the specific pull request exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-pull-request-milestone2');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone matching the specific exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-milestone2');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does not have a milestone', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, '');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone but not matching the specific pull request exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-milestone-not-exempted');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone matching the specific pull request exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-pull-request-milestone2');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone matching the specific exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-milestone2');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
+                expect(processor.staleIssues.length).toStrictEqual(
+                  shouldStale ? 1 : 0
+                );
+                expect(processor.closedIssues.length).toStrictEqual(0);
+                expect(processor.removedLabelIssues.length).toStrictEqual(0);
+              });
+            }
+          );
         });
       });
     });
@@ -981,321 +365,111 @@ describe('milestones options', (): void => {
         opts.exemptAllIssueMilestones = false;
       });
 
-      describe('when the issue does not have a milestone', (): void => {
-        beforeEach((): void => {
-          setTestIssueList(false, '');
-          setProcessor();
-        });
+      describe.each`
+        isPullRequest | milestone            | name                                     | shouldStale
+        ${false}      | ${''}                | ${'the issue does not have a milestone'} | ${true}
+        ${false}      | ${'dummy-milestone'} | ${'the issue does have a milestone'}     | ${true}
+        ${true}       | ${''}                | ${'the PR does not have a milestone'}    | ${true}
+        ${true}       | ${'dummy-milestone'} | ${'the PR does have a milestone'}        | ${true}
+      `(
+        'when $name',
+        ({isPullRequest, milestone, shouldStale}: ITestData): void => {
+          beforeEach((): void => {
+            setTestIssueList(isPullRequest, milestone);
+            setProcessor();
+          });
 
-        test('should be marked as stale', async () => {
-          expect.assertions(3);
+          test(`should${
+            shouldStale ? '' : ' not'
+          } be marked as stale`, async () => {
+            expect.assertions(3);
 
-          await processor.processIssues(1);
+            await processor.processIssues(1);
 
-          expect(processor.staleIssues.length).toStrictEqual(1);
-          expect(processor.closedIssues.length).toStrictEqual(0);
-          expect(processor.removedLabelIssues.length).toStrictEqual(0);
-        });
-      });
-
-      describe('when the issue does have a milestone', (): void => {
-        beforeEach((): void => {
-          setTestIssueList(false, 'dummy-milestone');
-          setProcessor();
-        });
-
-        test('should be marked as stale', async () => {
-          expect.assertions(3);
-
-          await processor.processIssues(1);
-
-          expect(processor.staleIssues.length).toStrictEqual(1);
-          expect(processor.closedIssues.length).toStrictEqual(0);
-          expect(processor.removedLabelIssues.length).toStrictEqual(0);
-        });
-      });
-
-      describe('when the PR does not have a milestone', (): void => {
-        beforeEach((): void => {
-          setTestIssueList(true, '');
-          setProcessor();
-        });
-
-        test('should be marked as stale', async () => {
-          expect.assertions(3);
-
-          await processor.processIssues(1);
-
-          expect(processor.staleIssues.length).toStrictEqual(1);
-          expect(processor.closedIssues.length).toStrictEqual(0);
-          expect(processor.removedLabelIssues.length).toStrictEqual(0);
-        });
-      });
-
-      describe('when the PR does have a milestone', (): void => {
-        beforeEach((): void => {
-          setTestIssueList(true, 'dummy-milestone');
-          setProcessor();
-        });
-
-        test('should be marked as stale', async () => {
-          expect.assertions(3);
-
-          await processor.processIssues(1);
-
-          expect(processor.staleIssues.length).toStrictEqual(1);
-          expect(processor.closedIssues.length).toStrictEqual(0);
-          expect(processor.removedLabelIssues.length).toStrictEqual(0);
-        });
-      });
+            expect(processor.staleIssues.length).toStrictEqual(
+              shouldStale ? 1 : 0
+            );
+            expect(processor.closedIssues.length).toStrictEqual(0);
+            expect(processor.removedLabelIssues.length).toStrictEqual(0);
+          });
+        }
+      );
 
       describe('when all the issues and pull requests milestones should exempt a specific milestone', (): void => {
         beforeEach((): void => {
           opts.exemptMilestones = 'dummy-milestone';
         });
 
-        describe('when the issue does not have a milestone', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(false, '');
-            setProcessor();
-          });
+        describe.each`
+          isPullRequest | milestone                         | name                                                                            | shouldStale
+          ${false}      | ${''}                             | ${'the issue does not have a milestone'}                                        | ${true}
+          ${false}      | ${'dummy-milestone-not-exempted'} | ${'the issue does have a milestone but not matching the specific exempted one'} | ${true}
+          ${false}      | ${'dummy-milestone'}              | ${'the issue does have a milestone matching the specific exempted one'}         | ${false}
+          ${true}       | ${''}                             | ${'the PR does not have a milestone'}                                           | ${true}
+          ${true}       | ${'dummy-milestone-not-exempted'} | ${'the PR does have a milestone but not matching the specific exempted one'}    | ${true}
+          ${true}       | ${'dummy-milestone'}              | ${'the PR does have a milestone matching the specific exempted one'}            | ${false}
+        `(
+          'when $name',
+          ({isPullRequest, milestone, shouldStale}: ITestData): void => {
+            beforeEach((): void => {
+              setTestIssueList(isPullRequest, milestone);
+              setProcessor();
+            });
 
-          test('should be marked as stale', async () => {
-            expect.assertions(3);
+            test(`should${
+              shouldStale ? '' : ' not'
+            } be marked as stale`, async () => {
+              expect.assertions(3);
 
-            await processor.processIssues(1);
+              await processor.processIssues(1);
 
-            expect(processor.staleIssues.length).toStrictEqual(1);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
-
-        describe('when the issue does have a milestone but not matching the specific exempted one', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(false, 'dummy-milestone-not-exempted');
-            setProcessor();
-          });
-
-          test('should be marked as stale', async () => {
-            expect.assertions(3);
-
-            await processor.processIssues(1);
-
-            expect(processor.staleIssues.length).toStrictEqual(1);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
-
-        describe('when the issue does have a milestone matching the specific exempted one', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(false, 'dummy-milestone');
-            setProcessor();
-          });
-
-          test('should not be marked as stale', async () => {
-            expect.assertions(3);
-
-            await processor.processIssues(1);
-
-            expect(processor.staleIssues.length).toStrictEqual(0);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
-
-        describe('when the PR does not have a milestone', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(true, '');
-            setProcessor();
-          });
-
-          test('should be marked as stale', async () => {
-            expect.assertions(3);
-
-            await processor.processIssues(1);
-
-            expect(processor.staleIssues.length).toStrictEqual(1);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
-
-        describe('when the PR does have a milestone but not matching the specific exempted one', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(true, 'dummy-milestone-not-exempted');
-            setProcessor();
-          });
-
-          test('should be marked as stale', async () => {
-            expect.assertions(3);
-
-            await processor.processIssues(1);
-
-            expect(processor.staleIssues.length).toStrictEqual(1);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
-
-        describe('when the PR does have a milestone matching the specific exempted one', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(true, 'dummy-milestone');
-            setProcessor();
-          });
-
-          test('should not be marked as stale', async () => {
-            expect.assertions(3);
-
-            await processor.processIssues(1);
-
-            expect(processor.staleIssues.length).toStrictEqual(0);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
+              expect(processor.staleIssues.length).toStrictEqual(
+                shouldStale ? 1 : 0
+              );
+              expect(processor.closedIssues.length).toStrictEqual(0);
+              expect(processor.removedLabelIssues.length).toStrictEqual(0);
+            });
+          }
+        );
 
         describe('when all the issues milestones should exempt a specific milestone', (): void => {
           beforeEach((): void => {
             opts.exemptIssueMilestones = 'dummy-issue-milestone';
           });
 
-          describe('when the issue does not have a milestone', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, '');
-              setProcessor();
-            });
+          describe.each`
+            isPullRequest | milestone                         | name                                                                                  | shouldStale
+            ${false}      | ${''}                             | ${'the issue does not have a milestone'}                                              | ${true}
+            ${false}      | ${'dummy-milestone-not-exempted'} | ${'the issue does have a milestone but not matching the specific issue exempted one'} | ${true}
+            ${false}      | ${'dummy-issue-milestone'}        | ${'the issue does have a milestone matching the specific issue exempted one'}         | ${false}
+            ${false}      | ${'dummy-milestone'}              | ${'the issue does have a milestone matching the specific exempted one'}               | ${true}
+            ${true}       | ${''}                             | ${'the PR does not have a milestone'}                                                 | ${true}
+            ${true}       | ${'dummy-milestone-not-exempted'} | ${'the PR does have a milestone but not matching the specific issue exempted one'}    | ${true}
+            ${true}       | ${'dummy-issue-milestone'}        | ${'the PR does have a milestone matching the specific issue exempted one'}            | ${true}
+            ${true}       | ${'dummy-milestone'}              | ${'the PR does have a milestone matching the specific exempted one'}                  | ${false}
+          `(
+            'when $name',
+            ({isPullRequest, milestone, shouldStale}: ITestData): void => {
+              beforeEach((): void => {
+                setTestIssueList(isPullRequest, milestone);
+                setProcessor();
+              });
 
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
+              test(`should${
+                shouldStale ? '' : ' not'
+              } be marked as stale`, async () => {
+                expect.assertions(3);
 
-              await processor.processIssues(1);
+                await processor.processIssues(1);
 
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone but not matching the specific issue exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-milestone-not-exempted');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone matching the specific issue exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-issue-milestone');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone matching the specific exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-milestone');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does not have a milestone', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, '');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone but not matching the specific issue exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-milestone-not-exempted');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone matching the specific issue exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-issue-milestone');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone matching the specific exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-milestone');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
+                expect(processor.staleIssues.length).toStrictEqual(
+                  shouldStale ? 1 : 0
+                );
+                expect(processor.closedIssues.length).toStrictEqual(0);
+                expect(processor.removedLabelIssues.length).toStrictEqual(0);
+              });
+            }
+          );
         });
 
         describe('when all the pull requests milestones should exempt a specific milestone', (): void => {
@@ -1303,141 +477,39 @@ describe('milestones options', (): void => {
             opts.exemptPrMilestones = 'dummy-pull-request-milestone';
           });
 
-          describe('when the issue does not have a milestone', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, '');
-              setProcessor();
-            });
+          describe.each`
+            isPullRequest | milestone                         | name                                                                                         | shouldStale
+            ${false}      | ${''}                             | ${'the issue does not have a milestone'}                                                     | ${true}
+            ${false}      | ${'dummy-milestone-not-exempted'} | ${'the issue does have a milestone but not matching the specific pull request exempted one'} | ${true}
+            ${false}      | ${'dummy-pull-request-milestone'} | ${'the issue does have a milestone matching the specific pull request exempted one'}         | ${true}
+            ${false}      | ${'dummy-milestone'}              | ${'the issue does have a milestone matching the specific exempted one'}                      | ${false}
+            ${true}       | ${''}                             | ${'the PR does not have a milestone'}                                                        | ${true}
+            ${true}       | ${'dummy-milestone-not-exempted'} | ${'the PR does have a milestone but not matching the specific pull request exempted one'}    | ${true}
+            ${true}       | ${'dummy-pull-request-milestone'} | ${'the PR does have a milestone matching the specific pull request exempted one'}            | ${false}
+            ${true}       | ${'dummy-milestone'}              | ${'the PR does have a milestone matching the specific exempted one'}                         | ${true}
+          `(
+            'when $name',
+            ({isPullRequest, milestone, shouldStale}: ITestData): void => {
+              beforeEach((): void => {
+                setTestIssueList(isPullRequest, milestone);
+                setProcessor();
+              });
 
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
+              test(`should${
+                shouldStale ? '' : ' not'
+              } be marked as stale`, async () => {
+                expect.assertions(3);
 
-              await processor.processIssues(1);
+                await processor.processIssues(1);
 
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone but not matching the specific pull request exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-milestone-not-exempted');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone matching the specific pull request exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-pull-request-milestone');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone matching the specific exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-milestone');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does not have a milestone', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, '');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone but not matching the specific pull request exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-milestone-not-exempted');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone matching the specific pull request exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-pull-request-milestone');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone matching the specific exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-milestone');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
+                expect(processor.staleIssues.length).toStrictEqual(
+                  shouldStale ? 1 : 0
+                );
+                expect(processor.closedIssues.length).toStrictEqual(0);
+                expect(processor.removedLabelIssues.length).toStrictEqual(0);
+              });
+            }
+          );
         });
       });
 
@@ -1446,107 +518,37 @@ describe('milestones options', (): void => {
           opts.exemptMilestones = 'dummy-milestone1, dummy-milestone2';
         });
 
-        describe('when the issue does not have a milestone', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(false, '');
-            setProcessor();
-          });
+        describe.each`
+          isPullRequest | milestone                         | name                                                                            | shouldStale
+          ${false}      | ${''}                             | ${'the issue does not have a milestone'}                                        | ${true}
+          ${false}      | ${'dummy-milestone-not-exempted'} | ${'the issue does have a milestone but not matching the specific exempted one'} | ${true}
+          ${false}      | ${'dummy-milestone2'}             | ${'the issue does have a milestone matching the specific exempted one'}         | ${false}
+          ${true}       | ${''}                             | ${'the PR does not have a milestone'}                                           | ${true}
+          ${true}       | ${'dummy-milestone-not-exempted'} | ${'the PR does have a milestone but not matching the specific exempted one'}    | ${true}
+          ${true}       | ${'dummy-milestone2'}             | ${'the PR does have a milestone matching the specific exempted one'}            | ${false}
+        `(
+          'when $name',
+          ({isPullRequest, milestone, shouldStale}: ITestData): void => {
+            beforeEach((): void => {
+              setTestIssueList(isPullRequest, milestone);
+              setProcessor();
+            });
 
-          test('should be marked as stale', async () => {
-            expect.assertions(3);
+            test(`should${
+              shouldStale ? '' : ' not'
+            } be marked as stale`, async () => {
+              expect.assertions(3);
 
-            await processor.processIssues(1);
+              await processor.processIssues(1);
 
-            expect(processor.staleIssues.length).toStrictEqual(1);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
-
-        describe('when the issue does have a milestone but not matching the specific exempted one', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(false, 'dummy-milestone-not-exempted');
-            setProcessor();
-          });
-
-          test('should be marked as stale', async () => {
-            expect.assertions(3);
-
-            await processor.processIssues(1);
-
-            expect(processor.staleIssues.length).toStrictEqual(1);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
-
-        describe('when the issue does have a milestone matching the specific exempted one', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(false, 'dummy-milestone2');
-            setProcessor();
-          });
-
-          test('should not be marked as stale', async () => {
-            expect.assertions(3);
-
-            await processor.processIssues(1);
-
-            expect(processor.staleIssues.length).toStrictEqual(0);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
-
-        describe('when the PR does not have a milestone', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(true, '');
-            setProcessor();
-          });
-
-          test('should be marked as stale', async () => {
-            expect.assertions(3);
-
-            await processor.processIssues(1);
-
-            expect(processor.staleIssues.length).toStrictEqual(1);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
-
-        describe('when the PR does have a milestone but not matching the specific exempted one', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(true, 'dummy-milestone-not-exempted');
-            setProcessor();
-          });
-
-          test('should be marked as stale', async () => {
-            expect.assertions(3);
-
-            await processor.processIssues(1);
-
-            expect(processor.staleIssues.length).toStrictEqual(1);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
-
-        describe('when the PR does have a milestone matching the specific exempted one', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(true, 'dummy-milestone2');
-            setProcessor();
-          });
-
-          test('should not be marked as stale', async () => {
-            expect.assertions(3);
-
-            await processor.processIssues(1);
-
-            expect(processor.staleIssues.length).toStrictEqual(0);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
+              expect(processor.staleIssues.length).toStrictEqual(
+                shouldStale ? 1 : 0
+              );
+              expect(processor.closedIssues.length).toStrictEqual(0);
+              expect(processor.removedLabelIssues.length).toStrictEqual(0);
+            });
+          }
+        );
 
         describe('when all the issues milestones should exempt a specific milestone', (): void => {
           beforeEach((): void => {
@@ -1554,141 +556,39 @@ describe('milestones options', (): void => {
               'dummy-issue-milestone1, dummy-issue-milestone2';
           });
 
-          describe('when the issue does not have a milestone', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, '');
-              setProcessor();
-            });
+          describe.each`
+            isPullRequest | milestone                         | name                                                                                  | shouldStale
+            ${false}      | ${''}                             | ${'the issue does not have a milestone'}                                              | ${true}
+            ${false}      | ${'dummy-milestone-not-exempted'} | ${'the issue does have a milestone but not matching the specific issue exempted one'} | ${true}
+            ${false}      | ${'dummy-issue-milestone2'}       | ${'the issue does have a milestone matching the specific issue exempted one'}         | ${false}
+            ${false}      | ${'dummy-milestone2'}             | ${'the issue does have a milestone matching the specific exempted one'}               | ${true}
+            ${true}       | ${''}                             | ${'the PR does not have a milestone'}                                                 | ${true}
+            ${true}       | ${'dummy-milestone-not-exempted'} | ${'the PR does have a milestone but not matching the specific issue exempted one'}    | ${true}
+            ${true}       | ${'dummy-issue-milestone2'}       | ${'the PR does have a milestone matching the specific issue exempted one'}            | ${true}
+            ${true}       | ${'dummy-milestone2'}             | ${'the PR does have a milestone matching the specific exempted one'}                  | ${false}
+          `(
+            'when $name',
+            ({isPullRequest, milestone, shouldStale}: ITestData): void => {
+              beforeEach((): void => {
+                setTestIssueList(isPullRequest, milestone);
+                setProcessor();
+              });
 
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
+              test(`should${
+                shouldStale ? '' : ' not'
+              } be marked as stale`, async () => {
+                expect.assertions(3);
 
-              await processor.processIssues(1);
+                await processor.processIssues(1);
 
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone but not matching the specific issue exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-milestone-not-exempted');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone matching the specific issue exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-issue-milestone2');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone matching the specific exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-milestone2');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does not have a milestone', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, '');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone but not matching the specific issue exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-milestone-not-exempted');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone matching the specific issue exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-issue-milestone2');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone matching the specific exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-milestone2');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
+                expect(processor.staleIssues.length).toStrictEqual(
+                  shouldStale ? 1 : 0
+                );
+                expect(processor.closedIssues.length).toStrictEqual(0);
+                expect(processor.removedLabelIssues.length).toStrictEqual(0);
+              });
+            }
+          );
         });
 
         describe('when all the pull requests milestones should exempt a specific milestone', (): void => {
@@ -1697,141 +597,39 @@ describe('milestones options', (): void => {
               'dummy-pull-request-milestone1, dummy-pull-request-milestone2';
           });
 
-          describe('when the issue does not have a milestone', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, '');
-              setProcessor();
-            });
+          describe.each`
+            isPullRequest | milestone                          | name                                                                                         | shouldStale
+            ${false}      | ${''}                              | ${'the issue does not have a milestone'}                                                     | ${true}
+            ${false}      | ${'dummy-milestone-not-exempted'}  | ${'the issue does have a milestone but not matching the specific pull request exempted one'} | ${true}
+            ${false}      | ${'dummy-pull-request-milestone2'} | ${'the issue does have a milestone matching the specific pull request exempted one'}         | ${true}
+            ${false}      | ${'dummy-milestone2'}              | ${'the issue does have a milestone matching the specific exempted one'}                      | ${false}
+            ${true}       | ${''}                              | ${'the PR does not have a milestone'}                                                        | ${true}
+            ${true}       | ${'dummy-milestone-not-exempted'}  | ${'the PR does have a milestone but not matching the specific pull request exempted one'}    | ${true}
+            ${true}       | ${'dummy-pull-request-milestone2'} | ${'the PR does have a milestone matching the specific pull request exempted one'}            | ${false}
+            ${true}       | ${'dummy-milestone2'}              | ${'the PR does have a milestone matching the specific exempted one'}                         | ${true}
+          `(
+            'when $name',
+            ({isPullRequest, milestone, shouldStale}: ITestData): void => {
+              beforeEach((): void => {
+                setTestIssueList(isPullRequest, milestone);
+                setProcessor();
+              });
 
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
+              test(`should${
+                shouldStale ? '' : ' not'
+              } be marked as stale`, async () => {
+                expect.assertions(3);
 
-              await processor.processIssues(1);
+                await processor.processIssues(1);
 
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone but not matching the specific pull request exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-milestone-not-exempted');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone matching the specific pull request exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-pull-request-milestone2');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone matching the specific exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-milestone2');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does not have a milestone', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, '');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone but not matching the specific pull request exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-milestone-not-exempted');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone matching the specific pull request exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-pull-request-milestone2');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone matching the specific exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-milestone2');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
+                expect(processor.staleIssues.length).toStrictEqual(
+                  shouldStale ? 1 : 0
+                );
+                expect(processor.closedIssues.length).toStrictEqual(0);
+                expect(processor.removedLabelIssues.length).toStrictEqual(0);
+              });
+            }
+          );
         });
       });
     });
@@ -1841,321 +639,111 @@ describe('milestones options', (): void => {
         opts.exemptAllIssueMilestones = true;
       });
 
-      describe('when the issue does not have a milestone', (): void => {
-        beforeEach((): void => {
-          setTestIssueList(false, '');
-          setProcessor();
-        });
+      describe.each`
+        isPullRequest | milestone            | name                                     | shouldStale
+        ${false}      | ${''}                | ${'the issue does not have a milestone'} | ${true}
+        ${false}      | ${'dummy-milestone'} | ${'the issue does have a milestone'}     | ${false}
+        ${true}       | ${''}                | ${'the PR does not have a milestone'}    | ${true}
+        ${true}       | ${'dummy-milestone'} | ${'the PR does have a milestone'}        | ${true}
+      `(
+        'when $name',
+        ({isPullRequest, milestone, shouldStale}: ITestData): void => {
+          beforeEach((): void => {
+            setTestIssueList(isPullRequest, milestone);
+            setProcessor();
+          });
 
-        test('should be marked as stale', async () => {
-          expect.assertions(3);
+          test(`should${
+            shouldStale ? '' : ' not'
+          } be marked as stale`, async () => {
+            expect.assertions(3);
 
-          await processor.processIssues(1);
+            await processor.processIssues(1);
 
-          expect(processor.staleIssues.length).toStrictEqual(1);
-          expect(processor.closedIssues.length).toStrictEqual(0);
-          expect(processor.removedLabelIssues.length).toStrictEqual(0);
-        });
-      });
-
-      describe('when the issue does have a milestone', (): void => {
-        beforeEach((): void => {
-          setTestIssueList(false, 'dummy-milestone');
-          setProcessor();
-        });
-
-        test('should not be marked as stale', async () => {
-          expect.assertions(3);
-
-          await processor.processIssues(1);
-
-          expect(processor.staleIssues.length).toStrictEqual(0);
-          expect(processor.closedIssues.length).toStrictEqual(0);
-          expect(processor.removedLabelIssues.length).toStrictEqual(0);
-        });
-      });
-
-      describe('when the PR does not have a milestone', (): void => {
-        beforeEach((): void => {
-          setTestIssueList(true, '');
-          setProcessor();
-        });
-
-        test('should be marked as stale', async () => {
-          expect.assertions(3);
-
-          await processor.processIssues(1);
-
-          expect(processor.staleIssues.length).toStrictEqual(1);
-          expect(processor.closedIssues.length).toStrictEqual(0);
-          expect(processor.removedLabelIssues.length).toStrictEqual(0);
-        });
-      });
-
-      describe('when the PR does have a milestone', (): void => {
-        beforeEach((): void => {
-          setTestIssueList(true, 'dummy-milestone');
-          setProcessor();
-        });
-
-        test('should be marked as stale', async () => {
-          expect.assertions(3);
-
-          await processor.processIssues(1);
-
-          expect(processor.staleIssues.length).toStrictEqual(1);
-          expect(processor.closedIssues.length).toStrictEqual(0);
-          expect(processor.removedLabelIssues.length).toStrictEqual(0);
-        });
-      });
+            expect(processor.staleIssues.length).toStrictEqual(
+              shouldStale ? 1 : 0
+            );
+            expect(processor.closedIssues.length).toStrictEqual(0);
+            expect(processor.removedLabelIssues.length).toStrictEqual(0);
+          });
+        }
+      );
 
       describe('when all the issues and pull requests milestones should exempt a specific milestone', (): void => {
         beforeEach((): void => {
           opts.exemptMilestones = 'dummy-milestone';
         });
 
-        describe('when the issue does not have a milestone', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(false, '');
-            setProcessor();
-          });
+        describe.each`
+          isPullRequest | milestone                         | name                                                                            | shouldStale
+          ${false}      | ${''}                             | ${'the issue does not have a milestone'}                                        | ${true}
+          ${false}      | ${'dummy-milestone-not-exempted'} | ${'the issue does have a milestone but not matching the specific exempted one'} | ${false}
+          ${false}      | ${'dummy-milestone'}              | ${'the issue does have a milestone matching the specific exempted one'}         | ${false}
+          ${true}       | ${''}                             | ${'the PR does not have a milestone'}                                           | ${true}
+          ${true}       | ${'dummy-milestone-not-exempted'} | ${'the PR does have a milestone but not matching the specific exempted one'}    | ${true}
+          ${true}       | ${'dummy-milestone'}              | ${'the PR does have a milestone matching the specific exempted one'}            | ${false}
+        `(
+          'when $name',
+          ({isPullRequest, milestone, shouldStale}: ITestData): void => {
+            beforeEach((): void => {
+              setTestIssueList(isPullRequest, milestone);
+              setProcessor();
+            });
 
-          test('should be marked as stale', async () => {
-            expect.assertions(3);
+            test(`should${
+              shouldStale ? '' : ' not'
+            } be marked as stale`, async () => {
+              expect.assertions(3);
 
-            await processor.processIssues(1);
+              await processor.processIssues(1);
 
-            expect(processor.staleIssues.length).toStrictEqual(1);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
-
-        describe('when the issue does have a milestone but not matching the specific exempted one', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(false, 'dummy-milestone-not-exempted');
-            setProcessor();
-          });
-
-          test('should not be marked as stale', async () => {
-            expect.assertions(3);
-
-            await processor.processIssues(1);
-
-            expect(processor.staleIssues.length).toStrictEqual(0);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
-
-        describe('when the issue does have a milestone matching the specific exempted one', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(false, 'dummy-milestone');
-            setProcessor();
-          });
-
-          test('should not be marked as stale', async () => {
-            expect.assertions(3);
-
-            await processor.processIssues(1);
-
-            expect(processor.staleIssues.length).toStrictEqual(0);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
-
-        describe('when the PR does not have a milestone', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(true, '');
-            setProcessor();
-          });
-
-          test('should be marked as stale', async () => {
-            expect.assertions(3);
-
-            await processor.processIssues(1);
-
-            expect(processor.staleIssues.length).toStrictEqual(1);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
-
-        describe('when the PR does have a milestone but not matching the specific exempted one', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(true, 'dummy-milestone-not-exempted');
-            setProcessor();
-          });
-
-          test('should be marked as stale', async () => {
-            expect.assertions(3);
-
-            await processor.processIssues(1);
-
-            expect(processor.staleIssues.length).toStrictEqual(1);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
-
-        describe('when the PR does have a milestone matching the specific exempted one', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(true, 'dummy-milestone');
-            setProcessor();
-          });
-
-          test('should not be marked as stale', async () => {
-            expect.assertions(3);
-
-            await processor.processIssues(1);
-
-            expect(processor.staleIssues.length).toStrictEqual(0);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
+              expect(processor.staleIssues.length).toStrictEqual(
+                shouldStale ? 1 : 0
+              );
+              expect(processor.closedIssues.length).toStrictEqual(0);
+              expect(processor.removedLabelIssues.length).toStrictEqual(0);
+            });
+          }
+        );
 
         describe('when all the issues milestones should exempt a specific milestone', (): void => {
           beforeEach((): void => {
             opts.exemptIssueMilestones = 'dummy-issue-milestone';
           });
 
-          describe('when the issue does not have a milestone', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, '');
-              setProcessor();
-            });
+          describe.each`
+            isPullRequest | milestone                         | name                                                                                  | shouldStale
+            ${false}      | ${''}                             | ${'the issue does not have a milestone'}                                              | ${true}
+            ${false}      | ${'dummy-milestone-not-exempted'} | ${'the issue does have a milestone but not matching the specific issue exempted one'} | ${false}
+            ${false}      | ${'dummy-issue-milestone'}        | ${'the issue does have a milestone matching the specific issue exempted one'}         | ${false}
+            ${false}      | ${'dummy-milestone'}              | ${'the issue does have a milestone matching the specific exempted one'}               | ${false}
+            ${true}       | ${''}                             | ${'the PR does not have a milestone'}                                                 | ${true}
+            ${true}       | ${'dummy-milestone-not-exempted'} | ${'the PR does have a milestone but not matching the specific issue exempted one'}    | ${true}
+            ${true}       | ${'dummy-issue-milestone'}        | ${'the PR does have a milestone matching the specific issue exempted one'}            | ${true}
+            ${true}       | ${'dummy-milestone'}              | ${'the PR does have a milestone matching the specific exempted one'}                  | ${false}
+          `(
+            'when $name',
+            ({isPullRequest, milestone, shouldStale}: ITestData): void => {
+              beforeEach((): void => {
+                setTestIssueList(isPullRequest, milestone);
+                setProcessor();
+              });
 
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
+              test(`should${
+                shouldStale ? '' : ' not'
+              } be marked as stale`, async () => {
+                expect.assertions(3);
 
-              await processor.processIssues(1);
+                await processor.processIssues(1);
 
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone but not matching the specific issue exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-milestone-not-exempted');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone matching the specific issue exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-issue-milestone');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone matching the specific exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-milestone');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does not have a milestone', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, '');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone but not matching the specific issue exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-milestone-not-exempted');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone matching the specific issue exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-issue-milestone');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone matching the specific exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-milestone');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
+                expect(processor.staleIssues.length).toStrictEqual(
+                  shouldStale ? 1 : 0
+                );
+                expect(processor.closedIssues.length).toStrictEqual(0);
+                expect(processor.removedLabelIssues.length).toStrictEqual(0);
+              });
+            }
+          );
         });
 
         describe('when all the pull requests milestones should exempt a specific milestone', (): void => {
@@ -2163,141 +751,39 @@ describe('milestones options', (): void => {
             opts.exemptPrMilestones = 'dummy-pull-request-milestone';
           });
 
-          describe('when the issue does not have a milestone', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, '');
-              setProcessor();
-            });
+          describe.each`
+            isPullRequest | milestone                         | name                                                                                         | shouldStale
+            ${false}      | ${''}                             | ${'the issue does not have a milestone'}                                                     | ${true}
+            ${false}      | ${'dummy-milestone-not-exempted'} | ${'the issue does have a milestone but not matching the specific pull request exempted one'} | ${false}
+            ${false}      | ${'dummy-pull-request-milestone'} | ${'the issue does have a milestone matching the specific pull request exempted one'}         | ${false}
+            ${false}      | ${'dummy-milestone'}              | ${'the issue does have a milestone matching the specific exempted one'}                      | ${false}
+            ${true}       | ${''}                             | ${'the PR does not have a milestone'}                                                        | ${true}
+            ${true}       | ${'dummy-milestone-not-exempted'} | ${'the PR does have a milestone but not matching the specific pull request exempted one'}    | ${true}
+            ${true}       | ${'dummy-pull-request-milestone'} | ${'the PR does have a milestone matching the specific pull request exempted one'}            | ${false}
+            ${true}       | ${'dummy-milestone'}              | ${'the PR does have a milestone matching the specific exempted one'}                         | ${true}
+          `(
+            'when $name',
+            ({isPullRequest, milestone, shouldStale}: ITestData): void => {
+              beforeEach((): void => {
+                setTestIssueList(isPullRequest, milestone);
+                setProcessor();
+              });
 
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
+              test(`should${
+                shouldStale ? '' : ' not'
+              } be marked as stale`, async () => {
+                expect.assertions(3);
 
-              await processor.processIssues(1);
+                await processor.processIssues(1);
 
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone but not matching the specific pull request exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-milestone-not-exempted');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone matching the specific pull request exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-pull-request-milestone');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone matching the specific exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-milestone');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does not have a milestone', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, '');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone but not matching the specific pull request exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-milestone-not-exempted');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone matching the specific pull request exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-pull-request-milestone');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone matching the specific exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-milestone');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
+                expect(processor.staleIssues.length).toStrictEqual(
+                  shouldStale ? 1 : 0
+                );
+                expect(processor.closedIssues.length).toStrictEqual(0);
+                expect(processor.removedLabelIssues.length).toStrictEqual(0);
+              });
+            }
+          );
         });
       });
 
@@ -2306,107 +792,37 @@ describe('milestones options', (): void => {
           opts.exemptMilestones = 'dummy-milestone1, dummy-milestone2';
         });
 
-        describe('when the issue does not have a milestone', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(false, '');
-            setProcessor();
-          });
+        describe.each`
+          isPullRequest | milestone                         | name                                                                            | shouldStale
+          ${false}      | ${''}                             | ${'the issue does not have a milestone'}                                        | ${true}
+          ${false}      | ${'dummy-milestone-not-exempted'} | ${'the issue does have a milestone but not matching the specific exempted one'} | ${false}
+          ${false}      | ${'dummy-milestone2'}             | ${'the issue does have a milestone matching the specific exempted one'}         | ${false}
+          ${true}       | ${''}                             | ${'the PR does not have a milestone'}                                           | ${true}
+          ${true}       | ${'dummy-milestone-not-exempted'} | ${'the PR does have a milestone but not matching the specific exempted one'}    | ${true}
+          ${true}       | ${'dummy-milestone2'}             | ${'the PR does have a milestone matching the specific exempted one'}            | ${false}
+        `(
+          'when $name',
+          ({isPullRequest, milestone, shouldStale}: ITestData): void => {
+            beforeEach((): void => {
+              setTestIssueList(isPullRequest, milestone);
+              setProcessor();
+            });
 
-          test('should be marked as stale', async () => {
-            expect.assertions(3);
+            test(`should${
+              shouldStale ? '' : ' not'
+            } be marked as stale`, async () => {
+              expect.assertions(3);
 
-            await processor.processIssues(1);
+              await processor.processIssues(1);
 
-            expect(processor.staleIssues.length).toStrictEqual(1);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
-
-        describe('when the issue does have a milestone but not matching the specific exempted one', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(false, 'dummy-milestone-not-exempted');
-            setProcessor();
-          });
-
-          test('should not be marked as stale', async () => {
-            expect.assertions(3);
-
-            await processor.processIssues(1);
-
-            expect(processor.staleIssues.length).toStrictEqual(0);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
-
-        describe('when the issue does have a milestone matching the specific exempted one', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(false, 'dummy-milestone2');
-            setProcessor();
-          });
-
-          test('should not be marked as stale', async () => {
-            expect.assertions(3);
-
-            await processor.processIssues(1);
-
-            expect(processor.staleIssues.length).toStrictEqual(0);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
-
-        describe('when the PR does not have a milestone', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(true, '');
-            setProcessor();
-          });
-
-          test('should be marked as stale', async () => {
-            expect.assertions(3);
-
-            await processor.processIssues(1);
-
-            expect(processor.staleIssues.length).toStrictEqual(1);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
-
-        describe('when the PR does have a milestone but not matching the specific exempted one', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(true, 'dummy-milestone-not-exempted');
-            setProcessor();
-          });
-
-          test('should be marked as stale', async () => {
-            expect.assertions(3);
-
-            await processor.processIssues(1);
-
-            expect(processor.staleIssues.length).toStrictEqual(1);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
-
-        describe('when the PR does have a milestone matching the specific exempted one', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(true, 'dummy-milestone2');
-            setProcessor();
-          });
-
-          test('should not be marked as stale', async () => {
-            expect.assertions(3);
-
-            await processor.processIssues(1);
-
-            expect(processor.staleIssues.length).toStrictEqual(0);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
+              expect(processor.staleIssues.length).toStrictEqual(
+                shouldStale ? 1 : 0
+              );
+              expect(processor.closedIssues.length).toStrictEqual(0);
+              expect(processor.removedLabelIssues.length).toStrictEqual(0);
+            });
+          }
+        );
 
         describe('when all the issues milestones should exempt a specific milestone', (): void => {
           beforeEach((): void => {
@@ -2414,141 +830,39 @@ describe('milestones options', (): void => {
               'dummy-issue-milestone1, dummy-issue-milestone2';
           });
 
-          describe('when the issue does not have a milestone', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, '');
-              setProcessor();
-            });
+          describe.each`
+            isPullRequest | milestone                         | name                                                                                  | shouldStale
+            ${false}      | ${''}                             | ${'the issue does not have a milestone'}                                              | ${true}
+            ${false}      | ${'dummy-milestone-not-exempted'} | ${'the issue does have a milestone but not matching the specific issue exempted one'} | ${false}
+            ${false}      | ${'dummy-issue-milestone2'}       | ${'the issue does have a milestone matching the specific issue exempted one'}         | ${false}
+            ${false}      | ${'dummy-milestone2'}             | ${'the issue does have a milestone matching the specific exempted one'}               | ${false}
+            ${true}       | ${''}                             | ${'the PR does not have a milestone'}                                                 | ${true}
+            ${true}       | ${'dummy-milestone-not-exempted'} | ${'the PR does have a milestone but not matching the specific issue exempted one'}    | ${true}
+            ${true}       | ${'dummy-issue-milestone2'}       | ${'the PR does have a milestone matching the specific issue exempted one'}            | ${true}
+            ${true}       | ${'dummy-milestone2'}             | ${'the PR does have a milestone matching the specific exempted one'}                  | ${false}
+          `(
+            'when $name',
+            ({isPullRequest, milestone, shouldStale}: ITestData): void => {
+              beforeEach((): void => {
+                setTestIssueList(isPullRequest, milestone);
+                setProcessor();
+              });
 
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
+              test(`should${
+                shouldStale ? '' : ' not'
+              } be marked as stale`, async () => {
+                expect.assertions(3);
 
-              await processor.processIssues(1);
+                await processor.processIssues(1);
 
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone but not matching the specific issue exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-milestone-not-exempted');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone matching the specific issue exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-issue-milestone2');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone matching the specific exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-milestone2');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does not have a milestone', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, '');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone but not matching the specific issue exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-milestone-not-exempted');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone matching the specific issue exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-issue-milestone2');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone matching the specific exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-milestone2');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
+                expect(processor.staleIssues.length).toStrictEqual(
+                  shouldStale ? 1 : 0
+                );
+                expect(processor.closedIssues.length).toStrictEqual(0);
+                expect(processor.removedLabelIssues.length).toStrictEqual(0);
+              });
+            }
+          );
         });
 
         describe('when all the pull requests milestones should exempt a specific milestone', (): void => {
@@ -2557,141 +871,39 @@ describe('milestones options', (): void => {
               'dummy-pull-request-milestone1, dummy-pull-request-milestone2';
           });
 
-          describe('when the issue does not have a milestone', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, '');
-              setProcessor();
-            });
+          describe.each`
+            isPullRequest | milestone                          | name                                                                                         | shouldStale
+            ${false}      | ${''}                              | ${'the issue does not have a milestone'}                                                     | ${true}
+            ${false}      | ${'dummy-milestone-not-exempted'}  | ${'the issue does have a milestone but not matching the specific pull request exempted one'} | ${false}
+            ${false}      | ${'dummy-pull-request-milestone2'} | ${'the issue does have a milestone matching the specific pull request exempted one'}         | ${false}
+            ${false}      | ${'dummy-milestone2'}              | ${'the issue does have a milestone matching the specific exempted one'}                      | ${false}
+            ${true}       | ${''}                              | ${'the PR does not have a milestone'}                                                        | ${true}
+            ${true}       | ${'dummy-milestone-not-exempted'}  | ${'the PR does have a milestone but not matching the specific pull request exempted one'}    | ${true}
+            ${true}       | ${'dummy-pull-request-milestone2'} | ${'the PR does have a milestone matching the specific pull request exempted one'}            | ${false}
+            ${true}       | ${'dummy-milestone2'}              | ${'the PR does have a milestone matching the specific exempted one'}                         | ${true}
+          `(
+            'when $name',
+            ({isPullRequest, milestone, shouldStale}: ITestData): void => {
+              beforeEach((): void => {
+                setTestIssueList(isPullRequest, milestone);
+                setProcessor();
+              });
 
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
+              test(`should${
+                shouldStale ? '' : ' not'
+              } be marked as stale`, async () => {
+                expect.assertions(3);
 
-              await processor.processIssues(1);
+                await processor.processIssues(1);
 
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone but not matching the specific pull request exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-milestone-not-exempted');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone matching the specific pull request exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-pull-request-milestone2');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone matching the specific exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-milestone2');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does not have a milestone', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, '');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone but not matching the specific pull request exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-milestone-not-exempted');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone matching the specific pull request exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-pull-request-milestone2');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone matching the specific exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-milestone2');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
+                expect(processor.staleIssues.length).toStrictEqual(
+                  shouldStale ? 1 : 0
+                );
+                expect(processor.closedIssues.length).toStrictEqual(0);
+                expect(processor.removedLabelIssues.length).toStrictEqual(0);
+              });
+            }
+          );
         });
       });
     });
@@ -2701,321 +913,111 @@ describe('milestones options', (): void => {
         opts.exemptAllPrMilestones = undefined;
       });
 
-      describe('when the issue does not have a milestone', (): void => {
-        beforeEach((): void => {
-          setTestIssueList(false, '');
-          setProcessor();
-        });
+      describe.each`
+        isPullRequest | milestone            | name                                     | shouldStale
+        ${false}      | ${''}                | ${'the issue does not have a milestone'} | ${true}
+        ${false}      | ${'dummy-milestone'} | ${'the issue does have a milestone'}     | ${true}
+        ${true}       | ${''}                | ${'the PR does not have a milestone'}    | ${true}
+        ${true}       | ${'dummy-milestone'} | ${'the PR does have a milestone'}        | ${true}
+      `(
+        'when $name',
+        ({isPullRequest, milestone, shouldStale}: ITestData): void => {
+          beforeEach((): void => {
+            setTestIssueList(isPullRequest, milestone);
+            setProcessor();
+          });
 
-        test('should be marked as stale', async () => {
-          expect.assertions(3);
+          test(`should${
+            shouldStale ? '' : ' not'
+          } be marked as stale`, async () => {
+            expect.assertions(3);
 
-          await processor.processIssues(1);
+            await processor.processIssues(1);
 
-          expect(processor.staleIssues.length).toStrictEqual(1);
-          expect(processor.closedIssues.length).toStrictEqual(0);
-          expect(processor.removedLabelIssues.length).toStrictEqual(0);
-        });
-      });
-
-      describe('when the issue does have a milestone', (): void => {
-        beforeEach((): void => {
-          setTestIssueList(false, 'dummy-milestone');
-          setProcessor();
-        });
-
-        test('should be marked as stale', async () => {
-          expect.assertions(3);
-
-          await processor.processIssues(1);
-
-          expect(processor.staleIssues.length).toStrictEqual(1);
-          expect(processor.closedIssues.length).toStrictEqual(0);
-          expect(processor.removedLabelIssues.length).toStrictEqual(0);
-        });
-      });
-
-      describe('when the PR does not have a milestone', (): void => {
-        beforeEach((): void => {
-          setTestIssueList(true, '');
-          setProcessor();
-        });
-
-        test('should be marked as stale', async () => {
-          expect.assertions(3);
-
-          await processor.processIssues(1);
-
-          expect(processor.staleIssues.length).toStrictEqual(1);
-          expect(processor.closedIssues.length).toStrictEqual(0);
-          expect(processor.removedLabelIssues.length).toStrictEqual(0);
-        });
-      });
-
-      describe('when the PR does have a milestone', (): void => {
-        beforeEach((): void => {
-          setTestIssueList(true, 'dummy-milestone');
-          setProcessor();
-        });
-
-        test('should be marked as stale', async () => {
-          expect.assertions(3);
-
-          await processor.processIssues(1);
-
-          expect(processor.staleIssues.length).toStrictEqual(1);
-          expect(processor.closedIssues.length).toStrictEqual(0);
-          expect(processor.removedLabelIssues.length).toStrictEqual(0);
-        });
-      });
+            expect(processor.staleIssues.length).toStrictEqual(
+              shouldStale ? 1 : 0
+            );
+            expect(processor.closedIssues.length).toStrictEqual(0);
+            expect(processor.removedLabelIssues.length).toStrictEqual(0);
+          });
+        }
+      );
 
       describe('when all the issues and pull requests milestones should exempt a specific milestone', (): void => {
         beforeEach((): void => {
           opts.exemptMilestones = 'dummy-milestone';
         });
 
-        describe('when the issue does not have a milestone', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(false, '');
-            setProcessor();
-          });
+        describe.each`
+          isPullRequest | milestone                         | name                                                                            | shouldStale
+          ${false}      | ${''}                             | ${'the issue does not have a milestone'}                                        | ${true}
+          ${false}      | ${'dummy-milestone-not-exempted'} | ${'the issue does have a milestone but not matching the specific exempted one'} | ${true}
+          ${false}      | ${'dummy-milestone'}              | ${'the issue does have a milestone matching the specific exempted one'}         | ${false}
+          ${true}       | ${''}                             | ${'the PR does not have a milestone'}                                           | ${true}
+          ${true}       | ${'dummy-milestone-not-exempted'} | ${'the PR does have a milestone but not matching the specific exempted one'}    | ${true}
+          ${true}       | ${'dummy-milestone'}              | ${'the PR does have a milestone matching the specific exempted one'}            | ${false}
+        `(
+          'when $name',
+          ({isPullRequest, milestone, shouldStale}: ITestData): void => {
+            beforeEach((): void => {
+              setTestIssueList(isPullRequest, milestone);
+              setProcessor();
+            });
 
-          test('should be marked as stale', async () => {
-            expect.assertions(3);
+            test(`should${
+              shouldStale ? '' : ' not'
+            } be marked as stale`, async () => {
+              expect.assertions(3);
 
-            await processor.processIssues(1);
+              await processor.processIssues(1);
 
-            expect(processor.staleIssues.length).toStrictEqual(1);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
-
-        describe('when the issue does have a milestone but not matching the specific exempted one', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(false, 'dummy-milestone-not-exempted');
-            setProcessor();
-          });
-
-          test('should be marked as stale', async () => {
-            expect.assertions(3);
-
-            await processor.processIssues(1);
-
-            expect(processor.staleIssues.length).toStrictEqual(1);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
-
-        describe('when the issue does have a milestone matching the specific exempted one', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(false, 'dummy-milestone');
-            setProcessor();
-          });
-
-          test('should not be marked as stale', async () => {
-            expect.assertions(3);
-
-            await processor.processIssues(1);
-
-            expect(processor.staleIssues.length).toStrictEqual(0);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
-
-        describe('when the PR does not have a milestone', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(true, '');
-            setProcessor();
-          });
-
-          test('should be marked as stale', async () => {
-            expect.assertions(3);
-
-            await processor.processIssues(1);
-
-            expect(processor.staleIssues.length).toStrictEqual(1);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
-
-        describe('when the PR does have a milestone but not matching the specific exempted one', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(true, 'dummy-milestone-not-exempted');
-            setProcessor();
-          });
-
-          test('should be marked as stale', async () => {
-            expect.assertions(3);
-
-            await processor.processIssues(1);
-
-            expect(processor.staleIssues.length).toStrictEqual(1);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
-
-        describe('when the PR does have a milestone matching the specific exempted one', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(true, 'dummy-milestone');
-            setProcessor();
-          });
-
-          test('should not be marked as stale', async () => {
-            expect.assertions(3);
-
-            await processor.processIssues(1);
-
-            expect(processor.staleIssues.length).toStrictEqual(0);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
+              expect(processor.staleIssues.length).toStrictEqual(
+                shouldStale ? 1 : 0
+              );
+              expect(processor.closedIssues.length).toStrictEqual(0);
+              expect(processor.removedLabelIssues.length).toStrictEqual(0);
+            });
+          }
+        );
 
         describe('when all the issues milestones should exempt a specific milestone', (): void => {
           beforeEach((): void => {
             opts.exemptIssueMilestones = 'dummy-issue-milestone';
           });
 
-          describe('when the issue does not have a milestone', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, '');
-              setProcessor();
-            });
+          describe.each`
+            isPullRequest | milestone                         | name                                                                                  | shouldStale
+            ${false}      | ${''}                             | ${'the issue does not have a milestone'}                                              | ${true}
+            ${false}      | ${'dummy-milestone-not-exempted'} | ${'the issue does have a milestone but not matching the specific issue exempted one'} | ${true}
+            ${false}      | ${'dummy-issue-milestone'}        | ${'the issue does have a milestone matching the specific issue exempted one'}         | ${false}
+            ${false}      | ${'dummy-milestone'}              | ${'the issue does have a milestone matching the specific exempted one'}               | ${true}
+            ${true}       | ${''}                             | ${'the PR does not have a milestone'}                                                 | ${true}
+            ${true}       | ${'dummy-milestone-not-exempted'} | ${'the PR does have a milestone but not matching the specific issue exempted one'}    | ${true}
+            ${true}       | ${'dummy-issue-milestone'}        | ${'the PR does have a milestone matching the specific issue exempted one'}            | ${true}
+            ${true}       | ${'dummy-milestone'}              | ${'the PR does have a milestone matching the specific exempted one'}                  | ${false}
+          `(
+            'when $name',
+            ({isPullRequest, milestone, shouldStale}: ITestData): void => {
+              beforeEach((): void => {
+                setTestIssueList(isPullRequest, milestone);
+                setProcessor();
+              });
 
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
+              test(`should${
+                shouldStale ? '' : ' not'
+              } be marked as stale`, async () => {
+                expect.assertions(3);
 
-              await processor.processIssues(1);
+                await processor.processIssues(1);
 
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone but not matching the specific issue exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-milestone-not-exempted');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone matching the specific issue exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-issue-milestone');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone matching the specific exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-milestone');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does not have a milestone', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, '');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone but not matching the specific issue exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-milestone-not-exempted');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone matching the specific issue exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-issue-milestone');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone matching the specific exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-milestone');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
+                expect(processor.staleIssues.length).toStrictEqual(
+                  shouldStale ? 1 : 0
+                );
+                expect(processor.closedIssues.length).toStrictEqual(0);
+                expect(processor.removedLabelIssues.length).toStrictEqual(0);
+              });
+            }
+          );
         });
 
         describe('when all the pull requests milestones should exempt a specific milestone', (): void => {
@@ -3023,141 +1025,39 @@ describe('milestones options', (): void => {
             opts.exemptPrMilestones = 'dummy-pull-request-milestone';
           });
 
-          describe('when the issue does not have a milestone', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, '');
-              setProcessor();
-            });
+          describe.each`
+            isPullRequest | milestone                         | name                                                                                         | shouldStale
+            ${false}      | ${''}                             | ${'the issue does not have a milestone'}                                                     | ${true}
+            ${false}      | ${'dummy-milestone-not-exempted'} | ${'the issue does have a milestone but not matching the specific pull request exempted one'} | ${true}
+            ${false}      | ${'dummy-pull-request-milestone'} | ${'the issue does have a milestone matching the specific pull request exempted one'}         | ${true}
+            ${false}      | ${'dummy-milestone'}              | ${'the issue does have a milestone matching the specific exempted one'}                      | ${false}
+            ${true}       | ${''}                             | ${'the PR does not have a milestone'}                                                        | ${true}
+            ${true}       | ${'dummy-milestone-not-exempted'} | ${'the PR does have a milestone but not matching the specific pull request exempted one'}    | ${true}
+            ${true}       | ${'dummy-pull-request-milestone'} | ${'the PR does have a milestone matching the specific pull request exempted one'}            | ${false}
+            ${true}       | ${'dummy-milestone'}              | ${'the PR does have a milestone matching the specific exempted one'}                         | ${true}
+          `(
+            'when $name',
+            ({isPullRequest, milestone, shouldStale}: ITestData): void => {
+              beforeEach((): void => {
+                setTestIssueList(isPullRequest, milestone);
+                setProcessor();
+              });
 
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
+              test(`should${
+                shouldStale ? '' : ' not'
+              } be marked as stale`, async () => {
+                expect.assertions(3);
 
-              await processor.processIssues(1);
+                await processor.processIssues(1);
 
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone but not matching the specific pull request exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-milestone-not-exempted');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone matching the specific pull request exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-pull-request-milestone');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone matching the specific exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-milestone');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does not have a milestone', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, '');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone but not matching the specific pull request exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-milestone-not-exempted');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone matching the specific pull request exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-pull-request-milestone');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone matching the specific exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-milestone');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
+                expect(processor.staleIssues.length).toStrictEqual(
+                  shouldStale ? 1 : 0
+                );
+                expect(processor.closedIssues.length).toStrictEqual(0);
+                expect(processor.removedLabelIssues.length).toStrictEqual(0);
+              });
+            }
+          );
         });
       });
 
@@ -3166,107 +1066,37 @@ describe('milestones options', (): void => {
           opts.exemptMilestones = 'dummy-milestone1, dummy-milestone2';
         });
 
-        describe('when the issue does not have a milestone', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(false, '');
-            setProcessor();
-          });
+        describe.each`
+          isPullRequest | milestone                         | name                                                                            | shouldStale
+          ${false}      | ${''}                             | ${'the issue does not have a milestone'}                                        | ${true}
+          ${false}      | ${'dummy-milestone-not-exempted'} | ${'the issue does have a milestone but not matching the specific exempted one'} | ${true}
+          ${false}      | ${'dummy-milestone2'}             | ${'the issue does have a milestone matching the specific exempted one'}         | ${false}
+          ${true}       | ${''}                             | ${'the PR does not have a milestone'}                                           | ${true}
+          ${true}       | ${'dummy-milestone-not-exempted'} | ${'the PR does have a milestone but not matching the specific exempted one'}    | ${true}
+          ${true}       | ${'dummy-milestone2'}             | ${'the PR does have a milestone matching the specific exempted one'}            | ${false}
+        `(
+          'when $name',
+          ({isPullRequest, milestone, shouldStale}: ITestData): void => {
+            beforeEach((): void => {
+              setTestIssueList(isPullRequest, milestone);
+              setProcessor();
+            });
 
-          test('should be marked as stale', async () => {
-            expect.assertions(3);
+            test(`should${
+              shouldStale ? '' : ' not'
+            } be marked as stale`, async () => {
+              expect.assertions(3);
 
-            await processor.processIssues(1);
+              await processor.processIssues(1);
 
-            expect(processor.staleIssues.length).toStrictEqual(1);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
-
-        describe('when the issue does have a milestone but not matching the specific exempted one', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(false, 'dummy-milestone-not-exempted');
-            setProcessor();
-          });
-
-          test('should be marked as stale', async () => {
-            expect.assertions(3);
-
-            await processor.processIssues(1);
-
-            expect(processor.staleIssues.length).toStrictEqual(1);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
-
-        describe('when the issue does have a milestone matching the specific exempted one', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(false, 'dummy-milestone2');
-            setProcessor();
-          });
-
-          test('should not be marked as stale', async () => {
-            expect.assertions(3);
-
-            await processor.processIssues(1);
-
-            expect(processor.staleIssues.length).toStrictEqual(0);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
-
-        describe('when the PR does not have a milestone', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(true, '');
-            setProcessor();
-          });
-
-          test('should be marked as stale', async () => {
-            expect.assertions(3);
-
-            await processor.processIssues(1);
-
-            expect(processor.staleIssues.length).toStrictEqual(1);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
-
-        describe('when the PR does have a milestone but not matching the specific exempted one', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(true, 'dummy-milestone-not-exempted');
-            setProcessor();
-          });
-
-          test('should be marked as stale', async () => {
-            expect.assertions(3);
-
-            await processor.processIssues(1);
-
-            expect(processor.staleIssues.length).toStrictEqual(1);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
-
-        describe('when the PR does have a milestone matching the specific exempted one', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(true, 'dummy-milestone2');
-            setProcessor();
-          });
-
-          test('should not be marked as stale', async () => {
-            expect.assertions(3);
-
-            await processor.processIssues(1);
-
-            expect(processor.staleIssues.length).toStrictEqual(0);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
+              expect(processor.staleIssues.length).toStrictEqual(
+                shouldStale ? 1 : 0
+              );
+              expect(processor.closedIssues.length).toStrictEqual(0);
+              expect(processor.removedLabelIssues.length).toStrictEqual(0);
+            });
+          }
+        );
 
         describe('when all the issues milestones should exempt a specific milestone', (): void => {
           beforeEach((): void => {
@@ -3274,141 +1104,39 @@ describe('milestones options', (): void => {
               'dummy-issue-milestone1, dummy-issue-milestone2';
           });
 
-          describe('when the issue does not have a milestone', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, '');
-              setProcessor();
-            });
+          describe.each`
+            isPullRequest | milestone                         | name                                                                                  | shouldStale
+            ${false}      | ${''}                             | ${'the issue does not have a milestone'}                                              | ${true}
+            ${false}      | ${'dummy-milestone-not-exempted'} | ${'the issue does have a milestone but not matching the specific issue exempted one'} | ${true}
+            ${false}      | ${'dummy-issue-milestone2'}       | ${'the issue does have a milestone matching the specific issue exempted one'}         | ${false}
+            ${false}      | ${'dummy-milestone2'}             | ${'the issue does have a milestone matching the specific exempted one'}               | ${true}
+            ${true}       | ${''}                             | ${'the PR does not have a milestone'}                                                 | ${true}
+            ${true}       | ${'dummy-milestone-not-exempted'} | ${'the PR does have a milestone but not matching the specific issue exempted one'}    | ${true}
+            ${true}       | ${'dummy-issue-milestone2'}       | ${'the PR does have a milestone matching the specific issue exempted one'}            | ${true}
+            ${true}       | ${'dummy-milestone2'}             | ${'the PR does have a milestone matching the specific exempted one'}                  | ${false}
+          `(
+            'when $name',
+            ({isPullRequest, milestone, shouldStale}: ITestData): void => {
+              beforeEach((): void => {
+                setTestIssueList(isPullRequest, milestone);
+                setProcessor();
+              });
 
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
+              test(`should${
+                shouldStale ? '' : ' not'
+              } be marked as stale`, async () => {
+                expect.assertions(3);
 
-              await processor.processIssues(1);
+                await processor.processIssues(1);
 
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone but not matching the specific issue exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-milestone-not-exempted');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone matching the specific issue exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-issue-milestone2');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone matching the specific exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-milestone2');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does not have a milestone', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, '');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone but not matching the specific issue exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-milestone-not-exempted');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone matching the specific issue exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-issue-milestone2');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone matching the specific exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-milestone2');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
+                expect(processor.staleIssues.length).toStrictEqual(
+                  shouldStale ? 1 : 0
+                );
+                expect(processor.closedIssues.length).toStrictEqual(0);
+                expect(processor.removedLabelIssues.length).toStrictEqual(0);
+              });
+            }
+          );
         });
 
         describe('when all the pull requests milestones should exempt a specific milestone', (): void => {
@@ -3417,141 +1145,39 @@ describe('milestones options', (): void => {
               'dummy-pull-request-milestone1, dummy-pull-request-milestone2';
           });
 
-          describe('when the issue does not have a milestone', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, '');
-              setProcessor();
-            });
+          describe.each`
+            isPullRequest | milestone                          | name                                                                                         | shouldStale
+            ${false}      | ${''}                              | ${'the issue does not have a milestone'}                                                     | ${true}
+            ${false}      | ${'dummy-milestone-not-exempted'}  | ${'the issue does have a milestone but not matching the specific pull request exempted one'} | ${true}
+            ${false}      | ${'dummy-pull-request-milestone2'} | ${'the issue does have a milestone matching the specific pull request exempted one'}         | ${true}
+            ${false}      | ${'dummy-milestone2'}              | ${'the issue does have a milestone matching the specific exempted one'}                      | ${false}
+            ${true}       | ${''}                              | ${'the PR does not have a milestone'}                                                        | ${true}
+            ${true}       | ${'dummy-milestone-not-exempted'}  | ${'the PR does have a milestone but not matching the specific pull request exempted one'}    | ${true}
+            ${true}       | ${'dummy-pull-request-milestone2'} | ${'the PR does have a milestone matching the specific pull request exempted one'}            | ${false}
+            ${true}       | ${'dummy-milestone2'}              | ${'the PR does have a milestone matching the specific exempted one'}                         | ${true}
+          `(
+            'when $name',
+            ({isPullRequest, milestone, shouldStale}: ITestData): void => {
+              beforeEach((): void => {
+                setTestIssueList(isPullRequest, milestone);
+                setProcessor();
+              });
 
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
+              test(`should${
+                shouldStale ? '' : ' not'
+              } be marked as stale`, async () => {
+                expect.assertions(3);
 
-              await processor.processIssues(1);
+                await processor.processIssues(1);
 
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone but not matching the specific pull request exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-milestone-not-exempted');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone matching the specific pull request exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-pull-request-milestone2');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone matching the specific exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-milestone2');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does not have a milestone', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, '');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone but not matching the specific pull request exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-milestone-not-exempted');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone matching the specific pull request exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-pull-request-milestone2');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone matching the specific exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-milestone2');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
+                expect(processor.staleIssues.length).toStrictEqual(
+                  shouldStale ? 1 : 0
+                );
+                expect(processor.closedIssues.length).toStrictEqual(0);
+                expect(processor.removedLabelIssues.length).toStrictEqual(0);
+              });
+            }
+          );
         });
       });
     });
@@ -3561,321 +1187,111 @@ describe('milestones options', (): void => {
         opts.exemptAllPrMilestones = false;
       });
 
-      describe('when the issue does not have a milestone', (): void => {
-        beforeEach((): void => {
-          setTestIssueList(false, '');
-          setProcessor();
-        });
+      describe.each`
+        isPullRequest | milestone            | name                                     | shouldStale
+        ${false}      | ${''}                | ${'the issue does not have a milestone'} | ${true}
+        ${false}      | ${'dummy-milestone'} | ${'the issue does have a milestone'}     | ${true}
+        ${true}       | ${''}                | ${'the PR does not have a milestone'}    | ${true}
+        ${true}       | ${'dummy-milestone'} | ${'the PR does have a milestone'}        | ${true}
+      `(
+        'when $name',
+        ({isPullRequest, milestone, shouldStale}: ITestData): void => {
+          beforeEach((): void => {
+            setTestIssueList(isPullRequest, milestone);
+            setProcessor();
+          });
 
-        test('should be marked as stale', async () => {
-          expect.assertions(3);
+          test(`should${
+            shouldStale ? '' : ' not'
+          } be marked as stale`, async () => {
+            expect.assertions(3);
 
-          await processor.processIssues(1);
+            await processor.processIssues(1);
 
-          expect(processor.staleIssues.length).toStrictEqual(1);
-          expect(processor.closedIssues.length).toStrictEqual(0);
-          expect(processor.removedLabelIssues.length).toStrictEqual(0);
-        });
-      });
-
-      describe('when the issue does have a milestone', (): void => {
-        beforeEach((): void => {
-          setTestIssueList(false, 'dummy-milestone');
-          setProcessor();
-        });
-
-        test('should be marked as stale', async () => {
-          expect.assertions(3);
-
-          await processor.processIssues(1);
-
-          expect(processor.staleIssues.length).toStrictEqual(1);
-          expect(processor.closedIssues.length).toStrictEqual(0);
-          expect(processor.removedLabelIssues.length).toStrictEqual(0);
-        });
-      });
-
-      describe('when the PR does not have a milestone', (): void => {
-        beforeEach((): void => {
-          setTestIssueList(true, '');
-          setProcessor();
-        });
-
-        test('should be marked as stale', async () => {
-          expect.assertions(3);
-
-          await processor.processIssues(1);
-
-          expect(processor.staleIssues.length).toStrictEqual(1);
-          expect(processor.closedIssues.length).toStrictEqual(0);
-          expect(processor.removedLabelIssues.length).toStrictEqual(0);
-        });
-      });
-
-      describe('when the PR does have a milestone', (): void => {
-        beforeEach((): void => {
-          setTestIssueList(true, 'dummy-milestone');
-          setProcessor();
-        });
-
-        test('should be marked as stale', async () => {
-          expect.assertions(3);
-
-          await processor.processIssues(1);
-
-          expect(processor.staleIssues.length).toStrictEqual(1);
-          expect(processor.closedIssues.length).toStrictEqual(0);
-          expect(processor.removedLabelIssues.length).toStrictEqual(0);
-        });
-      });
+            expect(processor.staleIssues.length).toStrictEqual(
+              shouldStale ? 1 : 0
+            );
+            expect(processor.closedIssues.length).toStrictEqual(0);
+            expect(processor.removedLabelIssues.length).toStrictEqual(0);
+          });
+        }
+      );
 
       describe('when all the issues and pull requests milestones should exempt a specific milestone', (): void => {
         beforeEach((): void => {
           opts.exemptMilestones = 'dummy-milestone';
         });
 
-        describe('when the issue does not have a milestone', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(false, '');
-            setProcessor();
-          });
+        describe.each`
+          isPullRequest | milestone                         | name                                                                            | shouldStale
+          ${false}      | ${''}                             | ${'the issue does not have a milestone'}                                        | ${true}
+          ${false}      | ${'dummy-milestone-not-exempted'} | ${'the issue does have a milestone but not matching the specific exempted one'} | ${true}
+          ${false}      | ${'dummy-milestone'}              | ${'the issue does have a milestone matching the specific exempted one'}         | ${false}
+          ${true}       | ${''}                             | ${'the PR does not have a milestone'}                                           | ${true}
+          ${true}       | ${'dummy-milestone-not-exempted'} | ${'the PR does have a milestone but not matching the specific exempted one'}    | ${true}
+          ${true}       | ${'dummy-milestone'}              | ${'the PR does have a milestone matching the specific exempted one'}            | ${false}
+        `(
+          'when $name',
+          ({isPullRequest, milestone, shouldStale}: ITestData): void => {
+            beforeEach((): void => {
+              setTestIssueList(isPullRequest, milestone);
+              setProcessor();
+            });
 
-          test('should be marked as stale', async () => {
-            expect.assertions(3);
+            test(`should${
+              shouldStale ? '' : ' not'
+            } be marked as stale`, async () => {
+              expect.assertions(3);
 
-            await processor.processIssues(1);
+              await processor.processIssues(1);
 
-            expect(processor.staleIssues.length).toStrictEqual(1);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
-
-        describe('when the issue does have a milestone but not matching the specific exempted one', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(false, 'dummy-milestone-not-exempted');
-            setProcessor();
-          });
-
-          test('should be marked as stale', async () => {
-            expect.assertions(3);
-
-            await processor.processIssues(1);
-
-            expect(processor.staleIssues.length).toStrictEqual(1);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
-
-        describe('when the issue does have a milestone matching the specific exempted one', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(false, 'dummy-milestone');
-            setProcessor();
-          });
-
-          test('should not be marked as stale', async () => {
-            expect.assertions(3);
-
-            await processor.processIssues(1);
-
-            expect(processor.staleIssues.length).toStrictEqual(0);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
-
-        describe('when the PR does not have a milestone', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(true, '');
-            setProcessor();
-          });
-
-          test('should be marked as stale', async () => {
-            expect.assertions(3);
-
-            await processor.processIssues(1);
-
-            expect(processor.staleIssues.length).toStrictEqual(1);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
-
-        describe('when the PR does have a milestone but not matching the specific exempted one', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(true, 'dummy-milestone-not-exempted');
-            setProcessor();
-          });
-
-          test('should be marked as stale', async () => {
-            expect.assertions(3);
-
-            await processor.processIssues(1);
-
-            expect(processor.staleIssues.length).toStrictEqual(1);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
-
-        describe('when the PR does have a milestone matching the specific exempted one', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(true, 'dummy-milestone');
-            setProcessor();
-          });
-
-          test('should not be marked as stale', async () => {
-            expect.assertions(3);
-
-            await processor.processIssues(1);
-
-            expect(processor.staleIssues.length).toStrictEqual(0);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
+              expect(processor.staleIssues.length).toStrictEqual(
+                shouldStale ? 1 : 0
+              );
+              expect(processor.closedIssues.length).toStrictEqual(0);
+              expect(processor.removedLabelIssues.length).toStrictEqual(0);
+            });
+          }
+        );
 
         describe('when all the issues milestones should exempt a specific milestone', (): void => {
           beforeEach((): void => {
             opts.exemptIssueMilestones = 'dummy-issue-milestone';
           });
 
-          describe('when the issue does not have a milestone', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, '');
-              setProcessor();
-            });
+          describe.each`
+            isPullRequest | milestone                         | name                                                                                  | shouldStale
+            ${false}      | ${''}                             | ${'the issue does not have a milestone'}                                              | ${true}
+            ${false}      | ${'dummy-milestone-not-exempted'} | ${'the issue does have a milestone but not matching the specific issue exempted one'} | ${true}
+            ${false}      | ${'dummy-issue-milestone'}        | ${'the issue does have a milestone matching the specific issue exempted one'}         | ${false}
+            ${false}      | ${'dummy-milestone'}              | ${'the issue does have a milestone matching the specific exempted one'}               | ${true}
+            ${true}       | ${''}                             | ${'the PR does not have a milestone'}                                                 | ${true}
+            ${true}       | ${'dummy-milestone-not-exempted'} | ${'the PR does have a milestone but not matching the specific issue exempted one'}    | ${true}
+            ${true}       | ${'dummy-issue-milestone'}        | ${'the PR does have a milestone matching the specific issue exempted one'}            | ${true}
+            ${true}       | ${'dummy-milestone'}              | ${'the PR does have a milestone matching the specific exempted one'}                  | ${false}
+          `(
+            'when $name',
+            ({isPullRequest, milestone, shouldStale}: ITestData): void => {
+              beforeEach((): void => {
+                setTestIssueList(isPullRequest, milestone);
+                setProcessor();
+              });
 
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
+              test(`should${
+                shouldStale ? '' : ' not'
+              } be marked as stale`, async () => {
+                expect.assertions(3);
 
-              await processor.processIssues(1);
+                await processor.processIssues(1);
 
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone but not matching the specific issue exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-milestone-not-exempted');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone matching the specific issue exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-issue-milestone');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone matching the specific exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-milestone');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does not have a milestone', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, '');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone but not matching the specific issue exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-milestone-not-exempted');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone matching the specific issue exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-issue-milestone');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone matching the specific exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-milestone');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
+                expect(processor.staleIssues.length).toStrictEqual(
+                  shouldStale ? 1 : 0
+                );
+                expect(processor.closedIssues.length).toStrictEqual(0);
+                expect(processor.removedLabelIssues.length).toStrictEqual(0);
+              });
+            }
+          );
         });
 
         describe('when all the pull requests milestones should exempt a specific milestone', (): void => {
@@ -3883,141 +1299,39 @@ describe('milestones options', (): void => {
             opts.exemptPrMilestones = 'dummy-pull-request-milestone';
           });
 
-          describe('when the issue does not have a milestone', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, '');
-              setProcessor();
-            });
+          describe.each`
+            isPullRequest | milestone                         | name                                                                                         | shouldStale
+            ${false}      | ${''}                             | ${'the issue does not have a milestone'}                                                     | ${true}
+            ${false}      | ${'dummy-milestone-not-exempted'} | ${'the issue does have a milestone but not matching the specific pull request exempted one'} | ${true}
+            ${false}      | ${'dummy-pull-request-milestone'} | ${'the issue does have a milestone matching the specific pull request exempted one'}         | ${true}
+            ${false}      | ${'dummy-milestone'}              | ${'the issue does have a milestone matching the specific exempted one'}                      | ${false}
+            ${true}       | ${''}                             | ${'the PR does not have a milestone'}                                                        | ${true}
+            ${true}       | ${'dummy-milestone-not-exempted'} | ${'the PR does have a milestone but not matching the specific pull request exempted one'}    | ${true}
+            ${true}       | ${'dummy-pull-request-milestone'} | ${'the PR does have a milestone matching the specific pull request exempted one'}            | ${false}
+            ${true}       | ${'dummy-milestone'}              | ${'the PR does have a milestone matching the specific exempted one'}                         | ${true}
+          `(
+            'when $name',
+            ({isPullRequest, milestone, shouldStale}: ITestData): void => {
+              beforeEach((): void => {
+                setTestIssueList(isPullRequest, milestone);
+                setProcessor();
+              });
 
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
+              test(`should${
+                shouldStale ? '' : ' not'
+              } be marked as stale`, async () => {
+                expect.assertions(3);
 
-              await processor.processIssues(1);
+                await processor.processIssues(1);
 
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone but not matching the specific pull request exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-milestone-not-exempted');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone matching the specific pull request exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-pull-request-milestone');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone matching the specific exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-milestone');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does not have a milestone', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, '');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone but not matching the specific pull request exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-milestone-not-exempted');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone matching the specific pull request exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-pull-request-milestone');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone matching the specific exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-milestone');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
+                expect(processor.staleIssues.length).toStrictEqual(
+                  shouldStale ? 1 : 0
+                );
+                expect(processor.closedIssues.length).toStrictEqual(0);
+                expect(processor.removedLabelIssues.length).toStrictEqual(0);
+              });
+            }
+          );
         });
       });
 
@@ -4026,107 +1340,37 @@ describe('milestones options', (): void => {
           opts.exemptMilestones = 'dummy-milestone1, dummy-milestone2';
         });
 
-        describe('when the issue does not have a milestone', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(false, '');
-            setProcessor();
-          });
+        describe.each`
+          isPullRequest | milestone                         | name                                                                            | shouldStale
+          ${false}      | ${''}                             | ${'the issue does not have a milestone'}                                        | ${true}
+          ${false}      | ${'dummy-milestone-not-exempted'} | ${'the issue does have a milestone but not matching the specific exempted one'} | ${true}
+          ${false}      | ${'dummy-milestone2'}             | ${'the issue does have a milestone matching the specific exempted one'}         | ${false}
+          ${true}       | ${''}                             | ${'the PR does not have a milestone'}                                           | ${true}
+          ${true}       | ${'dummy-milestone-not-exempted'} | ${'the PR does have a milestone but not matching the specific exempted one'}    | ${true}
+          ${true}       | ${'dummy-milestone2'}             | ${'the PR does have a milestone matching the specific exempted one'}            | ${false}
+        `(
+          'when $name',
+          ({isPullRequest, milestone, shouldStale}: ITestData): void => {
+            beforeEach((): void => {
+              setTestIssueList(isPullRequest, milestone);
+              setProcessor();
+            });
 
-          test('should be marked as stale', async () => {
-            expect.assertions(3);
+            test(`should${
+              shouldStale ? '' : ' not'
+            } be marked as stale`, async () => {
+              expect.assertions(3);
 
-            await processor.processIssues(1);
+              await processor.processIssues(1);
 
-            expect(processor.staleIssues.length).toStrictEqual(1);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
-
-        describe('when the issue does have a milestone but not matching the specific exempted one', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(false, 'dummy-milestone-not-exempted');
-            setProcessor();
-          });
-
-          test('should be marked as stale', async () => {
-            expect.assertions(3);
-
-            await processor.processIssues(1);
-
-            expect(processor.staleIssues.length).toStrictEqual(1);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
-
-        describe('when the issue does have a milestone matching the specific exempted one', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(false, 'dummy-milestone2');
-            setProcessor();
-          });
-
-          test('should not be marked as stale', async () => {
-            expect.assertions(3);
-
-            await processor.processIssues(1);
-
-            expect(processor.staleIssues.length).toStrictEqual(0);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
-
-        describe('when the PR does not have a milestone', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(true, '');
-            setProcessor();
-          });
-
-          test('should be marked as stale', async () => {
-            expect.assertions(3);
-
-            await processor.processIssues(1);
-
-            expect(processor.staleIssues.length).toStrictEqual(1);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
-
-        describe('when the PR does have a milestone but not matching the specific exempted one', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(true, 'dummy-milestone-not-exempted');
-            setProcessor();
-          });
-
-          test('should be marked as stale', async () => {
-            expect.assertions(3);
-
-            await processor.processIssues(1);
-
-            expect(processor.staleIssues.length).toStrictEqual(1);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
-
-        describe('when the PR does have a milestone matching the specific exempted one', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(true, 'dummy-milestone2');
-            setProcessor();
-          });
-
-          test('should not be marked as stale', async () => {
-            expect.assertions(3);
-
-            await processor.processIssues(1);
-
-            expect(processor.staleIssues.length).toStrictEqual(0);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
+              expect(processor.staleIssues.length).toStrictEqual(
+                shouldStale ? 1 : 0
+              );
+              expect(processor.closedIssues.length).toStrictEqual(0);
+              expect(processor.removedLabelIssues.length).toStrictEqual(0);
+            });
+          }
+        );
 
         describe('when all the issues milestones should exempt a specific milestone', (): void => {
           beforeEach((): void => {
@@ -4134,141 +1378,39 @@ describe('milestones options', (): void => {
               'dummy-issue-milestone1, dummy-issue-milestone2';
           });
 
-          describe('when the issue does not have a milestone', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, '');
-              setProcessor();
-            });
+          describe.each`
+            isPullRequest | milestone                         | name                                                                                  | shouldStale
+            ${false}      | ${''}                             | ${'the issue does not have a milestone'}                                              | ${true}
+            ${false}      | ${'dummy-milestone-not-exempted'} | ${'the issue does have a milestone but not matching the specific issue exempted one'} | ${true}
+            ${false}      | ${'dummy-issue-milestone2'}       | ${'the issue does have a milestone matching the specific issue exempted one'}         | ${false}
+            ${false}      | ${'dummy-milestone2'}             | ${'the issue does have a milestone matching the specific exempted one'}               | ${true}
+            ${true}       | ${''}                             | ${'the PR does not have a milestone'}                                                 | ${true}
+            ${true}       | ${'dummy-milestone-not-exempted'} | ${'the PR does have a milestone but not matching the specific issue exempted one'}    | ${true}
+            ${true}       | ${'dummy-issue-milestone2'}       | ${'the PR does have a milestone matching the specific issue exempted one'}            | ${true}
+            ${true}       | ${'dummy-milestone2'}             | ${'the PR does have a milestone matching the specific exempted one'}                  | ${false}
+          `(
+            'when $name',
+            ({isPullRequest, milestone, shouldStale}: ITestData): void => {
+              beforeEach((): void => {
+                setTestIssueList(isPullRequest, milestone);
+                setProcessor();
+              });
 
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
+              test(`should${
+                shouldStale ? '' : ' not'
+              } be marked as stale`, async () => {
+                expect.assertions(3);
 
-              await processor.processIssues(1);
+                await processor.processIssues(1);
 
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone but not matching the specific issue exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-milestone-not-exempted');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone matching the specific issue exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-issue-milestone2');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone matching the specific exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-milestone2');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does not have a milestone', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, '');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone but not matching the specific issue exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-milestone-not-exempted');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone matching the specific issue exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-issue-milestone2');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone matching the specific exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-milestone2');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
+                expect(processor.staleIssues.length).toStrictEqual(
+                  shouldStale ? 1 : 0
+                );
+                expect(processor.closedIssues.length).toStrictEqual(0);
+                expect(processor.removedLabelIssues.length).toStrictEqual(0);
+              });
+            }
+          );
         });
 
         describe('when all the pull requests milestones should exempt a specific milestone', (): void => {
@@ -4277,141 +1419,39 @@ describe('milestones options', (): void => {
               'dummy-pull-request-milestone1, dummy-pull-request-milestone2';
           });
 
-          describe('when the issue does not have a milestone', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, '');
-              setProcessor();
-            });
+          describe.each`
+            isPullRequest | milestone                          | name                                                                                         | shouldStale
+            ${false}      | ${''}                              | ${'the issue does not have a milestone'}                                                     | ${true}
+            ${false}      | ${'dummy-milestone-not-exempted'}  | ${'the issue does have a milestone but not matching the specific pull request exempted one'} | ${true}
+            ${false}      | ${'dummy-pull-request-milestone2'} | ${'the issue does have a milestone matching the specific pull request exempted one'}         | ${true}
+            ${false}      | ${'dummy-milestone2'}              | ${'the issue does have a milestone matching the specific exempted one'}                      | ${false}
+            ${true}       | ${''}                              | ${'the PR does not have a milestone'}                                                        | ${true}
+            ${true}       | ${'dummy-milestone-not-exempted'}  | ${'the PR does have a milestone but not matching the specific pull request exempted one'}    | ${true}
+            ${true}       | ${'dummy-pull-request-milestone2'} | ${'the PR does have a milestone matching the specific pull request exempted one'}            | ${false}
+            ${true}       | ${'dummy-milestone2'}              | ${'the PR does have a milestone matching the specific exempted one'}                         | ${true}
+          `(
+            'when $name',
+            ({isPullRequest, milestone, shouldStale}: ITestData): void => {
+              beforeEach((): void => {
+                setTestIssueList(isPullRequest, milestone);
+                setProcessor();
+              });
 
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
+              test(`should${
+                shouldStale ? '' : ' not'
+              } be marked as stale`, async () => {
+                expect.assertions(3);
 
-              await processor.processIssues(1);
+                await processor.processIssues(1);
 
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone but not matching the specific pull request exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-milestone-not-exempted');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone matching the specific pull request exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-pull-request-milestone2');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone matching the specific exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-milestone2');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does not have a milestone', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, '');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone but not matching the specific pull request exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-milestone-not-exempted');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone matching the specific pull request exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-pull-request-milestone2');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone matching the specific exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-milestone2');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
+                expect(processor.staleIssues.length).toStrictEqual(
+                  shouldStale ? 1 : 0
+                );
+                expect(processor.closedIssues.length).toStrictEqual(0);
+                expect(processor.removedLabelIssues.length).toStrictEqual(0);
+              });
+            }
+          );
         });
       });
     });
@@ -4421,321 +1461,111 @@ describe('milestones options', (): void => {
         opts.exemptAllPrMilestones = true;
       });
 
-      describe('when the issue does not have a milestone', (): void => {
-        beforeEach((): void => {
-          setTestIssueList(false, '');
-          setProcessor();
-        });
+      describe.each`
+        isPullRequest | milestone            | name                                     | shouldStale
+        ${false}      | ${''}                | ${'the issue does not have a milestone'} | ${true}
+        ${false}      | ${'dummy-milestone'} | ${'the issue does have a milestone'}     | ${true}
+        ${true}       | ${''}                | ${'the PR does not have a milestone'}    | ${true}
+        ${true}       | ${'dummy-milestone'} | ${'the PR does have a milestone'}        | ${false}
+      `(
+        'when $name',
+        ({isPullRequest, milestone, shouldStale}: ITestData): void => {
+          beforeEach((): void => {
+            setTestIssueList(isPullRequest, milestone);
+            setProcessor();
+          });
 
-        test('should be marked as stale', async () => {
-          expect.assertions(3);
+          test(`should${
+            shouldStale ? '' : ' not'
+          } be marked as stale`, async () => {
+            expect.assertions(3);
 
-          await processor.processIssues(1);
+            await processor.processIssues(1);
 
-          expect(processor.staleIssues.length).toStrictEqual(1);
-          expect(processor.closedIssues.length).toStrictEqual(0);
-          expect(processor.removedLabelIssues.length).toStrictEqual(0);
-        });
-      });
-
-      describe('when the issue does have a milestone', (): void => {
-        beforeEach((): void => {
-          setTestIssueList(false, 'dummy-milestone');
-          setProcessor();
-        });
-
-        test('should be marked as stale', async () => {
-          expect.assertions(3);
-
-          await processor.processIssues(1);
-
-          expect(processor.staleIssues.length).toStrictEqual(1);
-          expect(processor.closedIssues.length).toStrictEqual(0);
-          expect(processor.removedLabelIssues.length).toStrictEqual(0);
-        });
-      });
-
-      describe('when the PR does not have a milestone', (): void => {
-        beforeEach((): void => {
-          setTestIssueList(true, '');
-          setProcessor();
-        });
-
-        test('should be marked as stale', async () => {
-          expect.assertions(3);
-
-          await processor.processIssues(1);
-
-          expect(processor.staleIssues.length).toStrictEqual(1);
-          expect(processor.closedIssues.length).toStrictEqual(0);
-          expect(processor.removedLabelIssues.length).toStrictEqual(0);
-        });
-      });
-
-      describe('when the PR does have a milestone', (): void => {
-        beforeEach((): void => {
-          setTestIssueList(true, 'dummy-milestone');
-          setProcessor();
-        });
-
-        test('should not be marked as stale', async () => {
-          expect.assertions(3);
-
-          await processor.processIssues(1);
-
-          expect(processor.staleIssues.length).toStrictEqual(0);
-          expect(processor.closedIssues.length).toStrictEqual(0);
-          expect(processor.removedLabelIssues.length).toStrictEqual(0);
-        });
-      });
+            expect(processor.staleIssues.length).toStrictEqual(
+              shouldStale ? 1 : 0
+            );
+            expect(processor.closedIssues.length).toStrictEqual(0);
+            expect(processor.removedLabelIssues.length).toStrictEqual(0);
+          });
+        }
+      );
 
       describe('when all the issues and pull requests milestones should exempt a specific milestone', (): void => {
         beforeEach((): void => {
           opts.exemptMilestones = 'dummy-milestone';
         });
 
-        describe('when the issue does not have a milestone', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(false, '');
-            setProcessor();
-          });
+        describe.each`
+          isPullRequest | milestone                         | name                                                                            | shouldStale
+          ${false}      | ${''}                             | ${'the issue does not have a milestone'}                                        | ${true}
+          ${false}      | ${'dummy-milestone-not-exempted'} | ${'the issue does have a milestone but not matching the specific exempted one'} | ${true}
+          ${false}      | ${'dummy-milestone'}              | ${'the issue does have a milestone matching the specific exempted one'}         | ${false}
+          ${true}       | ${''}                             | ${'the PR does not have a milestone'}                                           | ${true}
+          ${true}       | ${'dummy-milestone-not-exempted'} | ${'the PR does have a milestone but not matching the specific exempted one'}    | ${false}
+          ${true}       | ${'dummy-milestone'}              | ${'the PR does have a milestone matching the specific exempted one'}            | ${false}
+        `(
+          'when $name',
+          ({isPullRequest, milestone, shouldStale}: ITestData): void => {
+            beforeEach((): void => {
+              setTestIssueList(isPullRequest, milestone);
+              setProcessor();
+            });
 
-          test('should be marked as stale', async () => {
-            expect.assertions(3);
+            test(`should${
+              shouldStale ? '' : ' not'
+            } be marked as stale`, async () => {
+              expect.assertions(3);
 
-            await processor.processIssues(1);
+              await processor.processIssues(1);
 
-            expect(processor.staleIssues.length).toStrictEqual(1);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
-
-        describe('when the issue does have a milestone but not matching the specific exempted one', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(false, 'dummy-milestone-not-exempted');
-            setProcessor();
-          });
-
-          test('should be marked as stale', async () => {
-            expect.assertions(3);
-
-            await processor.processIssues(1);
-
-            expect(processor.staleIssues.length).toStrictEqual(1);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
-
-        describe('when the issue does have a milestone matching the specific exempted one', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(false, 'dummy-milestone');
-            setProcessor();
-          });
-
-          test('should not be marked as stale', async () => {
-            expect.assertions(3);
-
-            await processor.processIssues(1);
-
-            expect(processor.staleIssues.length).toStrictEqual(0);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
-
-        describe('when the PR does not have a milestone', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(true, '');
-            setProcessor();
-          });
-
-          test('should be marked as stale', async () => {
-            expect.assertions(3);
-
-            await processor.processIssues(1);
-
-            expect(processor.staleIssues.length).toStrictEqual(1);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
-
-        describe('when the PR does have a milestone but not matching the specific exempted one', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(true, 'dummy-milestone-not-exempted');
-            setProcessor();
-          });
-
-          test('should not be marked as stale', async () => {
-            expect.assertions(3);
-
-            await processor.processIssues(1);
-
-            expect(processor.staleIssues.length).toStrictEqual(0);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
-
-        describe('when the PR does have a milestone matching the specific exempted one', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(true, 'dummy-milestone');
-            setProcessor();
-          });
-
-          test('should not be marked as stale', async () => {
-            expect.assertions(3);
-
-            await processor.processIssues(1);
-
-            expect(processor.staleIssues.length).toStrictEqual(0);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
+              expect(processor.staleIssues.length).toStrictEqual(
+                shouldStale ? 1 : 0
+              );
+              expect(processor.closedIssues.length).toStrictEqual(0);
+              expect(processor.removedLabelIssues.length).toStrictEqual(0);
+            });
+          }
+        );
 
         describe('when all the issues milestones should exempt a specific milestone', (): void => {
           beforeEach((): void => {
             opts.exemptIssueMilestones = 'dummy-issue-milestone';
           });
 
-          describe('when the issue does not have a milestone', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, '');
-              setProcessor();
-            });
+          describe.each`
+            isPullRequest | milestone                         | name                                                                                  | shouldStale
+            ${false}      | ${''}                             | ${'the issue does not have a milestone'}                                              | ${true}
+            ${false}      | ${'dummy-milestone-not-exempted'} | ${'the issue does have a milestone but not matching the specific issue exempted one'} | ${true}
+            ${false}      | ${'dummy-issue-milestone'}        | ${'the issue does have a milestone matching the specific issue exempted one'}         | ${false}
+            ${false}      | ${'dummy-milestone'}              | ${'the issue does have a milestone matching the specific exempted one'}               | ${true}
+            ${true}       | ${''}                             | ${'the PR does not have a milestone'}                                                 | ${true}
+            ${true}       | ${'dummy-milestone-not-exempted'} | ${'the PR does have a milestone but not matching the specific issue exempted one'}    | ${false}
+            ${true}       | ${'dummy-issue-milestone'}        | ${'the PR does have a milestone matching the specific issue exempted one'}            | ${false}
+            ${true}       | ${'dummy-milestone'}              | ${'the PR does have a milestone matching the specific exempted one'}                  | ${false}
+          `(
+            'when $name',
+            ({isPullRequest, milestone, shouldStale}: ITestData): void => {
+              beforeEach((): void => {
+                setTestIssueList(isPullRequest, milestone);
+                setProcessor();
+              });
 
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
+              test(`should${
+                shouldStale ? '' : ' not'
+              } be marked as stale`, async () => {
+                expect.assertions(3);
 
-              await processor.processIssues(1);
+                await processor.processIssues(1);
 
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone but not matching the specific issue exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-milestone-not-exempted');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone matching the specific issue exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-issue-milestone');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone matching the specific exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-milestone');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does not have a milestone', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, '');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone but not matching the specific issue exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-milestone-not-exempted');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone matching the specific issue exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-issue-milestone');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone matching the specific exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-milestone');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
+                expect(processor.staleIssues.length).toStrictEqual(
+                  shouldStale ? 1 : 0
+                );
+                expect(processor.closedIssues.length).toStrictEqual(0);
+                expect(processor.removedLabelIssues.length).toStrictEqual(0);
+              });
+            }
+          );
         });
 
         describe('when all the pull requests milestones should exempt a specific milestone', (): void => {
@@ -4743,141 +1573,39 @@ describe('milestones options', (): void => {
             opts.exemptPrMilestones = 'dummy-pull-request-milestone';
           });
 
-          describe('when the issue does not have a milestone', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, '');
-              setProcessor();
-            });
+          describe.each`
+            isPullRequest | milestone                         | name                                                                                         | shouldStale
+            ${false}      | ${''}                             | ${'the issue does not have a milestone'}                                                     | ${true}
+            ${false}      | ${'dummy-milestone-not-exempted'} | ${'the issue does have a milestone but not matching the specific pull request exempted one'} | ${true}
+            ${false}      | ${'dummy-pull-request-milestone'} | ${'the issue does have a milestone matching the specific pull request exempted one'}         | ${true}
+            ${false}      | ${'dummy-milestone'}              | ${'the issue does have a milestone matching the specific exempted one'}                      | ${false}
+            ${true}       | ${''}                             | ${'the PR does not have a milestone'}                                                        | ${true}
+            ${true}       | ${'dummy-milestone-not-exempted'} | ${'the PR does have a milestone but not matching the specific pull request exempted one'}    | ${false}
+            ${true}       | ${'dummy-pull-request-milestone'} | ${'the PR does have a milestone matching the specific pull request exempted one'}            | ${false}
+            ${true}       | ${'dummy-milestone'}              | ${'the PR does have a milestone matching the specific exempted one'}                         | ${false}
+          `(
+            'when $name',
+            ({isPullRequest, milestone, shouldStale}: ITestData): void => {
+              beforeEach((): void => {
+                setTestIssueList(isPullRequest, milestone);
+                setProcessor();
+              });
 
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
+              test(`should${
+                shouldStale ? '' : ' not'
+              } be marked as stale`, async () => {
+                expect.assertions(3);
 
-              await processor.processIssues(1);
+                await processor.processIssues(1);
 
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone but not matching the specific pull request exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-milestone-not-exempted');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone matching the specific pull request exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-pull-request-milestone');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone matching the specific exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-milestone');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does not have a milestone', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, '');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone but not matching the specific pull request exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-milestone-not-exempted');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone matching the specific pull request exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-pull-request-milestone');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone matching the specific exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-milestone');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
+                expect(processor.staleIssues.length).toStrictEqual(
+                  shouldStale ? 1 : 0
+                );
+                expect(processor.closedIssues.length).toStrictEqual(0);
+                expect(processor.removedLabelIssues.length).toStrictEqual(0);
+              });
+            }
+          );
         });
       });
 
@@ -4886,107 +1614,37 @@ describe('milestones options', (): void => {
           opts.exemptMilestones = 'dummy-milestone1, dummy-milestone2';
         });
 
-        describe('when the issue does not have a milestone', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(false, '');
-            setProcessor();
-          });
+        describe.each`
+          isPullRequest | milestone                         | name                                                                            | shouldStale
+          ${false}      | ${''}                             | ${'the issue does not have a milestone'}                                        | ${true}
+          ${false}      | ${'dummy-milestone-not-exempted'} | ${'the issue does have a milestone but not matching the specific exempted one'} | ${true}
+          ${false}      | ${'dummy-milestone2'}             | ${'the issue does have a milestone matching the specific exempted one'}         | ${false}
+          ${true}       | ${''}                             | ${'the PR does not have a milestone'}                                           | ${true}
+          ${true}       | ${'dummy-milestone-not-exempted'} | ${'the PR does have a milestone but not matching the specific exempted one'}    | ${false}
+          ${true}       | ${'dummy-milestone2'}             | ${'the PR does have a milestone matching the specific exempted one'}            | ${false}
+        `(
+          'when $name',
+          ({isPullRequest, milestone, shouldStale}: ITestData): void => {
+            beforeEach((): void => {
+              setTestIssueList(isPullRequest, milestone);
+              setProcessor();
+            });
 
-          test('should be marked as stale', async () => {
-            expect.assertions(3);
+            test(`should${
+              shouldStale ? '' : ' not'
+            } be marked as stale`, async () => {
+              expect.assertions(3);
 
-            await processor.processIssues(1);
+              await processor.processIssues(1);
 
-            expect(processor.staleIssues.length).toStrictEqual(1);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
-
-        describe('when the issue does have a milestone but not matching the specific exempted one', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(false, 'dummy-milestone-not-exempted');
-            setProcessor();
-          });
-
-          test('should be marked as stale', async () => {
-            expect.assertions(3);
-
-            await processor.processIssues(1);
-
-            expect(processor.staleIssues.length).toStrictEqual(1);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
-
-        describe('when the issue does have a milestone matching the specific exempted one', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(false, 'dummy-milestone2');
-            setProcessor();
-          });
-
-          test('should not be marked as stale', async () => {
-            expect.assertions(3);
-
-            await processor.processIssues(1);
-
-            expect(processor.staleIssues.length).toStrictEqual(0);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
-
-        describe('when the PR does not have a milestone', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(true, '');
-            setProcessor();
-          });
-
-          test('should be marked as stale', async () => {
-            expect.assertions(3);
-
-            await processor.processIssues(1);
-
-            expect(processor.staleIssues.length).toStrictEqual(1);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
-
-        describe('when the PR does have a milestone but not matching the specific exempted one', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(true, 'dummy-milestone-not-exempted');
-            setProcessor();
-          });
-
-          test('should not be marked as stale', async () => {
-            expect.assertions(3);
-
-            await processor.processIssues(1);
-
-            expect(processor.staleIssues.length).toStrictEqual(0);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
-
-        describe('when the PR does have a milestone matching the specific exempted one', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(true, 'dummy-milestone2');
-            setProcessor();
-          });
-
-          test('should not be marked as stale', async () => {
-            expect.assertions(3);
-
-            await processor.processIssues(1);
-
-            expect(processor.staleIssues.length).toStrictEqual(0);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
+              expect(processor.staleIssues.length).toStrictEqual(
+                shouldStale ? 1 : 0
+              );
+              expect(processor.closedIssues.length).toStrictEqual(0);
+              expect(processor.removedLabelIssues.length).toStrictEqual(0);
+            });
+          }
+        );
 
         describe('when all the issues milestones should exempt a specific milestone', (): void => {
           beforeEach((): void => {
@@ -4994,141 +1652,39 @@ describe('milestones options', (): void => {
               'dummy-issue-milestone1, dummy-issue-milestone2';
           });
 
-          describe('when the issue does not have a milestone', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, '');
-              setProcessor();
-            });
+          describe.each`
+            isPullRequest | milestone                         | name                                                                                  | shouldStale
+            ${false}      | ${''}                             | ${'the issue does not have a milestone'}                                              | ${true}
+            ${false}      | ${'dummy-milestone-not-exempted'} | ${'the issue does have a milestone but not matching the specific issue exempted one'} | ${true}
+            ${false}      | ${'dummy-issue-milestone2'}       | ${'the issue does have a milestone matching the specific issue exempted one'}         | ${false}
+            ${false}      | ${'dummy-milestone2'}             | ${'the issue does have a milestone matching the specific exempted one'}               | ${true}
+            ${true}       | ${''}                             | ${'the PR does not have a milestone'}                                                 | ${true}
+            ${true}       | ${'dummy-milestone-not-exempted'} | ${'the PR does have a milestone but not matching the specific issue exempted one'}    | ${false}
+            ${true}       | ${'dummy-issue-milestone2'}       | ${'the PR does have a milestone matching the specific issue exempted one'}            | ${false}
+            ${true}       | ${'dummy-milestone2'}             | ${'the PR does have a milestone matching the specific exempted one'}                  | ${false}
+          `(
+            'when $name',
+            ({isPullRequest, milestone, shouldStale}: ITestData): void => {
+              beforeEach((): void => {
+                setTestIssueList(isPullRequest, milestone);
+                setProcessor();
+              });
 
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
+              test(`should${
+                shouldStale ? '' : ' not'
+              } be marked as stale`, async () => {
+                expect.assertions(3);
 
-              await processor.processIssues(1);
+                await processor.processIssues(1);
 
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone but not matching the specific issue exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-milestone-not-exempted');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone matching the specific issue exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-issue-milestone2');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone matching the specific exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-milestone2');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does not have a milestone', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, '');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone but not matching the specific issue exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-milestone-not-exempted');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone matching the specific issue exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-issue-milestone2');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone matching the specific exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-milestone2');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
+                expect(processor.staleIssues.length).toStrictEqual(
+                  shouldStale ? 1 : 0
+                );
+                expect(processor.closedIssues.length).toStrictEqual(0);
+                expect(processor.removedLabelIssues.length).toStrictEqual(0);
+              });
+            }
+          );
         });
 
         describe('when all the pull requests milestones should exempt a specific milestone', (): void => {
@@ -5137,141 +1693,39 @@ describe('milestones options', (): void => {
               'dummy-pull-request-milestone1, dummy-pull-request-milestone2';
           });
 
-          describe('when the issue does not have a milestone', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, '');
-              setProcessor();
-            });
+          describe.each`
+            isPullRequest | milestone                          | name                                                                                         | shouldStale
+            ${false}      | ${''}                              | ${'the issue does not have a milestone'}                                                     | ${true}
+            ${false}      | ${'dummy-milestone-not-exempted'}  | ${'the issue does have a milestone but not matching the specific pull request exempted one'} | ${true}
+            ${false}      | ${'dummy-pull-request-milestone2'} | ${'the issue does have a milestone matching the specific pull request exempted one'}         | ${true}
+            ${false}      | ${'dummy-milestone2'}              | ${'the issue does have a milestone matching the specific exempted one'}                      | ${false}
+            ${true}       | ${''}                              | ${'the PR does not have a milestone'}                                                        | ${true}
+            ${true}       | ${'dummy-milestone-not-exempted'}  | ${'the PR does have a milestone but not matching the specific pull request exempted one'}    | ${false}
+            ${true}       | ${'dummy-pull-request-milestone2'} | ${'the PR does have a milestone matching the specific pull request exempted one'}            | ${false}
+            ${true}       | ${'dummy-milestone2'}              | ${'the PR does have a milestone matching the specific exempted one'}                         | ${false}
+          `(
+            'when $name',
+            ({isPullRequest, milestone, shouldStale}: ITestData): void => {
+              beforeEach((): void => {
+                setTestIssueList(isPullRequest, milestone);
+                setProcessor();
+              });
 
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
+              test(`should${
+                shouldStale ? '' : ' not'
+              } be marked as stale`, async () => {
+                expect.assertions(3);
 
-              await processor.processIssues(1);
+                await processor.processIssues(1);
 
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone but not matching the specific pull request exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-milestone-not-exempted');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone matching the specific pull request exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-pull-request-milestone2');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone matching the specific exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-milestone2');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does not have a milestone', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, '');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone but not matching the specific pull request exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-milestone-not-exempted');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone matching the specific pull request exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-pull-request-milestone2');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone matching the specific exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-milestone2');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
+                expect(processor.staleIssues.length).toStrictEqual(
+                  shouldStale ? 1 : 0
+                );
+                expect(processor.closedIssues.length).toStrictEqual(0);
+                expect(processor.removedLabelIssues.length).toStrictEqual(0);
+              });
+            }
+          );
         });
       });
     });
@@ -5282,394 +1736,146 @@ describe('milestones options', (): void => {
       opts.exemptAllMilestones = true;
     });
 
-    describe('when the issue does not have a milestone', (): void => {
-      beforeEach((): void => {
-        setTestIssueList(false, '');
-        setProcessor();
-      });
+    describe.each`
+      isPullRequest | milestone            | name                                     | shouldStale
+      ${false}      | ${''}                | ${'the issue does not have a milestone'} | ${true}
+      ${false}      | ${'dummy-milestone'} | ${'the issue does have a milestone'}     | ${false}
+      ${true}       | ${''}                | ${'the PR does not have a milestone'}    | ${true}
+      ${true}       | ${'dummy-milestone'} | ${'the PR does have a milestone'}        | ${false}
+    `(
+      'when $name',
+      ({isPullRequest, milestone, shouldStale}: ITestData): void => {
+        beforeEach((): void => {
+          setTestIssueList(isPullRequest, milestone);
+          setProcessor();
+        });
 
-      test('should be marked as stale', async () => {
-        expect.assertions(3);
+        test(`should${
+          shouldStale ? '' : ' not'
+        } be marked as stale`, async () => {
+          expect.assertions(3);
 
-        await processor.processIssues(1);
+          await processor.processIssues(1);
 
-        expect(processor.staleIssues.length).toStrictEqual(1);
-        expect(processor.closedIssues.length).toStrictEqual(0);
-        expect(processor.removedLabelIssues.length).toStrictEqual(0);
-      });
-    });
-
-    describe('when the issue does have a milestone', (): void => {
-      beforeEach((): void => {
-        setTestIssueList(false, 'dummy-milestone');
-        setProcessor();
-      });
-
-      test('should not be marked as stale', async () => {
-        expect.assertions(3);
-
-        await processor.processIssues(1);
-
-        expect(processor.staleIssues.length).toStrictEqual(0);
-        expect(processor.closedIssues.length).toStrictEqual(0);
-        expect(processor.removedLabelIssues.length).toStrictEqual(0);
-      });
-    });
-
-    describe('when the PR does not have a milestone', (): void => {
-      beforeEach((): void => {
-        setTestIssueList(true, '');
-        setProcessor();
-      });
-
-      test('should be marked as stale', async () => {
-        expect.assertions(3);
-
-        await processor.processIssues(1);
-
-        expect(processor.staleIssues.length).toStrictEqual(1);
-        expect(processor.closedIssues.length).toStrictEqual(0);
-        expect(processor.removedLabelIssues.length).toStrictEqual(0);
-      });
-    });
-
-    describe('when the PR does have a milestone', (): void => {
-      beforeEach((): void => {
-        setTestIssueList(true, 'dummy-milestone');
-        setProcessor();
-      });
-
-      test('should not be marked as stale', async () => {
-        expect.assertions(3);
-
-        await processor.processIssues(1);
-
-        expect(processor.staleIssues.length).toStrictEqual(0);
-        expect(processor.closedIssues.length).toStrictEqual(0);
-        expect(processor.removedLabelIssues.length).toStrictEqual(0);
-      });
-    });
+          expect(processor.staleIssues.length).toStrictEqual(
+            shouldStale ? 1 : 0
+          );
+          expect(processor.closedIssues.length).toStrictEqual(0);
+          expect(processor.removedLabelIssues.length).toStrictEqual(0);
+        });
+      }
+    );
 
     describe('when all the issues milestones are not configured to exempt', (): void => {
       beforeEach((): void => {
         opts.exemptAllIssueMilestones = undefined;
       });
 
-      describe('when the issue does not have a milestone', (): void => {
-        beforeEach((): void => {
-          setTestIssueList(false, '');
-          setProcessor();
-        });
+      describe.each`
+        isPullRequest | milestone            | name                                     | shouldStale
+        ${false}      | ${''}                | ${'the issue does not have a milestone'} | ${true}
+        ${false}      | ${'dummy-milestone'} | ${'the issue does have a milestone'}     | ${false}
+        ${true}       | ${''}                | ${'the PR does not have a milestone'}    | ${true}
+        ${true}       | ${'dummy-milestone'} | ${'the PR does have a milestone'}        | ${false}
+      `(
+        'when $name',
+        ({isPullRequest, milestone, shouldStale}: ITestData): void => {
+          beforeEach((): void => {
+            setTestIssueList(isPullRequest, milestone);
+            setProcessor();
+          });
 
-        test('should be marked as stale', async () => {
-          expect.assertions(3);
+          test(`should${
+            shouldStale ? '' : ' not'
+          } be marked as stale`, async () => {
+            expect.assertions(3);
 
-          await processor.processIssues(1);
+            await processor.processIssues(1);
 
-          expect(processor.staleIssues.length).toStrictEqual(1);
-          expect(processor.closedIssues.length).toStrictEqual(0);
-          expect(processor.removedLabelIssues.length).toStrictEqual(0);
-        });
-      });
-
-      describe('when the issue does have a milestone', (): void => {
-        beforeEach((): void => {
-          setTestIssueList(false, 'dummy-milestone');
-          setProcessor();
-        });
-
-        test('should not be marked as stale', async () => {
-          expect.assertions(3);
-
-          await processor.processIssues(1);
-
-          expect(processor.staleIssues.length).toStrictEqual(0);
-          expect(processor.closedIssues.length).toStrictEqual(0);
-          expect(processor.removedLabelIssues.length).toStrictEqual(0);
-        });
-      });
-
-      describe('when the PR does not have a milestone', (): void => {
-        beforeEach((): void => {
-          setTestIssueList(true, '');
-          setProcessor();
-        });
-
-        test('should be marked as stale', async () => {
-          expect.assertions(3);
-
-          await processor.processIssues(1);
-
-          expect(processor.staleIssues.length).toStrictEqual(1);
-          expect(processor.closedIssues.length).toStrictEqual(0);
-          expect(processor.removedLabelIssues.length).toStrictEqual(0);
-        });
-      });
-
-      describe('when the PR does have a milestone', (): void => {
-        beforeEach((): void => {
-          setTestIssueList(true, 'dummy-milestone');
-          setProcessor();
-        });
-
-        test('should not be marked as stale', async () => {
-          expect.assertions(3);
-
-          await processor.processIssues(1);
-
-          expect(processor.staleIssues.length).toStrictEqual(0);
-          expect(processor.closedIssues.length).toStrictEqual(0);
-          expect(processor.removedLabelIssues.length).toStrictEqual(0);
-        });
-      });
+            expect(processor.staleIssues.length).toStrictEqual(
+              shouldStale ? 1 : 0
+            );
+            expect(processor.closedIssues.length).toStrictEqual(0);
+            expect(processor.removedLabelIssues.length).toStrictEqual(0);
+          });
+        }
+      );
 
       describe('when all the issues and pull requests milestones should exempt a specific milestone', (): void => {
         beforeEach((): void => {
           opts.exemptMilestones = 'dummy-milestone';
         });
 
-        describe('when the issue does not have a milestone', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(false, '');
-            setProcessor();
-          });
+        describe.each`
+          isPullRequest | milestone                         | name                                                                            | shouldStale
+          ${false}      | ${''}                             | ${'the issue does not have a milestone'}                                        | ${true}
+          ${false}      | ${'dummy-milestone-not-exempted'} | ${'the issue does have a milestone but not matching the specific exempted one'} | ${false}
+          ${false}      | ${'dummy-milestone'}              | ${'the issue does have a milestone matching the specific exempted one'}         | ${false}
+          ${true}       | ${''}                             | ${'the PR does not have a milestone'}                                           | ${true}
+          ${true}       | ${'dummy-milestone-not-exempted'} | ${'the PR does have a milestone but not matching the specific exempted one'}    | ${false}
+          ${true}       | ${'dummy-milestone'}              | ${'the PR does have a milestone matching the specific exempted one'}            | ${false}
+        `(
+          'when $name',
+          ({isPullRequest, milestone, shouldStale}: ITestData): void => {
+            beforeEach((): void => {
+              setTestIssueList(isPullRequest, milestone);
+              setProcessor();
+            });
 
-          test('should be marked as stale', async () => {
-            expect.assertions(3);
+            test(`should${
+              shouldStale ? '' : ' not'
+            } be marked as stale`, async () => {
+              expect.assertions(3);
 
-            await processor.processIssues(1);
+              await processor.processIssues(1);
 
-            expect(processor.staleIssues.length).toStrictEqual(1);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
-
-        describe('when the issue does have a milestone but not matching the specific exempted one', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(false, 'dummy-milestone-not-exempted');
-            setProcessor();
-          });
-
-          test('should not be marked as stale', async () => {
-            expect.assertions(3);
-
-            await processor.processIssues(1);
-
-            expect(processor.staleIssues.length).toStrictEqual(0);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
-
-        describe('when the issue does have a milestone matching the specific exempted one', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(false, 'dummy-milestone');
-            setProcessor();
-          });
-
-          test('should not be marked as stale', async () => {
-            expect.assertions(3);
-
-            await processor.processIssues(1);
-
-            expect(processor.staleIssues.length).toStrictEqual(0);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
-
-        describe('when the PR does not have a milestone', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(true, '');
-            setProcessor();
-          });
-
-          test('should be marked as stale', async () => {
-            expect.assertions(3);
-
-            await processor.processIssues(1);
-
-            expect(processor.staleIssues.length).toStrictEqual(1);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
-
-        describe('when the PR does have a milestone but not matching the specific exempted one', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(true, 'dummy-milestone-not-exempted');
-            setProcessor();
-          });
-
-          test('should not be marked as stale', async () => {
-            expect.assertions(3);
-
-            await processor.processIssues(1);
-
-            expect(processor.staleIssues.length).toStrictEqual(0);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
-
-        describe('when the PR does have a milestone matching the specific exempted one', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(true, 'dummy-milestone');
-            setProcessor();
-          });
-
-          test('should not be marked as stale', async () => {
-            expect.assertions(3);
-
-            await processor.processIssues(1);
-
-            expect(processor.staleIssues.length).toStrictEqual(0);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
+              expect(processor.staleIssues.length).toStrictEqual(
+                shouldStale ? 1 : 0
+              );
+              expect(processor.closedIssues.length).toStrictEqual(0);
+              expect(processor.removedLabelIssues.length).toStrictEqual(0);
+            });
+          }
+        );
 
         describe('when all the issues milestones should exempt a specific milestone', (): void => {
           beforeEach((): void => {
             opts.exemptIssueMilestones = 'dummy-issue-milestone';
           });
 
-          describe('when the issue does not have a milestone', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, '');
-              setProcessor();
-            });
+          describe.each`
+            isPullRequest | milestone                         | name                                                                                  | shouldStale
+            ${false}      | ${''}                             | ${'the issue does not have a milestone'}                                              | ${true}
+            ${false}      | ${'dummy-milestone-not-exempted'} | ${'the issue does have a milestone but not matching the specific issue exempted one'} | ${false}
+            ${false}      | ${'dummy-issue-milestone'}        | ${'the issue does have a milestone matching the specific issue exempted one'}         | ${false}
+            ${false}      | ${'dummy-milestone'}              | ${'the issue does have a milestone matching the specific exempted one'}               | ${false}
+            ${true}       | ${''}                             | ${'the PR does not have a milestone'}                                                 | ${true}
+            ${true}       | ${'dummy-milestone-not-exempted'} | ${'the PR does have a milestone but not matching the specific issue exempted one'}    | ${false}
+            ${true}       | ${'dummy-issue-milestone'}        | ${'the PR does have a milestone matching the specific issue exempted one'}            | ${false}
+            ${true}       | ${'dummy-milestone'}              | ${'the PR does have a milestone matching the specific exempted one'}                  | ${false}
+          `(
+            'when $name',
+            ({isPullRequest, milestone, shouldStale}: ITestData): void => {
+              beforeEach((): void => {
+                setTestIssueList(isPullRequest, milestone);
+                setProcessor();
+              });
 
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
+              test(`should${
+                shouldStale ? '' : ' not'
+              } be marked as stale`, async () => {
+                expect.assertions(3);
 
-              await processor.processIssues(1);
+                await processor.processIssues(1);
 
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone but not matching the specific issue exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-milestone-not-exempted');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone matching the specific issue exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-issue-milestone');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone matching the specific exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-milestone');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does not have a milestone', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, '');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone but not matching the specific issue exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-milestone-not-exempted');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone matching the specific issue exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-issue-milestone');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone matching the specific exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-milestone');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
+                expect(processor.staleIssues.length).toStrictEqual(
+                  shouldStale ? 1 : 0
+                );
+                expect(processor.closedIssues.length).toStrictEqual(0);
+                expect(processor.removedLabelIssues.length).toStrictEqual(0);
+              });
+            }
+          );
         });
 
         describe('when all the pull requests milestones should exempt a specific milestone', (): void => {
@@ -5677,141 +1883,39 @@ describe('milestones options', (): void => {
             opts.exemptPrMilestones = 'dummy-pull-request-milestone';
           });
 
-          describe('when the issue does not have a milestone', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, '');
-              setProcessor();
-            });
+          describe.each`
+            isPullRequest | milestone                         | name                                                                                         | shouldStale
+            ${false}      | ${''}                             | ${'the issue does not have a milestone'}                                                     | ${true}
+            ${false}      | ${'dummy-milestone-not-exempted'} | ${'the issue does have a milestone but not matching the specific pull request exempted one'} | ${false}
+            ${false}      | ${'dummy-pull-request-milestone'} | ${'the issue does have a milestone matching the specific pull request exempted one'}         | ${false}
+            ${false}      | ${'dummy-milestone'}              | ${'the issue does have a milestone matching the specific exempted one'}                      | ${false}
+            ${true}       | ${''}                             | ${'the PR does not have a milestone'}                                                        | ${true}
+            ${true}       | ${'dummy-milestone-not-exempted'} | ${'the PR does have a milestone but not matching the specific pull request exempted one'}    | ${false}
+            ${true}       | ${'dummy-pull-request-milestone'} | ${'the PR does have a milestone matching the specific pull request exempted one'}            | ${false}
+            ${true}       | ${'dummy-milestone'}              | ${'the PR does have a milestone matching the specific exempted one'}                         | ${false}
+          `(
+            'when $name',
+            ({isPullRequest, milestone, shouldStale}: ITestData): void => {
+              beforeEach((): void => {
+                setTestIssueList(isPullRequest, milestone);
+                setProcessor();
+              });
 
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
+              test(`should${
+                shouldStale ? '' : ' not'
+              } be marked as stale`, async () => {
+                expect.assertions(3);
 
-              await processor.processIssues(1);
+                await processor.processIssues(1);
 
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone but not matching the specific pull request exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-milestone-not-exempted');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone matching the specific pull request exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-pull-request-milestone');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone matching the specific exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-milestone');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does not have a milestone', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, '');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone but not matching the specific pull request exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-milestone-not-exempted');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone matching the specific pull request exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-pull-request-milestone');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone matching the specific exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-milestone');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
+                expect(processor.staleIssues.length).toStrictEqual(
+                  shouldStale ? 1 : 0
+                );
+                expect(processor.closedIssues.length).toStrictEqual(0);
+                expect(processor.removedLabelIssues.length).toStrictEqual(0);
+              });
+            }
+          );
         });
       });
 
@@ -5820,107 +1924,37 @@ describe('milestones options', (): void => {
           opts.exemptMilestones = 'dummy-milestone1, dummy-milestone2';
         });
 
-        describe('when the issue does not have a milestone', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(false, '');
-            setProcessor();
-          });
+        describe.each`
+          isPullRequest | milestone                         | name                                                                            | shouldStale
+          ${false}      | ${''}                             | ${'the issue does not have a milestone'}                                        | ${true}
+          ${false}      | ${'dummy-milestone-not-exempted'} | ${'the issue does have a milestone but not matching the specific exempted one'} | ${false}
+          ${false}      | ${'dummy-milestone2'}             | ${'the issue does have a milestone matching the specific exempted one'}         | ${false}
+          ${true}       | ${''}                             | ${'the PR does not have a milestone'}                                           | ${true}
+          ${true}       | ${'dummy-milestone-not-exempted'} | ${'the PR does have a milestone but not matching the specific exempted one'}    | ${false}
+          ${true}       | ${'dummy-milestone2'}             | ${'the PR does have a milestone matching the specific exempted one'}            | ${false}
+        `(
+          'when $name',
+          ({isPullRequest, milestone, shouldStale}: ITestData): void => {
+            beforeEach((): void => {
+              setTestIssueList(isPullRequest, milestone);
+              setProcessor();
+            });
 
-          test('should be marked as stale', async () => {
-            expect.assertions(3);
+            test(`should${
+              shouldStale ? '' : ' not'
+            } be marked as stale`, async () => {
+              expect.assertions(3);
 
-            await processor.processIssues(1);
+              await processor.processIssues(1);
 
-            expect(processor.staleIssues.length).toStrictEqual(1);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
-
-        describe('when the issue does have a milestone but not matching the specific exempted one', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(false, 'dummy-milestone-not-exempted');
-            setProcessor();
-          });
-
-          test('should not be marked as stale', async () => {
-            expect.assertions(3);
-
-            await processor.processIssues(1);
-
-            expect(processor.staleIssues.length).toStrictEqual(0);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
-
-        describe('when the issue does have a milestone matching the specific exempted one', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(false, 'dummy-milestone2');
-            setProcessor();
-          });
-
-          test('should not be marked as stale', async () => {
-            expect.assertions(3);
-
-            await processor.processIssues(1);
-
-            expect(processor.staleIssues.length).toStrictEqual(0);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
-
-        describe('when the PR does not have a milestone', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(true, '');
-            setProcessor();
-          });
-
-          test('should be marked as stale', async () => {
-            expect.assertions(3);
-
-            await processor.processIssues(1);
-
-            expect(processor.staleIssues.length).toStrictEqual(1);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
-
-        describe('when the PR does have a milestone but not matching the specific exempted one', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(true, 'dummy-milestone-not-exempted');
-            setProcessor();
-          });
-
-          test('should not be marked as stale', async () => {
-            expect.assertions(3);
-
-            await processor.processIssues(1);
-
-            expect(processor.staleIssues.length).toStrictEqual(0);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
-
-        describe('when the PR does have a milestone matching the specific exempted one', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(true, 'dummy-milestone2');
-            setProcessor();
-          });
-
-          test('should not be marked as stale', async () => {
-            expect.assertions(3);
-
-            await processor.processIssues(1);
-
-            expect(processor.staleIssues.length).toStrictEqual(0);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
+              expect(processor.staleIssues.length).toStrictEqual(
+                shouldStale ? 1 : 0
+              );
+              expect(processor.closedIssues.length).toStrictEqual(0);
+              expect(processor.removedLabelIssues.length).toStrictEqual(0);
+            });
+          }
+        );
 
         describe('when all the issues milestones should exempt a specific milestone', (): void => {
           beforeEach((): void => {
@@ -5928,141 +1962,39 @@ describe('milestones options', (): void => {
               'dummy-issue-milestone1, dummy-issue-milestone2';
           });
 
-          describe('when the issue does not have a milestone', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, '');
-              setProcessor();
-            });
+          describe.each`
+            isPullRequest | milestone                         | name                                                                                  | shouldStale
+            ${false}      | ${''}                             | ${'the issue does not have a milestone'}                                              | ${true}
+            ${false}      | ${'dummy-milestone-not-exempted'} | ${'the issue does have a milestone but not matching the specific issue exempted one'} | ${false}
+            ${false}      | ${'dummy-issue-milestone2'}       | ${'the issue does have a milestone matching the specific issue exempted one'}         | ${false}
+            ${false}      | ${'dummy-milestone2'}             | ${'the issue does have a milestone matching the specific exempted one'}               | ${false}
+            ${true}       | ${''}                             | ${'the PR does not have a milestone'}                                                 | ${true}
+            ${true}       | ${'dummy-milestone-not-exempted'} | ${'the PR does have a milestone but not matching the specific issue exempted one'}    | ${false}
+            ${true}       | ${'dummy-issue-milestone2'}       | ${'the PR does have a milestone matching the specific issue exempted one'}            | ${false}
+            ${true}       | ${'dummy-milestone2'}             | ${'the PR does have a milestone matching the specific exempted one'}                  | ${false}
+          `(
+            'when $name',
+            ({isPullRequest, milestone, shouldStale}: ITestData): void => {
+              beforeEach((): void => {
+                setTestIssueList(isPullRequest, milestone);
+                setProcessor();
+              });
 
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
+              test(`should${
+                shouldStale ? '' : ' not'
+              } be marked as stale`, async () => {
+                expect.assertions(3);
 
-              await processor.processIssues(1);
+                await processor.processIssues(1);
 
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone but not matching the specific issue exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-milestone-not-exempted');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone matching the specific issue exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-issue-milestone2');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone matching the specific exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-milestone2');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does not have a milestone', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, '');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone but not matching the specific issue exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-milestone-not-exempted');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone matching the specific issue exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-issue-milestone2');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone matching the specific exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-milestone2');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
+                expect(processor.staleIssues.length).toStrictEqual(
+                  shouldStale ? 1 : 0
+                );
+                expect(processor.closedIssues.length).toStrictEqual(0);
+                expect(processor.removedLabelIssues.length).toStrictEqual(0);
+              });
+            }
+          );
         });
 
         describe('when all the pull requests milestones should exempt a specific milestone', (): void => {
@@ -6071,141 +2003,39 @@ describe('milestones options', (): void => {
               'dummy-pull-request-milestone1, dummy-pull-request-milestone2';
           });
 
-          describe('when the issue does not have a milestone', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, '');
-              setProcessor();
-            });
+          describe.each`
+            isPullRequest | milestone                          | name                                                                                         | shouldStale
+            ${false}      | ${''}                              | ${'the issue does not have a milestone'}                                                     | ${true}
+            ${false}      | ${'dummy-milestone-not-exempted'}  | ${'the issue does have a milestone but not matching the specific pull request exempted one'} | ${false}
+            ${false}      | ${'dummy-pull-request-milestone2'} | ${'the issue does have a milestone matching the specific pull request exempted one'}         | ${false}
+            ${false}      | ${'dummy-milestone2'}              | ${'the issue does have a milestone matching the specific exempted one'}                      | ${false}
+            ${true}       | ${''}                              | ${'the PR does not have a milestone'}                                                        | ${true}
+            ${true}       | ${'dummy-milestone-not-exempted'}  | ${'the PR does have a milestone but not matching the specific pull request exempted one'}    | ${false}
+            ${true}       | ${'dummy-pull-request-milestone2'} | ${'the PR does have a milestone matching the specific pull request exempted one'}            | ${false}
+            ${true}       | ${'dummy-milestone2'}              | ${'the PR does have a milestone matching the specific exempted one'}                         | ${false}
+          `(
+            'when $name',
+            ({isPullRequest, milestone, shouldStale}: ITestData): void => {
+              beforeEach((): void => {
+                setTestIssueList(isPullRequest, milestone);
+                setProcessor();
+              });
 
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
+              test(`should${
+                shouldStale ? '' : ' not'
+              } be marked as stale`, async () => {
+                expect.assertions(3);
 
-              await processor.processIssues(1);
+                await processor.processIssues(1);
 
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone but not matching the specific pull request exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-milestone-not-exempted');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone matching the specific pull request exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-pull-request-milestone2');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone matching the specific exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-milestone2');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does not have a milestone', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, '');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone but not matching the specific pull request exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-milestone-not-exempted');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone matching the specific pull request exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-pull-request-milestone2');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone matching the specific exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-milestone2');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
+                expect(processor.staleIssues.length).toStrictEqual(
+                  shouldStale ? 1 : 0
+                );
+                expect(processor.closedIssues.length).toStrictEqual(0);
+                expect(processor.removedLabelIssues.length).toStrictEqual(0);
+              });
+            }
+          );
         });
       });
     });
@@ -6215,321 +2045,111 @@ describe('milestones options', (): void => {
         opts.exemptAllIssueMilestones = false;
       });
 
-      describe('when the issue does not have a milestone', (): void => {
-        beforeEach((): void => {
-          setTestIssueList(false, '');
-          setProcessor();
-        });
+      describe.each`
+        isPullRequest | milestone            | name                                     | shouldStale
+        ${false}      | ${''}                | ${'the issue does not have a milestone'} | ${true}
+        ${false}      | ${'dummy-milestone'} | ${'the issue does have a milestone'}     | ${true}
+        ${true}       | ${''}                | ${'the PR does not have a milestone'}    | ${true}
+        ${true}       | ${'dummy-milestone'} | ${'the PR does have a milestone'}        | ${false}
+      `(
+        'when $name',
+        ({isPullRequest, milestone, shouldStale}: ITestData): void => {
+          beforeEach((): void => {
+            setTestIssueList(isPullRequest, milestone);
+            setProcessor();
+          });
 
-        test('should be marked as stale', async () => {
-          expect.assertions(3);
+          test(`should${
+            shouldStale ? '' : ' not'
+          } be marked as stale`, async () => {
+            expect.assertions(3);
 
-          await processor.processIssues(1);
+            await processor.processIssues(1);
 
-          expect(processor.staleIssues.length).toStrictEqual(1);
-          expect(processor.closedIssues.length).toStrictEqual(0);
-          expect(processor.removedLabelIssues.length).toStrictEqual(0);
-        });
-      });
-
-      describe('when the issue does have a milestone', (): void => {
-        beforeEach((): void => {
-          setTestIssueList(false, 'dummy-milestone');
-          setProcessor();
-        });
-
-        test('should be marked as stale', async () => {
-          expect.assertions(3);
-
-          await processor.processIssues(1);
-
-          expect(processor.staleIssues.length).toStrictEqual(1);
-          expect(processor.closedIssues.length).toStrictEqual(0);
-          expect(processor.removedLabelIssues.length).toStrictEqual(0);
-        });
-      });
-
-      describe('when the PR does not have a milestone', (): void => {
-        beforeEach((): void => {
-          setTestIssueList(true, '');
-          setProcessor();
-        });
-
-        test('should be marked as stale', async () => {
-          expect.assertions(3);
-
-          await processor.processIssues(1);
-
-          expect(processor.staleIssues.length).toStrictEqual(1);
-          expect(processor.closedIssues.length).toStrictEqual(0);
-          expect(processor.removedLabelIssues.length).toStrictEqual(0);
-        });
-      });
-
-      describe('when the PR does have a milestone', (): void => {
-        beforeEach((): void => {
-          setTestIssueList(true, 'dummy-milestone');
-          setProcessor();
-        });
-
-        test('should not be marked as stale', async () => {
-          expect.assertions(3);
-
-          await processor.processIssues(1);
-
-          expect(processor.staleIssues.length).toStrictEqual(0);
-          expect(processor.closedIssues.length).toStrictEqual(0);
-          expect(processor.removedLabelIssues.length).toStrictEqual(0);
-        });
-      });
+            expect(processor.staleIssues.length).toStrictEqual(
+              shouldStale ? 1 : 0
+            );
+            expect(processor.closedIssues.length).toStrictEqual(0);
+            expect(processor.removedLabelIssues.length).toStrictEqual(0);
+          });
+        }
+      );
 
       describe('when all the issues and pull requests milestones should exempt a specific milestone', (): void => {
         beforeEach((): void => {
           opts.exemptMilestones = 'dummy-milestone';
         });
 
-        describe('when the issue does not have a milestone', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(false, '');
-            setProcessor();
-          });
+        describe.each`
+          isPullRequest | milestone                         | name                                                                            | shouldStale
+          ${false}      | ${''}                             | ${'the issue does not have a milestone'}                                        | ${true}
+          ${false}      | ${'dummy-milestone-not-exempted'} | ${'the issue does have a milestone but not matching the specific exempted one'} | ${true}
+          ${false}      | ${'dummy-milestone'}              | ${'the issue does have a milestone matching the specific exempted one'}         | ${false}
+          ${true}       | ${''}                             | ${'the PR does not have a milestone'}                                           | ${true}
+          ${true}       | ${'dummy-milestone-not-exempted'} | ${'the PR does have a milestone but not matching the specific exempted one'}    | ${false}
+          ${true}       | ${'dummy-milestone'}              | ${'the PR does have a milestone matching the specific exempted one'}            | ${false}
+        `(
+          'when $name',
+          ({isPullRequest, milestone, shouldStale}: ITestData): void => {
+            beforeEach((): void => {
+              setTestIssueList(isPullRequest, milestone);
+              setProcessor();
+            });
 
-          test('should be marked as stale', async () => {
-            expect.assertions(3);
+            test(`should${
+              shouldStale ? '' : ' not'
+            } be marked as stale`, async () => {
+              expect.assertions(3);
 
-            await processor.processIssues(1);
+              await processor.processIssues(1);
 
-            expect(processor.staleIssues.length).toStrictEqual(1);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
-
-        describe('when the issue does have a milestone but not matching the specific exempted one', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(false, 'dummy-milestone-not-exempted');
-            setProcessor();
-          });
-
-          test('should be marked as stale', async () => {
-            expect.assertions(3);
-
-            await processor.processIssues(1);
-
-            expect(processor.staleIssues.length).toStrictEqual(1);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
-
-        describe('when the issue does have a milestone matching the specific exempted one', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(false, 'dummy-milestone');
-            setProcessor();
-          });
-
-          test('should not be marked as stale', async () => {
-            expect.assertions(3);
-
-            await processor.processIssues(1);
-
-            expect(processor.staleIssues.length).toStrictEqual(0);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
-
-        describe('when the PR does not have a milestone', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(true, '');
-            setProcessor();
-          });
-
-          test('should be marked as stale', async () => {
-            expect.assertions(3);
-
-            await processor.processIssues(1);
-
-            expect(processor.staleIssues.length).toStrictEqual(1);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
-
-        describe('when the PR does have a milestone but not matching the specific exempted one', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(true, 'dummy-milestone-not-exempted');
-            setProcessor();
-          });
-
-          test('should not be marked as stale', async () => {
-            expect.assertions(3);
-
-            await processor.processIssues(1);
-
-            expect(processor.staleIssues.length).toStrictEqual(0);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
-
-        describe('when the PR does have a milestone matching the specific exempted one', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(true, 'dummy-milestone');
-            setProcessor();
-          });
-
-          test('should not be marked as stale', async () => {
-            expect.assertions(3);
-
-            await processor.processIssues(1);
-
-            expect(processor.staleIssues.length).toStrictEqual(0);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
+              expect(processor.staleIssues.length).toStrictEqual(
+                shouldStale ? 1 : 0
+              );
+              expect(processor.closedIssues.length).toStrictEqual(0);
+              expect(processor.removedLabelIssues.length).toStrictEqual(0);
+            });
+          }
+        );
 
         describe('when all the issues milestones should exempt a specific milestone', (): void => {
           beforeEach((): void => {
             opts.exemptIssueMilestones = 'dummy-issue-milestone';
           });
 
-          describe('when the issue does not have a milestone', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, '');
-              setProcessor();
-            });
+          describe.each`
+            isPullRequest | milestone                         | name                                                                                  | shouldStale
+            ${false}      | ${''}                             | ${'the issue does not have a milestone'}                                              | ${true}
+            ${false}      | ${'dummy-milestone-not-exempted'} | ${'the issue does have a milestone but not matching the specific issue exempted one'} | ${true}
+            ${false}      | ${'dummy-issue-milestone'}        | ${'the issue does have a milestone matching the specific issue exempted one'}         | ${false}
+            ${false}      | ${'dummy-milestone'}              | ${'the issue does have a milestone matching the specific exempted one'}               | ${true}
+            ${true}       | ${''}                             | ${'the PR does not have a milestone'}                                                 | ${true}
+            ${true}       | ${'dummy-milestone-not-exempted'} | ${'the PR does have a milestone but not matching the specific issue exempted one'}    | ${false}
+            ${true}       | ${'dummy-issue-milestone'}        | ${'the PR does have a milestone matching the specific issue exempted one'}            | ${false}
+            ${true}       | ${'dummy-milestone'}              | ${'the PR does have a milestone matching the specific exempted one'}                  | ${false}
+          `(
+            'when $name',
+            ({isPullRequest, milestone, shouldStale}: ITestData): void => {
+              beforeEach((): void => {
+                setTestIssueList(isPullRequest, milestone);
+                setProcessor();
+              });
 
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
+              test(`should${
+                shouldStale ? '' : ' not'
+              } be marked as stale`, async () => {
+                expect.assertions(3);
 
-              await processor.processIssues(1);
+                await processor.processIssues(1);
 
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone but not matching the specific issue exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-milestone-not-exempted');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone matching the specific issue exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-issue-milestone');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone matching the specific exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-milestone');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does not have a milestone', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, '');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone but not matching the specific issue exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-milestone-not-exempted');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone matching the specific issue exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-issue-milestone');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone matching the specific exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-milestone');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
+                expect(processor.staleIssues.length).toStrictEqual(
+                  shouldStale ? 1 : 0
+                );
+                expect(processor.closedIssues.length).toStrictEqual(0);
+                expect(processor.removedLabelIssues.length).toStrictEqual(0);
+              });
+            }
+          );
         });
 
         describe('when all the pull requests milestones should exempt a specific milestone', (): void => {
@@ -6537,141 +2157,39 @@ describe('milestones options', (): void => {
             opts.exemptPrMilestones = 'dummy-pull-request-milestone';
           });
 
-          describe('when the issue does not have a milestone', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, '');
-              setProcessor();
-            });
+          describe.each`
+            isPullRequest | milestone                         | name                                                                                         | shouldStale
+            ${false}      | ${''}                             | ${'the issue does not have a milestone'}                                                     | ${true}
+            ${false}      | ${'dummy-milestone-not-exempted'} | ${'the issue does have a milestone but not matching the specific pull request exempted one'} | ${true}
+            ${false}      | ${'dummy-pull-request-milestone'} | ${'the issue does have a milestone matching the specific pull request exempted one'}         | ${true}
+            ${false}      | ${'dummy-milestone'}              | ${'the issue does have a milestone matching the specific exempted one'}                      | ${false}
+            ${true}       | ${''}                             | ${'the PR does not have a milestone'}                                                        | ${true}
+            ${true}       | ${'dummy-milestone-not-exempted'} | ${'the PR does have a milestone but not matching the specific pull request exempted one'}    | ${false}
+            ${true}       | ${'dummy-pull-request-milestone'} | ${'the PR does have a milestone matching the specific pull request exempted one'}            | ${false}
+            ${true}       | ${'dummy-milestone'}              | ${'the PR does have a milestone matching the specific exempted one'}                         | ${false}
+          `(
+            'when $name',
+            ({isPullRequest, milestone, shouldStale}: ITestData): void => {
+              beforeEach((): void => {
+                setTestIssueList(isPullRequest, milestone);
+                setProcessor();
+              });
 
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
+              test(`should${
+                shouldStale ? '' : ' not'
+              } be marked as stale`, async () => {
+                expect.assertions(3);
 
-              await processor.processIssues(1);
+                await processor.processIssues(1);
 
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone but not matching the specific pull request exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-milestone-not-exempted');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone matching the specific pull request exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-pull-request-milestone');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone matching the specific exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-milestone');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does not have a milestone', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, '');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone but not matching the specific pull request exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-milestone-not-exempted');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone matching the specific pull request exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-pull-request-milestone');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone matching the specific exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-milestone');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
+                expect(processor.staleIssues.length).toStrictEqual(
+                  shouldStale ? 1 : 0
+                );
+                expect(processor.closedIssues.length).toStrictEqual(0);
+                expect(processor.removedLabelIssues.length).toStrictEqual(0);
+              });
+            }
+          );
         });
       });
 
@@ -6680,107 +2198,37 @@ describe('milestones options', (): void => {
           opts.exemptMilestones = 'dummy-milestone1, dummy-milestone2';
         });
 
-        describe('when the issue does not have a milestone', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(false, '');
-            setProcessor();
-          });
+        describe.each`
+          isPullRequest | milestone                         | name                                                                            | shouldStale
+          ${false}      | ${''}                             | ${'the issue does not have a milestone'}                                        | ${true}
+          ${false}      | ${'dummy-milestone-not-exempted'} | ${'the issue does have a milestone but not matching the specific exempted one'} | ${true}
+          ${false}      | ${'dummy-milestone2'}             | ${'the issue does have a milestone matching the specific exempted one'}         | ${false}
+          ${true}       | ${''}                             | ${'the PR does not have a milestone'}                                           | ${true}
+          ${true}       | ${'dummy-milestone-not-exempted'} | ${'the PR does have a milestone but not matching the specific exempted one'}    | ${false}
+          ${true}       | ${'dummy-milestone2'}             | ${'the PR does have a milestone matching the specific exempted one'}            | ${false}
+        `(
+          'when $name',
+          ({isPullRequest, milestone, shouldStale}: ITestData): void => {
+            beforeEach((): void => {
+              setTestIssueList(isPullRequest, milestone);
+              setProcessor();
+            });
 
-          test('should be marked as stale', async () => {
-            expect.assertions(3);
+            test(`should${
+              shouldStale ? '' : ' not'
+            } be marked as stale`, async () => {
+              expect.assertions(3);
 
-            await processor.processIssues(1);
+              await processor.processIssues(1);
 
-            expect(processor.staleIssues.length).toStrictEqual(1);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
-
-        describe('when the issue does have a milestone but not matching the specific exempted one', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(false, 'dummy-milestone-not-exempted');
-            setProcessor();
-          });
-
-          test('should be marked as stale', async () => {
-            expect.assertions(3);
-
-            await processor.processIssues(1);
-
-            expect(processor.staleIssues.length).toStrictEqual(1);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
-
-        describe('when the issue does have a milestone matching the specific exempted one', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(false, 'dummy-milestone2');
-            setProcessor();
-          });
-
-          test('should not be marked as stale', async () => {
-            expect.assertions(3);
-
-            await processor.processIssues(1);
-
-            expect(processor.staleIssues.length).toStrictEqual(0);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
-
-        describe('when the PR does not have a milestone', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(true, '');
-            setProcessor();
-          });
-
-          test('should be marked as stale', async () => {
-            expect.assertions(3);
-
-            await processor.processIssues(1);
-
-            expect(processor.staleIssues.length).toStrictEqual(1);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
-
-        describe('when the PR does have a milestone but not matching the specific exempted one', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(true, 'dummy-milestone-not-exempted');
-            setProcessor();
-          });
-
-          test('should not be marked as stale', async () => {
-            expect.assertions(3);
-
-            await processor.processIssues(1);
-
-            expect(processor.staleIssues.length).toStrictEqual(0);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
-
-        describe('when the PR does have a milestone matching the specific exempted one', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(true, 'dummy-milestone2');
-            setProcessor();
-          });
-
-          test('should not be marked as stale', async () => {
-            expect.assertions(3);
-
-            await processor.processIssues(1);
-
-            expect(processor.staleIssues.length).toStrictEqual(0);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
+              expect(processor.staleIssues.length).toStrictEqual(
+                shouldStale ? 1 : 0
+              );
+              expect(processor.closedIssues.length).toStrictEqual(0);
+              expect(processor.removedLabelIssues.length).toStrictEqual(0);
+            });
+          }
+        );
 
         describe('when all the issues milestones should exempt a specific milestone', (): void => {
           beforeEach((): void => {
@@ -6788,141 +2236,39 @@ describe('milestones options', (): void => {
               'dummy-issue-milestone1, dummy-issue-milestone2';
           });
 
-          describe('when the issue does not have a milestone', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, '');
-              setProcessor();
-            });
+          describe.each`
+            isPullRequest | milestone                         | name                                                                                  | shouldStale
+            ${false}      | ${''}                             | ${'the issue does not have a milestone'}                                              | ${true}
+            ${false}      | ${'dummy-milestone-not-exempted'} | ${'the issue does have a milestone but not matching the specific issue exempted one'} | ${true}
+            ${false}      | ${'dummy-issue-milestone2'}       | ${'the issue does have a milestone matching the specific issue exempted one'}         | ${false}
+            ${false}      | ${'dummy-milestone2'}             | ${'the issue does have a milestone matching the specific exempted one'}               | ${true}
+            ${true}       | ${''}                             | ${'the PR does not have a milestone'}                                                 | ${true}
+            ${true}       | ${'dummy-milestone-not-exempted'} | ${'the PR does have a milestone but not matching the specific issue exempted one'}    | ${false}
+            ${true}       | ${'dummy-issue-milestone2'}       | ${'the PR does have a milestone matching the specific issue exempted one'}            | ${false}
+            ${true}       | ${'dummy-milestone2'}             | ${'the PR does have a milestone matching the specific exempted one'}                  | ${false}
+          `(
+            'when $name',
+            ({isPullRequest, milestone, shouldStale}: ITestData): void => {
+              beforeEach((): void => {
+                setTestIssueList(isPullRequest, milestone);
+                setProcessor();
+              });
 
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
+              test(`should${
+                shouldStale ? '' : ' not'
+              } be marked as stale`, async () => {
+                expect.assertions(3);
 
-              await processor.processIssues(1);
+                await processor.processIssues(1);
 
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone but not matching the specific issue exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-milestone-not-exempted');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone matching the specific issue exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-issue-milestone2');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone matching the specific exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-milestone2');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does not have a milestone', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, '');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone but not matching the specific issue exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-milestone-not-exempted');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone matching the specific issue exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-issue-milestone2');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone matching the specific exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-milestone2');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
+                expect(processor.staleIssues.length).toStrictEqual(
+                  shouldStale ? 1 : 0
+                );
+                expect(processor.closedIssues.length).toStrictEqual(0);
+                expect(processor.removedLabelIssues.length).toStrictEqual(0);
+              });
+            }
+          );
         });
 
         describe('when all the pull requests milestones should exempt a specific milestone', (): void => {
@@ -6931,141 +2277,39 @@ describe('milestones options', (): void => {
               'dummy-pull-request-milestone1, dummy-pull-request-milestone2';
           });
 
-          describe('when the issue does not have a milestone', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, '');
-              setProcessor();
-            });
+          describe.each`
+            isPullRequest | milestone                          | name                                                                                         | shouldStale
+            ${false}      | ${''}                              | ${'the issue does not have a milestone'}                                                     | ${true}
+            ${false}      | ${'dummy-milestone-not-exempted'}  | ${'the issue does have a milestone but not matching the specific pull request exempted one'} | ${true}
+            ${false}      | ${'dummy-pull-request-milestone2'} | ${'the issue does have a milestone matching the specific pull request exempted one'}         | ${true}
+            ${false}      | ${'dummy-milestone2'}              | ${'the issue does have a milestone matching the specific exempted one'}                      | ${false}
+            ${true}       | ${''}                              | ${'the PR does not have a milestone'}                                                        | ${true}
+            ${true}       | ${'dummy-milestone-not-exempted'}  | ${'the PR does have a milestone but not matching the specific pull request exempted one'}    | ${false}
+            ${true}       | ${'dummy-pull-request-milestone2'} | ${'the PR does have a milestone matching the specific pull request exempted one'}            | ${false}
+            ${true}       | ${'dummy-milestone2'}              | ${'the PR does have a milestone matching the specific exempted one'}                         | ${false}
+          `(
+            'when $name',
+            ({isPullRequest, milestone, shouldStale}: ITestData): void => {
+              beforeEach((): void => {
+                setTestIssueList(isPullRequest, milestone);
+                setProcessor();
+              });
 
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
+              test(`should${
+                shouldStale ? '' : ' not'
+              } be marked as stale`, async () => {
+                expect.assertions(3);
 
-              await processor.processIssues(1);
+                await processor.processIssues(1);
 
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone but not matching the specific pull request exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-milestone-not-exempted');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone matching the specific pull request exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-pull-request-milestone2');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone matching the specific exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-milestone2');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does not have a milestone', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, '');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone but not matching the specific pull request exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-milestone-not-exempted');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone matching the specific pull request exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-pull-request-milestone2');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone matching the specific exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-milestone2');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
+                expect(processor.staleIssues.length).toStrictEqual(
+                  shouldStale ? 1 : 0
+                );
+                expect(processor.closedIssues.length).toStrictEqual(0);
+                expect(processor.removedLabelIssues.length).toStrictEqual(0);
+              });
+            }
+          );
         });
       });
     });
@@ -7075,321 +2319,111 @@ describe('milestones options', (): void => {
         opts.exemptAllIssueMilestones = true;
       });
 
-      describe('when the issue does not have a milestone', (): void => {
-        beforeEach((): void => {
-          setTestIssueList(false, '');
-          setProcessor();
-        });
+      describe.each`
+        isPullRequest | milestone            | name                                     | shouldStale
+        ${false}      | ${''}                | ${'the issue does not have a milestone'} | ${true}
+        ${false}      | ${'dummy-milestone'} | ${'the issue does have a milestone'}     | ${false}
+        ${true}       | ${''}                | ${'the PR does not have a milestone'}    | ${true}
+        ${true}       | ${'dummy-milestone'} | ${'the PR does have a milestone'}        | ${false}
+      `(
+        'when $name',
+        ({isPullRequest, milestone, shouldStale}: ITestData): void => {
+          beforeEach((): void => {
+            setTestIssueList(isPullRequest, milestone);
+            setProcessor();
+          });
 
-        test('should be marked as stale', async () => {
-          expect.assertions(3);
+          test(`should${
+            shouldStale ? '' : ' not'
+          } be marked as stale`, async () => {
+            expect.assertions(3);
 
-          await processor.processIssues(1);
+            await processor.processIssues(1);
 
-          expect(processor.staleIssues.length).toStrictEqual(1);
-          expect(processor.closedIssues.length).toStrictEqual(0);
-          expect(processor.removedLabelIssues.length).toStrictEqual(0);
-        });
-      });
-
-      describe('when the issue does have a milestone', (): void => {
-        beforeEach((): void => {
-          setTestIssueList(false, 'dummy-milestone');
-          setProcessor();
-        });
-
-        test('should not be marked as stale', async () => {
-          expect.assertions(3);
-
-          await processor.processIssues(1);
-
-          expect(processor.staleIssues.length).toStrictEqual(0);
-          expect(processor.closedIssues.length).toStrictEqual(0);
-          expect(processor.removedLabelIssues.length).toStrictEqual(0);
-        });
-      });
-
-      describe('when the PR does not have a milestone', (): void => {
-        beforeEach((): void => {
-          setTestIssueList(true, '');
-          setProcessor();
-        });
-
-        test('should be marked as stale', async () => {
-          expect.assertions(3);
-
-          await processor.processIssues(1);
-
-          expect(processor.staleIssues.length).toStrictEqual(1);
-          expect(processor.closedIssues.length).toStrictEqual(0);
-          expect(processor.removedLabelIssues.length).toStrictEqual(0);
-        });
-      });
-
-      describe('when the PR does have a milestone', (): void => {
-        beforeEach((): void => {
-          setTestIssueList(true, 'dummy-milestone');
-          setProcessor();
-        });
-
-        test('should not be marked as stale', async () => {
-          expect.assertions(3);
-
-          await processor.processIssues(1);
-
-          expect(processor.staleIssues.length).toStrictEqual(0);
-          expect(processor.closedIssues.length).toStrictEqual(0);
-          expect(processor.removedLabelIssues.length).toStrictEqual(0);
-        });
-      });
+            expect(processor.staleIssues.length).toStrictEqual(
+              shouldStale ? 1 : 0
+            );
+            expect(processor.closedIssues.length).toStrictEqual(0);
+            expect(processor.removedLabelIssues.length).toStrictEqual(0);
+          });
+        }
+      );
 
       describe('when all the issues and pull requests milestones should exempt a specific milestone', (): void => {
         beforeEach((): void => {
           opts.exemptMilestones = 'dummy-milestone';
         });
 
-        describe('when the issue does not have a milestone', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(false, '');
-            setProcessor();
-          });
+        describe.each`
+          isPullRequest | milestone                         | name                                                                            | shouldStale
+          ${false}      | ${''}                             | ${'the issue does not have a milestone'}                                        | ${true}
+          ${false}      | ${'dummy-milestone-not-exempted'} | ${'the issue does have a milestone but not matching the specific exempted one'} | ${false}
+          ${false}      | ${'dummy-milestone'}              | ${'the issue does have a milestone matching the specific exempted one'}         | ${false}
+          ${true}       | ${''}                             | ${'the PR does not have a milestone'}                                           | ${true}
+          ${true}       | ${'dummy-milestone-not-exempted'} | ${'the PR does have a milestone but not matching the specific exempted one'}    | ${false}
+          ${true}       | ${'dummy-milestone'}              | ${'the PR does have a milestone matching the specific exempted one'}            | ${false}
+        `(
+          'when $name',
+          ({isPullRequest, milestone, shouldStale}: ITestData): void => {
+            beforeEach((): void => {
+              setTestIssueList(isPullRequest, milestone);
+              setProcessor();
+            });
 
-          test('should be marked as stale', async () => {
-            expect.assertions(3);
+            test(`should${
+              shouldStale ? '' : ' not'
+            } be marked as stale`, async () => {
+              expect.assertions(3);
 
-            await processor.processIssues(1);
+              await processor.processIssues(1);
 
-            expect(processor.staleIssues.length).toStrictEqual(1);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
-
-        describe('when the issue does have a milestone but not matching the specific exempted one', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(false, 'dummy-milestone-not-exempted');
-            setProcessor();
-          });
-
-          test('should not be marked as stale', async () => {
-            expect.assertions(3);
-
-            await processor.processIssues(1);
-
-            expect(processor.staleIssues.length).toStrictEqual(0);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
-
-        describe('when the issue does have a milestone matching the specific exempted one', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(false, 'dummy-milestone');
-            setProcessor();
-          });
-
-          test('should not be marked as stale', async () => {
-            expect.assertions(3);
-
-            await processor.processIssues(1);
-
-            expect(processor.staleIssues.length).toStrictEqual(0);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
-
-        describe('when the PR does not have a milestone', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(true, '');
-            setProcessor();
-          });
-
-          test('should be marked as stale', async () => {
-            expect.assertions(3);
-
-            await processor.processIssues(1);
-
-            expect(processor.staleIssues.length).toStrictEqual(1);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
-
-        describe('when the PR does have a milestone but not matching the specific exempted one', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(true, 'dummy-milestone-not-exempted');
-            setProcessor();
-          });
-
-          test('should not be marked as stale', async () => {
-            expect.assertions(3);
-
-            await processor.processIssues(1);
-
-            expect(processor.staleIssues.length).toStrictEqual(0);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
-
-        describe('when the PR does have a milestone matching the specific exempted one', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(true, 'dummy-milestone');
-            setProcessor();
-          });
-
-          test('should not be marked as stale', async () => {
-            expect.assertions(3);
-
-            await processor.processIssues(1);
-
-            expect(processor.staleIssues.length).toStrictEqual(0);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
+              expect(processor.staleIssues.length).toStrictEqual(
+                shouldStale ? 1 : 0
+              );
+              expect(processor.closedIssues.length).toStrictEqual(0);
+              expect(processor.removedLabelIssues.length).toStrictEqual(0);
+            });
+          }
+        );
 
         describe('when all the issues milestones should exempt a specific milestone', (): void => {
           beforeEach((): void => {
             opts.exemptIssueMilestones = 'dummy-issue-milestone';
           });
 
-          describe('when the issue does not have a milestone', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, '');
-              setProcessor();
-            });
+          describe.each`
+            isPullRequest | milestone                         | name                                                                                  | shouldStale
+            ${false}      | ${''}                             | ${'the issue does not have a milestone'}                                              | ${true}
+            ${false}      | ${'dummy-milestone-not-exempted'} | ${'the issue does have a milestone but not matching the specific issue exempted one'} | ${false}
+            ${false}      | ${'dummy-issue-milestone'}        | ${'the issue does have a milestone matching the specific issue exempted one'}         | ${false}
+            ${false}      | ${'dummy-milestone'}              | ${'the issue does have a milestone matching the specific exempted one'}               | ${false}
+            ${true}       | ${''}                             | ${'the PR does not have a milestone'}                                                 | ${true}
+            ${true}       | ${'dummy-milestone-not-exempted'} | ${'the PR does have a milestone but not matching the specific issue exempted one'}    | ${false}
+            ${true}       | ${'dummy-issue-milestone'}        | ${'the PR does have a milestone matching the specific issue exempted one'}            | ${false}
+            ${true}       | ${'dummy-milestone'}              | ${'the PR does have a milestone matching the specific exempted one'}                  | ${false}
+          `(
+            'when $name',
+            ({isPullRequest, milestone, shouldStale}: ITestData): void => {
+              beforeEach((): void => {
+                setTestIssueList(isPullRequest, milestone);
+                setProcessor();
+              });
 
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
+              test(`should${
+                shouldStale ? '' : ' not'
+              } be marked as stale`, async () => {
+                expect.assertions(3);
 
-              await processor.processIssues(1);
+                await processor.processIssues(1);
 
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone but not matching the specific issue exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-milestone-not-exempted');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone matching the specific issue exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-issue-milestone');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone matching the specific exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-milestone');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does not have a milestone', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, '');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone but not matching the specific issue exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-milestone-not-exempted');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone matching the specific issue exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-issue-milestone');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone matching the specific exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-milestone');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
+                expect(processor.staleIssues.length).toStrictEqual(
+                  shouldStale ? 1 : 0
+                );
+                expect(processor.closedIssues.length).toStrictEqual(0);
+                expect(processor.removedLabelIssues.length).toStrictEqual(0);
+              });
+            }
+          );
         });
 
         describe('when all the pull requests milestones should exempt a specific milestone', (): void => {
@@ -7397,141 +2431,39 @@ describe('milestones options', (): void => {
             opts.exemptPrMilestones = 'dummy-pull-request-milestone';
           });
 
-          describe('when the issue does not have a milestone', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, '');
-              setProcessor();
-            });
+          describe.each`
+            isPullRequest | milestone                         | name                                                                                         | shouldStale
+            ${false}      | ${''}                             | ${'the issue does not have a milestone'}                                                     | ${true}
+            ${false}      | ${'dummy-milestone-not-exempted'} | ${'the issue does have a milestone but not matching the specific pull request exempted one'} | ${false}
+            ${false}      | ${'dummy-pull-request-milestone'} | ${'the issue does have a milestone matching the specific pull request exempted one'}         | ${false}
+            ${false}      | ${'dummy-milestone'}              | ${'the issue does have a milestone matching the specific exempted one'}                      | ${false}
+            ${true}       | ${''}                             | ${'the PR does not have a milestone'}                                                        | ${true}
+            ${true}       | ${'dummy-milestone-not-exempted'} | ${'the PR does have a milestone but not matching the specific pull request exempted one'}    | ${false}
+            ${true}       | ${'dummy-pull-request-milestone'} | ${'the PR does have a milestone matching the specific pull request exempted one'}            | ${false}
+            ${true}       | ${'dummy-milestone'}              | ${'the PR does have a milestone matching the specific exempted one'}                         | ${false}
+          `(
+            'when $name',
+            ({isPullRequest, milestone, shouldStale}: ITestData): void => {
+              beforeEach((): void => {
+                setTestIssueList(isPullRequest, milestone);
+                setProcessor();
+              });
 
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
+              test(`should${
+                shouldStale ? '' : ' not'
+              } be marked as stale`, async () => {
+                expect.assertions(3);
 
-              await processor.processIssues(1);
+                await processor.processIssues(1);
 
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone but not matching the specific pull request exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-milestone-not-exempted');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone matching the specific pull request exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-pull-request-milestone');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone matching the specific exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-milestone');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does not have a milestone', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, '');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone but not matching the specific pull request exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-milestone-not-exempted');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone matching the specific pull request exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-pull-request-milestone');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone matching the specific exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-milestone');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
+                expect(processor.staleIssues.length).toStrictEqual(
+                  shouldStale ? 1 : 0
+                );
+                expect(processor.closedIssues.length).toStrictEqual(0);
+                expect(processor.removedLabelIssues.length).toStrictEqual(0);
+              });
+            }
+          );
         });
       });
 
@@ -7540,107 +2472,37 @@ describe('milestones options', (): void => {
           opts.exemptMilestones = 'dummy-milestone1, dummy-milestone2';
         });
 
-        describe('when the issue does not have a milestone', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(false, '');
-            setProcessor();
-          });
+        describe.each`
+          isPullRequest | milestone                         | name                                                                            | shouldStale
+          ${false}      | ${''}                             | ${'the issue does not have a milestone'}                                        | ${true}
+          ${false}      | ${'dummy-milestone-not-exempted'} | ${'the issue does have a milestone but not matching the specific exempted one'} | ${false}
+          ${false}      | ${'dummy-milestone2'}             | ${'the issue does have a milestone matching the specific exempted one'}         | ${false}
+          ${true}       | ${''}                             | ${'the PR does not have a milestone'}                                           | ${true}
+          ${true}       | ${'dummy-milestone-not-exempted'} | ${'the PR does have a milestone but not matching the specific exempted one'}    | ${false}
+          ${true}       | ${'dummy-milestone2'}             | ${'the PR does have a milestone matching the specific exempted one'}            | ${false}
+        `(
+          'when $name',
+          ({isPullRequest, milestone, shouldStale}: ITestData): void => {
+            beforeEach((): void => {
+              setTestIssueList(isPullRequest, milestone);
+              setProcessor();
+            });
 
-          test('should be marked as stale', async () => {
-            expect.assertions(3);
+            test(`should${
+              shouldStale ? '' : ' not'
+            } be marked as stale`, async () => {
+              expect.assertions(3);
 
-            await processor.processIssues(1);
+              await processor.processIssues(1);
 
-            expect(processor.staleIssues.length).toStrictEqual(1);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
-
-        describe('when the issue does have a milestone but not matching the specific exempted one', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(false, 'dummy-milestone-not-exempted');
-            setProcessor();
-          });
-
-          test('should not be marked as stale', async () => {
-            expect.assertions(3);
-
-            await processor.processIssues(1);
-
-            expect(processor.staleIssues.length).toStrictEqual(0);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
-
-        describe('when the issue does have a milestone matching the specific exempted one', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(false, 'dummy-milestone2');
-            setProcessor();
-          });
-
-          test('should not be marked as stale', async () => {
-            expect.assertions(3);
-
-            await processor.processIssues(1);
-
-            expect(processor.staleIssues.length).toStrictEqual(0);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
-
-        describe('when the PR does not have a milestone', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(true, '');
-            setProcessor();
-          });
-
-          test('should be marked as stale', async () => {
-            expect.assertions(3);
-
-            await processor.processIssues(1);
-
-            expect(processor.staleIssues.length).toStrictEqual(1);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
-
-        describe('when the PR does have a milestone but not matching the specific exempted one', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(true, 'dummy-milestone-not-exempted');
-            setProcessor();
-          });
-
-          test('should not be marked as stale', async () => {
-            expect.assertions(3);
-
-            await processor.processIssues(1);
-
-            expect(processor.staleIssues.length).toStrictEqual(0);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
-
-        describe('when the PR does have a milestone matching the specific exempted one', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(true, 'dummy-milestone2');
-            setProcessor();
-          });
-
-          test('should not be marked as stale', async () => {
-            expect.assertions(3);
-
-            await processor.processIssues(1);
-
-            expect(processor.staleIssues.length).toStrictEqual(0);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
+              expect(processor.staleIssues.length).toStrictEqual(
+                shouldStale ? 1 : 0
+              );
+              expect(processor.closedIssues.length).toStrictEqual(0);
+              expect(processor.removedLabelIssues.length).toStrictEqual(0);
+            });
+          }
+        );
 
         describe('when all the issues milestones should exempt a specific milestone', (): void => {
           beforeEach((): void => {
@@ -7648,141 +2510,39 @@ describe('milestones options', (): void => {
               'dummy-issue-milestone1, dummy-issue-milestone2';
           });
 
-          describe('when the issue does not have a milestone', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, '');
-              setProcessor();
-            });
+          describe.each`
+            isPullRequest | milestone                         | name                                                                                  | shouldStale
+            ${false}      | ${''}                             | ${'the issue does not have a milestone'}                                              | ${true}
+            ${false}      | ${'dummy-milestone-not-exempted'} | ${'the issue does have a milestone but not matching the specific issue exempted one'} | ${false}
+            ${false}      | ${'dummy-issue-milestone2'}       | ${'the issue does have a milestone matching the specific issue exempted one'}         | ${false}
+            ${false}      | ${'dummy-milestone2'}             | ${'the issue does have a milestone matching the specific exempted one'}               | ${false}
+            ${true}       | ${''}                             | ${'the PR does not have a milestone'}                                                 | ${true}
+            ${true}       | ${'dummy-milestone-not-exempted'} | ${'the PR does have a milestone but not matching the specific issue exempted one'}    | ${false}
+            ${true}       | ${'dummy-issue-milestone2'}       | ${'the PR does have a milestone matching the specific issue exempted one'}            | ${false}
+            ${true}       | ${'dummy-milestone2'}             | ${'the PR does have a milestone matching the specific exempted one'}                  | ${false}
+          `(
+            'when $name',
+            ({isPullRequest, milestone, shouldStale}: ITestData): void => {
+              beforeEach((): void => {
+                setTestIssueList(isPullRequest, milestone);
+                setProcessor();
+              });
 
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
+              test(`should${
+                shouldStale ? '' : ' not'
+              } be marked as stale`, async () => {
+                expect.assertions(3);
 
-              await processor.processIssues(1);
+                await processor.processIssues(1);
 
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone but not matching the specific issue exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-milestone-not-exempted');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone matching the specific issue exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-issue-milestone2');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone matching the specific exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-milestone2');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does not have a milestone', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, '');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone but not matching the specific issue exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-milestone-not-exempted');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone matching the specific issue exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-issue-milestone2');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone matching the specific exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-milestone2');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
+                expect(processor.staleIssues.length).toStrictEqual(
+                  shouldStale ? 1 : 0
+                );
+                expect(processor.closedIssues.length).toStrictEqual(0);
+                expect(processor.removedLabelIssues.length).toStrictEqual(0);
+              });
+            }
+          );
         });
 
         describe('when all the pull requests milestones should exempt a specific milestone', (): void => {
@@ -7791,141 +2551,39 @@ describe('milestones options', (): void => {
               'dummy-pull-request-milestone1, dummy-pull-request-milestone2';
           });
 
-          describe('when the issue does not have a milestone', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, '');
-              setProcessor();
-            });
+          describe.each`
+            isPullRequest | milestone                          | name                                                                                         | shouldStale
+            ${false}      | ${''}                              | ${'the issue does not have a milestone'}                                                     | ${true}
+            ${false}      | ${'dummy-milestone-not-exempted'}  | ${'the issue does have a milestone but not matching the specific pull request exempted one'} | ${false}
+            ${false}      | ${'dummy-pull-request-milestone2'} | ${'the issue does have a milestone matching the specific pull request exempted one'}         | ${false}
+            ${false}      | ${'dummy-milestone2'}              | ${'the issue does have a milestone matching the specific exempted one'}                      | ${false}
+            ${true}       | ${''}                              | ${'the PR does not have a milestone'}                                                        | ${true}
+            ${true}       | ${'dummy-milestone-not-exempted'}  | ${'the PR does have a milestone but not matching the specific pull request exempted one'}    | ${false}
+            ${true}       | ${'dummy-pull-request-milestone2'} | ${'the PR does have a milestone matching the specific pull request exempted one'}            | ${false}
+            ${true}       | ${'dummy-milestone2'}              | ${'the PR does have a milestone matching the specific exempted one'}                         | ${false}
+          `(
+            'when $name',
+            ({isPullRequest, milestone, shouldStale}: ITestData): void => {
+              beforeEach((): void => {
+                setTestIssueList(isPullRequest, milestone);
+                setProcessor();
+              });
 
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
+              test(`should${
+                shouldStale ? '' : ' not'
+              } be marked as stale`, async () => {
+                expect.assertions(3);
 
-              await processor.processIssues(1);
+                await processor.processIssues(1);
 
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone but not matching the specific pull request exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-milestone-not-exempted');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone matching the specific pull request exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-pull-request-milestone2');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone matching the specific exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-milestone2');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does not have a milestone', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, '');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone but not matching the specific pull request exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-milestone-not-exempted');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone matching the specific pull request exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-pull-request-milestone2');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone matching the specific exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-milestone2');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
+                expect(processor.staleIssues.length).toStrictEqual(
+                  shouldStale ? 1 : 0
+                );
+                expect(processor.closedIssues.length).toStrictEqual(0);
+                expect(processor.removedLabelIssues.length).toStrictEqual(0);
+              });
+            }
+          );
         });
       });
     });
@@ -7935,321 +2593,111 @@ describe('milestones options', (): void => {
         opts.exemptAllPrMilestones = undefined;
       });
 
-      describe('when the issue does not have a milestone', (): void => {
-        beforeEach((): void => {
-          setTestIssueList(false, '');
-          setProcessor();
-        });
+      describe.each`
+        isPullRequest | milestone            | name                                     | shouldStale
+        ${false}      | ${''}                | ${'the issue does not have a milestone'} | ${true}
+        ${false}      | ${'dummy-milestone'} | ${'the issue does have a milestone'}     | ${false}
+        ${true}       | ${''}                | ${'the PR does not have a milestone'}    | ${true}
+        ${true}       | ${'dummy-milestone'} | ${'the PR does have a milestone'}        | ${false}
+      `(
+        'when $name',
+        ({isPullRequest, milestone, shouldStale}: ITestData): void => {
+          beforeEach((): void => {
+            setTestIssueList(isPullRequest, milestone);
+            setProcessor();
+          });
 
-        test('should be marked as stale', async () => {
-          expect.assertions(3);
+          test(`should${
+            shouldStale ? '' : ' not'
+          } be marked as stale`, async () => {
+            expect.assertions(3);
 
-          await processor.processIssues(1);
+            await processor.processIssues(1);
 
-          expect(processor.staleIssues.length).toStrictEqual(1);
-          expect(processor.closedIssues.length).toStrictEqual(0);
-          expect(processor.removedLabelIssues.length).toStrictEqual(0);
-        });
-      });
-
-      describe('when the issue does have a milestone', (): void => {
-        beforeEach((): void => {
-          setTestIssueList(false, 'dummy-milestone');
-          setProcessor();
-        });
-
-        test('should not be marked as stale', async () => {
-          expect.assertions(3);
-
-          await processor.processIssues(1);
-
-          expect(processor.staleIssues.length).toStrictEqual(0);
-          expect(processor.closedIssues.length).toStrictEqual(0);
-          expect(processor.removedLabelIssues.length).toStrictEqual(0);
-        });
-      });
-
-      describe('when the PR does not have a milestone', (): void => {
-        beforeEach((): void => {
-          setTestIssueList(true, '');
-          setProcessor();
-        });
-
-        test('should be marked as stale', async () => {
-          expect.assertions(3);
-
-          await processor.processIssues(1);
-
-          expect(processor.staleIssues.length).toStrictEqual(1);
-          expect(processor.closedIssues.length).toStrictEqual(0);
-          expect(processor.removedLabelIssues.length).toStrictEqual(0);
-        });
-      });
-
-      describe('when the PR does have a milestone', (): void => {
-        beforeEach((): void => {
-          setTestIssueList(true, 'dummy-milestone');
-          setProcessor();
-        });
-
-        test('should not be marked as stale', async () => {
-          expect.assertions(3);
-
-          await processor.processIssues(1);
-
-          expect(processor.staleIssues.length).toStrictEqual(0);
-          expect(processor.closedIssues.length).toStrictEqual(0);
-          expect(processor.removedLabelIssues.length).toStrictEqual(0);
-        });
-      });
+            expect(processor.staleIssues.length).toStrictEqual(
+              shouldStale ? 1 : 0
+            );
+            expect(processor.closedIssues.length).toStrictEqual(0);
+            expect(processor.removedLabelIssues.length).toStrictEqual(0);
+          });
+        }
+      );
 
       describe('when all the issues and pull requests milestones should exempt a specific milestone', (): void => {
         beforeEach((): void => {
           opts.exemptMilestones = 'dummy-milestone';
         });
 
-        describe('when the issue does not have a milestone', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(false, '');
-            setProcessor();
-          });
+        describe.each`
+          isPullRequest | milestone                         | name                                                                            | shouldStale
+          ${false}      | ${''}                             | ${'the issue does not have a milestone'}                                        | ${true}
+          ${false}      | ${'dummy-milestone-not-exempted'} | ${'the issue does have a milestone but not matching the specific exempted one'} | ${false}
+          ${false}      | ${'dummy-milestone'}              | ${'the issue does have a milestone matching the specific exempted one'}         | ${false}
+          ${true}       | ${''}                             | ${'the PR does not have a milestone'}                                           | ${true}
+          ${true}       | ${'dummy-milestone-not-exempted'} | ${'the PR does have a milestone but not matching the specific exempted one'}    | ${false}
+          ${true}       | ${'dummy-milestone'}              | ${'the PR does have a milestone matching the specific exempted one'}            | ${false}
+        `(
+          'when $name',
+          ({isPullRequest, milestone, shouldStale}: ITestData): void => {
+            beforeEach((): void => {
+              setTestIssueList(isPullRequest, milestone);
+              setProcessor();
+            });
 
-          test('should be marked as stale', async () => {
-            expect.assertions(3);
+            test(`should${
+              shouldStale ? '' : ' not'
+            } be marked as stale`, async () => {
+              expect.assertions(3);
 
-            await processor.processIssues(1);
+              await processor.processIssues(1);
 
-            expect(processor.staleIssues.length).toStrictEqual(1);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
-
-        describe('when the issue does have a milestone but not matching the specific exempted one', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(false, 'dummy-milestone-not-exempted');
-            setProcessor();
-          });
-
-          test('should not be marked as stale', async () => {
-            expect.assertions(3);
-
-            await processor.processIssues(1);
-
-            expect(processor.staleIssues.length).toStrictEqual(0);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
-
-        describe('when the issue does have a milestone matching the specific exempted one', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(false, 'dummy-milestone');
-            setProcessor();
-          });
-
-          test('should not be marked as stale', async () => {
-            expect.assertions(3);
-
-            await processor.processIssues(1);
-
-            expect(processor.staleIssues.length).toStrictEqual(0);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
-
-        describe('when the PR does not have a milestone', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(true, '');
-            setProcessor();
-          });
-
-          test('should be marked as stale', async () => {
-            expect.assertions(3);
-
-            await processor.processIssues(1);
-
-            expect(processor.staleIssues.length).toStrictEqual(1);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
-
-        describe('when the PR does have a milestone but not matching the specific exempted one', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(true, 'dummy-milestone-not-exempted');
-            setProcessor();
-          });
-
-          test('should not be marked as stale', async () => {
-            expect.assertions(3);
-
-            await processor.processIssues(1);
-
-            expect(processor.staleIssues.length).toStrictEqual(0);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
-
-        describe('when the PR does have a milestone matching the specific exempted one', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(true, 'dummy-milestone');
-            setProcessor();
-          });
-
-          test('should not be marked as stale', async () => {
-            expect.assertions(3);
-
-            await processor.processIssues(1);
-
-            expect(processor.staleIssues.length).toStrictEqual(0);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
+              expect(processor.staleIssues.length).toStrictEqual(
+                shouldStale ? 1 : 0
+              );
+              expect(processor.closedIssues.length).toStrictEqual(0);
+              expect(processor.removedLabelIssues.length).toStrictEqual(0);
+            });
+          }
+        );
 
         describe('when all the issues milestones should exempt a specific milestone', (): void => {
           beforeEach((): void => {
             opts.exemptIssueMilestones = 'dummy-issue-milestone';
           });
 
-          describe('when the issue does not have a milestone', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, '');
-              setProcessor();
-            });
+          describe.each`
+            isPullRequest | milestone                         | name                                                                                  | shouldStale
+            ${false}      | ${''}                             | ${'the issue does not have a milestone'}                                              | ${true}
+            ${false}      | ${'dummy-milestone-not-exempted'} | ${'the issue does have a milestone but not matching the specific issue exempted one'} | ${false}
+            ${false}      | ${'dummy-issue-milestone'}        | ${'the issue does have a milestone matching the specific issue exempted one'}         | ${false}
+            ${false}      | ${'dummy-milestone'}              | ${'the issue does have a milestone matching the specific exempted one'}               | ${false}
+            ${true}       | ${''}                             | ${'the PR does not have a milestone'}                                                 | ${true}
+            ${true}       | ${'dummy-milestone-not-exempted'} | ${'the PR does have a milestone but not matching the specific issue exempted one'}    | ${false}
+            ${true}       | ${'dummy-issue-milestone'}        | ${'the PR does have a milestone matching the specific issue exempted one'}            | ${false}
+            ${true}       | ${'dummy-milestone'}              | ${'the PR does have a milestone matching the specific exempted one'}                  | ${false}
+          `(
+            'when $name',
+            ({isPullRequest, milestone, shouldStale}: ITestData): void => {
+              beforeEach((): void => {
+                setTestIssueList(isPullRequest, milestone);
+                setProcessor();
+              });
 
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
+              test(`should${
+                shouldStale ? '' : ' not'
+              } be marked as stale`, async () => {
+                expect.assertions(3);
 
-              await processor.processIssues(1);
+                await processor.processIssues(1);
 
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone but not matching the specific issue exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-milestone-not-exempted');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone matching the specific issue exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-issue-milestone');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone matching the specific exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-milestone');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does not have a milestone', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, '');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone but not matching the specific issue exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-milestone-not-exempted');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone matching the specific issue exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-issue-milestone');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone matching the specific exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-milestone');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
+                expect(processor.staleIssues.length).toStrictEqual(
+                  shouldStale ? 1 : 0
+                );
+                expect(processor.closedIssues.length).toStrictEqual(0);
+                expect(processor.removedLabelIssues.length).toStrictEqual(0);
+              });
+            }
+          );
         });
 
         describe('when all the pull requests milestones should exempt a specific milestone', (): void => {
@@ -8257,141 +2705,39 @@ describe('milestones options', (): void => {
             opts.exemptPrMilestones = 'dummy-pull-request-milestone';
           });
 
-          describe('when the issue does not have a milestone', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, '');
-              setProcessor();
-            });
+          describe.each`
+            isPullRequest | milestone                         | name                                                                                         | shouldStale
+            ${false}      | ${''}                             | ${'the issue does not have a milestone'}                                                     | ${true}
+            ${false}      | ${'dummy-milestone-not-exempted'} | ${'the issue does have a milestone but not matching the specific pull request exempted one'} | ${false}
+            ${false}      | ${'dummy-pull-request-milestone'} | ${'the issue does have a milestone matching the specific pull request exempted one'}         | ${false}
+            ${false}      | ${'dummy-milestone'}              | ${'the issue does have a milestone matching the specific exempted one'}                      | ${false}
+            ${true}       | ${''}                             | ${'the PR does not have a milestone'}                                                        | ${true}
+            ${true}       | ${'dummy-milestone-not-exempted'} | ${'the PR does have a milestone but not matching the specific pull request exempted one'}    | ${false}
+            ${true}       | ${'dummy-pull-request-milestone'} | ${'the PR does have a milestone matching the specific pull request exempted one'}            | ${false}
+            ${true}       | ${'dummy-milestone'}              | ${'the PR does have a milestone matching the specific exempted one'}                         | ${false}
+          `(
+            'when $name',
+            ({isPullRequest, milestone, shouldStale}: ITestData): void => {
+              beforeEach((): void => {
+                setTestIssueList(isPullRequest, milestone);
+                setProcessor();
+              });
 
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
+              test(`should${
+                shouldStale ? '' : ' not'
+              } be marked as stale`, async () => {
+                expect.assertions(3);
 
-              await processor.processIssues(1);
+                await processor.processIssues(1);
 
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone but not matching the specific pull request exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-milestone-not-exempted');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone matching the specific pull request exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-pull-request-milestone');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone matching the specific exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-milestone');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does not have a milestone', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, '');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone but not matching the specific pull request exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-milestone-not-exempted');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone matching the specific pull request exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-pull-request-milestone');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone matching the specific exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-milestone');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
+                expect(processor.staleIssues.length).toStrictEqual(
+                  shouldStale ? 1 : 0
+                );
+                expect(processor.closedIssues.length).toStrictEqual(0);
+                expect(processor.removedLabelIssues.length).toStrictEqual(0);
+              });
+            }
+          );
         });
       });
 
@@ -8400,107 +2746,37 @@ describe('milestones options', (): void => {
           opts.exemptMilestones = 'dummy-milestone1, dummy-milestone2';
         });
 
-        describe('when the issue does not have a milestone', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(false, '');
-            setProcessor();
-          });
+        describe.each`
+          isPullRequest | milestone                         | name                                                                            | shouldStale
+          ${false}      | ${''}                             | ${'the issue does not have a milestone'}                                        | ${true}
+          ${false}      | ${'dummy-milestone-not-exempted'} | ${'the issue does have a milestone but not matching the specific exempted one'} | ${false}
+          ${false}      | ${'dummy-milestone2'}             | ${'the issue does have a milestone matching the specific exempted one'}         | ${false}
+          ${true}       | ${''}                             | ${'the PR does not have a milestone'}                                           | ${true}
+          ${true}       | ${'dummy-milestone-not-exempted'} | ${'the PR does have a milestone but not matching the specific exempted one'}    | ${false}
+          ${true}       | ${'dummy-milestone2'}             | ${'the PR does have a milestone matching the specific exempted one'}            | ${false}
+        `(
+          'when $name',
+          ({isPullRequest, milestone, shouldStale}: ITestData): void => {
+            beforeEach((): void => {
+              setTestIssueList(isPullRequest, milestone);
+              setProcessor();
+            });
 
-          test('should be marked as stale', async () => {
-            expect.assertions(3);
+            test(`should${
+              shouldStale ? '' : ' not'
+            } be marked as stale`, async () => {
+              expect.assertions(3);
 
-            await processor.processIssues(1);
+              await processor.processIssues(1);
 
-            expect(processor.staleIssues.length).toStrictEqual(1);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
-
-        describe('when the issue does have a milestone but not matching the specific exempted one', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(false, 'dummy-milestone-not-exempted');
-            setProcessor();
-          });
-
-          test('should not be marked as stale', async () => {
-            expect.assertions(3);
-
-            await processor.processIssues(1);
-
-            expect(processor.staleIssues.length).toStrictEqual(0);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
-
-        describe('when the issue does have a milestone matching the specific exempted one', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(false, 'dummy-milestone2');
-            setProcessor();
-          });
-
-          test('should not be marked as stale', async () => {
-            expect.assertions(3);
-
-            await processor.processIssues(1);
-
-            expect(processor.staleIssues.length).toStrictEqual(0);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
-
-        describe('when the PR does not have a milestone', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(true, '');
-            setProcessor();
-          });
-
-          test('should be marked as stale', async () => {
-            expect.assertions(3);
-
-            await processor.processIssues(1);
-
-            expect(processor.staleIssues.length).toStrictEqual(1);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
-
-        describe('when the PR does have a milestone but not matching the specific exempted one', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(true, 'dummy-milestone-not-exempted');
-            setProcessor();
-          });
-
-          test('should not be marked as stale', async () => {
-            expect.assertions(3);
-
-            await processor.processIssues(1);
-
-            expect(processor.staleIssues.length).toStrictEqual(0);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
-
-        describe('when the PR does have a milestone matching the specific exempted one', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(true, 'dummy-milestone2');
-            setProcessor();
-          });
-
-          test('should not be marked as stale', async () => {
-            expect.assertions(3);
-
-            await processor.processIssues(1);
-
-            expect(processor.staleIssues.length).toStrictEqual(0);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
+              expect(processor.staleIssues.length).toStrictEqual(
+                shouldStale ? 1 : 0
+              );
+              expect(processor.closedIssues.length).toStrictEqual(0);
+              expect(processor.removedLabelIssues.length).toStrictEqual(0);
+            });
+          }
+        );
 
         describe('when all the issues milestones should exempt a specific milestone', (): void => {
           beforeEach((): void => {
@@ -8508,141 +2784,39 @@ describe('milestones options', (): void => {
               'dummy-issue-milestone1, dummy-issue-milestone2';
           });
 
-          describe('when the issue does not have a milestone', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, '');
-              setProcessor();
-            });
+          describe.each`
+            isPullRequest | milestone                         | name                                                                                  | shouldStale
+            ${false}      | ${''}                             | ${'the issue does not have a milestone'}                                              | ${true}
+            ${false}      | ${'dummy-milestone-not-exempted'} | ${'the issue does have a milestone but not matching the specific issue exempted one'} | ${false}
+            ${false}      | ${'dummy-issue-milestone2'}       | ${'the issue does have a milestone matching the specific issue exempted one'}         | ${false}
+            ${false}      | ${'dummy-milestone2'}             | ${'the issue does have a milestone matching the specific exempted one'}               | ${false}
+            ${true}       | ${''}                             | ${'the PR does not have a milestone'}                                                 | ${true}
+            ${true}       | ${'dummy-milestone-not-exempted'} | ${'the PR does have a milestone but not matching the specific issue exempted one'}    | ${false}
+            ${true}       | ${'dummy-issue-milestone2'}       | ${'the PR does have a milestone matching the specific issue exempted one'}            | ${false}
+            ${true}       | ${'dummy-milestone2'}             | ${'the PR does have a milestone matching the specific exempted one'}                  | ${false}
+          `(
+            'when $name',
+            ({isPullRequest, milestone, shouldStale}: ITestData): void => {
+              beforeEach((): void => {
+                setTestIssueList(isPullRequest, milestone);
+                setProcessor();
+              });
 
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
+              test(`should${
+                shouldStale ? '' : ' not'
+              } be marked as stale`, async () => {
+                expect.assertions(3);
 
-              await processor.processIssues(1);
+                await processor.processIssues(1);
 
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone but not matching the specific issue exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-milestone-not-exempted');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone matching the specific issue exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-issue-milestone2');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone matching the specific exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-milestone2');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does not have a milestone', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, '');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone but not matching the specific issue exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-milestone-not-exempted');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone matching the specific issue exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-issue-milestone2');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone matching the specific exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-milestone2');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
+                expect(processor.staleIssues.length).toStrictEqual(
+                  shouldStale ? 1 : 0
+                );
+                expect(processor.closedIssues.length).toStrictEqual(0);
+                expect(processor.removedLabelIssues.length).toStrictEqual(0);
+              });
+            }
+          );
         });
 
         describe('when all the pull requests milestones should exempt a specific milestone', (): void => {
@@ -8651,141 +2825,39 @@ describe('milestones options', (): void => {
               'dummy-pull-request-milestone1, dummy-pull-request-milestone2';
           });
 
-          describe('when the issue does not have a milestone', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, '');
-              setProcessor();
-            });
+          describe.each`
+            isPullRequest | milestone                          | name                                                                                         | shouldStale
+            ${false}      | ${''}                              | ${'the issue does not have a milestone'}                                                     | ${true}
+            ${false}      | ${'dummy-milestone-not-exempted'}  | ${'the issue does have a milestone but not matching the specific pull request exempted one'} | ${false}
+            ${false}      | ${'dummy-pull-request-milestone2'} | ${'the issue does have a milestone matching the specific pull request exempted one'}         | ${false}
+            ${false}      | ${'dummy-milestone2'}              | ${'the issue does have a milestone matching the specific exempted one'}                      | ${false}
+            ${true}       | ${''}                              | ${'the PR does not have a milestone'}                                                        | ${true}
+            ${true}       | ${'dummy-milestone-not-exempted'}  | ${'the PR does have a milestone but not matching the specific pull request exempted one'}    | ${false}
+            ${true}       | ${'dummy-pull-request-milestone2'} | ${'the PR does have a milestone matching the specific pull request exempted one'}            | ${false}
+            ${true}       | ${'dummy-milestone2'}              | ${'the PR does have a milestone matching the specific exempted one'}                         | ${false}
+          `(
+            'when $name',
+            ({isPullRequest, milestone, shouldStale}: ITestData): void => {
+              beforeEach((): void => {
+                setTestIssueList(isPullRequest, milestone);
+                setProcessor();
+              });
 
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
+              test(`should${
+                shouldStale ? '' : ' not'
+              } be marked as stale`, async () => {
+                expect.assertions(3);
 
-              await processor.processIssues(1);
+                await processor.processIssues(1);
 
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone but not matching the specific pull request exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-milestone-not-exempted');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone matching the specific pull request exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-pull-request-milestone2');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone matching the specific exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-milestone2');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does not have a milestone', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, '');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone but not matching the specific pull request exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-milestone-not-exempted');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone matching the specific pull request exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-pull-request-milestone2');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone matching the specific exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-milestone2');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
+                expect(processor.staleIssues.length).toStrictEqual(
+                  shouldStale ? 1 : 0
+                );
+                expect(processor.closedIssues.length).toStrictEqual(0);
+                expect(processor.removedLabelIssues.length).toStrictEqual(0);
+              });
+            }
+          );
         });
       });
     });
@@ -8795,321 +2867,111 @@ describe('milestones options', (): void => {
         opts.exemptAllPrMilestones = false;
       });
 
-      describe('when the issue does not have a milestone', (): void => {
-        beforeEach((): void => {
-          setTestIssueList(false, '');
-          setProcessor();
-        });
+      describe.each`
+        isPullRequest | milestone            | name                                     | shouldStale
+        ${false}      | ${''}                | ${'the issue does not have a milestone'} | ${true}
+        ${false}      | ${'dummy-milestone'} | ${'the issue does have a milestone'}     | ${false}
+        ${true}       | ${''}                | ${'the PR does not have a milestone'}    | ${true}
+        ${true}       | ${'dummy-milestone'} | ${'the PR does have a milestone'}        | ${true}
+      `(
+        'when $name',
+        ({isPullRequest, milestone, shouldStale}: ITestData): void => {
+          beforeEach((): void => {
+            setTestIssueList(isPullRequest, milestone);
+            setProcessor();
+          });
 
-        test('should be marked as stale', async () => {
-          expect.assertions(3);
+          test(`should${
+            shouldStale ? '' : ' not'
+          } be marked as stale`, async () => {
+            expect.assertions(3);
 
-          await processor.processIssues(1);
+            await processor.processIssues(1);
 
-          expect(processor.staleIssues.length).toStrictEqual(1);
-          expect(processor.closedIssues.length).toStrictEqual(0);
-          expect(processor.removedLabelIssues.length).toStrictEqual(0);
-        });
-      });
-
-      describe('when the issue does have a milestone', (): void => {
-        beforeEach((): void => {
-          setTestIssueList(false, 'dummy-milestone');
-          setProcessor();
-        });
-
-        test('should not be marked as stale', async () => {
-          expect.assertions(3);
-
-          await processor.processIssues(1);
-
-          expect(processor.staleIssues.length).toStrictEqual(0);
-          expect(processor.closedIssues.length).toStrictEqual(0);
-          expect(processor.removedLabelIssues.length).toStrictEqual(0);
-        });
-      });
-
-      describe('when the PR does not have a milestone', (): void => {
-        beforeEach((): void => {
-          setTestIssueList(true, '');
-          setProcessor();
-        });
-
-        test('should be marked as stale', async () => {
-          expect.assertions(3);
-
-          await processor.processIssues(1);
-
-          expect(processor.staleIssues.length).toStrictEqual(1);
-          expect(processor.closedIssues.length).toStrictEqual(0);
-          expect(processor.removedLabelIssues.length).toStrictEqual(0);
-        });
-      });
-
-      describe('when the PR does have a milestone', (): void => {
-        beforeEach((): void => {
-          setTestIssueList(true, 'dummy-milestone');
-          setProcessor();
-        });
-
-        test('should be marked as stale', async () => {
-          expect.assertions(3);
-
-          await processor.processIssues(1);
-
-          expect(processor.staleIssues.length).toStrictEqual(1);
-          expect(processor.closedIssues.length).toStrictEqual(0);
-          expect(processor.removedLabelIssues.length).toStrictEqual(0);
-        });
-      });
+            expect(processor.staleIssues.length).toStrictEqual(
+              shouldStale ? 1 : 0
+            );
+            expect(processor.closedIssues.length).toStrictEqual(0);
+            expect(processor.removedLabelIssues.length).toStrictEqual(0);
+          });
+        }
+      );
 
       describe('when all the issues and pull requests milestones should exempt a specific milestone', (): void => {
         beforeEach((): void => {
           opts.exemptMilestones = 'dummy-milestone';
         });
 
-        describe('when the issue does not have a milestone', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(false, '');
-            setProcessor();
-          });
+        describe.each`
+          isPullRequest | milestone                         | name                                                                            | shouldStale
+          ${false}      | ${''}                             | ${'the issue does not have a milestone'}                                        | ${true}
+          ${false}      | ${'dummy-milestone-not-exempted'} | ${'the issue does have a milestone but not matching the specific exempted one'} | ${false}
+          ${false}      | ${'dummy-milestone'}              | ${'the issue does have a milestone matching the specific exempted one'}         | ${false}
+          ${true}       | ${''}                             | ${'the PR does not have a milestone'}                                           | ${true}
+          ${true}       | ${'dummy-milestone-not-exempted'} | ${'the PR does have a milestone but not matching the specific exempted one'}    | ${true}
+          ${true}       | ${'dummy-milestone'}              | ${'the PR does have a milestone matching the specific exempted one'}            | ${false}
+        `(
+          'when $name',
+          ({isPullRequest, milestone, shouldStale}: ITestData): void => {
+            beforeEach((): void => {
+              setTestIssueList(isPullRequest, milestone);
+              setProcessor();
+            });
 
-          test('should be marked as stale', async () => {
-            expect.assertions(3);
+            test(`should${
+              shouldStale ? '' : ' not'
+            } be marked as stale`, async () => {
+              expect.assertions(3);
 
-            await processor.processIssues(1);
+              await processor.processIssues(1);
 
-            expect(processor.staleIssues.length).toStrictEqual(1);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
-
-        describe('when the issue does have a milestone but not matching the specific exempted one', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(false, 'dummy-milestone-not-exempted');
-            setProcessor();
-          });
-
-          test('should not be marked as stale', async () => {
-            expect.assertions(3);
-
-            await processor.processIssues(1);
-
-            expect(processor.staleIssues.length).toStrictEqual(0);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
-
-        describe('when the issue does have a milestone matching the specific exempted one', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(false, 'dummy-milestone');
-            setProcessor();
-          });
-
-          test('should not be marked as stale', async () => {
-            expect.assertions(3);
-
-            await processor.processIssues(1);
-
-            expect(processor.staleIssues.length).toStrictEqual(0);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
-
-        describe('when the PR does not have a milestone', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(true, '');
-            setProcessor();
-          });
-
-          test('should be marked as stale', async () => {
-            expect.assertions(3);
-
-            await processor.processIssues(1);
-
-            expect(processor.staleIssues.length).toStrictEqual(1);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
-
-        describe('when the PR does have a milestone but not matching the specific exempted one', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(true, 'dummy-milestone-not-exempted');
-            setProcessor();
-          });
-
-          test('should be marked as stale', async () => {
-            expect.assertions(3);
-
-            await processor.processIssues(1);
-
-            expect(processor.staleIssues.length).toStrictEqual(1);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
-
-        describe('when the PR does have a milestone matching the specific exempted one', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(true, 'dummy-milestone');
-            setProcessor();
-          });
-
-          test('should not be marked as stale', async () => {
-            expect.assertions(3);
-
-            await processor.processIssues(1);
-
-            expect(processor.staleIssues.length).toStrictEqual(0);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
+              expect(processor.staleIssues.length).toStrictEqual(
+                shouldStale ? 1 : 0
+              );
+              expect(processor.closedIssues.length).toStrictEqual(0);
+              expect(processor.removedLabelIssues.length).toStrictEqual(0);
+            });
+          }
+        );
 
         describe('when all the issues milestones should exempt a specific milestone', (): void => {
           beforeEach((): void => {
             opts.exemptIssueMilestones = 'dummy-issue-milestone';
           });
 
-          describe('when the issue does not have a milestone', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, '');
-              setProcessor();
-            });
+          describe.each`
+            isPullRequest | milestone                         | name                                                                                  | shouldStale
+            ${false}      | ${''}                             | ${'the issue does not have a milestone'}                                              | ${true}
+            ${false}      | ${'dummy-milestone-not-exempted'} | ${'the issue does have a milestone but not matching the specific issue exempted one'} | ${false}
+            ${false}      | ${'dummy-issue-milestone'}        | ${'the issue does have a milestone matching the specific issue exempted one'}         | ${false}
+            ${false}      | ${'dummy-milestone'}              | ${'the issue does have a milestone matching the specific exempted one'}               | ${false}
+            ${true}       | ${''}                             | ${'the PR does not have a milestone'}                                                 | ${true}
+            ${true}       | ${'dummy-milestone-not-exempted'} | ${'the PR does have a milestone but not matching the specific issue exempted one'}    | ${true}
+            ${true}       | ${'dummy-issue-milestone'}        | ${'the PR does have a milestone matching the specific issue exempted one'}            | ${true}
+            ${true}       | ${'dummy-milestone'}              | ${'the PR does have a milestone matching the specific exempted one'}                  | ${false}
+          `(
+            'when $name',
+            ({isPullRequest, milestone, shouldStale}: ITestData): void => {
+              beforeEach((): void => {
+                setTestIssueList(isPullRequest, milestone);
+                setProcessor();
+              });
 
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
+              test(`should${
+                shouldStale ? '' : ' not'
+              } be marked as stale`, async () => {
+                expect.assertions(3);
 
-              await processor.processIssues(1);
+                await processor.processIssues(1);
 
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone but not matching the specific issue exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-milestone-not-exempted');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone matching the specific issue exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-issue-milestone');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone matching the specific exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-milestone');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does not have a milestone', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, '');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone but not matching the specific issue exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-milestone-not-exempted');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone matching the specific issue exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-issue-milestone');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone matching the specific exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-milestone');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
+                expect(processor.staleIssues.length).toStrictEqual(
+                  shouldStale ? 1 : 0
+                );
+                expect(processor.closedIssues.length).toStrictEqual(0);
+                expect(processor.removedLabelIssues.length).toStrictEqual(0);
+              });
+            }
+          );
         });
 
         describe('when all the pull requests milestones should exempt a specific milestone', (): void => {
@@ -9117,141 +2979,39 @@ describe('milestones options', (): void => {
             opts.exemptPrMilestones = 'dummy-pull-request-milestone';
           });
 
-          describe('when the issue does not have a milestone', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, '');
-              setProcessor();
-            });
+          describe.each`
+            isPullRequest | milestone                         | name                                                                                         | shouldStale
+            ${false}      | ${''}                             | ${'the issue does not have a milestone'}                                                     | ${true}
+            ${false}      | ${'dummy-milestone-not-exempted'} | ${'the issue does have a milestone but not matching the specific pull request exempted one'} | ${false}
+            ${false}      | ${'dummy-pull-request-milestone'} | ${'the issue does have a milestone matching the specific pull request exempted one'}         | ${false}
+            ${false}      | ${'dummy-milestone'}              | ${'the issue does have a milestone matching the specific exempted one'}                      | ${false}
+            ${true}       | ${''}                             | ${'the PR does not have a milestone'}                                                        | ${true}
+            ${true}       | ${'dummy-milestone-not-exempted'} | ${'the PR does have a milestone but not matching the specific pull request exempted one'}    | ${true}
+            ${true}       | ${'dummy-pull-request-milestone'} | ${'the PR does have a milestone matching the specific pull request exempted one'}            | ${false}
+            ${true}       | ${'dummy-milestone'}              | ${'the PR does have a milestone matching the specific exempted one'}                         | ${true}
+          `(
+            'when $name',
+            ({isPullRequest, milestone, shouldStale}: ITestData): void => {
+              beforeEach((): void => {
+                setTestIssueList(isPullRequest, milestone);
+                setProcessor();
+              });
 
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
+              test(`should${
+                shouldStale ? '' : ' not'
+              } be marked as stale`, async () => {
+                expect.assertions(3);
 
-              await processor.processIssues(1);
+                await processor.processIssues(1);
 
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone but not matching the specific pull request exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-milestone-not-exempted');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone matching the specific pull request exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-pull-request-milestone');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone matching the specific exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-milestone');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does not have a milestone', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, '');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone but not matching the specific pull request exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-milestone-not-exempted');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone matching the specific pull request exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-pull-request-milestone');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone matching the specific exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-milestone');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
+                expect(processor.staleIssues.length).toStrictEqual(
+                  shouldStale ? 1 : 0
+                );
+                expect(processor.closedIssues.length).toStrictEqual(0);
+                expect(processor.removedLabelIssues.length).toStrictEqual(0);
+              });
+            }
+          );
         });
       });
 
@@ -9260,107 +3020,37 @@ describe('milestones options', (): void => {
           opts.exemptMilestones = 'dummy-milestone1, dummy-milestone2';
         });
 
-        describe('when the issue does not have a milestone', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(false, '');
-            setProcessor();
-          });
+        describe.each`
+          isPullRequest | milestone                         | name                                                                            | shouldStale
+          ${false}      | ${''}                             | ${'the issue does not have a milestone'}                                        | ${true}
+          ${false}      | ${'dummy-milestone-not-exempted'} | ${'the issue does have a milestone but not matching the specific exempted one'} | ${false}
+          ${false}      | ${'dummy-milestone2'}             | ${'the issue does have a milestone matching the specific exempted one'}         | ${false}
+          ${true}       | ${''}                             | ${'the PR does not have a milestone'}                                           | ${true}
+          ${true}       | ${'dummy-milestone-not-exempted'} | ${'the PR does have a milestone but not matching the specific exempted one'}    | ${true}
+          ${true}       | ${'dummy-milestone2'}             | ${'the PR does have a milestone matching the specific exempted one'}            | ${false}
+        `(
+          'when $name',
+          ({isPullRequest, milestone, shouldStale}: ITestData): void => {
+            beforeEach((): void => {
+              setTestIssueList(isPullRequest, milestone);
+              setProcessor();
+            });
 
-          test('should be marked as stale', async () => {
-            expect.assertions(3);
+            test(`should${
+              shouldStale ? '' : ' not'
+            } be marked as stale`, async () => {
+              expect.assertions(3);
 
-            await processor.processIssues(1);
+              await processor.processIssues(1);
 
-            expect(processor.staleIssues.length).toStrictEqual(1);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
-
-        describe('when the issue does have a milestone but not matching the specific exempted one', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(false, 'dummy-milestone-not-exempted');
-            setProcessor();
-          });
-
-          test('should not be marked as stale', async () => {
-            expect.assertions(3);
-
-            await processor.processIssues(1);
-
-            expect(processor.staleIssues.length).toStrictEqual(0);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
-
-        describe('when the issue does have a milestone matching the specific exempted one', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(false, 'dummy-milestone2');
-            setProcessor();
-          });
-
-          test('should not be marked as stale', async () => {
-            expect.assertions(3);
-
-            await processor.processIssues(1);
-
-            expect(processor.staleIssues.length).toStrictEqual(0);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
-
-        describe('when the PR does not have a milestone', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(true, '');
-            setProcessor();
-          });
-
-          test('should be marked as stale', async () => {
-            expect.assertions(3);
-
-            await processor.processIssues(1);
-
-            expect(processor.staleIssues.length).toStrictEqual(1);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
-
-        describe('when the PR does have a milestone but not matching the specific exempted one', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(true, 'dummy-milestone-not-exempted');
-            setProcessor();
-          });
-
-          test('should be marked as stale', async () => {
-            expect.assertions(3);
-
-            await processor.processIssues(1);
-
-            expect(processor.staleIssues.length).toStrictEqual(1);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
-
-        describe('when the PR does have a milestone matching the specific exempted one', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(true, 'dummy-milestone2');
-            setProcessor();
-          });
-
-          test('should not be marked as stale', async () => {
-            expect.assertions(3);
-
-            await processor.processIssues(1);
-
-            expect(processor.staleIssues.length).toStrictEqual(0);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
+              expect(processor.staleIssues.length).toStrictEqual(
+                shouldStale ? 1 : 0
+              );
+              expect(processor.closedIssues.length).toStrictEqual(0);
+              expect(processor.removedLabelIssues.length).toStrictEqual(0);
+            });
+          }
+        );
 
         describe('when all the issues milestones should exempt a specific milestone', (): void => {
           beforeEach((): void => {
@@ -9368,141 +3058,39 @@ describe('milestones options', (): void => {
               'dummy-issue-milestone1, dummy-issue-milestone2';
           });
 
-          describe('when the issue does not have a milestone', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, '');
-              setProcessor();
-            });
+          describe.each`
+            isPullRequest | milestone                         | name                                                                                  | shouldStale
+            ${false}      | ${''}                             | ${'the issue does not have a milestone'}                                              | ${true}
+            ${false}      | ${'dummy-milestone-not-exempted'} | ${'the issue does have a milestone but not matching the specific issue exempted one'} | ${false}
+            ${false}      | ${'dummy-issue-milestone2'}       | ${'the issue does have a milestone matching the specific issue exempted one'}         | ${false}
+            ${false}      | ${'dummy-milestone2'}             | ${'the issue does have a milestone matching the specific exempted one'}               | ${false}
+            ${true}       | ${''}                             | ${'the PR does not have a milestone'}                                                 | ${true}
+            ${true}       | ${'dummy-milestone-not-exempted'} | ${'the PR does have a milestone but not matching the specific issue exempted one'}    | ${true}
+            ${true}       | ${'dummy-issue-milestone2'}       | ${'the PR does have a milestone matching the specific issue exempted one'}            | ${true}
+            ${true}       | ${'dummy-milestone2'}             | ${'the PR does have a milestone matching the specific exempted one'}                  | ${false}
+          `(
+            'when $name',
+            ({isPullRequest, milestone, shouldStale}: ITestData): void => {
+              beforeEach((): void => {
+                setTestIssueList(isPullRequest, milestone);
+                setProcessor();
+              });
 
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
+              test(`should${
+                shouldStale ? '' : ' not'
+              } be marked as stale`, async () => {
+                expect.assertions(3);
 
-              await processor.processIssues(1);
+                await processor.processIssues(1);
 
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone but not matching the specific issue exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-milestone-not-exempted');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone matching the specific issue exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-issue-milestone2');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone matching the specific exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-milestone2');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does not have a milestone', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, '');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone but not matching the specific issue exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-milestone-not-exempted');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone matching the specific issue exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-issue-milestone2');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone matching the specific exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-milestone2');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
+                expect(processor.staleIssues.length).toStrictEqual(
+                  shouldStale ? 1 : 0
+                );
+                expect(processor.closedIssues.length).toStrictEqual(0);
+                expect(processor.removedLabelIssues.length).toStrictEqual(0);
+              });
+            }
+          );
         });
 
         describe('when all the pull requests milestones should exempt a specific milestone', (): void => {
@@ -9511,141 +3099,39 @@ describe('milestones options', (): void => {
               'dummy-pull-request-milestone1, dummy-pull-request-milestone2';
           });
 
-          describe('when the issue does not have a milestone', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, '');
-              setProcessor();
-            });
+          describe.each`
+            isPullRequest | milestone                          | name                                                                                         | shouldStale
+            ${false}      | ${''}                              | ${'the issue does not have a milestone'}                                                     | ${true}
+            ${false}      | ${'dummy-milestone-not-exempted'}  | ${'the issue does have a milestone but not matching the specific pull request exempted one'} | ${false}
+            ${false}      | ${'dummy-pull-request-milestone2'} | ${'the issue does have a milestone matching the specific pull request exempted one'}         | ${false}
+            ${false}      | ${'dummy-milestone2'}              | ${'the issue does have a milestone matching the specific exempted one'}                      | ${false}
+            ${true}       | ${''}                              | ${'the PR does not have a milestone'}                                                        | ${true}
+            ${true}       | ${'dummy-milestone-not-exempted'}  | ${'the PR does have a milestone but not matching the specific pull request exempted one'}    | ${true}
+            ${true}       | ${'dummy-pull-request-milestone2'} | ${'the PR does have a milestone matching the specific pull request exempted one'}            | ${false}
+            ${true}       | ${'dummy-milestone2'}              | ${'the PR does have a milestone matching the specific exempted one'}                         | ${true}
+          `(
+            'when $name',
+            ({isPullRequest, milestone, shouldStale}: ITestData): void => {
+              beforeEach((): void => {
+                setTestIssueList(isPullRequest, milestone);
+                setProcessor();
+              });
 
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
+              test(`should${
+                shouldStale ? '' : ' not'
+              } be marked as stale`, async () => {
+                expect.assertions(3);
 
-              await processor.processIssues(1);
+                await processor.processIssues(1);
 
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone but not matching the specific pull request exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-milestone-not-exempted');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone matching the specific pull request exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-pull-request-milestone2');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone matching the specific exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-milestone2');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does not have a milestone', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, '');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone but not matching the specific pull request exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-milestone-not-exempted');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone matching the specific pull request exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-pull-request-milestone2');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone matching the specific exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-milestone2');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
+                expect(processor.staleIssues.length).toStrictEqual(
+                  shouldStale ? 1 : 0
+                );
+                expect(processor.closedIssues.length).toStrictEqual(0);
+                expect(processor.removedLabelIssues.length).toStrictEqual(0);
+              });
+            }
+          );
         });
       });
     });
@@ -9655,321 +3141,111 @@ describe('milestones options', (): void => {
         opts.exemptAllPrMilestones = true;
       });
 
-      describe('when the issue does not have a milestone', (): void => {
-        beforeEach((): void => {
-          setTestIssueList(false, '');
-          setProcessor();
-        });
+      describe.each`
+        isPullRequest | milestone            | name                                     | shouldStale
+        ${false}      | ${''}                | ${'the issue does not have a milestone'} | ${true}
+        ${false}      | ${'dummy-milestone'} | ${'the issue does have a milestone'}     | ${false}
+        ${true}       | ${''}                | ${'the PR does not have a milestone'}    | ${true}
+        ${true}       | ${'dummy-milestone'} | ${'the PR does have a milestone'}        | ${false}
+      `(
+        'when $name',
+        ({isPullRequest, milestone, shouldStale}: ITestData): void => {
+          beforeEach((): void => {
+            setTestIssueList(isPullRequest, milestone);
+            setProcessor();
+          });
 
-        test('should be marked as stale', async () => {
-          expect.assertions(3);
+          test(`should${
+            shouldStale ? '' : ' not'
+          } be marked as stale`, async () => {
+            expect.assertions(3);
 
-          await processor.processIssues(1);
+            await processor.processIssues(1);
 
-          expect(processor.staleIssues.length).toStrictEqual(1);
-          expect(processor.closedIssues.length).toStrictEqual(0);
-          expect(processor.removedLabelIssues.length).toStrictEqual(0);
-        });
-      });
-
-      describe('when the issue does have a milestone', (): void => {
-        beforeEach((): void => {
-          setTestIssueList(false, 'dummy-milestone');
-          setProcessor();
-        });
-
-        test('should not be marked as stale', async () => {
-          expect.assertions(3);
-
-          await processor.processIssues(1);
-
-          expect(processor.staleIssues.length).toStrictEqual(0);
-          expect(processor.closedIssues.length).toStrictEqual(0);
-          expect(processor.removedLabelIssues.length).toStrictEqual(0);
-        });
-      });
-
-      describe('when the PR does not have a milestone', (): void => {
-        beforeEach((): void => {
-          setTestIssueList(true, '');
-          setProcessor();
-        });
-
-        test('should be marked as stale', async () => {
-          expect.assertions(3);
-
-          await processor.processIssues(1);
-
-          expect(processor.staleIssues.length).toStrictEqual(1);
-          expect(processor.closedIssues.length).toStrictEqual(0);
-          expect(processor.removedLabelIssues.length).toStrictEqual(0);
-        });
-      });
-
-      describe('when the PR does have a milestone', (): void => {
-        beforeEach((): void => {
-          setTestIssueList(true, 'dummy-milestone');
-          setProcessor();
-        });
-
-        test('should not be marked as stale', async () => {
-          expect.assertions(3);
-
-          await processor.processIssues(1);
-
-          expect(processor.staleIssues.length).toStrictEqual(0);
-          expect(processor.closedIssues.length).toStrictEqual(0);
-          expect(processor.removedLabelIssues.length).toStrictEqual(0);
-        });
-      });
+            expect(processor.staleIssues.length).toStrictEqual(
+              shouldStale ? 1 : 0
+            );
+            expect(processor.closedIssues.length).toStrictEqual(0);
+            expect(processor.removedLabelIssues.length).toStrictEqual(0);
+          });
+        }
+      );
 
       describe('when all the issues and pull requests milestones should exempt a specific milestone', (): void => {
         beforeEach((): void => {
           opts.exemptMilestones = 'dummy-milestone';
         });
 
-        describe('when the issue does not have a milestone', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(false, '');
-            setProcessor();
-          });
+        describe.each`
+          isPullRequest | milestone                         | name                                                                            | shouldStale
+          ${false}      | ${''}                             | ${'the issue does not have a milestone'}                                        | ${true}
+          ${false}      | ${'dummy-milestone-not-exempted'} | ${'the issue does have a milestone but not matching the specific exempted one'} | ${false}
+          ${false}      | ${'dummy-milestone'}              | ${'the issue does have a milestone matching the specific exempted one'}         | ${false}
+          ${true}       | ${''}                             | ${'the PR does not have a milestone'}                                           | ${true}
+          ${true}       | ${'dummy-milestone-not-exempted'} | ${'the PR does have a milestone but not matching the specific exempted one'}    | ${false}
+          ${true}       | ${'dummy-milestone'}              | ${'the PR does have a milestone matching the specific exempted one'}            | ${false}
+        `(
+          'when $name',
+          ({isPullRequest, milestone, shouldStale}: ITestData): void => {
+            beforeEach((): void => {
+              setTestIssueList(isPullRequest, milestone);
+              setProcessor();
+            });
 
-          test('should be marked as stale', async () => {
-            expect.assertions(3);
+            test(`should${
+              shouldStale ? '' : ' not'
+            } be marked as stale`, async () => {
+              expect.assertions(3);
 
-            await processor.processIssues(1);
+              await processor.processIssues(1);
 
-            expect(processor.staleIssues.length).toStrictEqual(1);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
-
-        describe('when the issue does have a milestone but not matching the specific exempted one', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(false, 'dummy-milestone-not-exempted');
-            setProcessor();
-          });
-
-          test('should not be marked as stale', async () => {
-            expect.assertions(3);
-
-            await processor.processIssues(1);
-
-            expect(processor.staleIssues.length).toStrictEqual(0);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
-
-        describe('when the issue does have a milestone matching the specific exempted one', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(false, 'dummy-milestone');
-            setProcessor();
-          });
-
-          test('should not be marked as stale', async () => {
-            expect.assertions(3);
-
-            await processor.processIssues(1);
-
-            expect(processor.staleIssues.length).toStrictEqual(0);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
-
-        describe('when the PR does not have a milestone', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(true, '');
-            setProcessor();
-          });
-
-          test('should be marked as stale', async () => {
-            expect.assertions(3);
-
-            await processor.processIssues(1);
-
-            expect(processor.staleIssues.length).toStrictEqual(1);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
-
-        describe('when the PR does have a milestone but not matching the specific exempted one', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(true, 'dummy-milestone-not-exempted');
-            setProcessor();
-          });
-
-          test('should not be marked as stale', async () => {
-            expect.assertions(3);
-
-            await processor.processIssues(1);
-
-            expect(processor.staleIssues.length).toStrictEqual(0);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
-
-        describe('when the PR does have a milestone matching the specific exempted one', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(true, 'dummy-milestone');
-            setProcessor();
-          });
-
-          test('should not be marked as stale', async () => {
-            expect.assertions(3);
-
-            await processor.processIssues(1);
-
-            expect(processor.staleIssues.length).toStrictEqual(0);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
+              expect(processor.staleIssues.length).toStrictEqual(
+                shouldStale ? 1 : 0
+              );
+              expect(processor.closedIssues.length).toStrictEqual(0);
+              expect(processor.removedLabelIssues.length).toStrictEqual(0);
+            });
+          }
+        );
 
         describe('when all the issues milestones should exempt a specific milestone', (): void => {
           beforeEach((): void => {
             opts.exemptIssueMilestones = 'dummy-issue-milestone';
           });
 
-          describe('when the issue does not have a milestone', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, '');
-              setProcessor();
-            });
+          describe.each`
+            isPullRequest | milestone                         | name                                                                                  | shouldStale
+            ${false}      | ${''}                             | ${'the issue does not have a milestone'}                                              | ${true}
+            ${false}      | ${'dummy-milestone-not-exempted'} | ${'the issue does have a milestone but not matching the specific issue exempted one'} | ${false}
+            ${false}      | ${'dummy-issue-milestone'}        | ${'the issue does have a milestone matching the specific issue exempted one'}         | ${false}
+            ${false}      | ${'dummy-milestone'}              | ${'the issue does have a milestone matching the specific exempted one'}               | ${false}
+            ${true}       | ${''}                             | ${'the PR does not have a milestone'}                                                 | ${true}
+            ${true}       | ${'dummy-milestone-not-exempted'} | ${'the PR does have a milestone but not matching the specific issue exempted one'}    | ${false}
+            ${true}       | ${'dummy-issue-milestone'}        | ${'the PR does have a milestone matching the specific issue exempted one'}            | ${false}
+            ${true}       | ${'dummy-milestone'}              | ${'the PR does have a milestone matching the specific exempted one'}                  | ${false}
+          `(
+            'when $name',
+            ({isPullRequest, milestone, shouldStale}: ITestData): void => {
+              beforeEach((): void => {
+                setTestIssueList(isPullRequest, milestone);
+                setProcessor();
+              });
 
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
+              test(`should${
+                shouldStale ? '' : ' not'
+              } be marked as stale`, async () => {
+                expect.assertions(3);
 
-              await processor.processIssues(1);
+                await processor.processIssues(1);
 
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone but not matching the specific issue exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-milestone-not-exempted');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone matching the specific issue exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-issue-milestone');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone matching the specific exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-milestone');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does not have a milestone', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, '');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone but not matching the specific issue exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-milestone-not-exempted');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone matching the specific issue exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-issue-milestone');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone matching the specific exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-milestone');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
+                expect(processor.staleIssues.length).toStrictEqual(
+                  shouldStale ? 1 : 0
+                );
+                expect(processor.closedIssues.length).toStrictEqual(0);
+                expect(processor.removedLabelIssues.length).toStrictEqual(0);
+              });
+            }
+          );
         });
 
         describe('when all the pull requests milestones should exempt a specific milestone', (): void => {
@@ -9977,141 +3253,39 @@ describe('milestones options', (): void => {
             opts.exemptPrMilestones = 'dummy-pull-request-milestone';
           });
 
-          describe('when the issue does not have a milestone', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, '');
-              setProcessor();
-            });
+          describe.each`
+            isPullRequest | milestone                         | name                                                                                         | shouldStale
+            ${false}      | ${''}                             | ${'the issue does not have a milestone'}                                                     | ${true}
+            ${false}      | ${'dummy-milestone-not-exempted'} | ${'the issue does have a milestone but not matching the specific pull request exempted one'} | ${false}
+            ${false}      | ${'dummy-pull-request-milestone'} | ${'the issue does have a milestone matching the specific pull request exempted one'}         | ${false}
+            ${false}      | ${'dummy-milestone'}              | ${'the issue does have a milestone matching the specific exempted one'}                      | ${false}
+            ${true}       | ${''}                             | ${'the PR does not have a milestone'}                                                        | ${true}
+            ${true}       | ${'dummy-milestone-not-exempted'} | ${'the PR does have a milestone but not matching the specific pull request exempted one'}    | ${false}
+            ${true}       | ${'dummy-pull-request-milestone'} | ${'the PR does have a milestone matching the specific pull request exempted one'}            | ${false}
+            ${true}       | ${'dummy-milestone'}              | ${'the PR does have a milestone matching the specific exempted one'}                         | ${false}
+          `(
+            'when $name',
+            ({isPullRequest, milestone, shouldStale}: ITestData): void => {
+              beforeEach((): void => {
+                setTestIssueList(isPullRequest, milestone);
+                setProcessor();
+              });
 
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
+              test(`should${
+                shouldStale ? '' : ' not'
+              } be marked as stale`, async () => {
+                expect.assertions(3);
 
-              await processor.processIssues(1);
+                await processor.processIssues(1);
 
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone but not matching the specific pull request exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-milestone-not-exempted');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone matching the specific pull request exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-pull-request-milestone');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone matching the specific exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-milestone');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does not have a milestone', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, '');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone but not matching the specific pull request exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-milestone-not-exempted');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone matching the specific pull request exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-pull-request-milestone');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone matching the specific exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-milestone');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
+                expect(processor.staleIssues.length).toStrictEqual(
+                  shouldStale ? 1 : 0
+                );
+                expect(processor.closedIssues.length).toStrictEqual(0);
+                expect(processor.removedLabelIssues.length).toStrictEqual(0);
+              });
+            }
+          );
         });
       });
 
@@ -10120,107 +3294,37 @@ describe('milestones options', (): void => {
           opts.exemptMilestones = 'dummy-milestone1, dummy-milestone2';
         });
 
-        describe('when the issue does not have a milestone', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(false, '');
-            setProcessor();
-          });
+        describe.each`
+          isPullRequest | milestone                         | name                                                                            | shouldStale
+          ${false}      | ${''}                             | ${'the issue does not have a milestone'}                                        | ${true}
+          ${false}      | ${'dummy-milestone-not-exempted'} | ${'the issue does have a milestone but not matching the specific exempted one'} | ${false}
+          ${false}      | ${'dummy-milestone2'}             | ${'the issue does have a milestone matching the specific exempted one'}         | ${false}
+          ${true}       | ${''}                             | ${'the PR does not have a milestone'}                                           | ${true}
+          ${true}       | ${'dummy-milestone-not-exempted'} | ${'the PR does have a milestone but not matching the specific exempted one'}    | ${false}
+          ${true}       | ${'dummy-milestone2'}             | ${'the PR does have a milestone matching the specific exempted one'}            | ${false}
+        `(
+          'when $name',
+          ({isPullRequest, milestone, shouldStale}: ITestData): void => {
+            beforeEach((): void => {
+              setTestIssueList(isPullRequest, milestone);
+              setProcessor();
+            });
 
-          test('should be marked as stale', async () => {
-            expect.assertions(3);
+            test(`should${
+              shouldStale ? '' : ' not'
+            } be marked as stale`, async () => {
+              expect.assertions(3);
 
-            await processor.processIssues(1);
+              await processor.processIssues(1);
 
-            expect(processor.staleIssues.length).toStrictEqual(1);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
-
-        describe('when the issue does have a milestone but not matching the specific exempted one', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(false, 'dummy-milestone-not-exempted');
-            setProcessor();
-          });
-
-          test('should not be marked as stale', async () => {
-            expect.assertions(3);
-
-            await processor.processIssues(1);
-
-            expect(processor.staleIssues.length).toStrictEqual(0);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
-
-        describe('when the issue does have a milestone matching the specific exempted one', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(false, 'dummy-milestone2');
-            setProcessor();
-          });
-
-          test('should not be marked as stale', async () => {
-            expect.assertions(3);
-
-            await processor.processIssues(1);
-
-            expect(processor.staleIssues.length).toStrictEqual(0);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
-
-        describe('when the PR does not have a milestone', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(true, '');
-            setProcessor();
-          });
-
-          test('should be marked as stale', async () => {
-            expect.assertions(3);
-
-            await processor.processIssues(1);
-
-            expect(processor.staleIssues.length).toStrictEqual(1);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
-
-        describe('when the PR does have a milestone but not matching the specific exempted one', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(true, 'dummy-milestone-not-exempted');
-            setProcessor();
-          });
-
-          test('should not be marked as stale', async () => {
-            expect.assertions(3);
-
-            await processor.processIssues(1);
-
-            expect(processor.staleIssues.length).toStrictEqual(0);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
-
-        describe('when the PR does have a milestone matching the specific exempted one', (): void => {
-          beforeEach((): void => {
-            setTestIssueList(true, 'dummy-milestone2');
-            setProcessor();
-          });
-
-          test('should not be marked as stale', async () => {
-            expect.assertions(3);
-
-            await processor.processIssues(1);
-
-            expect(processor.staleIssues.length).toStrictEqual(0);
-            expect(processor.closedIssues.length).toStrictEqual(0);
-            expect(processor.removedLabelIssues.length).toStrictEqual(0);
-          });
-        });
+              expect(processor.staleIssues.length).toStrictEqual(
+                shouldStale ? 1 : 0
+              );
+              expect(processor.closedIssues.length).toStrictEqual(0);
+              expect(processor.removedLabelIssues.length).toStrictEqual(0);
+            });
+          }
+        );
 
         describe('when all the issues milestones should exempt a specific milestone', (): void => {
           beforeEach((): void => {
@@ -10228,141 +3332,39 @@ describe('milestones options', (): void => {
               'dummy-issue-milestone1, dummy-issue-milestone2';
           });
 
-          describe('when the issue does not have a milestone', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, '');
-              setProcessor();
-            });
+          describe.each`
+            isPullRequest | milestone                         | name                                                                                  | shouldStale
+            ${false}      | ${''}                             | ${'the issue does not have a milestone'}                                              | ${true}
+            ${false}      | ${'dummy-milestone-not-exempted'} | ${'the issue does have a milestone but not matching the specific issue exempted one'} | ${false}
+            ${false}      | ${'dummy-issue-milestone2'}       | ${'the issue does have a milestone matching the specific issue exempted one'}         | ${false}
+            ${false}      | ${'dummy-milestone2'}             | ${'the issue does have a milestone matching the specific exempted one'}               | ${false}
+            ${true}       | ${''}                             | ${'the PR does not have a milestone'}                                                 | ${true}
+            ${true}       | ${'dummy-milestone-not-exempted'} | ${'the PR does have a milestone but not matching the specific issue exempted one'}    | ${false}
+            ${true}       | ${'dummy-issue-milestone2'}       | ${'the PR does have a milestone matching the specific issue exempted one'}            | ${false}
+            ${true}       | ${'dummy-milestone2'}             | ${'the PR does have a milestone matching the specific exempted one'}                  | ${false}
+          `(
+            'when $name',
+            ({isPullRequest, milestone, shouldStale}: ITestData): void => {
+              beforeEach((): void => {
+                setTestIssueList(isPullRequest, milestone);
+                setProcessor();
+              });
 
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
+              test(`should${
+                shouldStale ? '' : ' not'
+              } be marked as stale`, async () => {
+                expect.assertions(3);
 
-              await processor.processIssues(1);
+                await processor.processIssues(1);
 
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone but not matching the specific issue exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-milestone-not-exempted');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone matching the specific issue exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-issue-milestone2');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone matching the specific exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-milestone2');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does not have a milestone', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, '');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone but not matching the specific issue exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-milestone-not-exempted');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone matching the specific issue exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-issue-milestone2');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone matching the specific exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-milestone2');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
+                expect(processor.staleIssues.length).toStrictEqual(
+                  shouldStale ? 1 : 0
+                );
+                expect(processor.closedIssues.length).toStrictEqual(0);
+                expect(processor.removedLabelIssues.length).toStrictEqual(0);
+              });
+            }
+          );
         });
 
         describe('when all the pull requests milestones should exempt a specific milestone', (): void => {
@@ -10371,141 +3373,39 @@ describe('milestones options', (): void => {
               'dummy-pull-request-milestone1, dummy-pull-request-milestone2';
           });
 
-          describe('when the issue does not have a milestone', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, '');
-              setProcessor();
-            });
+          describe.each`
+            isPullRequest | milestone                          | name                                                                                         | shouldStale
+            ${false}      | ${''}                              | ${'the issue does not have a milestone'}                                                     | ${true}
+            ${false}      | ${'dummy-milestone-not-exempted'}  | ${'the issue does have a milestone but not matching the specific pull request exempted one'} | ${false}
+            ${false}      | ${'dummy-pull-request-milestone2'} | ${'the issue does have a milestone matching the specific pull request exempted one'}         | ${false}
+            ${false}      | ${'dummy-milestone2'}              | ${'the issue does have a milestone matching the specific exempted one'}                      | ${false}
+            ${true}       | ${''}                              | ${'the PR does not have a milestone'}                                                        | ${true}
+            ${true}       | ${'dummy-milestone-not-exempted'}  | ${'the PR does have a milestone but not matching the specific pull request exempted one'}    | ${false}
+            ${true}       | ${'dummy-pull-request-milestone2'} | ${'the PR does have a milestone matching the specific pull request exempted one'}            | ${false}
+            ${true}       | ${'dummy-milestone2'}              | ${'the PR does have a milestone matching the specific exempted one'}                         | ${false}
+          `(
+            'when $name',
+            ({isPullRequest, milestone, shouldStale}: ITestData): void => {
+              beforeEach((): void => {
+                setTestIssueList(isPullRequest, milestone);
+                setProcessor();
+              });
 
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
+              test(`should${
+                shouldStale ? '' : ' not'
+              } be marked as stale`, async () => {
+                expect.assertions(3);
 
-              await processor.processIssues(1);
+                await processor.processIssues(1);
 
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone but not matching the specific pull request exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-milestone-not-exempted');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone matching the specific pull request exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-pull-request-milestone2');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the issue does have a milestone matching the specific exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(false, 'dummy-milestone2');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does not have a milestone', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, '');
-              setProcessor();
-            });
-
-            test('should be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(1);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone but not matching the specific pull request exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-milestone-not-exempted');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone matching the specific pull request exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-pull-request-milestone2');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
-
-          describe('when the PR does have a milestone matching the specific exempted one', (): void => {
-            beforeEach((): void => {
-              setTestIssueList(true, 'dummy-milestone2');
-              setProcessor();
-            });
-
-            test('should not be marked as stale', async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(0);
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          });
+                expect(processor.staleIssues.length).toStrictEqual(
+                  shouldStale ? 1 : 0
+                );
+                expect(processor.closedIssues.length).toStrictEqual(0);
+                expect(processor.removedLabelIssues.length).toStrictEqual(0);
+              });
+            }
+          );
         });
       });
     });

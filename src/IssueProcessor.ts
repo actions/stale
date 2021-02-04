@@ -273,7 +273,7 @@ export class IssueProcessor {
       // should this issue be marked stale?
       const shouldBeStale = !IssueProcessor._updatedSince(
         issue.updated_at,
-        this.options.daysBeforeStale
+        daysBeforeStale
       );
 
       // determine if this issue needs to be marked stale first

@@ -2273,12 +2273,7 @@ test('processing an issue opened since 2 days and with the option "daysBeforeIss
   let issueDate = new Date();
   issueDate.setDate(issueDate.getDate() - 2);
   const TestIssueList: Issue[] = [
-    generateIssue(
-      opts,
-      1,
-      'An issue with no label',
-      issueDate.toDateString(),
-    )
+    generateIssue(opts, 1, 'An issue with no label', issueDate.toDateString())
   ];
   const processor = new IssueProcessor(
     opts,
@@ -2287,10 +2282,10 @@ test('processing an issue opened since 2 days and with the option "daysBeforeIss
     async (num, dt) => [],
     async (issue, label) => new Date().toDateString()
   );
-  
+
   // process our fake issue list
   await processor.processIssues(1);
-  
+
   expect(processor.staleIssues.length).toEqual(0);
   expect(processor.closedIssues.length).toEqual(0);
 });
@@ -2305,12 +2300,7 @@ test('processing an issue opened since 2 days and with the option "daysBeforeIss
   let issueDate = new Date();
   issueDate.setDate(issueDate.getDate() - 2);
   const TestIssueList: Issue[] = [
-    generateIssue(
-      opts,
-      1,
-      'An issue with no label',
-      issueDate.toDateString(),
-    )
+    generateIssue(opts, 1, 'An issue with no label', issueDate.toDateString())
   ];
   const processor = new IssueProcessor(
     opts,
@@ -2319,10 +2309,10 @@ test('processing an issue opened since 2 days and with the option "daysBeforeIss
     async (num, dt) => [],
     async (issue, label) => new Date().toDateString()
   );
-  
+
   // process our fake issue list
   await processor.processIssues(1);
-  
+
   expect(processor.staleIssues.length).toEqual(1);
   expect(processor.closedIssues.length).toEqual(0);
 });
@@ -2337,12 +2327,7 @@ test('processing an issue opened since 2 days and with the option "daysBeforeIss
   let issueDate = new Date();
   issueDate.setDate(issueDate.getDate() - 2);
   const TestIssueList: Issue[] = [
-    generateIssue(
-      opts,
-      1,
-      'An issue with no label',
-      issueDate.toDateString(),
-    )
+    generateIssue(opts, 1, 'An issue with no label', issueDate.toDateString())
   ];
   const processor = new IssueProcessor(
     opts,
@@ -2351,10 +2336,10 @@ test('processing an issue opened since 2 days and with the option "daysBeforeIss
     async (num, dt) => [],
     async (issue, label) => new Date().toDateString()
   );
-  
+
   // process our fake issue list
   await processor.processIssues(1);
-  
+
   expect(processor.staleIssues.length).toEqual(1);
   expect(processor.closedIssues.length).toEqual(0);
 });
@@ -2385,10 +2370,10 @@ test('processing a pull request opened since 2 days and with the option "daysBef
     async (num, dt) => [],
     async (issue, label) => new Date().toDateString()
   );
-  
+
   // process our fake issue list
   await processor.processIssues(1);
-  
+
   expect(processor.staleIssues.length).toEqual(0);
   expect(processor.closedIssues.length).toEqual(0);
 });
@@ -2419,10 +2404,10 @@ test('processing a pull request opened since 2 days and with the option "daysBef
     async (num, dt) => [],
     async (issue, label) => new Date().toDateString()
   );
-  
+
   // process our fake issue list
   await processor.processIssues(1);
-  
+
   expect(processor.staleIssues.length).toEqual(1);
   expect(processor.closedIssues.length).toEqual(0);
 });
@@ -2453,10 +2438,10 @@ test('processing a pull request opened since 2 days and with the option "daysBef
     async (num, dt) => [],
     async (issue, label) => new Date().toDateString()
   );
-  
+
   // process our fake issue list
   await processor.processIssues(1);
-  
+
   expect(processor.staleIssues.length).toEqual(1);
   expect(processor.closedIssues.length).toEqual(0);
 });

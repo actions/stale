@@ -273,7 +273,7 @@ export class IssueProcessor {
       // should this issue be marked stale?
       const shouldBeStale = !IssueProcessor._updatedSince(
         issue.updated_at,
-        this.options.daysBeforeStale
+        daysBeforeStale
       );
 
       // determine if this issue needs to be marked stale first
@@ -283,6 +283,10 @@ export class IssueProcessor {
         );
         await this._markStale(issue, staleMessage, staleLabel, skipMessage);
         issue.isStale = true; // this issue is now considered stale
+      } else if (!issue.isStale) {
+        issueLogger.info(
+          `Not marking as stale: shouldBeStale=${shouldBeStale}, shouldMarkAsStale=${shouldMarkAsStale}`
+        );
       }
 
       // process the issue if it was marked stale

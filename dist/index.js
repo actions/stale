@@ -157,12 +157,15 @@ class IssueProcessor {
                     continue; // don't process exempt milestones
                 }
                 // should this issue be marked stale?
-                const shouldBeStale = !IssueProcessor._updatedSince(issue.updated_at, this.options.daysBeforeStale);
+                const shouldBeStale = !IssueProcessor._updatedSince(issue.updated_at, daysBeforeStale);
                 // determine if this issue needs to be marked stale first
                 if (!issue.isStale && shouldBeStale && shouldMarkAsStale) {
                     issueLogger.info(`Marking ${issueType} stale because it was last updated on ${issue.updated_at} and it does not have a stale label`);
                     yield this._markStale(issue, staleMessage, staleLabel, skipMessage);
                     issue.isStale = true; // this issue is now considered stale
+                }
+                else if (!issue.isStale) {
+                    issueLogger.info(`Not marking as stale: shouldBeStale=${shouldBeStale}, shouldMarkAsStale=${shouldMarkAsStale}`);
                 }
                 // process the issue if it was marked stale
                 if (issue.isStale) {

@@ -53,6 +53,7 @@ $ npm test
 | `ascending`                 | Order to get issues/pr. _Defaults to **false**_                                              | Optional |
 | `skip-stale-issue-message`  | Skip adding stale message on stale issue. _Defaults to **false**_                            | Optional |
 | `skip-stale-pr-message`     | Skip adding stale message on stale pr. _Defaults to **false**_                               | Optional |
+| `delete-branch`             | Delete the git branch after closing a stale pull request. _Defaults to **false**_            | Optional |
 | `start-date`                | The date used to skip the stale action on issue/pr created before it (ISO 8601 or RFC 2822). | Optional |
 
 ### Usage

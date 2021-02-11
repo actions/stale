@@ -2,26 +2,6 @@
 
 Warns and then closes issues and PRs that have had no activity for a specified amount of time.
 
-### Building and testing
-
-Install the dependencies
-
-```bash
-$ npm install
-```
-
-Build the typescript and package it for distribution
-
-```bash
-$ npm run build && npm run pack
-```
-
-Run the tests :heavy_check_mark:
-
-```bash
-$ npm test
-```
-
 ### Arguments
 
 | Input                         | Description                                                                                                     | Usage    |
@@ -225,4 +205,12 @@ jobs:
 
 ### Debugging
 
-To see debug output from this action, you must set the secret `ACTIONS_STEP_DEBUG` to `true` in your repository. You can run this action in debug only mode (no actions will be taken on your issues) by passing `debug-only` `true` as an argument to the action.
+To see the debug output from this action, you must set the secret `ACTIONS_STEP_DEBUG` to `true` in your repository.  
+You can run this action in debug only mode (no actions will be taken on your issues and pull requests) by passing `debug-only` to `true` as an argument to the action.  
+You can also increase the maximum number of operations per run by passing `operations-per-run` to `100` for example.  
+Finally, you could also change the cron job frequency in the stale workflow to run stale more often.
+
+### Contributing
+
+You wish to contribute?  
+Check out the [contributing](CONTRIBUTING.md) file before helping us.

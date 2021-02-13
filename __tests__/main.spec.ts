@@ -1929,3 +1929,186 @@ test('an issue with an exempted milestone and with an exempted issue milestone w
   expect(processor.closedIssues.length).toStrictEqual(0);
   expect(processor.removedLabelIssues.length).toStrictEqual(0);
 });
+
+test('processing an issue opened since 2 days and with the option "daysBeforeIssueStale" at 3 will not make it stale', async () => {
+  expect.assertions(2);
+  const opts: IIssuesProcessorOptions = {
+    ...DefaultProcessorOptions,
+    daysBeforeStale: 10,
+    daysBeforeIssueStale: 3
+  };
+  const issueDate = new Date();
+  issueDate.setDate(issueDate.getDate() - 2);
+  const TestIssueList: Issue[] = [
+    generateIssue(opts, 1, 'An issue with no label', issueDate.toDateString())
+  ];
+  const processor = new IssuesProcessor(
+    opts,
+    async () => 'abot',
+    async p => (p == 1 ? TestIssueList : []),
+    async (num, dt) => [],
+    async (issue, label) => new Date().toDateString()
+  );
+
+  // process our fake issue list
+  await processor.processIssues(1);
+
+  expect(processor.staleIssues.length).toEqual(0);
+  expect(processor.closedIssues.length).toEqual(0);
+});
+
+test('processing an issue opened since 2 days and with the option "daysBeforeIssueStale" at 2 will make it stale', async () => {
+  expect.assertions(2);
+  const opts: IIssuesProcessorOptions = {
+    ...DefaultProcessorOptions,
+    daysBeforeStale: 10,
+    daysBeforeIssueStale: 2
+  };
+  const issueDate = new Date();
+  issueDate.setDate(issueDate.getDate() - 2);
+  const TestIssueList: Issue[] = [
+    generateIssue(opts, 1, 'An issue with no label', issueDate.toDateString())
+  ];
+  const processor = new IssuesProcessor(
+    opts,
+    async () => 'abot',
+    async p => (p == 1 ? TestIssueList : []),
+    async (num, dt) => [],
+    async (issue, label) => new Date().toDateString()
+  );
+
+  // process our fake issue list
+  await processor.processIssues(1);
+
+  expect(processor.staleIssues.length).toEqual(1);
+  expect(processor.closedIssues.length).toEqual(0);
+});
+
+test('processing an issue opened since 2 days and with the option "daysBeforeIssueStale" at 1 will make it stale', async () => {
+  expect.assertions(2);
+  const opts: IIssuesProcessorOptions = {
+    ...DefaultProcessorOptions,
+    daysBeforeStale: 10,
+    daysBeforeIssueStale: 1
+  };
+  const issueDate = new Date();
+  issueDate.setDate(issueDate.getDate() - 2);
+  const TestIssueList: Issue[] = [
+    generateIssue(opts, 1, 'An issue with no label', issueDate.toDateString())
+  ];
+  const processor = new IssuesProcessor(
+    opts,
+    async () => 'abot',
+    async p => (p == 1 ? TestIssueList : []),
+    async (num, dt) => [],
+    async (issue, label) => new Date().toDateString()
+  );
+
+  // process our fake issue list
+  await processor.processIssues(1);
+
+  expect(processor.staleIssues.length).toEqual(1);
+  expect(processor.closedIssues.length).toEqual(0);
+});
+
+test('processing a pull request opened since 2 days and with the option "daysBeforePrStale" at 3 will not make it stale', async () => {
+  expect.assertions(2);
+  const opts: IIssuesProcessorOptions = {
+    ...DefaultProcessorOptions,
+    daysBeforeStale: 10,
+    daysBeforePrStale: 3
+  };
+  const issueDate = new Date();
+  issueDate.setDate(issueDate.getDate() - 2);
+  const TestIssueList: Issue[] = [
+    generateIssue(
+      opts,
+      1,
+      'A pull request with no label',
+      issueDate.toDateString(),
+      issueDate.toDateString(),
+      true
+    )
+  ];
+  const processor = new IssuesProcessor(
+    opts,
+    async () => 'abot',
+    async p => (p == 1 ? TestIssueList : []),
+    async (num, dt) => [],
+    async (issue, label) => new Date().toDateString()
+  );
+
+  // process our fake issue list
+  await processor.processIssues(1);
+
+  expect(processor.staleIssues.length).toEqual(0);
+  expect(processor.closedIssues.length).toEqual(0);
+});
+
+test('processing a pull request opened since 2 days and with the option "daysBeforePrStale" at 2 will make it stale', async () => {
+  expect.assertions(2);
+  const opts: IIssuesProcessorOptions = {
+    ...DefaultProcessorOptions,
+    daysBeforeStale: 10,
+    daysBeforePrStale: 2
+  };
+  const issueDate = new Date();
+  issueDate.setDate(issueDate.getDate() - 2);
+  const TestIssueList: Issue[] = [
+    generateIssue(
+      opts,
+      1,
+      'A pull request with no label',
+      issueDate.toDateString(),
+      issueDate.toDateString(),
+      true
+    )
+  ];
+  const processor = new IssuesProcessor(
+    opts,
+    async () => 'abot',
+    async p => (p == 1 ? TestIssueList : []),
+    async (num, dt) => [],
+    async (issue, label) => new Date().toDateString()
+  );
+
+  // process our fake issue list
+  await processor.processIssues(1);
+
+  expect(processor.staleIssues.length).toEqual(1);
+  expect(processor.closedIssues.length).toEqual(0);
+});
+
+test('processing a pull request opened since 2 days and with the option "daysBeforePrStale" at 1 will make it stale', async () => {
+  expect.assertions(2);
+  const opts: IIssuesProcessorOptions = {
+    ...DefaultProcessorOptions,
+    daysBeforeStale: 10,
+    daysBeforePrStale: 1
+  };
+  const issueDate = new Date();
+  issueDate.setDate(issueDate.getDate() - 2);
+  const TestIssueList: Issue[] = [
+    generateIssue(
+      opts,
+      1,
+      'A pull request with no label',
+      issueDate.toDateString(),
+      issueDate.toDateString(),
+      true
+    )
+  ];
+  const processor = new IssuesProcessor(
+    opts,
+    async () => 'abot',
+    async p => (p == 1 ? TestIssueList : []),
+    async (num, dt) => [],
+    async (issue, label) => new Date().toDateString()
+  );
+
+  // process our fake issue list
+  await processor.processIssues(1);
+
+  expect(processor.staleIssues.length).toEqual(1);
+  expect(processor.closedIssues.length).toEqual(0);
+});

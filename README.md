@@ -37,7 +37,7 @@ Warns and then closes issues and PRs that have had no activity for a specified a
 | `skip-stale-issue-message`    | Skip adding stale message on stale issue. _Defaults to **false**_                                               | Optional |
 | `skip-stale-pr-message`       | Skip adding stale message on stale PR. _Defaults to **false**_                                                  | Optional |
 | `start-date`                  | The date used to skip the stale action on issue/PR created before it (ISO 8601 or RFC 2822).                    | Optional |
-| `delete-branch`             | Delete the git branch after closing a stale pull request. _Defaults to **false**_            | Optional |
+| `delete-branch`               | Delete the git branch after closing a stale pull request. _Defaults to **false**_                               | Optional |
 
 ### Usage
 

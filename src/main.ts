@@ -1,12 +1,13 @@
 import * as core from '@actions/core';
 import {isValidDate} from './functions/dates/is-valid-date';
-import {IssueProcessor, IssueProcessorOptions} from './IssueProcessor';
+import {IssuesProcessor} from './classes/issues-processor';
+import {IIssuesProcessorOptions} from './interfaces/issues-processor-options';
 
 async function run(): Promise<void> {
   try {
     const args = getAndValidateArgs();
 
-    const processor: IssueProcessor = new IssueProcessor(args);
+    const processor: IssuesProcessor = new IssuesProcessor(args);
     await processor.processIssues();
   } catch (error) {
     core.error(error);
@@ -14,8 +15,8 @@ async function run(): Promise<void> {
   }
 }
 
-function getAndValidateArgs(): IssueProcessorOptions {
-  const args: IssueProcessorOptions = {
+function getAndValidateArgs(): IIssuesProcessorOptions {
+  const args: IIssuesProcessorOptions = {
     repoToken: core.getInput('repo-token'),
     staleIssueMessage: core.getInput('stale-issue-message'),
     stalePrMessage: core.getInput('stale-pr-message'),

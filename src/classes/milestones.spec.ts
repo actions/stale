@@ -1,11 +1,11 @@
 import {IIssue} from '../interfaces/issue';
-import {IssueProcessorOptions} from '../IssueProcessor';
+import {IIssuesProcessorOptions} from '../interfaces/issues-processor-options';
 import {Issue} from './issue';
 import {Milestones} from './milestones';
 
 describe('Milestones', (): void => {
   let milestones: Milestones;
-  let optionsInterface: IssueProcessorOptions;
+  let optionsInterface: IIssuesProcessorOptions;
   let issue: Issue;
   let issueInterface: IIssue;
 

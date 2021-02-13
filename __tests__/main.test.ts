@@ -1,19 +1,20 @@
 import * as github from '@actions/github';
 import {Issue} from '../src/classes/issue';
 
-import {IssueProcessor, IssueProcessorOptions} from '../src/IssueProcessor';
+import {IssuesProcessor} from '../src/classes/issues-processor';
+import {IIssuesProcessorOptions} from '../src/interfaces/issues-processor-options';
 import {IsoDateString} from '../src/types/iso-date-string';
 
 function generateIssue(
-  options: IssueProcessorOptions,
+  options: IIssuesProcessorOptions,
   id: number,
   title: string,
   updatedAt: IsoDateString,
   createdAt: IsoDateString = updatedAt,
-  isPullRequest: boolean = false,
+  isPullRequest = false,
   labels: string[] = [],
-  isClosed: boolean = false,
-  isLocked: boolean = false,
+  isClosed = false,
+  isLocked = false,
   milestone = ''
 ): Issue {
   return new Issue(options, {
@@ -21,7 +22,7 @@ function generateIssue(
     labels: labels.map(l => {
       return {name: l};
     }),
-    title: title,
+    title,
     created_at: createdAt,
     updated_at: updatedAt,
     pull_request: isPullRequest ? {} : null,
@@ -33,7 +34,7 @@ function generateIssue(
   });
 }
 
-const DefaultProcessorOptions: IssueProcessorOptions = Object.freeze({
+const DefaultProcessorOptions: IIssuesProcessorOptions = Object.freeze({
   repoToken: 'none',
   staleIssueMessage: 'This issue is stale',
   stalePrMessage: 'This PR is stale',
@@ -66,7 +67,7 @@ const DefaultProcessorOptions: IssueProcessorOptions = Object.freeze({
 });
 
 test('empty issue list results in 1 operation', async () => {
-  const processor = new IssueProcessor(
+  const processor = new IssuesProcessor(
     DefaultProcessorOptions,
     async () => 'abot',
     async () => [],
@@ -82,14 +83,14 @@ test('empty issue list results in 1 operation', async () => {
 });
 
 test('processing an issue with no label will make it stale and close it, if it is old enough only if days-before-close is set to 0', async () => {
-  const opts: IssueProcessorOptions = {
+  const opts: IIssuesProcessorOptions = {
     ...DefaultProcessorOptions,
     daysBeforeClose: 0
   };
   const TestIssueList: Issue[] = [
     generateIssue(opts, 1, 'An issue with no label', '2020-01-01T17:00:00Z')
   ];
-  const processor = new IssueProcessor(
+  const processor = new IssuesProcessor(
     opts,
     async () => 'abot',
     async p => (p == 1 ? TestIssueList : []),
@@ -107,7 +108,7 @@ test('processing an issue with no label will make it stale and close it, if it i
 test('processing an issue with no label and a start date as ECMAScript epoch in seconds being before the issue creation date will not make it stale nor close it when it is old enough and days-before-close is set to 0', async () => {
   expect.assertions(2);
   const january2000 = 946681200000;
-  const opts: IssueProcessorOptions = {
+  const opts: IIssuesProcessorOptions = {
     ...DefaultProcessorOptions,
     daysBeforeClose: 0,
     startDate: january2000.toString()
@@ -121,7 +122,7 @@ test('processing an issue with no label and a start date as ECMAScript epoch in 
       '2020-01-01T17:00:00Z'
     )
   ];
-  const processor = new IssueProcessor(
+  const processor = new IssuesProcessor(
     opts,
     async () => 'abot',
     async p => (p == 1 ? TestIssueList : []),
@@ -139,7 +140,7 @@ test('processing an issue with no label and a start date as ECMAScript epoch in 
 test('processing an issue with no label and a start date as ECMAScript epoch in seconds being after the issue creation date will not make it stale nor close it when it is old enough and days-before-close is set to 0', async () => {
   expect.assertions(2);
   const january2021 = 1609455600000;
-  const opts: IssueProcessorOptions = {
+  const opts: IIssuesProcessorOptions = {
     ...DefaultProcessorOptions,
     daysBeforeClose: 0,
     startDate: january2021.toString()
@@ -153,7 +154,7 @@ test('processing an issue with no label and a start date as ECMAScript epoch in 
       '2020-01-01T17:00:00Z'
     )
   ];
-  const processor = new IssueProcessor(
+  const processor = new IssuesProcessor(
     opts,
     async () => 'abot',
     async p => (p == 1 ? TestIssueList : []),
@@ -171,7 +172,7 @@ test('processing an issue with no label and a start date as ECMAScript epoch in 
 test('processing an issue with no label and a start date as ECMAScript epoch in milliseconds being before the issue creation date will not make it stale nor close it when it is old enough and days-before-close is set to 0', async () => {
   expect.assertions(2);
   const january2000 = 946681200000000;
-  const opts: IssueProcessorOptions = {
+  const opts: IIssuesProcessorOptions = {
     ...DefaultProcessorOptions,
     daysBeforeClose: 0,
     startDate: january2000.toString()
@@ -185,7 +186,7 @@ test('processing an issue with no label and a start date as ECMAScript epoch in 
       '2020-01-01T17:00:00Z'
     )
   ];
-  const processor = new IssueProcessor(
+  const processor = new IssuesProcessor(
     opts,
     async () => 'abot',
     async p => (p == 1 ? TestIssueList : []),
@@ -203,7 +204,7 @@ test('processing an issue with no label and a start date as ECMAScript epoch in 
 test('processing an issue with no label and a start date as ECMAScript epoch in milliseconds being after the issue creation date will not make it stale nor close it when it is old enough and days-before-close is set to 0', async () => {
   expect.assertions(2);
   const january2021 = 1609455600000;
-  const opts: IssueProcessorOptions = {
+  const opts: IIssuesProcessorOptions = {
     ...DefaultProcessorOptions,
     daysBeforeClose: 0,
     startDate: january2021.toString()
@@ -217,7 +218,7 @@ test('processing an issue with no label and a start date as ECMAScript epoch in 
       '2020-01-01T17:00:00Z'
     )
   ];
-  const processor = new IssueProcessor(
+  const processor = new IssuesProcessor(
     opts,
     async () => 'abot',
     async p => (p == 1 ? TestIssueList : []),
@@ -235,7 +236,7 @@ test('processing an issue with no label and a start date as ECMAScript epoch in 
 test('processing an issue with no label and a start date as ISO 8601 being before the issue creation date will make it stale and close it when it is old enough and days-before-close is set to 0', async () => {
   expect.assertions(2);
   const january2000 = '2000-01-01T00:00:00Z';
-  const opts: IssueProcessorOptions = {
+  const opts: IIssuesProcessorOptions = {
     ...DefaultProcessorOptions,
     daysBeforeClose: 0,
     startDate: january2000.toString()
@@ -249,7 +250,7 @@ test('processing an issue with no label and a start date as ISO 8601 being befor
       '2020-01-01T17:00:00Z'
     )
   ];
-  const processor = new IssueProcessor(
+  const processor = new IssuesProcessor(
     opts,
     async () => 'abot',
     async p => (p == 1 ? TestIssueList : []),
@@ -267,7 +268,7 @@ test('processing an issue with no label and a start date as ISO 8601 being befor
 test('processing an issue with no label and a start date as ISO 8601 being after the issue creation date will not make it stale nor close it when it is old enough and days-before-close is set to 0', async () => {
   expect.assertions(2);
   const january2021 = '2021-01-01T00:00:00Z';
-  const opts: IssueProcessorOptions = {
+  const opts: IIssuesProcessorOptions = {
     ...DefaultProcessorOptions,
     daysBeforeClose: 0,
     startDate: january2021.toString()
@@ -281,7 +282,7 @@ test('processing an issue with no label and a start date as ISO 8601 being after
       '2020-01-01T17:00:00Z'
     )
   ];
-  const processor = new IssueProcessor(
+  const processor = new IssuesProcessor(
     opts,
     async () => 'abot',
     async p => (p == 1 ? TestIssueList : []),
@@ -299,7 +300,7 @@ test('processing an issue with no label and a start date as ISO 8601 being after
 test('processing an issue with no label and a start date as RFC 2822 being before the issue creation date will make it stale and close it when it is old enough and days-before-close is set to 0', async () => {
   expect.assertions(2);
   const january2000 = 'January 1, 2000 00:00:00';
-  const opts: IssueProcessorOptions = {
+  const opts: IIssuesProcessorOptions = {
     ...DefaultProcessorOptions,
     daysBeforeClose: 0,
     startDate: january2000.toString()
@@ -313,7 +314,7 @@ test('processing an issue with no label and a start date as RFC 2822 being befor
       '2020-01-01T17:00:00Z'
     )
   ];
-  const processor = new IssueProcessor(
+  const processor = new IssuesProcessor(
     opts,
     async () => 'abot',
     async p => (p == 1 ? TestIssueList : []),
@@ -331,7 +332,7 @@ test('processing an issue with no label and a start date as RFC 2822 being befor
 test('processing an issue with no label and a start date as RFC 2822 being after the issue creation date will not make it stale nor close it when it is old enough and days-before-close is set to 0', async () => {
   expect.assertions(2);
   const january2021 = 'January 1, 2021 00:00:00';
-  const opts: IssueProcessorOptions = {
+  const opts: IIssuesProcessorOptions = {
     ...DefaultProcessorOptions,
     daysBeforeClose: 0,
     startDate: january2021.toString()
@@ -345,7 +346,7 @@ test('processing an issue with no label and a start date as RFC 2822 being after
       '2020-01-01T17:00:00Z'
     )
   ];
-  const processor = new IssueProcessor(
+  const processor = new IssuesProcessor(
     opts,
     async () => 'abot',
     async p => (p == 1 ? TestIssueList : []),
@@ -361,7 +362,7 @@ test('processing an issue with no label and a start date as RFC 2822 being after
 });
 
 test('processing an issue with no label will make it stale and close it, if it is old enough only if days-before-close is set to > 0 and days-before-issue-close is set to 0', async () => {
-  const opts: IssueProcessorOptions = {
+  const opts: IIssuesProcessorOptions = {
     ...DefaultProcessorOptions,
     daysBeforeClose: 1,
     daysBeforeIssueClose: 0
@@ -369,7 +370,7 @@ test('processing an issue with no label will make it stale and close it, if it i
   const TestIssueList: Issue[] = [
     generateIssue(opts, 1, 'An issue with no label', '2020-01-01T17:00:00Z')
   ];
-  const processor = new IssueProcessor(
+  const processor = new IssuesProcessor(
     opts,
     async () => 'abot',
     async p => (p == 1 ? TestIssueList : []),
@@ -386,7 +387,7 @@ test('processing an issue with no label will make it stale and close it, if it i
 });
 
 test('processing an issue with no label will make it stale and not close it, if it is old enough only if days-before-close is set to > 0 and days-before-issue-close is set to > 0', async () => {
-  const opts: IssueProcessorOptions = {
+  const opts: IIssuesProcessorOptions = {
     ...DefaultProcessorOptions,
     daysBeforeClose: 1,
     daysBeforeIssueClose: 1
@@ -394,7 +395,7 @@ test('processing an issue with no label will make it stale and not close it, if 
   const TestIssueList: Issue[] = [
     generateIssue(opts, 1, 'An issue with no label', '2020-01-01T17:00:00Z')
   ];
-  const processor = new IssueProcessor(
+  const processor = new IssuesProcessor(
     opts,
     async () => 'abot',
     async p => (p == 1 ? TestIssueList : []),
@@ -410,14 +411,14 @@ test('processing an issue with no label will make it stale and not close it, if 
 });
 
 test('processing an issue with no label will make it stale and not close it if days-before-close is set to > 0', async () => {
-  const opts: IssueProcessorOptions = {
+  const opts: IIssuesProcessorOptions = {
     ...DefaultProcessorOptions,
     daysBeforeClose: 15
   };
   const TestIssueList: Issue[] = [
     generateIssue(opts, 1, 'An issue with no label', '2020-01-01T17:00:00Z')
   ];
-  const processor = new IssueProcessor(
+  const processor = new IssuesProcessor(
     opts,
     async () => 'abot',
     async p => (p == 1 ? TestIssueList : []),
@@ -433,7 +434,7 @@ test('processing an issue with no label will make it stale and not close it if d
 });
 
 test('processing an issue with no label will make it stale and not close it if days-before-close is set to -1 and days-before-issue-close is set to > 0', async () => {
-  const opts: IssueProcessorOptions = {
+  const opts: IIssuesProcessorOptions = {
     ...DefaultProcessorOptions,
     daysBeforeClose: -1,
     daysBeforeIssueClose: 15
@@ -441,7 +442,7 @@ test('processing an issue with no label will make it stale and not close it if d
   const TestIssueList: Issue[] = [
     generateIssue(opts, 1, 'An issue with no label', '2020-01-01T17:00:00Z')
   ];
-  const processor = new IssueProcessor(
+  const processor = new IssuesProcessor(
     opts,
     async () => 'abot',
     async p => (p == 1 ? TestIssueList : []),
@@ -457,7 +458,7 @@ test('processing an issue with no label will make it stale and not close it if d
 });
 
 test('processing an issue with no label will not make it stale if days-before-stale is set to -1', async () => {
-  const opts: IssueProcessorOptions = {
+  const opts: IIssuesProcessorOptions = {
     ...DefaultProcessorOptions,
     staleIssueMessage: '',
     daysBeforeStale: -1
@@ -465,7 +466,7 @@ test('processing an issue with no label will not make it stale if days-before-st
   const TestIssueList: Issue[] = [
     generateIssue(opts, 1, 'An issue with no label', '2020-01-01T17:00:00Z')
   ];
-  const processor = new IssueProcessor(
+  const processor = new IssuesProcessor(
     opts,
     async () => 'abot',
     async p => (p == 1 ? TestIssueList : []),
@@ -481,7 +482,7 @@ test('processing an issue with no label will not make it stale if days-before-st
 });
 
 test('processing an issue with no label will not make it stale if days-before-stale and days-before-issue-stale are set to -1', async () => {
-  const opts: IssueProcessorOptions = {
+  const opts: IIssuesProcessorOptions = {
     ...DefaultProcessorOptions,
     staleIssueMessage: '',
     daysBeforeStale: -1,
@@ -490,7 +491,7 @@ test('processing an issue with no label will not make it stale if days-before-st
   const TestIssueList: Issue[] = [
     generateIssue(opts, 1, 'An issue with no label', '2020-01-01T17:00:00Z')
   ];
-  const processor = new IssueProcessor(
+  const processor = new IssuesProcessor(
     opts,
     async () => 'abot',
     async p => (p == 1 ? TestIssueList : []),
@@ -508,7 +509,7 @@ test('processing an issue with no label will not make it stale if days-before-st
 test('processing an issue with no label will make it stale but not close it', async () => {
   // issue should be from 2 days ago so it will be
   // stale but not close-able, based on default settings
-  let issueDate = new Date();
+  const issueDate = new Date();
   issueDate.setDate(issueDate.getDate() - 2);
   const TestIssueList: Issue[] = [
     generateIssue(
@@ -518,7 +519,7 @@ test('processing an issue with no label will make it stale but not close it', as
       issueDate.toDateString()
     )
   ];
-  const processor = new IssueProcessor(
+  const processor = new IssuesProcessor(
     DefaultProcessorOptions,
     async () => 'abot',
     async p => (p == 1 ? TestIssueList : []),
@@ -534,7 +535,7 @@ test('processing an issue with no label will make it stale but not close it', as
 });
 
 test('processing a stale issue will close it', async () => {
-  const opts: IssueProcessorOptions = {
+  const opts: IIssuesProcessorOptions = {
     ...DefaultProcessorOptions,
     daysBeforeClose: 30
   };
@@ -549,7 +550,7 @@ test('processing a stale issue will close it', async () => {
       ['Stale']
     )
   ];
-  const processor = new IssueProcessor(
+  const processor = new IssuesProcessor(
     opts,
     async () => 'abot',
     async p => (p == 1 ? TestIssueList : []),
@@ -565,7 +566,7 @@ test('processing a stale issue will close it', async () => {
 });
 
 test('processing a stale issue containing a space in the label will close it', async () => {
-  const opts: IssueProcessorOptions = {
+  const opts: IIssuesProcessorOptions = {
     ...DefaultProcessorOptions,
     staleIssueLabel: 'state: stale'
   };
@@ -580,7 +581,7 @@ test('processing a stale issue containing a space in the label will close it', a
       ['state: stale']
     )
   ];
-  const processor = new IssueProcessor(
+  const processor = new IssuesProcessor(
     opts,
     async () => 'abot',
     async p => (p == 1 ? TestIssueList : []),
@@ -596,7 +597,7 @@ test('processing a stale issue containing a space in the label will close it', a
 });
 
 test('processing a stale issue containing a slash in the label will close it', async () => {
-  const opts: IssueProcessorOptions = {
+  const opts: IIssuesProcessorOptions = {
     ...DefaultProcessorOptions,
     staleIssueLabel: 'lifecycle/stale'
   };
@@ -611,7 +612,7 @@ test('processing a stale issue containing a slash in the label will close it', a
       ['lifecycle/stale']
     )
   ];
-  const processor = new IssueProcessor(
+  const processor = new IssuesProcessor(
     opts,
     async () => 'abot',
     async p => (p == 1 ? TestIssueList : []),
@@ -627,7 +628,7 @@ test('processing a stale issue containing a slash in the label will close it', a
 });
 
 test('processing a stale issue will close it when days-before-issue-stale override days-before-stale', async () => {
-  const opts: IssueProcessorOptions = {
+  const opts: IIssuesProcessorOptions = {
     ...DefaultProcessorOptions,
     daysBeforeClose: 30,
     daysBeforeIssueStale: 30
@@ -643,7 +644,7 @@ test('processing a stale issue will close it when days-before-issue-stale overri
       ['Stale']
     )
   ];
-  const processor = new IssueProcessor(
+  const processor = new IssuesProcessor(
     opts,
     async () => 'abot',
     async p => (p == 1 ? TestIssueList : []),
@@ -659,7 +660,7 @@ test('processing a stale issue will close it when days-before-issue-stale overri
 });
 
 test('processing a stale PR will close it', async () => {
-  const opts: IssueProcessorOptions = {
+  const opts: IIssuesProcessorOptions = {
     ...DefaultProcessorOptions,
     daysBeforeClose: 30
   };
@@ -674,7 +675,7 @@ test('processing a stale PR will close it', async () => {
       ['Stale']
     )
   ];
-  const processor = new IssueProcessor(
+  const processor = new IssuesProcessor(
     opts,
     async () => 'abot',
     async p => (p == 1 ? TestIssueList : []),
@@ -690,7 +691,7 @@ test('processing a stale PR will close it', async () => {
 });
 
 test('processing a stale PR will close it when days-before-pr-stale override days-before-stale', async () => {
-  const opts: IssueProcessorOptions = {
+  const opts: IIssuesProcessorOptions = {
     ...DefaultProcessorOptions,
     daysBeforeClose: 30,
     daysBeforePrClose: 30
@@ -706,7 +707,7 @@ test('processing a stale PR will close it when days-before-pr-stale override day
       ['Stale']
     )
   ];
-  const processor = new IssueProcessor(
+  const processor = new IssuesProcessor(
     opts,
     async () => 'abot',
     async p => (p == 1 ? TestIssueList : []),
@@ -738,7 +739,7 @@ test('processing a stale issue will close it even if configured not to mark as s
       ['Stale']
     )
   ];
-  const processor = new IssueProcessor(
+  const processor = new IssuesProcessor(
     opts,
     async () => 'abot',
     async p => (p == 1 ? TestIssueList : []),
@@ -771,7 +772,7 @@ test('processing a stale issue will close it even if configured not to mark as s
       ['Stale']
     )
   ];
-  const processor = new IssueProcessor(
+  const processor = new IssuesProcessor(
     opts,
     async () => 'abot',
     async p => (p == 1 ? TestIssueList : []),
@@ -803,7 +804,7 @@ test('processing a stale PR will close it even if configured not to mark as stal
       ['Stale']
     )
   ];
-  const processor = new IssueProcessor(
+  const processor = new IssuesProcessor(
     opts,
     async () => 'abot',
     async p => (p == 1 ? TestIssueList : []),
@@ -836,7 +837,7 @@ test('processing a stale PR will close it even if configured not to mark as stal
       ['Stale']
     )
   ];
-  const processor = new IssueProcessor(
+  const processor = new IssuesProcessor(
     opts,
     async () => 'abot',
     async p => (p == 1 ? TestIssueList : []),
@@ -864,7 +865,7 @@ test('closed issues will not be marked stale', async () => {
       true
     )
   ];
-  const processor = new IssueProcessor(
+  const processor = new IssuesProcessor(
     DefaultProcessorOptions,
     async () => 'abot',
     async p => (p == 1 ? TestIssueList : []),
@@ -891,7 +892,7 @@ test('stale closed issues will not be closed', async () => {
       true
     )
   ];
-  const processor = new IssueProcessor(
+  const processor = new IssuesProcessor(
     DefaultProcessorOptions,
     async () => 'abot',
     async p => (p == 1 ? TestIssueList : []),
@@ -919,7 +920,7 @@ test('closed prs will not be marked stale', async () => {
       true
     )
   ];
-  const processor = new IssueProcessor(
+  const processor = new IssuesProcessor(
     DefaultProcessorOptions,
     async () => 'abot',
     async p => (p == 1 ? TestIssueList : []),
@@ -947,7 +948,7 @@ test('stale closed prs will not be closed', async () => {
       true
     )
   ];
-  const processor = new IssueProcessor(
+  const processor = new IssuesProcessor(
     DefaultProcessorOptions,
     async () => 'abot',
     async p => (p == 1 ? TestIssueList : []),
@@ -976,7 +977,7 @@ test('locked issues will not be marked stale', async () => {
       true
     )
   ];
-  const processor = new IssueProcessor(
+  const processor = new IssuesProcessor(
     DefaultProcessorOptions,
     async () => 'abot',
     async p => (p == 1 ? TestIssueList : [])
@@ -1003,7 +1004,7 @@ test('stale locked issues will not be closed', async () => {
       true
     )
   ];
-  const processor = new IssueProcessor(
+  const processor = new IssuesProcessor(
     DefaultProcessorOptions,
     async () => 'abot',
     async p => (p == 1 ? TestIssueList : []),
@@ -1032,7 +1033,7 @@ test('locked prs will not be marked stale', async () => {
       true
     )
   ];
-  const processor = new IssueProcessor(
+  const processor = new IssuesProcessor(
     DefaultProcessorOptions,
     async () => 'abot',
     async p => (p == 1 ? TestIssueList : [])
@@ -1059,7 +1060,7 @@ test('stale locked prs will not be closed', async () => {
       true
     )
   ];
-  const processor = new IssueProcessor(
+  const processor = new IssuesProcessor(
     DefaultProcessorOptions,
     async () => 'abot',
     async p => (p == 1 ? TestIssueList : []),
@@ -1089,7 +1090,7 @@ test('exempt issue labels will not be marked stale', async () => {
       ['Exempt']
     )
   ];
-  const processor = new IssueProcessor(
+  const processor = new IssuesProcessor(
     opts,
     async () => 'abot',
     async p => (p == 1 ? TestIssueList : []),
@@ -1119,7 +1120,7 @@ test('exempt issue labels will not be marked stale (multi issue label with space
       ['Cool']
     )
   ];
-  const processor = new IssueProcessor(
+  const processor = new IssuesProcessor(
     opts,
     async () => 'abot',
     async p => (p == 1 ? TestIssueList : []),
@@ -1148,7 +1149,7 @@ test('exempt issue labels will not be marked stale (multi issue label)', async (
       ['Cool']
     )
   ];
-  const processor = new IssueProcessor(
+  const processor = new IssuesProcessor(
     opts,
     async () => 'abot',
     async p => (p == 1 ? TestIssueList : []),
@@ -1195,7 +1196,7 @@ test('exempt pr labels will not be marked stale', async () => {
       false
     )
   ];
-  const processor = new IssueProcessor(
+  const processor = new IssuesProcessor(
     opts,
     async () => 'abot',
     async p => (p == 1 ? TestIssueList : []),
@@ -1224,7 +1225,7 @@ test('exempt issue labels will not be marked stale and will remove the existing 
       ['Exempt', 'Stale']
     )
   ];
-  const processor = new IssueProcessor(
+  const processor = new IssuesProcessor(
     opts,
     async () => 'abot',
     async p => (p == 1 ? TestIssueList : []),
@@ -1279,7 +1280,7 @@ test('stale issues should not be closed if days is set to -1', async () => {
       ['Stale']
     )
   ];
-  const processor = new IssueProcessor(
+  const processor = new IssuesProcessor(
     opts,
     async () => 'abot',
     async p => (p == 1 ? TestIssueList : []),
@@ -1308,7 +1309,7 @@ test('stale label should be removed if a comment was added to a stale issue', as
       ['Stale']
     )
   ];
-  const processor = new IssueProcessor(
+  const processor = new IssuesProcessor(
     opts,
     async () => 'abot',
     async p => (p == 1 ? TestIssueList : []),
@@ -1346,7 +1347,7 @@ test('stale label should not be removed if a comment was added by the bot (and t
       ['Stale']
     )
   ];
-  const processor = new IssueProcessor(
+  const processor = new IssuesProcessor(
     opts,
     async () => 'abot',
     async p => (p == 1 ? TestIssueList : []),
@@ -1370,7 +1371,7 @@ test('stale label should not be removed if a comment was added by the bot (and t
 });
 
 test('stale label containing a space should be removed if a comment was added to a stale issue', async () => {
-  const opts: IssueProcessorOptions = {
+  const opts: IIssuesProcessorOptions = {
     ...DefaultProcessorOptions,
     removeStaleWhenUpdated: true,
     staleIssueLabel: 'stat: stale'
@@ -1386,7 +1387,7 @@ test('stale label containing a space should be removed if a comment was added to
       ['stat: stale']
     )
   ];
-  const processor = new IssueProcessor(
+  const processor = new IssuesProcessor(
     opts,
     async () => 'abot',
     async p => (p == 1 ? TestIssueList : []),
@@ -1406,7 +1407,7 @@ test('stale issues should not be closed until after the closed number of days', 
   const opts = {...DefaultProcessorOptions};
   opts.daysBeforeStale = 5; // stale after 5 days
   opts.daysBeforeClose = 1; // closes after 6 days
-  let lastUpdate = new Date();
+  const lastUpdate = new Date();
   lastUpdate.setDate(lastUpdate.getDate() - 5);
   const TestIssueList: Issue[] = [
     generateIssue(
@@ -1418,7 +1419,7 @@ test('stale issues should not be closed until after the closed number of days', 
       false
     )
   ];
-  const processor = new IssueProcessor(
+  const processor = new IssuesProcessor(
     opts,
     async () => 'abot',
     async p => (p == 1 ? TestIssueList : []),
@@ -1438,7 +1439,7 @@ test('stale issues should be closed if the closed nubmer of days (additive) is a
   const opts = {...DefaultProcessorOptions};
   opts.daysBeforeStale = 5; // stale after 5 days
   opts.daysBeforeClose = 1; // closes after 6 days
-  let lastUpdate = new Date();
+  const lastUpdate = new Date();
   lastUpdate.setDate(lastUpdate.getDate() - 7);
   const TestIssueList: Issue[] = [
     generateIssue(
@@ -1451,7 +1452,7 @@ test('stale issues should be closed if the closed nubmer of days (additive) is a
       ['Stale']
     )
   ];
-  const processor = new IssueProcessor(
+  const processor = new IssuesProcessor(
     opts,
     async () => 'abot',
     async p => (p == 1 ? TestIssueList : []),
@@ -1471,7 +1472,7 @@ test('stale issues should not be closed until after the closed number of days (l
   const opts = {...DefaultProcessorOptions};
   opts.daysBeforeStale = 5; // stale after 5 days
   opts.daysBeforeClose = 20; // closes after 25 days
-  let lastUpdate = new Date();
+  const lastUpdate = new Date();
   lastUpdate.setDate(lastUpdate.getDate() - 10);
   const TestIssueList: Issue[] = [
     generateIssue(
@@ -1483,7 +1484,7 @@ test('stale issues should not be closed until after the closed number of days (l
       false
     )
   ];
-  const processor = new IssueProcessor(
+  const processor = new IssuesProcessor(
     opts,
     async () => 'abot',
     async p => (p == 1 ? TestIssueList : []),
@@ -1504,7 +1505,7 @@ test('skips stale message on issues when skip-stale-issue-message is set', async
   opts.daysBeforeStale = 5; // stale after 5 days
   opts.daysBeforeClose = 20; // closes after 25 days
   opts.skipStaleIssueMessage = true;
-  let lastUpdate = new Date();
+  const lastUpdate = new Date();
   lastUpdate.setDate(lastUpdate.getDate() - 10);
   const TestIssueList: Issue[] = [
     generateIssue(
@@ -1516,7 +1517,7 @@ test('skips stale message on issues when skip-stale-issue-message is set', async
       false
     )
   ];
-  const processor = new IssueProcessor(
+  const processor = new IssuesProcessor(
     opts,
     async () => 'abot',
     async p => (p == 1 ? TestIssueList : []),
@@ -1549,7 +1550,7 @@ test('skips stale message on prs when skip-stale-pr-message is set', async () =>
   opts.daysBeforeStale = 5; // stale after 5 days
   opts.daysBeforeClose = 20; // closes after 25 days
   opts.skipStalePrMessage = true;
-  let lastUpdate = new Date();
+  const lastUpdate = new Date();
   lastUpdate.setDate(lastUpdate.getDate() - 10);
   const TestIssueList: Issue[] = [
     generateIssue(
@@ -1561,7 +1562,7 @@ test('skips stale message on prs when skip-stale-pr-message is set', async () =>
       true
     )
   ];
-  const processor = new IssueProcessor(
+  const processor = new IssuesProcessor(
     opts,
     async () => 'abot',
     async p => (p == 1 ? TestIssueList : []),
@@ -1595,7 +1596,7 @@ test('not providing state takes precedence over skipStaleIssueMessage', async ()
   opts.daysBeforeClose = 20; // closes after 25 days
   opts.skipStalePrMessage = true;
   opts.staleIssueMessage = '';
-  let lastUpdate = new Date();
+  const lastUpdate = new Date();
   lastUpdate.setDate(lastUpdate.getDate() - 10);
   const TestIssueList: Issue[] = [
     generateIssue(
@@ -1607,7 +1608,7 @@ test('not providing state takes precedence over skipStaleIssueMessage', async ()
       false
     )
   ];
-  const processor = new IssueProcessor(
+  const processor = new IssuesProcessor(
     opts,
     async () => 'abot',
     async p => (p == 1 ? TestIssueList : []),
@@ -1629,7 +1630,7 @@ test('not providing stalePrMessage takes precedence over skipStalePrMessage', as
   opts.daysBeforeClose = 20; // closes after 25 days
   opts.skipStalePrMessage = true;
   opts.stalePrMessage = '';
-  let lastUpdate = new Date();
+  const lastUpdate = new Date();
   lastUpdate.setDate(lastUpdate.getDate() - 10);
   const TestIssueList: Issue[] = [
     generateIssue(
@@ -1641,7 +1642,7 @@ test('not providing stalePrMessage takes precedence over skipStalePrMessage', as
       true
     )
   ];
-  const processor = new IssueProcessor(
+  const processor = new IssuesProcessor(
     opts,
     async () => 'abot',
     async p => (p == 1 ? TestIssueList : []),
@@ -1671,7 +1672,7 @@ test('git branch is deleted when option is enabled', async () => {
       ['Stale']
     )
   ];
-  const processor = new IssueProcessor(
+  const processor = new IssuesProcessor(
     opts,
     async () => 'abot',
     async p => (p == 1 ? TestIssueList : []),
@@ -1701,7 +1702,7 @@ test('git branch is not deleted when issue is not pull request', async () => {
       ['Stale']
     )
   ];
-  const processor = new IssueProcessor(
+  const processor = new IssuesProcessor(
     opts,
     async () => 'abot',
     async p => (p == 1 ? TestIssueList : []),
@@ -1733,7 +1734,7 @@ test('an issue without a milestone will be marked as stale', async () => {
       ''
     )
   ];
-  const processor = new IssueProcessor(
+  const processor = new IssuesProcessor(
     DefaultProcessorOptions,
     async () => 'abot',
     async p => (p == 1 ? TestIssueList : []),
@@ -1767,7 +1768,7 @@ test('an issue without an exempted milestone will be marked as stale', async () 
       'Milestone'
     )
   ];
-  const processor = new IssueProcessor(
+  const processor = new IssuesProcessor(
     opts,
     async () => 'abot',
     async p => (p == 1 ? TestIssueList : []),
@@ -1801,7 +1802,7 @@ test('an issue with an exempted milestone will not be marked as stale', async ()
       'Milestone1'
     )
   ];
-  const processor = new IssueProcessor(
+  const processor = new IssuesProcessor(
     opts,
     async () => 'abot',
     async p => (p == 1 ? TestIssueList : []),
@@ -1835,7 +1836,7 @@ test('an issue with an exempted milestone will not be marked as stale (multi mil
       'Milestone2'
     )
   ];
-  const processor = new IssueProcessor(
+  const processor = new IssuesProcessor(
     opts,
     async () => 'abot',
     async p => (p == 1 ? TestIssueList : []),
@@ -1869,7 +1870,7 @@ test('an issue with an exempted milestone will not be marked as stale (multi mil
       'Milestone2'
     )
   ];
-  const processor = new IssueProcessor(
+  const processor = new IssuesProcessor(
     opts,
     async () => 'abot',
     async p => (p == 1 ? TestIssueList : []),
@@ -1904,7 +1905,7 @@ test('an issue with an exempted milestone but without an exempted issue mileston
       'Milestone1'
     )
   ];
-  const processor = new IssueProcessor(
+  const processor = new IssuesProcessor(
     opts,
     async () => 'abot',
     async p => (p == 1 ? TestIssueList : []),
@@ -1939,7 +1940,7 @@ test('an issue with an exempted milestone but with another exempted issue milest
       'Milestone1'
     )
   ];
-  const processor = new IssueProcessor(
+  const processor = new IssuesProcessor(
     opts,
     async () => 'abot',
     async p => (p == 1 ? TestIssueList : []),
@@ -1974,7 +1975,7 @@ test('an issue with an exempted milestone and with an exempted issue milestone w
       'Milestone1'
     )
   ];
-  const processor = new IssueProcessor(
+  const processor = new IssuesProcessor(
     opts,
     async () => 'abot',
     async p => (p == 1 ? TestIssueList : []),
@@ -2006,7 +2007,7 @@ test('a PR without a milestone will be marked as stale', async () => {
       ''
     )
   ];
-  const processor = new IssueProcessor(
+  const processor = new IssuesProcessor(
     DefaultProcessorOptions,
     async () => 'abot',
     async p => (p == 1 ? TestIssueList : []),
@@ -2040,7 +2041,7 @@ test('a PR without an exempted milestone will be marked as stale', async () => {
       'Milestone'
     )
   ];
-  const processor = new IssueProcessor(
+  const processor = new IssuesProcessor(
     opts,
     async () => 'abot',
     async p => (p == 1 ? TestIssueList : []),
@@ -2074,7 +2075,7 @@ test('a PR with an exempted milestone will not be marked as stale', async () => 
       'Milestone1'
     )
   ];
-  const processor = new IssueProcessor(
+  const processor = new IssuesProcessor(
     opts,
     async () => 'abot',
     async p => (p == 1 ? TestIssueList : []),
@@ -2108,7 +2109,7 @@ test('a PR with an exempted milestone will not be marked as stale (multi milesto
       'Milestone2'
     )
   ];
-  const processor = new IssueProcessor(
+  const processor = new IssuesProcessor(
     opts,
     async () => 'abot',
     async p => (p == 1 ? TestIssueList : []),
@@ -2142,7 +2143,7 @@ test('a PR with an exempted milestone will not be marked as stale (multi milesto
       'Milestone2'
     )
   ];
-  const processor = new IssueProcessor(
+  const processor = new IssuesProcessor(
     opts,
     async () => 'abot',
     async p => (p == 1 ? TestIssueList : []),
@@ -2177,7 +2178,7 @@ test('a PR with an exempted milestone but without an exempted issue milestone wi
       'Milestone1'
     )
   ];
-  const processor = new IssueProcessor(
+  const processor = new IssuesProcessor(
     opts,
     async () => 'abot',
     async p => (p == 1 ? TestIssueList : []),
@@ -2212,7 +2213,7 @@ test('a PR with an exempted milestone but with another exempted issue milestone 
       'Milestone1'
     )
   ];
-  const processor = new IssueProcessor(
+  const processor = new IssuesProcessor(
     opts,
     async () => 'abot',
     async p => (p == 1 ? TestIssueList : []),
@@ -2247,7 +2248,7 @@ test('a PR with an exempted milestone and with an exempted issue milestone will 
       'Milestone1'
     )
   ];
-  const processor = new IssueProcessor(
+  const processor = new IssuesProcessor(
     opts,
     async () => 'abot',
     async p => (p == 1 ? TestIssueList : []),
@@ -2265,17 +2266,17 @@ test('a PR with an exempted milestone and with an exempted issue milestone will 
 
 test('processing an issue opened since 2 days and with the option "daysBeforeIssueStale" at 3 will not make it stale', async () => {
   expect.assertions(2);
-  const opts: IssueProcessorOptions = {
+  const opts: IIssuesProcessorOptions = {
     ...DefaultProcessorOptions,
     daysBeforeStale: 10,
     daysBeforeIssueStale: 3
   };
-  let issueDate = new Date();
+  const issueDate = new Date();
   issueDate.setDate(issueDate.getDate() - 2);
   const TestIssueList: Issue[] = [
     generateIssue(opts, 1, 'An issue with no label', issueDate.toDateString())
   ];
-  const processor = new IssueProcessor(
+  const processor = new IssuesProcessor(
     opts,
     async () => 'abot',
     async p => (p == 1 ? TestIssueList : []),
@@ -2292,17 +2293,17 @@ test('processing an issue opened since 2 days and with the option "daysBeforeIss
 
 test('processing an issue opened since 2 days and with the option "daysBeforeIssueStale" at 2 will make it stale', async () => {
   expect.assertions(2);
-  const opts: IssueProcessorOptions = {
+  const opts: IIssuesProcessorOptions = {
     ...DefaultProcessorOptions,
     daysBeforeStale: 10,
     daysBeforeIssueStale: 2
   };
-  let issueDate = new Date();
+  const issueDate = new Date();
   issueDate.setDate(issueDate.getDate() - 2);
   const TestIssueList: Issue[] = [
     generateIssue(opts, 1, 'An issue with no label', issueDate.toDateString())
   ];
-  const processor = new IssueProcessor(
+  const processor = new IssuesProcessor(
     opts,
     async () => 'abot',
     async p => (p == 1 ? TestIssueList : []),
@@ -2319,17 +2320,17 @@ test('processing an issue opened since 2 days and with the option "daysBeforeIss
 
 test('processing an issue opened since 2 days and with the option "daysBeforeIssueStale" at 1 will make it stale', async () => {
   expect.assertions(2);
-  const opts: IssueProcessorOptions = {
+  const opts: IIssuesProcessorOptions = {
     ...DefaultProcessorOptions,
     daysBeforeStale: 10,
     daysBeforeIssueStale: 1
   };
-  let issueDate = new Date();
+  const issueDate = new Date();
   issueDate.setDate(issueDate.getDate() - 2);
   const TestIssueList: Issue[] = [
     generateIssue(opts, 1, 'An issue with no label', issueDate.toDateString())
   ];
-  const processor = new IssueProcessor(
+  const processor = new IssuesProcessor(
     opts,
     async () => 'abot',
     async p => (p == 1 ? TestIssueList : []),
@@ -2346,12 +2347,12 @@ test('processing an issue opened since 2 days and with the option "daysBeforeIss
 
 test('processing a pull request opened since 2 days and with the option "daysBeforePrStale" at 3 will not make it stale', async () => {
   expect.assertions(2);
-  const opts: IssueProcessorOptions = {
+  const opts: IIssuesProcessorOptions = {
     ...DefaultProcessorOptions,
     daysBeforeStale: 10,
     daysBeforePrStale: 3
   };
-  let issueDate = new Date();
+  const issueDate = new Date();
   issueDate.setDate(issueDate.getDate() - 2);
   const TestIssueList: Issue[] = [
     generateIssue(
@@ -2363,7 +2364,7 @@ test('processing a pull request opened since 2 days and with the option "daysBef
       true
     )
   ];
-  const processor = new IssueProcessor(
+  const processor = new IssuesProcessor(
     opts,
     async () => 'abot',
     async p => (p == 1 ? TestIssueList : []),
@@ -2380,12 +2381,12 @@ test('processing a pull request opened since 2 days and with the option "daysBef
 
 test('processing a pull request opened since 2 days and with the option "daysBeforePrStale" at 2 will make it stale', async () => {
   expect.assertions(2);
-  const opts: IssueProcessorOptions = {
+  const opts: IIssuesProcessorOptions = {
     ...DefaultProcessorOptions,
     daysBeforeStale: 10,
     daysBeforePrStale: 2
   };
-  let issueDate = new Date();
+  const issueDate = new Date();
   issueDate.setDate(issueDate.getDate() - 2);
   const TestIssueList: Issue[] = [
     generateIssue(
@@ -2397,7 +2398,7 @@ test('processing a pull request opened since 2 days and with the option "daysBef
       true
     )
   ];
-  const processor = new IssueProcessor(
+  const processor = new IssuesProcessor(
     opts,
     async () => 'abot',
     async p => (p == 1 ? TestIssueList : []),
@@ -2414,12 +2415,12 @@ test('processing a pull request opened since 2 days and with the option "daysBef
 
 test('processing a pull request opened since 2 days and with the option "daysBeforePrStale" at 1 will make it stale', async () => {
   expect.assertions(2);
-  const opts: IssueProcessorOptions = {
+  const opts: IIssuesProcessorOptions = {
     ...DefaultProcessorOptions,
     daysBeforeStale: 10,
     daysBeforePrStale: 1
   };
-  let issueDate = new Date();
+  const issueDate = new Date();
   issueDate.setDate(issueDate.getDate() - 2);
   const TestIssueList: Issue[] = [
     generateIssue(
@@ -2431,7 +2432,7 @@ test('processing a pull request opened since 2 days and with the option "daysBef
       true
     )
   ];
-  const processor = new IssueProcessor(
+  const processor = new IssuesProcessor(
     opts,
     async () => 'abot',
     async p => (p == 1 ? TestIssueList : []),

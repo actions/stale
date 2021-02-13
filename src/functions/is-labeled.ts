@@ -1,6 +1,6 @@
 import deburr from 'lodash.deburr';
 import {Issue} from '../classes/issue';
-import {Label} from '../IssueProcessor';
+import {ILabel} from '../interfaces/label';
 import {CleanLabel} from '../types/clean-label';
 
 /**
@@ -16,7 +16,7 @@ export function isLabeled(
   issue: Readonly<Issue>,
   label: Readonly<string>
 ): boolean {
-  return !!issue.labels.find((issueLabel: Readonly<Label>): boolean => {
+  return !!issue.labels.find((issueLabel: Readonly<ILabel>): boolean => {
     return cleanLabel(label) === cleanLabel(issueLabel.name);
   });
 }

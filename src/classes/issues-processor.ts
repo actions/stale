@@ -1,84 +1,29 @@
 import {context, getOctokit} from '@actions/github';
 import {GitHub} from '@actions/github/lib/utils';
 import {GetResponseTypeFromEndpointMethod} from '@octokit/types';
-import {Issue} from './classes/issue';
-import {IssueLogger} from './classes/loggers/issue-logger';
-import {Logger} from './classes/loggers/logger';
-import {Milestones} from './classes/milestones';
-import {IssueType} from './enums/issue-type';
-import {getHumanizedDate} from './functions/dates/get-humanized-date';
-import {isDateMoreRecentThan} from './functions/dates/is-date-more-recent-than';
-import {isValidDate} from './functions/dates/is-valid-date';
-import {getIssueType} from './functions/get-issue-type';
-import {isLabeled} from './functions/is-labeled';
-import {isPullRequest} from './functions/is-pull-request';
-import {shouldMarkWhenStale} from './functions/should-mark-when-stale';
-import {IsoOrRfcDateString} from './types/iso-or-rfc-date-string';
-import {wordsToList} from './functions/words-to-list';
-import {IIssue} from './interfaces/issue';
-
-export interface PullRequest {
-  number: number;
-  head: {
-    ref: string;
-  };
-}
-
-export interface User {
-  type: string;
-  login: string;
-}
-
-export interface Comment {
-  user: User;
-}
-
-export interface IssueEvent {
-  created_at: string;
-  event: string;
-  label: Label;
-}
-
-export interface Label {
-  name: string;
-}
-
-export interface IssueProcessorOptions {
-  repoToken: string;
-  staleIssueMessage: string;
-  stalePrMessage: string;
-  closeIssueMessage: string;
-  closePrMessage: string;
-  daysBeforeStale: number;
-  daysBeforeIssueStale: number; // Could be NaN
-  daysBeforePrStale: number; // Could be NaN
-  daysBeforeClose: number;
-  daysBeforeIssueClose: number; // Could be NaN
-  daysBeforePrClose: number; // Could be NaN
-  staleIssueLabel: string;
-  closeIssueLabel: string;
-  exemptIssueLabels: string;
-  stalePrLabel: string;
-  closePrLabel: string;
-  exemptPrLabels: string;
-  onlyLabels: string;
-  operationsPerRun: number;
-  removeStaleWhenUpdated: boolean;
-  debugOnly: boolean;
-  ascending: boolean;
-  skipStaleIssueMessage: boolean;
-  skipStalePrMessage: boolean;
-  deleteBranch: boolean;
-  startDate: IsoOrRfcDateString | undefined; // Should be ISO 8601 or RFC 2822
-  exemptMilestones: string;
-  exemptIssueMilestones: string;
-  exemptPrMilestones: string;
-}
+import {IssueType} from '../enums/issue-type';
+import {getHumanizedDate} from '../functions/dates/get-humanized-date';
+import {isDateMoreRecentThan} from '../functions/dates/is-date-more-recent-than';
+import {isValidDate} from '../functions/dates/is-valid-date';
+import {getIssueType} from '../functions/get-issue-type';
+import {isLabeled} from '../functions/is-labeled';
+import {isPullRequest} from '../functions/is-pull-request';
+import {shouldMarkWhenStale} from '../functions/should-mark-when-stale';
+import {wordsToList} from '../functions/words-to-list';
+import {IComment} from '../interfaces/comment';
+import {IIssue} from '../interfaces/issue';
+import {IIssueEvent} from '../interfaces/issue-event';
+import {IIssuesProcessorOptions} from '../interfaces/issues-processor-options';
+import {IPullRequest} from '../interfaces/pull-request';
+import {Issue} from './issue';
+import {IssueLogger} from './loggers/issue-logger';
+import {Logger} from './loggers/logger';
+import {Milestones} from './milestones';
 
 /***
  * Handle processing of issues for staleness/closure.
  */
-export class IssueProcessor {
+export class IssuesProcessor {
   private static _updatedSince(timestamp: string, num_days: number): boolean {
     const daysInMillis = 1000 * 60 * 60 * 24 * num_days;
     const millisSinceLastUpdated =
@@ -90,20 +35,20 @@ export class IssueProcessor {
   private readonly _logger: Logger = new Logger();
   private _operationsLeft = 0;
   readonly client: InstanceType<typeof GitHub>;
-  readonly options: IssueProcessorOptions;
+  readonly options: IIssuesProcessorOptions;
   readonly staleIssues: Issue[] = [];
   readonly closedIssues: Issue[] = [];
   readonly deletedBranchIssues: Issue[] = [];
   readonly removedLabelIssues: Issue[] = [];
 
   constructor(
-    options: IssueProcessorOptions,
+    options: IIssuesProcessorOptions,
     getActor?: () => Promise<string>,
     getIssues?: (page: number) => Promise<Issue[]>,
     listIssueComments?: (
       issueNumber: number,
       sinceDate: string
-    ) => Promise<Comment[]>,
+    ) => Promise<IComment[]>,
     getLabelCreationDate?: (
       issue: Issue,
       label: string
@@ -271,7 +216,7 @@ export class IssueProcessor {
       }
 
       // should this issue be marked stale?
-      const shouldBeStale = !IssueProcessor._updatedSince(
+      const shouldBeStale = !IssuesProcessor._updatedSince(
         issue.updated_at,
         daysBeforeStale
       );
@@ -350,7 +295,7 @@ export class IssueProcessor {
       issueLogger.info(`Days before issue close: ${daysBeforeClose}`);
     }
 
-    const issueHasUpdate: boolean = IssueProcessor._updatedSince(
+    const issueHasUpdate: boolean = IssuesProcessor._updatedSince(
       issue.updated_at,
       daysBeforeClose
     );
@@ -423,7 +368,7 @@ export class IssueProcessor {
   private async _listIssueComments(
     issueNumber: number,
     sinceDate: string
-  ): Promise<Comment[]> {
+  ): Promise<IComment[]> {
     // find any comments since date on the given issue
     try {
       const comments = await this.client.issues.listComments({
@@ -586,7 +531,7 @@ export class IssueProcessor {
 
   private async _getPullRequest(
     issue: Issue
-  ): Promise<PullRequest | undefined> {
+  ): Promise<IPullRequest | undefined> {
     const issueLogger: IssueLogger = new IssueLogger(issue);
     this._operationsLeft -= 1;
 
@@ -692,7 +637,7 @@ export class IssueProcessor {
       issue_number: issue.number
     });
 
-    const events: IssueEvent[] = await this.client.paginate(options);
+    const events: IIssueEvent[] = await this.client.paginate(options);
     const reversedEvents = events.reverse();
 
     const staleLabeledEvent = reversedEvents.find(

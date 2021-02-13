@@ -1,5 +1,5 @@
-import {Label} from '../IssueProcessor';
 import {IsoDateString} from '../types/iso-date-string';
+import {ILabel} from './label';
 import {IMilestone} from './milestone';
 
 export interface IIssue {
@@ -7,7 +7,7 @@ export interface IIssue {
   number: number;
   created_at: IsoDateString;
   updated_at: IsoDateString;
-  labels: Label[];
+  labels: ILabel[];
   pull_request: Object | null | undefined;
   state: string;
   locked: boolean;

@@ -1,17 +1,18 @@
 import {isLabeled} from '../functions/is-labeled';
 import {isPullRequest} from '../functions/is-pull-request';
 import {IIssue} from '../interfaces/issue';
+import {IIssuesProcessorOptions} from '../interfaces/issues-processor-options';
+import {ILabel} from '../interfaces/label';
 import {IMilestone} from '../interfaces/milestone';
-import {IssueProcessorOptions, Label} from '../IssueProcessor';
 import {IsoDateString} from '../types/iso-date-string';
 
 export class Issue implements IIssue {
-  private readonly _options: IssueProcessorOptions;
+  private readonly _options: IIssuesProcessorOptions;
   readonly title: string;
   readonly number: number;
   created_at: IsoDateString;
   updated_at: IsoDateString;
-  readonly labels: Label[];
+  readonly labels: ILabel[];
   readonly pull_request: Object | null | undefined;
   readonly state: string;
   readonly locked: boolean;
@@ -21,7 +22,7 @@ export class Issue implements IIssue {
   isStale: boolean;
 
   constructor(
-    options: Readonly<IssueProcessorOptions>,
+    options: Readonly<IIssuesProcessorOptions>,
     issue: Readonly<IIssue>
   ) {
     this._options = options;

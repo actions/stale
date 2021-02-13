@@ -2,7 +2,43 @@ module.exports =
 /******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
-/***/ 4407:
+/***/ 4783:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.Issue = void 0;
+const is_labeled_1 = __nccwpck_require__(6792);
+const is_pull_request_1 = __nccwpck_require__(5400);
+class Issue {
+    constructor(options, issue) {
+        this._options = options;
+        this.title = issue.title;
+        this.number = issue.number;
+        this.created_at = issue.created_at;
+        this.updated_at = issue.updated_at;
+        this.labels = issue.labels;
+        this.pull_request = issue.pull_request;
+        this.state = issue.state;
+        this.locked = issue.locked;
+        this.milestone = issue.milestone;
+        this.isPullRequest = is_pull_request_1.isPullRequest(this);
+        this.staleLabel = this._getStaleLabel();
+        this.isStale = is_labeled_1.isLabeled(this, this.staleLabel);
+    }
+    _getStaleLabel() {
+        return this.isPullRequest
+            ? this._options.stalePrLabel
+            : this._options.staleIssueLabel;
+    }
+}
+exports.Issue = Issue;
+
+
+/***/ }),
+
+/***/ 3292:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
@@ -17,12 +53,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.IssueProcessor = void 0;
+exports.IssuesProcessor = void 0;
 const github_1 = __nccwpck_require__(5438);
-const issue_1 = __nccwpck_require__(4783);
-const issue_logger_1 = __nccwpck_require__(2984);
-const logger_1 = __nccwpck_require__(6212);
-const milestones_1 = __nccwpck_require__(4601);
 const get_humanized_date_1 = __nccwpck_require__(965);
 const is_date_more_recent_than_1 = __nccwpck_require__(1473);
 const is_valid_date_1 = __nccwpck_require__(891);
@@ -31,10 +63,14 @@ const is_labeled_1 = __nccwpck_require__(6792);
 const is_pull_request_1 = __nccwpck_require__(5400);
 const should_mark_when_stale_1 = __nccwpck_require__(2461);
 const words_to_list_1 = __nccwpck_require__(1883);
+const issue_1 = __nccwpck_require__(4783);
+const issue_logger_1 = __nccwpck_require__(2984);
+const logger_1 = __nccwpck_require__(6212);
+const milestones_1 = __nccwpck_require__(4601);
 /***
  * Handle processing of issues for staleness/closure.
  */
-class IssueProcessor {
+class IssuesProcessor {
     constructor(options, getActor, getIssues, listIssueComments, getLabelCreationDate) {
         this._logger = new logger_1.Logger();
         this._operationsLeft = 0;
@@ -157,7 +193,7 @@ class IssueProcessor {
                     continue; // don't process exempt milestones
                 }
                 // should this issue be marked stale?
-                const shouldBeStale = !IssueProcessor._updatedSince(issue.updated_at, daysBeforeStale);
+                const shouldBeStale = !IssuesProcessor._updatedSince(issue.updated_at, daysBeforeStale);
                 // determine if this issue needs to be marked stale first
                 if (!issue.isStale && shouldBeStale && shouldMarkAsStale) {
                     issueLogger.info(`Marking ${issueType} stale because it was last updated on ${issue.updated_at} and it does not have a stale label`);
@@ -199,7 +235,7 @@ class IssueProcessor {
             else {
                 issueLogger.info(`Days before issue close: ${daysBeforeClose}`);
             }
-            const issueHasUpdate = IssueProcessor._updatedSince(issue.updated_at, daysBeforeClose);
+            const issueHasUpdate = IssuesProcessor._updatedSince(issue.updated_at, daysBeforeClose);
             issueLogger.info(`Issue #${issue.number} has been updated: ${issueHasUpdate}`);
             // should we un-stale this issue?
             if (this.options.removeStaleWhenUpdated && issueHasComments) {
@@ -503,43 +539,7 @@ class IssueProcessor {
         });
     }
 }
-exports.IssueProcessor = IssueProcessor;
-
-
-/***/ }),
-
-/***/ 4783:
-/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.Issue = void 0;
-const is_labeled_1 = __nccwpck_require__(6792);
-const is_pull_request_1 = __nccwpck_require__(5400);
-class Issue {
-    constructor(options, issue) {
-        this._options = options;
-        this.title = issue.title;
-        this.number = issue.number;
-        this.created_at = issue.created_at;
-        this.updated_at = issue.updated_at;
-        this.labels = issue.labels;
-        this.pull_request = issue.pull_request;
-        this.state = issue.state;
-        this.locked = issue.locked;
-        this.milestone = issue.milestone;
-        this.isPullRequest = is_pull_request_1.isPullRequest(this);
-        this.staleLabel = this._getStaleLabel();
-        this.isStale = is_labeled_1.isLabeled(this, this.staleLabel);
-    }
-    _getStaleLabel() {
-        return this.isPullRequest
-            ? this._options.stalePrLabel
-            : this._options.staleIssueLabel;
-    }
-}
-exports.Issue = Issue;
+exports.IssuesProcessor = IssuesProcessor;
 
 
 /***/ }),
@@ -924,12 +924,12 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__nccwpck_require__(2186));
 const is_valid_date_1 = __nccwpck_require__(891);
-const IssueProcessor_1 = __nccwpck_require__(4407);
+const issues_processor_1 = __nccwpck_require__(3292);
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const args = getAndValidateArgs();
-            const processor = new IssueProcessor_1.IssueProcessor(args);
+            const processor = new issues_processor_1.IssuesProcessor(args);
             yield processor.processIssues();
         }
         catch (error) {

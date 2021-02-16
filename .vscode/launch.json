@@ -9,7 +9,7 @@
             "args": [
                 "-i"
             ],
-            "preLaunchTask": "tsc: build - tsconfig.json",
+            "preLaunchTask": "tsc: build - tsconfig.app.json",
             "internalConsoleOptions": "openOnSessionStart",
             "console": "integratedTerminal",
             "outFiles": [

@@ -39,7 +39,10 @@ describe('Issue', (): void => {
       stalePrMessage: '',
       startDate: undefined,
       stalePrLabel: 'dummy-stale-pr-label',
-      staleIssueLabel: 'dummy-stale-issue-label'
+      staleIssueLabel: 'dummy-stale-issue-label',
+      exemptAllMilestones: false,
+      exemptAllIssueMilestones: undefined,
+      exemptAllPrMilestones: undefined
     };
     issueInterface = {
       title: 'dummy-title',

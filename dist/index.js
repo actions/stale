@@ -660,6 +660,9 @@ class Milestones {
         return lodash_deburr_1.default(label.toLowerCase());
     }
     shouldExemptMilestones() {
+        if (this._shouldExemptAllMilestones()) {
+            return true;
+        }
         const exemptMilestones = this._getExemptMilestones();
         return exemptMilestones.some((exemptMilestone) => this._hasMilestone(exemptMilestone));
     }
@@ -684,6 +687,32 @@ class Milestones {
         }
         return (Milestones._cleanMilestone(milestone) ===
             Milestones._cleanMilestone(this._issue.milestone.title));
+    }
+    _shouldExemptAllMilestones() {
+        if (this._issue.milestone) {
+            return this._issue.isPullRequest
+                ? this._shouldExemptAllPullRequestMilestones()
+                : this._shouldExemptAllIssueMilestones();
+        }
+        return false;
+    }
+    _shouldExemptAllIssueMilestones() {
+        if (this._options.exemptAllIssueMilestones === true) {
+            return true;
+        }
+        else if (this._options.exemptAllIssueMilestones === false) {
+            return false;
+        }
+        return this._options.exemptAllMilestones;
+    }
+    _shouldExemptAllPullRequestMilestones() {
+        if (this._options.exemptAllPrMilestones === true) {
+            return true;
+        }
+        else if (this._options.exemptAllPrMilestones === false) {
+            return false;
+        }
+        return this._options.exemptAllMilestones;
     }
 }
 exports.Milestones = Milestones;
@@ -925,10 +954,10 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__nccwpck_require__(2186));
 const is_valid_date_1 = __nccwpck_require__(891);
 const issues_processor_1 = __nccwpck_require__(3292);
-function run() {
+function _run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const args = getAndValidateArgs();
+            const args = _getAndValidateArgs();
             const processor = new issues_processor_1.IssuesProcessor(args);
             yield processor.processIssues();
         }
@@ -938,7 +967,7 @@ function run() {
         }
     });
 }
-function getAndValidateArgs() {
+function _getAndValidateArgs() {
     const args = {
         repoToken: core.getInput('repo-token'),
         staleIssueMessage: core.getInput('stale-issue-message'),
@@ -970,7 +999,10 @@ function getAndValidateArgs() {
             : undefined,
         exemptMilestones: core.getInput('exempt-milestones'),
         exemptIssueMilestones: core.getInput('exempt-issue-milestones'),
-        exemptPrMilestones: core.getInput('exempt-pr-milestones')
+        exemptPrMilestones: core.getInput('exempt-pr-milestones'),
+        exemptAllMilestones: core.getInput('exempt-all-milestones') === 'true',
+        exemptAllIssueMilestones: _toOptionalBoolean('exempt-all-issue-milestones'),
+        exemptAllPrMilestones: _toOptionalBoolean('exempt-all-pr-milestones')
     };
     for (const numberInput of [
         'days-before-stale',
@@ -991,7 +1023,17 @@ function getAndValidateArgs() {
     }
     return args;
 }
-run();
+function _toOptionalBoolean(argumentName) {
+    const argument = core.getInput(argumentName);
+    if (argument === 'true') {
+        return true;
+    }
+    else if (argument === 'false') {
+        return false;
+    }
+    return undefined;
+}
+_run();
 
 
 /***/ }),

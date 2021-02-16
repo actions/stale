@@ -19,6 +19,10 @@ export class Milestones {
   }
 
   shouldExemptMilestones(): boolean {
+    if (this._shouldExemptAllMilestones()) {
+      return true;
+    }
+
     const exemptMilestones: string[] = this._getExemptMilestones();
 
     return exemptMilestones.some((exemptMilestone: Readonly<string>): boolean =>
@@ -55,5 +59,35 @@ export class Milestones {
       Milestones._cleanMilestone(milestone) ===
       Milestones._cleanMilestone(this._issue.milestone.title)
     );
+  }
+
+  private _shouldExemptAllMilestones(): boolean {
+    if (this._issue.milestone) {
+      return this._issue.isPullRequest
+        ? this._shouldExemptAllPullRequestMilestones()
+        : this._shouldExemptAllIssueMilestones();
+    }
+
+    return false;
+  }
+
+  private _shouldExemptAllIssueMilestones(): boolean {
+    if (this._options.exemptAllIssueMilestones === true) {
+      return true;
+    } else if (this._options.exemptAllIssueMilestones === false) {
+      return false;
+    }
+
+    return this._options.exemptAllMilestones;
+  }
+
+  private _shouldExemptAllPullRequestMilestones(): boolean {
+    if (this._options.exemptAllPrMilestones === true) {
+      return true;
+    } else if (this._options.exemptAllPrMilestones === false) {
+      return false;
+    }
+
+    return this._options.exemptAllMilestones;
   }
 }

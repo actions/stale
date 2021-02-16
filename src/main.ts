@@ -39,6 +39,7 @@ function _getAndValidateArgs(): IIssuesProcessorOptions {
     closePrLabel: core.getInput('close-pr-label'),
     exemptPrLabels: core.getInput('exempt-pr-labels'),
     onlyLabels: core.getInput('only-labels'),
+    anyOfLabels: core.getInput('any-of-labels'),
     operationsPerRun: parseInt(
       core.getInput('operations-per-run', {required: true})
     ),

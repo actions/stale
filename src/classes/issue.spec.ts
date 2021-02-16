@@ -30,6 +30,7 @@ describe('Issue', (): void => {
       exemptPrLabels: '',
       exemptPrMilestones: '',
       onlyLabels: '',
+      anyOfLabels: '',
       operationsPerRun: 0,
       removeStaleWhenUpdated: false,
       repoToken: '',

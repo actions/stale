@@ -206,6 +206,19 @@ export class IssuesProcessor {
         continue; // don't process exempt issues
       }
 
+      const anyOfLabels: string[] = wordsToList(this.options.anyOfLabels);
+      if (
+        anyOfLabels.length &&
+        !anyOfLabels.some((label: Readonly<string>): boolean =>
+          isLabeled(issue, label)
+        )
+      ) {
+        issueLogger.info(
+          `Skipping ${issueType} because it does not have any of the required labels`
+        );
+        continue; // don't process issues without any of the required labels
+      }
+
       const milestones: Milestones = new Milestones(this.options, issue);
 
       if (milestones.shouldExemptMilestones()) {

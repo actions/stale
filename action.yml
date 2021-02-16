@@ -88,6 +88,10 @@ inputs:
     description: 'Only issues or pull requests with all of these labels are checked if stale. Defaults to `[]` (disabled) and can be a comma-separated list of labels.'
     default: ''
     required: false
+  any-of-labels:
+    description: 'Only issues or pull requests with one of these labels are checked if stale. Defaults to `[]` (disabled) and can be a comma-separated list of labels.'
+    default: ''
+    required: false
   operations-per-run:
     description: 'The maximum number of operations per run, used to control rate limiting (GitHub API CRUD related).'
     default: '30'

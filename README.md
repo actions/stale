@@ -29,7 +29,8 @@ Warns and then closes issues and PRs that have had no activity for a specified a
 | `exempt-all-milestones`       | Exempt all issues and PRs with milestones from being marked as stale. (priority over `exempt-milestones` rules) | Optional |
 | `exempt-all-issue-milestones` | Exempt all issues with milestones from being marked as stale. (override `exempt-all-milestones`).               | Optional |
 | `exempt-all-pr-milestones`    | Exempt all PRs with milestones from being marked as stale. (override `exempt-all-milestones`).                  | Optional |
-| `only-labels`                 | Only labels checked for stale issue/PR.                                                                         | Optional |
+| `only-labels`                 | Only issues and PRs with ALL these labels are checked.                                                          | Optional |
+| `any-of-labels`               | Only issues and PRs with ANY of these labels are checked.                                                       | Optional |
 | `operations-per-run`          | Maximum number of operations per run (GitHub API CRUD related). _Defaults to **30**_                            | Optional |
 | `remove-stale-when-updated`   | Remove stale label from issue/PR on updates or comments. _Defaults to **true**_                                 | Optional |
 | `debug-only`                  | Dry-run on action. _Defaults to **false**_                                                                      | Optional |
@@ -201,6 +202,25 @@ jobs:
       - uses: actions/stale@v3
         with:
           exempt-all-pr-milestones: true
+```
+
+Avoid stale for specific labels:
+
+```yaml
+name: 'Close stale issues and PRs'
+on:
+  schedule:
+    - cron: '30 1 * * *'
+
+jobs:
+  stale:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/stale@v3
+        with:
+          any-of-labels: 'needs-more-info,needs-demo'
+          # You can opt for 'only-labels' instead if your usecase requires all labels
+          # to be present in the issue/PR
 ```
 
 ### Debugging

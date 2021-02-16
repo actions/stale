@@ -5,7 +5,7 @@
   "description": "Marks old issues and PRs as stale",
   "main": "lib/main.js",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc --project tsconfig.app.json",
     "format": "prettier --write --ignore-unknown **/*.{md,json,yml,ts}",
     "format-check": "prettier --check --ignore-unknown **/*.{md,json,yml,ts}",
     "lint": "eslint src/**/*.ts",
@@ -42,7 +42,7 @@
     "@typescript-eslint/eslint-plugin": "^4.14.0",
     "@typescript-eslint/parser": "^4.14.0",
     "@vercel/ncc": "^0.27.0",
-    "eslint": "^7.19.0",
+    "eslint": "^7.20.0",
     "eslint-plugin-github": "^4.0.1",
     "eslint-plugin-jest": "^24.1.3",
     "jest": "^26.6.3",

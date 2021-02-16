@@ -27,6 +27,7 @@ describe('Milestones', (): void => {
       exemptIssueLabels: '',
       exemptPrLabels: '',
       onlyLabels: '',
+      anyOfLabels: '',
       operationsPerRun: 0,
       removeStaleWhenUpdated: false,
       repoToken: '',

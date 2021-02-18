@@ -39,7 +39,10 @@ describe('Milestones', (): void => {
       startDate: undefined,
       exemptIssueMilestones: '',
       exemptPrMilestones: '',
-      exemptMilestones: ''
+      exemptMilestones: '',
+      exemptAllMilestones: false,
+      exemptAllIssueMilestones: undefined,
+      exemptAllPrMilestones: undefined
     };
     issueInterface = {
       created_at: '',

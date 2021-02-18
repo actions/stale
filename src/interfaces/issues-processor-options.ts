@@ -30,4 +30,7 @@ export interface IIssuesProcessorOptions {
   exemptMilestones: string;
   exemptIssueMilestones: string;
   exemptPrMilestones: string;
+  exemptAllMilestones: boolean;
+  exemptAllIssueMilestones: boolean | undefined;
+  exemptAllPrMilestones: boolean | undefined;
 }

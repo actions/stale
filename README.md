@@ -29,8 +29,8 @@ Warns and then closes issues and PRs that have had no activity for a specified a
 | `exempt-all-milestones`       | Exempt all issues and PRs with milestones from being marked as stale. (priority over `exempt-milestones` rules) | Optional |
 | `exempt-all-issue-milestones` | Exempt all issues with milestones from being marked as stale. (override `exempt-all-milestones`).               | Optional |
 | `exempt-all-pr-milestones`    | Exempt all PRs with milestones from being marked as stale. (override `exempt-all-milestones`).                  | Optional |
-| `only-labels`                 | Only issues and PRs with ALL these labels are checked.                                                          | Optional |
-| `any-of-labels`               | Only issues and PRs with ANY of these labels are checked.                                                       | Optional |
+| `only-labels`                 | Only issues and PRs with ALL these labels are checked. Separate multiple labels with commas (eg. "question,answered").                                                         | Optional |
+| `any-of-labels`               | Only issues and PRs with ANY of these labels are checked. Separate multiple labels with commas (eg. "incomplete,waiting-feedback").                                                      | Optional |
 | `operations-per-run`          | Maximum number of operations per run (GitHub API CRUD related). _Defaults to **30**_                            | Optional |
 | `remove-stale-when-updated`   | Remove stale label from issue/PR on updates or comments. _Defaults to **true**_                                 | Optional |
 | `debug-only`                  | Dry-run on action. _Defaults to **false**_                                                                      | Optional |

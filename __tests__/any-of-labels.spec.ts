@@ -80,16 +80,17 @@ class IssuesProcessorBuilder {
   }
 
   issues(issues: Partial<Issue>[]): IssuesProcessorBuilder {
-    this._issues = issues.map((issue, idx) =>
-      generateIssue(
-        this._options,
-        idx,
-        issue.title || 'Issue title',
-        issue.updated_at || '2000-01-01T00:00:00Z', // we only care about stale/expired issues here
-        issue.created_at || '2000-01-01T00:00:00Z',
-        issue.isPullRequest || false,
-        issue.labels ? issue.labels.map(label => label.name) : []
-      )
+    this._issues = issues.map(
+      (issue, index): Issue =>
+        generateIssue(
+          this._options,
+          index,
+          issue.title || 'Issue title',
+          issue.updated_at || '2000-01-01T00:00:00Z', // we only care about stale/expired issues here
+          issue.created_at || '2000-01-01T00:00:00Z',
+          issue.isPullRequest || false,
+          issue.labels ? issue.labels.map(label => label.name) : []
+        )
     );
     return this;
   }

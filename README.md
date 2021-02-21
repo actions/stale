@@ -28,7 +28,7 @@ Warns and then closes issues and PRs that have had no activity for a specified a
 | `exempt-pr-milestones`        | Milestones on the PR exempted from being marked as stale (override `exempt-milestones`).                        | Optional |
 | `exempt-all-milestones`       | Exempt all issues and PRs with milestones from being marked as stale. (priority over `exempt-milestones` rules) | Optional |
 | `exempt-all-issue-milestones` | Exempt all issues with milestones from being marked as stale. (override `exempt-all-milestones`).               | Optional |
-| `exempt-all-pr-milestones`    | Exempt all PRs with milestones from being marked as stale. (override `exempt-all-milestones`).                  |
+| `exempt-all-pr-milestones`    | Exempt all PRs with milestones from being marked as stale. (override `exempt-all-milestones`).                  | Optional |
 | `exempt-assignees`            | Assignees on an issue or a PR exempted from being marked as stale.                                              | Optional |
 | `exempt-issue-assignees`      | Assignees on an issue exempted from being marked as stale (override `exempt-assignees`).                        | Optional |
 | `exempt-pr-assignees`         | Assignees on the PR exempted from being marked as stale (override `exempt-assignees`).                          | Optional |

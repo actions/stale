@@ -23,12 +23,6 @@ Warns and then closes issues and PRs that have had no activity for a specified a
 | `close-pr-label`              | Label to apply on the closing PR (automatically removed if no longer closed nor locked).                                            | Optional |
 | `exempt-issue-labels`         | Labels on an issue exempted from being marked as stale.                                                                             | Optional |
 | `exempt-pr-labels`            | Labels on the PR exempted from being marked as stale.                                                                               | Optional |
-| `exempt-milestones`           | Milestones on an issue or a PR exempted from being marked as stale.                                                                 | Optional |
-| `exempt-issue-milestones`     | Milestones on an issue exempted from being marked as stale (override `exempt-milestones`).                                          | Optional |
-| `exempt-pr-milestones`        | Milestones on the PR exempted from being marked as stale (override `exempt-milestones`).                                            | Optional |
-| `exempt-all-milestones`       | Exempt all issues and PRs with milestones from being marked as stale. (priority over `exempt-milestones` rules)                     | Optional |
-| `exempt-all-issue-milestones` | Exempt all issues with milestones from being marked as stale. (override `exempt-all-milestones`).                                   | Optional |
-| `exempt-all-pr-milestones`    | Exempt all PRs with milestones from being marked as stale. (override `exempt-all-milestones`).                                      | Optional |
 | `only-labels`                 | Only issues and PRs with ALL these labels are checked. Separate multiple labels with commas (eg. "question,answered").              | Optional |
 | `only-labels`                 | Only labels checked for stale issue/PR.                                                                                             | Optional |
 | `only-issue-labels`           | Only labels checked for stale issue (override `only-labels`).                                                                       | Optional |

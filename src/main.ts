@@ -59,7 +59,13 @@ function _getAndValidateArgs(): IIssuesProcessorOptions {
     exemptPrMilestones: core.getInput('exempt-pr-milestones'),
     exemptAllMilestones: core.getInput('exempt-all-milestones') === 'true',
     exemptAllIssueMilestones: _toOptionalBoolean('exempt-all-issue-milestones'),
-    exemptAllPrMilestones: _toOptionalBoolean('exempt-all-pr-milestones')
+    exemptAllPrMilestones: _toOptionalBoolean('exempt-all-pr-milestones'),
+    exemptAssignees: core.getInput('exempt-assignees'),
+    exemptIssueAssignees: core.getInput('exempt-issue-assignees'),
+    exemptPrAssignees: core.getInput('exempt-pr-assignees'),
+    exemptAllAssignees: core.getInput('exempt-all-assignees') === 'true',
+    exemptAllIssueAssignees: _toOptionalBoolean('exempt-all-issue-assignees'),
+    exemptAllPrAssignees: _toOptionalBoolean('exempt-all-pr-assignees')
   };
 
   for (const numberInput of [

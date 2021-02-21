@@ -28,7 +28,13 @@ Warns and then closes issues and PRs that have had no activity for a specified a
 | `exempt-pr-milestones`        | Milestones on the PR exempted from being marked as stale (override `exempt-milestones`).                        | Optional |
 | `exempt-all-milestones`       | Exempt all issues and PRs with milestones from being marked as stale. (priority over `exempt-milestones` rules) | Optional |
 | `exempt-all-issue-milestones` | Exempt all issues with milestones from being marked as stale. (override `exempt-all-milestones`).               | Optional |
-| `exempt-all-pr-milestones`    | Exempt all PRs with milestones from being marked as stale. (override `exempt-all-milestones`).                  | Optional |
+| `exempt-all-pr-milestones`    | Exempt all PRs with milestones from being marked as stale. (override `exempt-all-milestones`).                  |
+| `exempt-assignees`            | Assignees on an issue or a PR exempted from being marked as stale.                                              | Optional |
+| `exempt-issue-assignees`      | Assignees on an issue exempted from being marked as stale (override `exempt-assignees`).                        | Optional |
+| `exempt-pr-assignees`         | Assignees on the PR exempted from being marked as stale (override `exempt-assignees`).                          | Optional |
+| `exempt-all-assignees`        | Exempt all issues and PRs with assignees from being marked as stale. (priority over `exempt-assignees` rules)   | Optional |
+| `exempt-all-issue-assignees`  | Exempt all issues with assignees from being marked as stale. (override `exempt-all-assignees`).                 | Optional |
+| `exempt-all-pr-assignees`     | Exempt all PRs with assignees from being marked as stale. (override `exempt-all-assignees`).                    | Optional |
 | `only-labels`                 | Only labels checked for stale issue/PR.                                                                         | Optional |
 | `operations-per-run`          | Maximum number of operations per run (GitHub API CRUD related). _Defaults to **30**_                            | Optional |
 | `remove-stale-when-updated`   | Remove stale label from issue/PR on updates or comments. _Defaults to **true**_                                 | Optional |
@@ -201,6 +207,41 @@ jobs:
       - uses: actions/stale@v3
         with:
           exempt-all-pr-milestones: true
+```
+
+Avoid stale for specific assignees:
+
+```yaml
+name: 'Close stale issues and PRs'
+on:
+  schedule:
+    - cron: '30 1 * * *'
+
+jobs:
+  stale:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/stale@v3
+        with:
+          exempt-issue-assignees: 'marco,polo'
+          exempt-pr-assignees: 'marco'
+```
+
+Avoid stale for all PR with assignees:
+
+```yaml
+name: 'Close stale issues and PRs'
+on:
+  schedule:
+    - cron: '30 1 * * *'
+
+jobs:
+  stale:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/stale@v3
+        with:
+          exempt-all-pr-assignees: true
 ```
 
 ### Debugging

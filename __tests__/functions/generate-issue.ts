@@ -12,7 +12,8 @@ export function generateIssue(
   labels: string[] = [],
   isClosed = false,
   isLocked = false,
-  milestone: string | undefined = undefined
+  milestone: string | undefined = undefined,
+  assignee: string | undefined = undefined
 ): Issue {
   return new Issue(options, {
     number: id,
@@ -29,6 +30,13 @@ export function generateIssue(
       ? {
           title: milestone
         }
-      : undefined
+      : undefined,
+    assignees: assignee
+      ? [
+          {
+            login: assignee
+          }
+        ]
+      : []
   });
 }

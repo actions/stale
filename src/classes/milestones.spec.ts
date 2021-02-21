@@ -37,12 +37,18 @@ describe('Milestones', (): void => {
       stalePrLabel: '',
       stalePrMessage: '',
       startDate: undefined,
+      exemptMilestones: '',
       exemptIssueMilestones: '',
       exemptPrMilestones: '',
-      exemptMilestones: '',
       exemptAllMilestones: false,
       exemptAllIssueMilestones: undefined,
-      exemptAllPrMilestones: undefined
+      exemptAllPrMilestones: undefined,
+      exemptAssignees: '',
+      exemptIssueAssignees: '',
+      exemptPrAssignees: '',
+      exemptAllAssignees: false,
+      exemptAllIssueAssignees: undefined,
+      exemptAllPrAssignees: undefined
     };
     issueInterface = {
       created_at: '',

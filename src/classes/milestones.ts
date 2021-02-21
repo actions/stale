@@ -6,8 +6,8 @@ import {Issue} from './issue';
 type CleanMilestone = string;
 
 export class Milestones {
-  private static _cleanMilestone(label: Readonly<string>): CleanMilestone {
-    return deburr(label.toLowerCase());
+  private static _cleanMilestone(milestone: Readonly<string>): CleanMilestone {
+    return deburr(milestone.toLowerCase());
   }
 
   private readonly _options: IIssuesProcessorOptions;

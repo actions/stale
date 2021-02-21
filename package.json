@@ -14,7 +14,7 @@
     "lint:all:fix": "npm run format && npm run lint:fix",
     "pack": "ncc build",
     "test": "jest",
-    "test:only-errors": "jest --reporters jest-silent-reporter --silent",
+    "test:only-errors": "jest --reporters jest-silent-reporter --bail --silent",
     "test:watch": "jest --watch --notify --expandf",
     "all": "npm run build && npm run format && npm run lint && npm run pack && npm test"
   },

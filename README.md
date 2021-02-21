@@ -23,6 +23,15 @@ Warns and then closes issues and PRs that have had no activity for a specified a
 | `close-pr-label`              | Label to apply on the closing PR.                                                                               | Optional |
 | `exempt-issue-labels`         | Labels on an issue exempted from being marked as stale.                                                         | Optional |
 | `exempt-pr-labels`            | Labels on the PR exempted from being marked as stale.                                                           | Optional |
+| `only-labels`                 | Only labels checked for stale issue/PR.                                                                         | Optional |
+| `operations-per-run`          | Maximum number of operations per run (GitHub API CRUD related). _Defaults to **30**_                            | Optional |
+| `remove-stale-when-updated`   | Remove stale label from issue/PR on updates or comments. _Defaults to **true**_                                 | Optional |
+| `debug-only`                  | Dry-run on action. _Defaults to **false**_                                                                      | Optional |
+| `ascending`                   | Order to get issues/PR. _Defaults to **false**_                                                                 | Optional |
+| `skip-stale-issue-message`    | Skip adding stale message on stale issue. _Defaults to **false**_                                               | Optional |
+| `skip-stale-pr-message`       | Skip adding stale message on stale PR. _Defaults to **false**_                                                  | Optional |
+| `start-date`                  | The date used to skip the stale action on issue/PR created before it (ISO 8601 or RFC 2822).                    | Optional |
+| `delete-branch`               | Delete the git branch after closing a stale pull request. _Defaults to **false**_                               | Optional |
 | `exempt-milestones`           | Milestones on an issue or a PR exempted from being marked as stale.                                             | Optional |
 | `exempt-issue-milestones`     | Milestones on an issue exempted from being marked as stale (override `exempt-milestones`).                      | Optional |
 | `exempt-pr-milestones`        | Milestones on the PR exempted from being marked as stale (override `exempt-milestones`).                        | Optional |
@@ -35,19 +44,10 @@ Warns and then closes issues and PRs that have had no activity for a specified a
 | `exempt-all-assignees`        | Exempt all issues and PRs with assignees from being marked as stale. (priority over `exempt-assignees` rules)   | Optional |
 | `exempt-all-issue-assignees`  | Exempt all issues with assignees from being marked as stale. (override `exempt-all-assignees`).                 | Optional |
 | `exempt-all-pr-assignees`     | Exempt all PRs with assignees from being marked as stale. (override `exempt-all-assignees`).                    | Optional |
-| `only-labels`                 | Only labels checked for stale issue/PR.                                                                         | Optional |
-| `operations-per-run`          | Maximum number of operations per run (GitHub API CRUD related). _Defaults to **30**_                            | Optional |
-| `remove-stale-when-updated`   | Remove stale label from issue/PR on updates or comments. _Defaults to **true**_                                 | Optional |
-| `debug-only`                  | Dry-run on action. _Defaults to **false**_                                                                      | Optional |
-| `ascending`                   | Order to get issues/PR. _Defaults to **false**_                                                                 | Optional |
-| `skip-stale-issue-message`    | Skip adding stale message on stale issue. _Defaults to **false**_                                               | Optional |
-| `skip-stale-pr-message`       | Skip adding stale message on stale PR. _Defaults to **false**_                                                  | Optional |
-| `start-date`                  | The date used to skip the stale action on issue/PR created before it (ISO 8601 or RFC 2822).                    | Optional |
-| `delete-branch`               | Delete the git branch after closing a stale pull request. _Defaults to **false**_                               | Optional |
 
 ### Usage
 
-See [action.yml](./action.yml) For comprehensive list of options.
+See also [action.yml](./action.yml) for a comprehensive list of all the options.
 
 Basic:
 

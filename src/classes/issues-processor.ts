@@ -507,6 +507,7 @@ export class IssuesProcessor {
     try {
       this._operationsLeft -= 1;
       this._statistics?.incrementAddedLabel();
+      this._statistics?.incrementStaleIssuesCount();
       await this.client.issues.addLabels({
         owner: context.repo.owner,
         repo: context.repo.repo,
@@ -712,7 +713,8 @@ export class IssuesProcessor {
       `The $$type is no longer stale. Removing the stale label...`
     );
 
-    return this._removeLabel(issue, staleLabel);
+    await this._removeLabel(issue, staleLabel);
+    this._statistics?.incrementUndoStaleIssuesCount();
   }
 
   private async _removeCloseLabel(

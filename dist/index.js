@@ -523,7 +523,7 @@ class IssuesProcessor {
     }
     // Mark an issue as stale with a comment and a label
     _markStale(issue, staleMessage, staleLabel, skipMessage) {
-        var _a, _b;
+        var _a, _b, _c;
         return __awaiter(this, void 0, void 0, function* () {
             const issueLogger = new issue_logger_1.IssueLogger(issue);
             issueLogger.info(`Marking $$type as stale`);
@@ -553,6 +553,7 @@ class IssuesProcessor {
             try {
                 this._operationsLeft -= 1;
                 (_b = this._statistics) === null || _b === void 0 ? void 0 : _b.incrementAddedLabel();
+                (_c = this._statistics) === null || _c === void 0 ? void 0 : _c.incrementStaleIssuesCount();
                 yield this.client.issues.addLabels({
                     owner: github_1.context.repo.owner,
                     repo: github_1.context.repo.repo,
@@ -732,10 +733,12 @@ class IssuesProcessor {
         return this.options.onlyLabels;
     }
     _removeStaleLabel(issue, staleLabel) {
+        var _a;
         return __awaiter(this, void 0, void 0, function* () {
             const issueLogger = new issue_logger_1.IssueLogger(issue);
-            issueLogger.info(`The $$type is no longer stale. Removing the stale label...`);
-            return this._removeLabel(issue, staleLabel);
+            issueLogger.info(`$$type is no longer stale. Removing stale label`);
+            yield this._removeLabel(issue, staleLabel);
+            (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.incrementUndoStaleIssuesCount();
         });
     }
     _removeCloseLabel(issue, closeLabel) {
@@ -970,6 +973,8 @@ class Statistics {
     constructor(options) {
         this._logger = new logger_1.Logger();
         this._processedIssuesCount = 0;
+        this._staleIssuesCount = 0;
+        this._undoStaleIssuesCount = 0;
         this._operationsCount = 0;
         this._closedIssuesCount = 0;
         this._deletedLabelsCount = 0;
@@ -984,6 +989,14 @@ class Statistics {
     }
     incrementProcessedIssuesCount(increment = 1) {
         this._processedIssuesCount += increment;
+        return this;
+    }
+    incrementStaleIssuesCount(increment = 1) {
+        this._staleIssuesCount += increment;
+        return this;
+    }
+    incrementUndoStaleIssuesCount(increment = 1) {
+        this._undoStaleIssuesCount += increment;
         return this;
     }
     setOperationsLeft(operationsLeft) {
@@ -1029,6 +1042,8 @@ class Statistics {
     logStats() {
         this._logger.info('Statistics');
         this._logProcessedIssuesCount();
+        this._logStaleIssuesCount();
+        this._logUndoStaleIssuesCount();
         this._logOperationsCount();
         this._logClosedIssuesCount();
         this._logDeletedLabelsCount();
@@ -1044,6 +1059,12 @@ class Statistics {
     }
     _logProcessedIssuesCount() {
         this._logCount('Processed issues/PRs', this._processedIssuesCount);
+    }
+    _logStaleIssuesCount() {
+        this._logCount('New stale issues/PRs', this._staleIssuesCount);
+    }
+    _logUndoStaleIssuesCount() {
+        this._logCount('No longer stale issues/PRs', this._undoStaleIssuesCount);
     }
     _logOperationsCount() {
         this._logCount('Operations performed', this._operationsCount);

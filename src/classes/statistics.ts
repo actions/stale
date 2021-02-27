@@ -5,6 +5,8 @@ export class Statistics {
   private readonly _logger: Logger = new Logger();
   private readonly _options: IIssuesProcessorOptions;
   private _processedIssuesCount = 0;
+  private _staleIssuesCount = 0;
+  private _undoStaleIssuesCount = 0;
   private _operationsCount = 0;
   private _closedIssuesCount = 0;
   private _deletedLabelsCount = 0;
@@ -22,6 +24,18 @@ export class Statistics {
 
   incrementProcessedIssuesCount(increment: Readonly<number> = 1): Statistics {
     this._processedIssuesCount += increment;
+
+    return this;
+  }
+
+  incrementStaleIssuesCount(increment: Readonly<number> = 1): Statistics {
+    this._staleIssuesCount += increment;
+
+    return this;
+  }
+
+  incrementUndoStaleIssuesCount(increment: Readonly<number> = 1): Statistics {
+    this._undoStaleIssuesCount += increment;
 
     return this;
   }
@@ -95,6 +109,8 @@ export class Statistics {
   logStats(): Statistics {
     this._logger.info('Statistics');
     this._logProcessedIssuesCount();
+    this._logStaleIssuesCount();
+    this._logUndoStaleIssuesCount();
     this._logOperationsCount();
     this._logClosedIssuesCount();
     this._logDeletedLabelsCount();
@@ -112,6 +128,14 @@ export class Statistics {
 
   private _logProcessedIssuesCount(): void {
     this._logCount('Processed issues/PRs', this._processedIssuesCount);
+  }
+
+  private _logStaleIssuesCount(): void {
+    this._logCount('New stale issues/PRs', this._staleIssuesCount);
+  }
+
+  private _logUndoStaleIssuesCount(): void {
+    this._logCount('No longer stale issues/PRs', this._undoStaleIssuesCount);
   }
 
   private _logOperationsCount(): void {

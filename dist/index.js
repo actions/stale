@@ -220,7 +220,7 @@ const statistics_1 = __nccwpck_require__(3334);
  * Handle processing of issues for staleness/closure.
  */
 class IssuesProcessor {
-    constructor(options, getActor, getIssues, listIssueComments, getLabelCreationDate) {
+    constructor(options) {
         this._logger = new logger_1.Logger();
         this._operationsLeft = 0;
         this.staleIssues = [];
@@ -230,18 +230,6 @@ class IssuesProcessor {
         this.options = options;
         this._operationsLeft = this.options.operationsPerRun;
         this.client = github_1.getOctokit(this.options.repoToken);
-        if (getActor) {
-            this._getActor = getActor;
-        }
-        if (getIssues) {
-            this._getIssues = getIssues;
-        }
-        if (listIssueComments) {
-            this._listIssueComments = listIssueComments;
-        }
-        if (getLabelCreationDate) {
-            this._getLabelCreationDate = getLabelCreationDate;
-        }
         if (this.options.debugOnly) {
             this._logger.warning('Executing in debug mode. Debug output will be written but no issues will be processed.');
         }
@@ -258,8 +246,8 @@ class IssuesProcessor {
         var _a, _b;
         return __awaiter(this, void 0, void 0, function* () {
             // get the next batch of issues
-            const issues = yield this._getIssues(page);
-            const actor = yield this._getActor();
+            const issues = yield this.getIssues(page);
+            const actor = yield this.getActor();
             if (issues.length <= 0) {
                 this._logger.info('---');
                 (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.setOperationsLeft(this._operationsLeft).logStats();
@@ -394,11 +382,97 @@ class IssuesProcessor {
             return this.processIssues(page + 1);
         });
     }
+    // grab comments for an issue since a given date
+    listIssueComments(issueNumber, sinceDate) {
+        var _a;
+        return __awaiter(this, void 0, void 0, function* () {
+            // find any comments since date on the given issue
+            try {
+                this._operationsLeft -= 1;
+                (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.incrementFetchedIssuesCommentsCount();
+                const comments = yield this.client.issues.listComments({
+                    owner: github_1.context.repo.owner,
+                    repo: github_1.context.repo.repo,
+                    issue_number: issueNumber,
+                    since: sinceDate
+                });
+                return comments.data;
+            }
+            catch (error) {
+                this._logger.error(`List issue comments error: ${error.message}`);
+                return Promise.resolve([]);
+            }
+        });
+    }
+    // get the actor from the GitHub token or context
+    getActor() {
+        return __awaiter(this, void 0, void 0, function* () {
+            let actor;
+            try {
+                this._operationsLeft -= 1;
+                actor = yield this.client.users.getAuthenticated();
+            }
+            catch (error) {
+                return github_1.context.actor;
+            }
+            return actor.data.login;
+        });
+    }
+    // grab issues from github in batches of 100
+    getIssues(page) {
+        var _a;
+        return __awaiter(this, void 0, void 0, function* () {
+            // generate type for response
+            const endpoint = this.client.issues.listForRepo;
+            try {
+                this._operationsLeft -= 1;
+                (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.incrementFetchedIssuesCount();
+                const issueResult = yield this.client.issues.listForRepo({
+                    owner: github_1.context.repo.owner,
+                    repo: github_1.context.repo.repo,
+                    state: 'open',
+                    per_page: 100,
+                    direction: this.options.ascending ? 'asc' : 'desc',
+                    page
+                });
+                return issueResult.data.map((issue) => new issue_1.Issue(this.options, issue));
+            }
+            catch (error) {
+                this._logger.error(`Get issues for repo error: ${error.message}`);
+                return Promise.resolve([]);
+            }
+        });
+    }
+    // returns the creation date of a given label on an issue (or nothing if no label existed)
+    ///see https://developer.github.com/v3/activity/events/
+    getLabelCreationDate(issue, label) {
+        var _a;
+        return __awaiter(this, void 0, void 0, function* () {
+            const issueLogger = new issue_logger_1.IssueLogger(issue);
+            issueLogger.info(`Checking for label on $$type`);
+            this._operationsLeft -= 1;
+            (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.incrementFetchedIssuesEventsCount();
+            const options = this.client.issues.listEvents.endpoint.merge({
+                owner: github_1.context.repo.owner,
+                repo: github_1.context.repo.repo,
+                per_page: 100,
+                issue_number: issue.number
+            });
+            const events = yield this.client.paginate(options);
+            const reversedEvents = events.reverse();
+            const staleLabeledEvent = reversedEvents.find(event => event.event === 'labeled' && event.label.name === label);
+            if (!staleLabeledEvent) {
+                // Must be old rather than labeled
+                return undefined;
+            }
+            return staleLabeledEvent.created_at;
+        });
+    }
     // handle all of the stale issue logic when we find a stale issue
     _processStaleIssue(issue, staleLabel, actor, closeMessage, closeLabel) {
         return __awaiter(this, void 0, void 0, function* () {
             const issueLogger = new issue_logger_1.IssueLogger(issue);
-            const markedStaleOn = (yield this._getLabelCreationDate(issue, staleLabel)) || issue.updated_at;
+            const markedStaleOn = (yield this.getLabelCreationDate(issue, staleLabel)) || issue.updated_at;
             issueLogger.info(`$$type marked stale on: ${markedStaleOn}`);
             const issueHasComments = yield this._hasCommentsSince(issue, markedStaleOn, actor);
             issueLogger.info(`$$type has been commented on: ${issueHasComments}`);
@@ -440,70 +514,11 @@ class IssuesProcessor {
                 return true;
             }
             // find any comments since the date
-            const comments = yield this._listIssueComments(issue.number, sinceDate);
+            const comments = yield this.listIssueComments(issue.number, sinceDate);
             const filteredComments = comments.filter(comment => comment.user.type === 'User' && comment.user.login !== actor);
             issueLogger.info(`Comments not made by actor or another bot: ${filteredComments.length}`);
             // if there are any user comments returned
             return filteredComments.length > 0;
-        });
-    }
-    // grab comments for an issue since a given date
-    _listIssueComments(issueNumber, sinceDate) {
-        var _a;
-        return __awaiter(this, void 0, void 0, function* () {
-            // find any comments since date on the given issue
-            try {
-                (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.incrementFetchedIssuesCommentsCount();
-                const comments = yield this.client.issues.listComments({
-                    owner: github_1.context.repo.owner,
-                    repo: github_1.context.repo.repo,
-                    issue_number: issueNumber,
-                    since: sinceDate
-                });
-                return comments.data;
-            }
-            catch (error) {
-                this._logger.error(`List issue comments error: ${error.message}`);
-                return Promise.resolve([]);
-            }
-        });
-    }
-    // get the actor from the GitHub token or context
-    _getActor() {
-        return __awaiter(this, void 0, void 0, function* () {
-            let actor;
-            try {
-                this._operationsLeft -= 1;
-                actor = yield this.client.users.getAuthenticated();
-            }
-            catch (error) {
-                return github_1.context.actor;
-            }
-            return actor.data.login;
-        });
-    }
-    // grab issues from github in batches of 100
-    _getIssues(page) {
-        var _a;
-        return __awaiter(this, void 0, void 0, function* () {
-            // generate type for response
-            const endpoint = this.client.issues.listForRepo;
-            try {
-                (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.incrementFetchedIssuesCount();
-                const issueResult = yield this.client.issues.listForRepo({
-                    owner: github_1.context.repo.owner,
-                    repo: github_1.context.repo.repo,
-                    state: 'open',
-                    per_page: 100,
-                    direction: this.options.ascending ? 'asc' : 'desc',
-                    page
-                });
-                return issueResult.data.map((issue) => new issue_1.Issue(this.options, issue));
-            }
-            catch (error) {
-                this._logger.error(`Get issues for repo error: ${error.message}`);
-                return Promise.resolve([]);
-            }
         });
     }
     // Mark an issue as stale with a comment and a label
@@ -681,31 +696,6 @@ class IssuesProcessor {
             catch (error) {
                 issueLogger.error(`Error removing a label: ${error.message}`);
             }
-        });
-    }
-    // returns the creation date of a given label on an issue (or nothing if no label existed)
-    ///see https://developer.github.com/v3/activity/events/
-    _getLabelCreationDate(issue, label) {
-        var _a;
-        return __awaiter(this, void 0, void 0, function* () {
-            const issueLogger = new issue_logger_1.IssueLogger(issue);
-            issueLogger.info(`Checking for label on $$type`);
-            this._operationsLeft -= 1;
-            (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.incrementFetchedIssuesEventsCount();
-            const options = this.client.issues.listEvents.endpoint.merge({
-                owner: github_1.context.repo.owner,
-                repo: github_1.context.repo.repo,
-                per_page: 100,
-                issue_number: issue.number
-            });
-            const events = yield this.client.paginate(options);
-            const reversedEvents = events.reverse();
-            const staleLabeledEvent = reversedEvents.find(event => event.event === 'labeled' && event.label.name === label);
-            if (!staleLabeledEvent) {
-                // Must be old rather than labeled
-                return undefined;
-            }
-            return staleLabeledEvent.created_at;
         });
     }
     _getDaysBeforeIssueStale() {

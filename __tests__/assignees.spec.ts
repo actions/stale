@@ -1,6 +1,6 @@
 import {Issue} from '../src/classes/issue';
-import {IssuesProcessor} from '../src/classes/issues-processor';
 import {IIssuesProcessorOptions} from '../src/interfaces/issues-processor-options';
+import {IssuesProcessorMock} from './classes/issues-processor-mock';
 import {DefaultProcessorOptions} from './constants/default-processor-options';
 import {generateIssue} from './functions/generate-issue';
 
@@ -21,7 +21,7 @@ interface ITestData {
 describe('assignees options', (): void => {
   let opts: IIssuesProcessorOptions;
   let testIssueList: Issue[];
-  let processor: IssuesProcessor;
+  let processor: IssuesProcessorMock;
 
   const setTestIssueList = (
     isPullRequest: boolean,
@@ -46,7 +46,7 @@ describe('assignees options', (): void => {
   };
 
   const setProcessor = () => {
-    processor = new IssuesProcessor(
+    processor = new IssuesProcessorMock(
       opts,
       async () => 'abot',
       async p => (p === 1 ? testIssueList : []),

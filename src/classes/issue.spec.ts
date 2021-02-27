@@ -53,7 +53,7 @@ describe('Issue', (): void => {
       exemptAllAssignees: false,
       exemptAllIssueAssignees: undefined,
       exemptAllPrAssignees: undefined,
-      enableStatistics: true
+      enableStatistics: false
     };
     issueInterface = {
       title: 'dummy-title',

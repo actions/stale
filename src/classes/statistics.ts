@@ -6,6 +6,15 @@ export class Statistics {
   private readonly _options: IIssuesProcessorOptions;
   private _processedIssuesCount = 0;
   private _operationsCount = 0;
+  private _closedIssuesCount = 0;
+  private _deletedLabelsCount = 0;
+  private _deletedBranchesCount = 0;
+  private _addedLabelsCount = 0;
+  private _addedCommentsCount = 0;
+  private _fetchedIssuesCount = 0;
+  private _fetchedIssuesEventsCount = 0;
+  private _fetchedIssuesCommentsCount = 0;
+  private _fetchedPullRequestsCount = 0;
 
   constructor(options: IIssuesProcessorOptions) {
     this._options = options;
@@ -23,10 +32,79 @@ export class Statistics {
     return this;
   }
 
+  incrementClosedIssuesCount(increment: Readonly<number> = 1): Statistics {
+    this._closedIssuesCount += increment;
+
+    return this;
+  }
+
+  incrementDeletedLabelsCount(increment: Readonly<number> = 1): Statistics {
+    this._deletedLabelsCount += increment;
+
+    return this;
+  }
+
+  incrementDeletedBranchesCount(increment: Readonly<number> = 1): Statistics {
+    this._deletedBranchesCount += increment;
+
+    return this;
+  }
+
+  incrementAddedLabel(increment: Readonly<number> = 1): Statistics {
+    this._addedLabelsCount += increment;
+
+    return this;
+  }
+
+  incrementAddedComment(increment: Readonly<number> = 1): Statistics {
+    this._addedCommentsCount += increment;
+
+    return this;
+  }
+
+  incrementFetchedIssuesCount(increment: Readonly<number> = 1): Statistics {
+    this._fetchedIssuesCount += increment;
+
+    return this;
+  }
+
+  incrementFetchedIssuesEventsCount(
+    increment: Readonly<number> = 1
+  ): Statistics {
+    this._fetchedIssuesEventsCount += increment;
+
+    return this;
+  }
+
+  incrementFetchedIssuesCommentsCount(
+    increment: Readonly<number> = 1
+  ): Statistics {
+    this._fetchedIssuesCommentsCount += increment;
+
+    return this;
+  }
+
+  incrementFetchedPullRequestsCount(
+    increment: Readonly<number> = 1
+  ): Statistics {
+    this._fetchedPullRequestsCount += increment;
+
+    return this;
+  }
+
   logStats(): Statistics {
     this._logger.info('Statistics');
     this._logProcessedIssuesCount();
     this._logOperationsCount();
+    this._logClosedIssuesCount();
+    this._logDeletedLabelsCount();
+    this._logDeletedBranchesCount();
+    this._logAddedLabelsCount();
+    this._logAddedCommentsCount();
+    this._logFetchedIssuesCount();
+    this._logFetchedIssuesEventsCount();
+    this._logFetchedIssuesCommentsCount();
+    this._logFetchedPullRequestsCount();
     this._logger.info('---');
 
     return this;
@@ -37,7 +115,43 @@ export class Statistics {
   }
 
   private _logOperationsCount(): void {
-    this._logCount('GitHub operations consumed', this._operationsCount);
+    this._logCount('Operations performed', this._operationsCount);
+  }
+
+  private _logClosedIssuesCount(): void {
+    this._logCount('Closed issues', this._closedIssuesCount);
+  }
+
+  private _logDeletedLabelsCount(): void {
+    this._logCount('Deleted labels', this._deletedLabelsCount);
+  }
+
+  private _logDeletedBranchesCount(): void {
+    this._logCount('Deleted branches', this._deletedBranchesCount);
+  }
+
+  private _logAddedLabelsCount(): void {
+    this._logCount('Added labels', this._addedLabelsCount);
+  }
+
+  private _logAddedCommentsCount(): void {
+    this._logCount('Added comments', this._addedCommentsCount);
+  }
+
+  private _logFetchedIssuesCount(): void {
+    this._logCount('Fetched issues', this._fetchedIssuesCount);
+  }
+
+  private _logFetchedIssuesEventsCount(): void {
+    this._logCount('Fetched issues events', this._fetchedIssuesEventsCount);
+  }
+
+  private _logFetchedIssuesCommentsCount(): void {
+    this._logCount('Fetched issues comments', this._fetchedIssuesCommentsCount);
+  }
+
+  private _logFetchedPullRequestsCount(): void {
+    this._logCount('Fetched pull requests', this._fetchedPullRequestsCount);
   }
 
   private _logCount(name: Readonly<string>, count: Readonly<number>): void {

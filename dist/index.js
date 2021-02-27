@@ -206,7 +206,6 @@ const github_1 = __nccwpck_require__(5438);
 const get_humanized_date_1 = __nccwpck_require__(965);
 const is_date_more_recent_than_1 = __nccwpck_require__(1473);
 const is_valid_date_1 = __nccwpck_require__(891);
-const get_issue_type_1 = __nccwpck_require__(5153);
 const is_labeled_1 = __nccwpck_require__(6792);
 const is_pull_request_1 = __nccwpck_require__(5400);
 const should_mark_when_stale_1 = __nccwpck_require__(2461);
@@ -223,15 +222,14 @@ const statistics_1 = __nccwpck_require__(3334);
 class IssuesProcessor {
     constructor(options, getActor, getIssues, listIssueComments, getLabelCreationDate) {
         this._logger = new logger_1.Logger();
-        this._statistics = new statistics_1.Statistics();
         this._operationsLeft = 0;
         this.staleIssues = [];
         this.closedIssues = [];
         this.deletedBranchIssues = [];
         this.removedLabelIssues = [];
         this.options = options;
-        this._operationsLeft = options.operationsPerRun;
-        this.client = github_1.getOctokit(options.repoToken);
+        this._operationsLeft = this.options.operationsPerRun;
+        this.client = github_1.getOctokit(this.options.repoToken);
         if (getActor) {
             this._getActor = getActor;
         }
@@ -247,6 +245,9 @@ class IssuesProcessor {
         if (this.options.debugOnly) {
             this._logger.warning('Executing in debug mode. Debug output will be written but no issues will be processed.');
         }
+        if (this.options.enableStatistics) {
+            this._statistics = new statistics_1.Statistics(this.options);
+        }
     }
     static _updatedSince(timestamp, num_days) {
         const daysInMillis = 1000 * 60 * 60 * 24 * num_days;
@@ -254,21 +255,20 @@ class IssuesProcessor {
         return millisSinceLastUpdated <= daysInMillis;
     }
     processIssues(page = 1) {
+        var _a, _b;
         return __awaiter(this, void 0, void 0, function* () {
             // get the next batch of issues
             const issues = yield this._getIssues(page);
-            this._operationsLeft -= 1;
             const actor = yield this._getActor();
             if (issues.length <= 0) {
                 this._logger.info('---');
-                this._statistics.logStats();
-                this._logger.info('---');
+                (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.setOperationsLeft(this._operationsLeft).logStats();
                 this._logger.info('No more issues found to process. Exiting.');
                 return this._operationsLeft;
             }
             for (const issue of issues.values()) {
                 const issueLogger = new issue_logger_1.IssueLogger(issue);
-                this._statistics.incrementProcessedIssuesCount();
+                (_b = this._statistics) === null || _b === void 0 ? void 0 : _b.incrementProcessedIssuesCount();
                 issueLogger.info(`Found this $$type last updated ${issue.updated_at}`);
                 // calculate string based messages for this issue
                 const staleMessage = issue.isPullRequest
@@ -286,7 +286,6 @@ class IssuesProcessor {
                 const skipMessage = issue.isPullRequest
                     ? this.options.skipStalePrMessage
                     : this.options.skipStaleIssueMessage;
-                const issueType = get_issue_type_1.getIssueType(issue.isPullRequest);
                 const daysBeforeStale = issue.isPullRequest
                     ? this._getDaysBeforePrStale()
                     : this._getDaysBeforeIssueStale();
@@ -384,7 +383,7 @@ class IssuesProcessor {
                 // process the issue if it was marked stale
                 if (issue.isStale) {
                     issueLogger.info(`Found a stale $$type`);
-                    yield this._processStaleIssue(issue, issueType, staleLabel, actor, closeMessage, closeLabel);
+                    yield this._processStaleIssue(issue, staleLabel, actor, closeMessage, closeLabel);
                 }
             }
             if (this._operationsLeft <= 0) {
@@ -396,7 +395,7 @@ class IssuesProcessor {
         });
     }
     // handle all of the stale issue logic when we find a stale issue
-    _processStaleIssue(issue, issueType, staleLabel, actor, closeMessage, closeLabel) {
+    _processStaleIssue(issue, staleLabel, actor, closeMessage, closeLabel) {
         return __awaiter(this, void 0, void 0, function* () {
             const issueLogger = new issue_logger_1.IssueLogger(issue);
             const markedStaleOn = (yield this._getLabelCreationDate(issue, staleLabel)) || issue.updated_at;
@@ -450,9 +449,11 @@ class IssuesProcessor {
     }
     // grab comments for an issue since a given date
     _listIssueComments(issueNumber, sinceDate) {
+        var _a;
         return __awaiter(this, void 0, void 0, function* () {
             // find any comments since date on the given issue
             try {
+                (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.incrementFetchedIssuesCommentsCount();
                 const comments = yield this.client.issues.listComments({
                     owner: github_1.context.repo.owner,
                     repo: github_1.context.repo.repo,
@@ -472,6 +473,7 @@ class IssuesProcessor {
         return __awaiter(this, void 0, void 0, function* () {
             let actor;
             try {
+                this._operationsLeft -= 1;
                 actor = yield this.client.users.getAuthenticated();
             }
             catch (error) {
@@ -482,10 +484,12 @@ class IssuesProcessor {
     }
     // grab issues from github in batches of 100
     _getIssues(page) {
+        var _a;
         return __awaiter(this, void 0, void 0, function* () {
             // generate type for response
             const endpoint = this.client.issues.listForRepo;
             try {
+                (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.incrementFetchedIssuesCount();
                 const issueResult = yield this.client.issues.listForRepo({
                     owner: github_1.context.repo.owner,
                     repo: github_1.context.repo.repo,
@@ -504,11 +508,11 @@ class IssuesProcessor {
     }
     // Mark an issue as stale with a comment and a label
     _markStale(issue, staleMessage, staleLabel, skipMessage) {
+        var _a, _b;
         return __awaiter(this, void 0, void 0, function* () {
             const issueLogger = new issue_logger_1.IssueLogger(issue);
             issueLogger.info(`Marking $$type as stale`);
             this.staleIssues.push(issue);
-            this._operationsLeft -= 2;
             // if the issue is being marked stale, the updated date should be changed to right now
             // so that close calculations work correctly
             const newUpdatedAtDate = new Date();
@@ -518,6 +522,8 @@ class IssuesProcessor {
             }
             if (!skipMessage) {
                 try {
+                    this._operationsLeft -= 1;
+                    (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.incrementAddedComment();
                     yield this.client.issues.createComment({
                         owner: github_1.context.repo.owner,
                         repo: github_1.context.repo.repo,
@@ -530,6 +536,8 @@ class IssuesProcessor {
                 }
             }
             try {
+                this._operationsLeft -= 1;
+                (_b = this._statistics) === null || _b === void 0 ? void 0 : _b.incrementAddedLabel();
                 yield this.client.issues.addLabels({
                     owner: github_1.context.repo.owner,
                     repo: github_1.context.repo.repo,
@@ -544,16 +552,18 @@ class IssuesProcessor {
     }
     // Close an issue based on staleness
     _closeIssue(issue, closeMessage, closeLabel) {
+        var _a, _b, _c;
         return __awaiter(this, void 0, void 0, function* () {
             const issueLogger = new issue_logger_1.IssueLogger(issue);
             issueLogger.info(`Closing $$type for being stale`);
             this.closedIssues.push(issue);
-            this._operationsLeft -= 1;
             if (this.options.debugOnly) {
                 return;
             }
             if (closeMessage) {
                 try {
+                    this._operationsLeft -= 1;
+                    (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.incrementAddedComment();
                     yield this.client.issues.createComment({
                         owner: github_1.context.repo.owner,
                         repo: github_1.context.repo.repo,
@@ -567,6 +577,8 @@ class IssuesProcessor {
             }
             if (closeLabel) {
                 try {
+                    this._operationsLeft -= 1;
+                    (_b = this._statistics) === null || _b === void 0 ? void 0 : _b.incrementAddedLabel();
                     yield this.client.issues.addLabels({
                         owner: github_1.context.repo.owner,
                         repo: github_1.context.repo.repo,
@@ -579,6 +591,8 @@ class IssuesProcessor {
                 }
             }
             try {
+                this._operationsLeft -= 1;
+                (_c = this._statistics) === null || _c === void 0 ? void 0 : _c.incrementClosedIssuesCount();
                 yield this.client.issues.update({
                     owner: github_1.context.repo.owner,
                     repo: github_1.context.repo.repo,
@@ -592,10 +606,15 @@ class IssuesProcessor {
         });
     }
     _getPullRequest(issue) {
+        var _a;
         return __awaiter(this, void 0, void 0, function* () {
             const issueLogger = new issue_logger_1.IssueLogger(issue);
-            this._operationsLeft -= 1;
+            if (this.options.debugOnly) {
+                return;
+            }
             try {
+                this._operationsLeft -= 1;
+                (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.incrementFetchedPullRequestsCount();
                 const pullRequest = yield this.client.pulls.get({
                     owner: github_1.context.repo.owner,
                     repo: github_1.context.repo.repo,
@@ -610,21 +629,23 @@ class IssuesProcessor {
     }
     // Delete the branch on closed pull request
     _deleteBranch(issue) {
+        var _a;
         return __awaiter(this, void 0, void 0, function* () {
             const issueLogger = new issue_logger_1.IssueLogger(issue);
             issueLogger.info(`Delete branch from closed $$type - ${issue.title}`);
-            if (this.options.debugOnly) {
-                return;
-            }
             const pullRequest = yield this._getPullRequest(issue);
             if (!pullRequest) {
                 issueLogger.info(`Not deleting branch as pull request not found for this $$type`);
                 return;
             }
+            if (this.options.debugOnly) {
+                return;
+            }
             const branch = pullRequest.head.ref;
             issueLogger.info(`Deleting branch ${branch} from closed $$type`);
-            this._operationsLeft -= 1;
             try {
+                this._operationsLeft -= 1;
+                (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.incrementDeletedBranchesCount();
                 yield this.client.git.deleteRef({
                     owner: github_1.context.repo.owner,
                     repo: github_1.context.repo.repo,
@@ -638,16 +659,18 @@ class IssuesProcessor {
     }
     // Remove a label from an issue
     _removeLabel(issue, label) {
+        var _a;
         return __awaiter(this, void 0, void 0, function* () {
             const issueLogger = new issue_logger_1.IssueLogger(issue);
             issueLogger.info(`Removing label "${label}" from $$type`);
             this.removedLabelIssues.push(issue);
-            this._operationsLeft -= 1;
             // @todo remove the debug only to be able to test the code below
             if (this.options.debugOnly) {
                 return;
             }
             try {
+                this._operationsLeft -= 1;
+                (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.incrementDeletedLabelsCount();
                 yield this.client.issues.removeLabel({
                     owner: github_1.context.repo.owner,
                     repo: github_1.context.repo.repo,
@@ -663,10 +686,12 @@ class IssuesProcessor {
     // returns the creation date of a given label on an issue (or nothing if no label existed)
     ///see https://developer.github.com/v3/activity/events/
     _getLabelCreationDate(issue, label) {
+        var _a;
         return __awaiter(this, void 0, void 0, function* () {
             const issueLogger = new issue_logger_1.IssueLogger(issue);
             issueLogger.info(`Checking for label on $$type`);
             this._operationsLeft -= 1;
+            (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.incrementFetchedIssuesEventsCount();
             const options = this.client.issues.listEvents.endpoint.merge({
                 owner: github_1.context.repo.owner,
                 repo: github_1.context.repo.repo,
@@ -952,19 +977,113 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.Statistics = void 0;
 const logger_1 = __nccwpck_require__(6212);
 class Statistics {
-    constructor() {
+    constructor(options) {
         this._logger = new logger_1.Logger();
         this._processedIssuesCount = 0;
+        this._operationsCount = 0;
+        this._closedIssuesCount = 0;
+        this._deletedLabelsCount = 0;
+        this._deletedBranchesCount = 0;
+        this._addedLabelsCount = 0;
+        this._addedCommentsCount = 0;
+        this._fetchedIssuesCount = 0;
+        this._fetchedIssuesEventsCount = 0;
+        this._fetchedIssuesCommentsCount = 0;
+        this._fetchedPullRequestsCount = 0;
+        this._options = options;
     }
     incrementProcessedIssuesCount(increment = 1) {
         this._processedIssuesCount += increment;
+        return this;
+    }
+    setOperationsLeft(operationsLeft) {
+        this._operationsCount = this._options.operationsPerRun - operationsLeft;
+        return this;
+    }
+    incrementClosedIssuesCount(increment = 1) {
+        this._closedIssuesCount += increment;
+        return this;
+    }
+    incrementDeletedLabelsCount(increment = 1) {
+        this._deletedLabelsCount += increment;
+        return this;
+    }
+    incrementDeletedBranchesCount(increment = 1) {
+        this._deletedBranchesCount += increment;
+        return this;
+    }
+    incrementAddedLabel(increment = 1) {
+        this._addedLabelsCount += increment;
+        return this;
+    }
+    incrementAddedComment(increment = 1) {
+        this._addedCommentsCount += increment;
+        return this;
+    }
+    incrementFetchedIssuesCount(increment = 1) {
+        this._fetchedIssuesCount += increment;
+        return this;
+    }
+    incrementFetchedIssuesEventsCount(increment = 1) {
+        this._fetchedIssuesEventsCount += increment;
+        return this;
+    }
+    incrementFetchedIssuesCommentsCount(increment = 1) {
+        this._fetchedIssuesCommentsCount += increment;
+        return this;
+    }
+    incrementFetchedPullRequestsCount(increment = 1) {
+        this._fetchedPullRequestsCount += increment;
+        return this;
     }
     logStats() {
         this._logger.info('Statistics');
         this._logProcessedIssuesCount();
+        this._logOperationsCount();
+        this._logClosedIssuesCount();
+        this._logDeletedLabelsCount();
+        this._logDeletedBranchesCount();
+        this._logAddedLabelsCount();
+        this._logAddedCommentsCount();
+        this._logFetchedIssuesCount();
+        this._logFetchedIssuesEventsCount();
+        this._logFetchedIssuesCommentsCount();
+        this._logFetchedPullRequestsCount();
+        this._logger.info('---');
+        return this;
     }
     _logProcessedIssuesCount() {
-        this._logCount('Processed issues', this._processedIssuesCount);
+        this._logCount('Processed issues/PRs', this._processedIssuesCount);
+    }
+    _logOperationsCount() {
+        this._logCount('Operations performed', this._operationsCount);
+    }
+    _logClosedIssuesCount() {
+        this._logCount('Closed issues', this._closedIssuesCount);
+    }
+    _logDeletedLabelsCount() {
+        this._logCount('Deleted labels', this._deletedLabelsCount);
+    }
+    _logDeletedBranchesCount() {
+        this._logCount('Deleted branches', this._deletedBranchesCount);
+    }
+    _logAddedLabelsCount() {
+        this._logCount('Added labels', this._addedLabelsCount);
+    }
+    _logAddedCommentsCount() {
+        this._logCount('Added comments', this._addedCommentsCount);
+    }
+    _logFetchedIssuesCount() {
+        this._logCount('Fetched issues', this._fetchedIssuesCount);
+    }
+    _logFetchedIssuesEventsCount() {
+        this._logCount('Fetched issues events', this._fetchedIssuesEventsCount);
+    }
+    _logFetchedIssuesCommentsCount() {
+        this._logCount('Fetched issues comments', this._fetchedIssuesCommentsCount);
+    }
+    _logFetchedPullRequestsCount() {
+        this._logCount('Fetched pull requests', this._fetchedPullRequestsCount);
     }
     _logCount(name, count) {
         if (count > 0) {
@@ -973,22 +1092,6 @@ class Statistics {
     }
 }
 exports.Statistics = Statistics;
-
-
-/***/ }),
-
-/***/ 9639:
-/***/ ((__unused_webpack_module, exports) => {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.IssueType = void 0;
-var IssueType;
-(function (IssueType) {
-    IssueType["Issue"] = "issue";
-    IssueType["PullRequest"] = "pr";
-})(IssueType = exports.IssueType || (exports.IssueType = {}));
 
 
 /***/ }),
@@ -1057,22 +1160,6 @@ function isValidDate(date) {
     return false;
 }
 exports.isValidDate = isValidDate;
-
-
-/***/ }),
-
-/***/ 5153:
-/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getIssueType = void 0;
-const issue_type_1 = __nccwpck_require__(9639);
-function getIssueType(isPullRequest) {
-    return isPullRequest ? issue_type_1.IssueType.PullRequest : issue_type_1.IssueType.Issue;
-}
-exports.getIssueType = getIssueType;
 
 
 /***/ }),
@@ -1268,7 +1355,8 @@ function _getAndValidateArgs() {
         exemptPrAssignees: core.getInput('exempt-pr-assignees'),
         exemptAllAssignees: core.getInput('exempt-all-assignees') === 'true',
         exemptAllIssueAssignees: _toOptionalBoolean('exempt-all-issue-assignees'),
-        exemptAllPrAssignees: _toOptionalBoolean('exempt-all-pr-assignees')
+        exemptAllPrAssignees: _toOptionalBoolean('exempt-all-pr-assignees'),
+        enableStatistics: core.getInput('enable-statistics') === 'true'
     };
     for (const numberInput of [
         'days-before-stale',

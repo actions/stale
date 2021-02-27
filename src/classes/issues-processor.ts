@@ -1,11 +1,9 @@
 import {context, getOctokit} from '@actions/github';
 import {GitHub} from '@actions/github/lib/utils';
 import {GetResponseTypeFromEndpointMethod} from '@octokit/types';
-import {IssueType} from '../enums/issue-type';
 import {getHumanizedDate} from '../functions/dates/get-humanized-date';
 import {isDateMoreRecentThan} from '../functions/dates/is-date-more-recent-than';
 import {isValidDate} from '../functions/dates/is-valid-date';
-import {getIssueType} from '../functions/get-issue-type';
 import {isLabeled} from '../functions/is-labeled';
 import {isPullRequest} from '../functions/is-pull-request';
 import {shouldMarkWhenStale} from '../functions/should-mark-when-stale';
@@ -91,8 +89,6 @@ export class IssuesProcessor {
   async processIssues(page = 1): Promise<number> {
     // get the next batch of issues
     const issues: Issue[] = await this._getIssues(page);
-    this._operationsLeft -= 1;
-
     const actor: string = await this._getActor();
 
     if (issues.length <= 0) {
@@ -125,7 +121,6 @@ export class IssuesProcessor {
       const skipMessage = issue.isPullRequest
         ? this.options.skipStalePrMessage
         : this.options.skipStaleIssueMessage;
-      const issueType: IssueType = getIssueType(issue.isPullRequest);
       const daysBeforeStale: number = issue.isPullRequest
         ? this._getDaysBeforePrStale()
         : this._getDaysBeforeIssueStale();
@@ -291,7 +286,6 @@ export class IssuesProcessor {
         issueLogger.info(`Found a stale $$type`);
         await this._processStaleIssue(
           issue,
-          issueType,
           staleLabel,
           actor,
           closeMessage,
@@ -314,7 +308,6 @@ export class IssuesProcessor {
   // handle all of the stale issue logic when we find a stale issue
   private async _processStaleIssue(
     issue: Issue,
-    issueType: IssueType,
     staleLabel: string,
     actor: string,
     closeMessage?: string,
@@ -411,6 +404,8 @@ export class IssuesProcessor {
   ): Promise<IComment[]> {
     // find any comments since date on the given issue
     try {
+      this._operationsLeft -= 1;
+      this._statistics?.incrementFetchedIssuesCommentsCount();
       const comments = await this.client.issues.listComments({
         owner: context.repo.owner,
         repo: context.repo.repo,
@@ -427,7 +422,9 @@ export class IssuesProcessor {
   // get the actor from the GitHub token or context
   private async _getActor(): Promise<string> {
     let actor;
+
     try {
+      this._operationsLeft -= 1;
       actor = await this.client.users.getAuthenticated();
     } catch (error) {
       return context.actor;
@@ -443,6 +440,8 @@ export class IssuesProcessor {
     type OctoKitIssueList = GetResponseTypeFromEndpointMethod<typeof endpoint>;
 
     try {
+      this._operationsLeft -= 1;
+      this._statistics?.incrementFetchedIssuesCount();
       const issueResult: OctoKitIssueList = await this.client.issues.listForRepo(
         {
           owner: context.repo.owner,
@@ -473,10 +472,7 @@ export class IssuesProcessor {
     const issueLogger: IssueLogger = new IssueLogger(issue);
 
     issueLogger.info(`Marking $$type as stale`);
-
     this.staleIssues.push(issue);
-
-    this._operationsLeft -= 2;
 
     // if the issue is being marked stale, the updated date should be changed to right now
     // so that close calculations work correctly
@@ -489,6 +485,8 @@ export class IssuesProcessor {
 
     if (!skipMessage) {
       try {
+        this._operationsLeft -= 1;
+        this._statistics?.incrementAddedComment();
         await this.client.issues.createComment({
           owner: context.repo.owner,
           repo: context.repo.repo,
@@ -501,6 +499,8 @@ export class IssuesProcessor {
     }
 
     try {
+      this._operationsLeft -= 1;
+      this._statistics?.incrementAddedLabel();
       await this.client.issues.addLabels({
         owner: context.repo.owner,
         repo: context.repo.repo,
@@ -521,10 +521,7 @@ export class IssuesProcessor {
     const issueLogger: IssueLogger = new IssueLogger(issue);
 
     issueLogger.info(`Closing $$type for being stale`);
-
     this.closedIssues.push(issue);
-
-    this._operationsLeft -= 1;
 
     if (this.options.debugOnly) {
       return;
@@ -532,6 +529,8 @@ export class IssuesProcessor {
 
     if (closeMessage) {
       try {
+        this._operationsLeft -= 1;
+        this._statistics?.incrementAddedComment();
         await this.client.issues.createComment({
           owner: context.repo.owner,
           repo: context.repo.repo,
@@ -545,6 +544,8 @@ export class IssuesProcessor {
 
     if (closeLabel) {
       try {
+        this._operationsLeft -= 1;
+        this._statistics?.incrementAddedLabel();
         await this.client.issues.addLabels({
           owner: context.repo.owner,
           repo: context.repo.repo,
@@ -557,6 +558,8 @@ export class IssuesProcessor {
     }
 
     try {
+      this._operationsLeft -= 1;
+      this._statistics?.incrementClosedIssuesCount();
       await this.client.issues.update({
         owner: context.repo.owner,
         repo: context.repo.repo,
@@ -570,11 +573,16 @@ export class IssuesProcessor {
 
   private async _getPullRequest(
     issue: Issue
-  ): Promise<IPullRequest | undefined> {
+  ): Promise<IPullRequest | undefined | void> {
     const issueLogger: IssueLogger = new IssueLogger(issue);
-    this._operationsLeft -= 1;
+
+    if (this.options.debugOnly) {
+      return;
+    }
 
     try {
+      this._operationsLeft -= 1;
+      this._statistics?.incrementFetchedPullRequestsCount();
       const pullRequest = await this.client.pulls.get({
         owner: context.repo.owner,
         repo: context.repo.repo,
@@ -593,10 +601,6 @@ export class IssuesProcessor {
 
     issueLogger.info(`Delete branch from closed $$type - ${issue.title}`);
 
-    if (this.options.debugOnly) {
-      return;
-    }
-
     const pullRequest = await this._getPullRequest(issue);
 
     if (!pullRequest) {
@@ -606,12 +610,16 @@ export class IssuesProcessor {
       return;
     }
 
+    if (this.options.debugOnly) {
+      return;
+    }
+
     const branch = pullRequest.head.ref;
     issueLogger.info(`Deleting branch ${branch} from closed $$type`);
 
-    this._operationsLeft -= 1;
-
     try {
+      this._operationsLeft -= 1;
+      this._statistics?.incrementDeletedBranchesCount();
       await this.client.git.deleteRef({
         owner: context.repo.owner,
         repo: context.repo.repo,
@@ -629,10 +637,7 @@ export class IssuesProcessor {
     const issueLogger: IssueLogger = new IssueLogger(issue);
 
     issueLogger.info(`Removing label "${label}" from $$type`);
-
     this.removedLabelIssues.push(issue);
-
-    this._operationsLeft -= 1;
 
     // @todo remove the debug only to be able to test the code below
     if (this.options.debugOnly) {
@@ -640,6 +645,8 @@ export class IssuesProcessor {
     }
 
     try {
+      this._operationsLeft -= 1;
+      this._statistics?.incrementDeletedLabelsCount();
       await this.client.issues.removeLabel({
         owner: context.repo.owner,
         repo: context.repo.repo,
@@ -662,7 +669,7 @@ export class IssuesProcessor {
     issueLogger.info(`Checking for label on $$type`);
 
     this._operationsLeft -= 1;
-
+    this._statistics?.incrementFetchedIssuesEventsCount();
     const options = this.client.issues.listEvents.endpoint.merge({
       owner: context.repo.owner,
       repo: context.repo.repo,

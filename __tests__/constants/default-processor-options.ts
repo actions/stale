@@ -42,5 +42,5 @@ export const DefaultProcessorOptions: IIssuesProcessorOptions = Object.freeze({
   exemptAllAssignees: false,
   exemptAllIssueAssignees: undefined,
   exemptAllPrAssignees: undefined,
-  enableStatistics: true
+  enableStatistics: false
 });

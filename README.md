@@ -17,9 +17,9 @@ Warns and then closes issues and PRs that have had no activity for a specified a
 | `stale-pr-message`            | Message to post on the stale PR.                                                                                | Optional |
 | `close-issue-message`         | Message to post on the stale issue while closing it.                                                            | Optional |
 | `close-pr-message`            | Message to post on the stale PR while closing it.                                                               | Optional |
-| `stale-issue-label`           | Label to apply on the stale issue. _Defaults to **stale**_                                                      | Optional |
+| `stale-issue-label`           | Label to apply on the stale issue. _Defaults to **Stale**_                                                      | Optional |
 | `close-issue-label`           | Label to apply on closing issue.                                                                                | Optional |
-| `stale-pr-label`              | Label to apply on the stale PR.                                                                                 | Optional |
+| `stale-pr-label`              | Label to apply on the stale PR. _Defaults to **Stale**_                                                         | Optional |
 | `close-pr-label`              | Label to apply on the closing PR.                                                                               | Optional |
 | `exempt-issue-labels`         | Labels on an issue exempted from being marked as stale.                                                         | Optional |
 | `exempt-pr-labels`            | Labels on the PR exempted from being marked as stale.                                                           | Optional |

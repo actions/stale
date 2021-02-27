@@ -48,6 +48,7 @@ Warns and then closes issues and PRs that have had no activity for a specified a
 | `exempt-all-assignees`        | Exempt all issues and PRs with assignees from being marked as stale. (priority over `exempt-assignees` rules)                       | Optional |
 | `exempt-all-issue-assignees`  | Exempt all issues with assignees from being marked as stale. (override `exempt-all-assignees`).                                     | Optional |
 | `exempt-all-pr-assignees`     | Exempt all PRs with assignees from being marked as stale. (override `exempt-all-assignees`).                                        | Optional |
+|`enable-statistics`           | Display some statistics at the end regarding the stale workflow (only when the logs are enabled). _Defaults to **false**_ | Optional |
 
 ### Usage
 
@@ -269,10 +270,25 @@ jobs:
 
 ### Debugging
 
+**Logs:**  
 To see the debug output from this action, you must set the secret `ACTIONS_STEP_DEBUG` to `true` in your repository.  
-You can run this action in debug only mode (no actions will be taken on your issues and pull requests) by passing `debug-only` to `true` as an argument to the action.  
-You can also increase the maximum number of operations per run by passing `operations-per-run` to `100` for example.  
-Finally, you could also change the cron job frequency in the stale workflow to run stale more often.
+There is a lot of logs so this can be very helpful!
+
+**Statistics:**
+If the logs are enabled, you can also enable the statistics log which will be visible at the end of the logs once all issues were processed.  
+This is very helpful to have a quick understanding of the whole stale workflow.  
+Set `enable-statistics` to `true` in your workflow configuration file.
+
+**Dry-run:**  
+You can run this action in debug only mode (no actions will be taken on your issues and pull requests) by passing `debug-only` to `true` as an argument to the action.
+
+**More operations:**  
+You can increase the maximum number of operations per run by passing `operations-per-run` to `1000` for example which will help you to handle more operations in a single stale workflow run.  
+If the `debug-only` option is enabled, this is very helpful because the workflow will (almost) never reach the GitHub API rate, and you will be able to deep-dive into the logs.
+
+**Job frequency:**  
+You could change the cron job frequency in the stale workflow to run the stale workflow more often.  
+Usually this is not very helpful though.
 
 ### Contributing
 

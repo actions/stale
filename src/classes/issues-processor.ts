@@ -20,6 +20,7 @@ import {Issue} from './issue';
 import {IssueLogger} from './loggers/issue-logger';
 import {Logger} from './loggers/logger';
 import {Milestones} from './milestones';
+import {Statistics} from './statistics';
 
 /***
  * Handle processing of issues for staleness/closure.
@@ -34,6 +35,7 @@ export class IssuesProcessor {
   }
 
   private readonly _logger: Logger = new Logger();
+  private readonly _statistics: Statistics | undefined;
   private _operationsLeft = 0;
   readonly client: InstanceType<typeof GitHub>;
   readonly options: IIssuesProcessorOptions;
@@ -56,8 +58,8 @@ export class IssuesProcessor {
     ) => Promise<string | undefined>
   ) {
     this.options = options;
-    this._operationsLeft = options.operationsPerRun;
-    this.client = getOctokit(options.repoToken);
+    this._operationsLeft = this.options.operationsPerRun;
+    this.client = getOctokit(this.options.repoToken);
 
     if (getActor) {
       this._getActor = getActor;
@@ -80,6 +82,10 @@ export class IssuesProcessor {
         'Executing in debug mode. Debug output will be written but no issues will be processed.'
       );
     }
+
+    if (this.options.enableStatistics) {
+      this._statistics = new Statistics(this.options);
+    }
   }
 
   async processIssues(page = 1): Promise<number> {
@@ -91,12 +97,15 @@ export class IssuesProcessor {
 
     if (issues.length <= 0) {
       this._logger.info('---');
+      this._statistics?.setOperationsLeft(this._operationsLeft).logStats();
       this._logger.info('No more issues found to process. Exiting.');
+
       return this._operationsLeft;
     }
 
     for (const issue of issues.values()) {
       const issueLogger: IssueLogger = new IssueLogger(issue);
+      this._statistics?.incrementProcessedIssuesCount();
 
       issueLogger.info(`Found this $$type last updated ${issue.updated_at}`);
 

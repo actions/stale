@@ -216,12 +216,14 @@ const issue_1 = __nccwpck_require__(4783);
 const issue_logger_1 = __nccwpck_require__(2984);
 const logger_1 = __nccwpck_require__(6212);
 const milestones_1 = __nccwpck_require__(4601);
+const statistics_1 = __nccwpck_require__(3334);
 /***
  * Handle processing of issues for staleness/closure.
  */
 class IssuesProcessor {
     constructor(options, getActor, getIssues, listIssueComments, getLabelCreationDate) {
         this._logger = new logger_1.Logger();
+        this._statistics = new statistics_1.Statistics();
         this._operationsLeft = 0;
         this.staleIssues = [];
         this.closedIssues = [];
@@ -259,11 +261,14 @@ class IssuesProcessor {
             const actor = yield this._getActor();
             if (issues.length <= 0) {
                 this._logger.info('---');
+                this._statistics.logStats();
+                this._logger.info('---');
                 this._logger.info('No more issues found to process. Exiting.');
                 return this._operationsLeft;
             }
             for (const issue of issues.values()) {
                 const issueLogger = new issue_logger_1.IssueLogger(issue);
+                this._statistics.incrementProcessedIssuesCount();
                 issueLogger.info(`Found this $$type last updated ${issue.updated_at}`);
                 // calculate string based messages for this issue
                 const staleMessage = issue.isPullRequest
@@ -934,6 +939,40 @@ class Milestones {
     }
 }
 exports.Milestones = Milestones;
+
+
+/***/ }),
+
+/***/ 3334:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.Statistics = void 0;
+const logger_1 = __nccwpck_require__(6212);
+class Statistics {
+    constructor() {
+        this._logger = new logger_1.Logger();
+        this._processedIssuesCount = 0;
+    }
+    incrementProcessedIssuesCount(increment = 1) {
+        this._processedIssuesCount += increment;
+    }
+    logStats() {
+        this._logger.info('Statistics');
+        this._logProcessedIssuesCount();
+    }
+    _logProcessedIssuesCount() {
+        this._logCount('Processed issues', this._processedIssuesCount);
+    }
+    _logCount(name, count) {
+        if (count > 0) {
+            this._logger.info(`${name}: ${count}`);
+        }
+    }
+}
+exports.Statistics = Statistics;
 
 
 /***/ }),

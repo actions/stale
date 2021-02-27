@@ -42,4 +42,5 @@ export interface IIssuesProcessorOptions {
   exemptAllAssignees: boolean;
   exemptAllIssueAssignees: boolean | undefined;
   exemptAllPrAssignees: boolean | undefined;
+  enableStatistics: boolean;
 }

@@ -140,6 +140,9 @@ export class IssuesProcessor {
         continue; // don't process locked issues
       }
 
+      // Try to remove the close label when not close/locked issue or PR
+      await this._removeCloseLabel(issue, closeLabel);
+
       if (this.options.startDate) {
         const startDate: Date = new Date(this.options.startDate);
         const createdAt: Date = new Date(issue.created_at);
@@ -663,8 +666,35 @@ export class IssuesProcessor {
   ): Promise<void> {
     const issueLogger: IssueLogger = new IssueLogger(issue);
 
-    issueLogger.info(`$$type is no longer stale. Removing stale label.`);
+    issueLogger.info(
+      `The $$type is no longer stale. Removing the stale label...`
+    );
 
     return this._removeLabel(issue, staleLabel);
+  }
+
+  private async _removeCloseLabel(
+    issue: Issue,
+    closeLabel: Readonly<string | undefined>
+  ): Promise<void> {
+    const issueLogger: IssueLogger = new IssueLogger(issue);
+
+    issueLogger.info(
+      `The $$type is not closed nor locked. Trying to remove the close label...`
+    );
+
+    if (!closeLabel) {
+      issueLogger.info(`There is no close label on this $$type. Skip`);
+
+      return Promise.resolve();
+    }
+
+    if (isLabeled(issue, closeLabel)) {
+      issueLogger.info(
+        `The $$type has a close label "${closeLabel}". Removing the close label...`
+      );
+
+      return this._removeLabel(issue, closeLabel);
+    }
   }
 }

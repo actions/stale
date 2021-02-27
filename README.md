@@ -24,6 +24,8 @@ Warns and then closes issues and PRs that have had no activity for a specified a
 | `exempt-issue-labels`         | Labels on an issue exempted from being marked as stale.                                                         | Optional |
 | `exempt-pr-labels`            | Labels on the PR exempted from being marked as stale.                                                           | Optional |
 | `only-labels`                 | Only labels checked for stale issue/PR.                                                                         | Optional |
+| `only-issue-labels`           | Only labels checked for stale issue (override `only-labels`).                                                   | Optional |
+| `only-pr-labels`              | Only labels checked for stale PR (override `only-labels`).                                                      | Optional |
 | `operations-per-run`          | Maximum number of operations per run (GitHub API CRUD related). _Defaults to **30**_                            | Optional |
 | `remove-stale-when-updated`   | Remove stale label from issue/PR on updates or comments. _Defaults to **true**_                                 | Optional |
 | `debug-only`                  | Dry-run on action. _Defaults to **false**_                                                                      | Optional |

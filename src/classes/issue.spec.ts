@@ -28,6 +28,8 @@ describe('Issue', (): void => {
       exemptIssueLabels: '',
       exemptPrLabels: '',
       onlyLabels: '',
+      onlyIssueLabels: '',
+      onlyPrLabels: '',
       operationsPerRun: 0,
       removeStaleWhenUpdated: false,
       repoToken: '',

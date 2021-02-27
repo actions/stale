@@ -49,7 +49,10 @@ describe('Issue', (): void => {
       exemptPrAssignees: '',
       exemptAllAssignees: false,
       exemptAllIssueAssignees: undefined,
-      exemptAllPrAssignees: undefined
+      exemptAllPrAssignees: undefined,
+      manualStaleLabel: '',
+      manualStaleIssueLabel: '',
+      manualStalePrLabel: ''
     };
     issueInterface = {
       title: 'dummy-title',

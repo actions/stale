@@ -113,6 +113,7 @@ export class IssuesProcessor {
       const closeLabel: string = issue.isPullRequest
         ? this.options.closePrLabel
         : this.options.closeIssueLabel;
+      const manualStaleLabel: string | null = this._getManualStaleLabel(issue);
       const skipMessage = issue.isPullRequest
         ? this.options.skipStalePrMessage
         : this.options.skipStaleIssueMessage;
@@ -120,15 +121,6 @@ export class IssuesProcessor {
       const daysBeforeStale: number = issue.isPullRequest
         ? this._getDaysBeforePrStale()
         : this._getDaysBeforeIssueStale();
-
-      issueLogger.info(`Days before $$type stale: ${daysBeforeStale}`);
-
-      const shouldMarkAsStale: boolean = shouldMarkWhenStale(daysBeforeStale);
-
-      if (!staleMessage && shouldMarkAsStale) {
-        issueLogger.info(`Skipping $$type due to empty stale message`);
-        continue;
-      }
 
       if (issue.state === 'closed') {
         issueLogger.info(`Skipping $$type because it is closed`);
@@ -138,6 +130,16 @@ export class IssuesProcessor {
       if (issue.locked) {
         issueLogger.info(`Skipping $$type because it is locked`);
         continue; // don't process locked issues
+      }
+
+      if (manualStaleLabel) {
+        issueLogger.info(
+          `The $$type has a manual stale label "${manualStaleLabel}". The stale workflow will process based on the label creation date instead of the idle number of days`
+        );
+      } else {
+        issueLogger.info(
+          `The $$type has no manual stale label. The stale workflow will process normally based on the idle number of days`
+        );
       }
 
       if (this.options.startDate) {
@@ -171,6 +173,15 @@ export class IssuesProcessor {
 
           continue; // don't process issues which were created before the start date
         }
+      }
+
+      issueLogger.info(`Days before $$type stale: ${daysBeforeStale}`);
+
+      const shouldMarkAsStale: boolean = shouldMarkWhenStale(daysBeforeStale);
+
+      if (!staleMessage && shouldMarkAsStale) {
+        issueLogger.info(`Skipping $$type due to empty stale message`);
+        continue;
       }
 
       if (issue.isStale) {
@@ -655,6 +666,24 @@ export class IssuesProcessor {
     return isNaN(this.options.daysBeforePrClose)
       ? this.options.daysBeforeClose
       : this.options.daysBeforePrClose;
+  }
+
+  private _getManualStaleLabel(issue: Issue): string | null {
+    if (issue.isPullRequest) {
+      if (this.options.manualStalePrLabel !== '') {
+        return this.options.manualStalePrLabel;
+      }
+    } else {
+      if (this.options.manualStaleIssueLabel !== '') {
+        return this.options.manualStaleIssueLabel;
+      }
+    }
+
+    if (this.options.manualStaleLabel !== '') {
+      return this.options.manualStaleLabel;
+    }
+
+    return null;
   }
 
   private async _removeStaleLabel(

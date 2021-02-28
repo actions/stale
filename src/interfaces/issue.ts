@@ -1,4 +1,5 @@
 import {IsoDateString} from '../types/iso-date-string';
+import {IAssignee} from './assignee';
 import {ILabel} from './label';
 import {IMilestone} from './milestone';
 
@@ -12,4 +13,5 @@ export interface IIssue {
   state: string;
   locked: boolean;
   milestone: IMilestone | undefined;
+  assignees: IAssignee[];
 }

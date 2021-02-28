@@ -10,13 +10,13 @@ inputs:
     description: 'The message to post on the issue when tagging it. If none provided, will not mark issues stale.'
     required: false
   stale-pr-message:
-    description: 'The message to post on the pr when tagging it. If none provided, will not mark pull requests stale.'
+    description: 'The message to post on the pull request when tagging it. If none provided, will not mark pull requests stale.'
     required: false
   close-issue-message:
     description: 'The message to post on the issue when closing it. If none provided, will not comment when closing an issue.'
     required: false
   close-pr-message:
-    description: 'The message to post on the pr when closing it. If none provided, will not comment when closing a pull requests.'
+    description: 'The message to post on the pull request when closing it. If none provided, will not comment when closing a pull requests.'
     required: false
   days-before-stale:
     description: 'The number of days old an issue or a pull request can be before marking it stale. Set to -1 to never mark issues or pull requests as stale automatically.'
@@ -57,19 +57,31 @@ inputs:
     description: 'The label to apply when a pull request is closed.'
     required: false
   exempt-pr-labels:
-    description: 'The labels that mean a pull request is exempt from being marked stale. Separate multiple labels with commas (eg. "label1,label2")'
+    description: 'The labels that mean a pull request is exempt from being marked as stale. Separate multiple labels with commas (eg. "label1,label2")'
     default: ''
     required: false
   exempt-milestones:
-    description: 'The milestones that mean an issue or a pr is exempt from being marked stale. Separate multiple milestones with commas (eg. "milestone1,milestone2")'
+    description: 'The milestones that mean an issue or a pull request is exempt from being marked as stale. Separate multiple milestones with commas (eg. "milestone1,milestone2")'
     default: ''
     required: false
   exempt-issue-milestones:
-    description: 'The milestones that mean an issue is exempt from being marked stale. Separate multiple milestones with commas (eg. "milestone1,milestone2"). Override "exempt-milestones" option regarding only the issue.'
+    description: 'The milestones that mean an issue is exempt from being marked as stale. Separate multiple milestones with commas (eg. "milestone1,milestone2"). Override "exempt-milestones" option regarding only the issues.'
     default: ''
     required: false
   exempt-pr-milestones:
-    description: 'The milestones that mean a pull request is exempt from being marked stale. Separate multiple milestones with commas (eg. "milestone1,milestone2"). Override "exempt-milestones" option regarding only the pull requests.'
+    description: 'The milestones that mean a pull request is exempt from being marked as stale. Separate multiple milestones with commas (eg. "milestone1,milestone2"). Override "exempt-milestones" option regarding only the pull requests.'
+    default: ''
+    required: false
+  exempt-all-milestones:
+    description: 'Exempt all issues and pull requests with milestones from being marked as stale. Default to false.'
+    default: 'false'
+    required: false
+  exempt-all-issue-milestones:
+    description: 'Exempt all issues with milestones from being marked as stale. Override "exempt-all-milestones" option regarding only the issues.'
+    default: ''
+    required: false
+  exempt-all-pr-milestones:
+    description: 'Exempt all pull requests with milestones from being marked as stale. Override "exempt-all-milestones" option regarding only the pull requests.'
     default: ''
     required: false
   only-labels:
@@ -105,7 +117,31 @@ inputs:
     default: 'false'
     required: false
   start-date:
-    description: 'The date used to skip the stale action on issue/pr created before it (ISO 8601 or RFC 2822).'
+    description: 'The date used to skip the stale action on issue/pull request created before it (ISO 8601 or RFC 2822).'
+    default: ''
+    required: false
+  exempt-assignees:
+    description: 'The assignees which exempt an issue or a pull request from being marked as stale. Separate multiple assignees with commas (eg. "user1,user2")'
+    default: ''
+    required: false
+  exempt-issue-assignees:
+    description: 'The assignees which exempt an issue from being marked as stale. Separate multiple assignees with commas (eg. "user1,user2"). Override "exempt-assignees" option regarding only the issues.'
+    default: ''
+    required: false
+  exempt-pr-assignees:
+    description: 'The assignees which exempt a pull request from being marked as stale. Separate multiple assignees with commas (eg. "user1,user2"). Override "exempt-assignees" option regarding only the pull requests.'
+    default: ''
+    required: false
+  exempt-all-assignees:
+    description: 'Exempt all issues and pull requests with assignees from being marked as stale. Default to false.'
+    default: 'false'
+    required: false
+  exempt-all-issue-assignees:
+    description: 'Exempt all issues with assignees from being marked as stale. Override "exempt-all-assignees" option regarding only the issues.'
+    default: ''
+    required: false
+  exempt-all-pr-assignees:
+    description: 'Exempt all pull requests with assignees from being marked as stale. Override "exempt-all-assignees" option regarding only the pull requests.'
     default: ''
     required: false
 runs:

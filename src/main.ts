@@ -3,9 +3,9 @@ import {isValidDate} from './functions/dates/is-valid-date';
 import {IssuesProcessor} from './classes/issues-processor';
 import {IIssuesProcessorOptions} from './interfaces/issues-processor-options';
 
-async function run(): Promise<void> {
+async function _run(): Promise<void> {
   try {
-    const args = getAndValidateArgs();
+    const args = _getAndValidateArgs();
 
     const processor: IssuesProcessor = new IssuesProcessor(args);
     await processor.processIssues();
@@ -15,7 +15,7 @@ async function run(): Promise<void> {
   }
 }
 
-function getAndValidateArgs(): IIssuesProcessorOptions {
+function _getAndValidateArgs(): IIssuesProcessorOptions {
   const args: IIssuesProcessorOptions = {
     repoToken: core.getInput('repo-token'),
     staleIssueMessage: core.getInput('stale-issue-message'),
@@ -56,7 +56,16 @@ function getAndValidateArgs(): IIssuesProcessorOptions {
         : undefined,
     exemptMilestones: core.getInput('exempt-milestones'),
     exemptIssueMilestones: core.getInput('exempt-issue-milestones'),
-    exemptPrMilestones: core.getInput('exempt-pr-milestones')
+    exemptPrMilestones: core.getInput('exempt-pr-milestones'),
+    exemptAllMilestones: core.getInput('exempt-all-milestones') === 'true',
+    exemptAllIssueMilestones: _toOptionalBoolean('exempt-all-issue-milestones'),
+    exemptAllPrMilestones: _toOptionalBoolean('exempt-all-pr-milestones'),
+    exemptAssignees: core.getInput('exempt-assignees'),
+    exemptIssueAssignees: core.getInput('exempt-issue-assignees'),
+    exemptPrAssignees: core.getInput('exempt-pr-assignees'),
+    exemptAllAssignees: core.getInput('exempt-all-assignees') === 'true',
+    exemptAllIssueAssignees: _toOptionalBoolean('exempt-all-issue-assignees'),
+    exemptAllPrAssignees: _toOptionalBoolean('exempt-all-pr-assignees')
   };
 
   for (const numberInput of [
@@ -83,4 +92,18 @@ function getAndValidateArgs(): IIssuesProcessorOptions {
   return args;
 }
 
-run();
+function _toOptionalBoolean(
+  argumentName: Readonly<string>
+): boolean | undefined {
+  const argument: string = core.getInput(argumentName);
+
+  if (argument === 'true') {
+    return true;
+  } else if (argument === 'false') {
+    return false;
+  }
+
+  return undefined;
+}
+
+_run();

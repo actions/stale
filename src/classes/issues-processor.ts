@@ -15,6 +15,7 @@ import {IIssue} from '../interfaces/issue';
 import {IIssueEvent} from '../interfaces/issue-event';
 import {IIssuesProcessorOptions} from '../interfaces/issues-processor-options';
 import {IPullRequest} from '../interfaces/pull-request';
+import {Assignees} from './assignees';
 import {Issue} from './issue';
 import {IssueLogger} from './loggers/issue-logger';
 import {Logger} from './loggers/logger';
@@ -97,9 +98,7 @@ export class IssuesProcessor {
     for (const issue of issues.values()) {
       const issueLogger: IssueLogger = new IssueLogger(issue);
 
-      issueLogger.info(
-        `Found issue: issue #${issue.number} last updated ${issue.updated_at} (is pr? ${issue.isPullRequest})`
-      );
+      issueLogger.info(`Found this $$type last updated ${issue.updated_at}`);
 
       // calculate string based messages for this issue
       const staleMessage: string = issue.isPullRequest
@@ -122,26 +121,22 @@ export class IssuesProcessor {
         ? this._getDaysBeforePrStale()
         : this._getDaysBeforeIssueStale();
 
-      if (issue.isPullRequest) {
-        issueLogger.info(`Days before pull request stale: ${daysBeforeStale}`);
-      } else {
-        issueLogger.info(`Days before issue stale: ${daysBeforeStale}`);
-      }
+      issueLogger.info(`Days before $$type stale: ${daysBeforeStale}`);
 
       const shouldMarkAsStale: boolean = shouldMarkWhenStale(daysBeforeStale);
 
       if (!staleMessage && shouldMarkAsStale) {
-        issueLogger.info(`Skipping ${issueType} due to empty stale message`);
+        issueLogger.info(`Skipping $$type due to empty stale message`);
         continue;
       }
 
       if (issue.state === 'closed') {
-        issueLogger.info(`Skipping ${issueType} because it is closed`);
+        issueLogger.info(`Skipping $$type because it is closed`);
         continue; // don't process closed issues
       }
 
       if (issue.locked) {
-        issueLogger.info(`Skipping ${issueType} because it is locked`);
+        issueLogger.info(`Skipping $$type because it is locked`);
         continue; // don't process locked issues
       }
 
@@ -164,14 +159,14 @@ export class IssuesProcessor {
         }
 
         issueLogger.info(
-          `Issue created the ${getHumanizedDate(createdAt)} (${
+          `$$type created the ${getHumanizedDate(createdAt)} (${
             issue.created_at
           })`
         );
 
         if (!isDateMoreRecentThan(createdAt, startDate)) {
           issueLogger.info(
-            `Skipping ${issueType} because it was created before the specified start date`
+            `Skipping $$type because it was created before the specified start date`
           );
 
           continue; // don't process issues which were created before the start date
@@ -179,9 +174,9 @@ export class IssuesProcessor {
       }
 
       if (issue.isStale) {
-        issueLogger.info(`This issue has a stale label`);
+        issueLogger.info(`This $$type has a stale label`);
       } else {
-        issueLogger.info(`This issue hasn't a stale label`);
+        issueLogger.info(`This $$type hasn't a stale label`);
       }
 
       const exemptLabels: string[] = wordsToList(
@@ -200,9 +195,7 @@ export class IssuesProcessor {
           await this._removeStaleLabel(issue, staleLabel);
         }
 
-        issueLogger.info(
-          `Skipping ${issueType} because it has an exempt label`
-        );
+        issueLogger.info(`Skipping $$type because it has an exempt label`);
         continue; // don't process exempt issues
       }
 
@@ -210,9 +203,15 @@ export class IssuesProcessor {
 
       if (milestones.shouldExemptMilestones()) {
         issueLogger.info(
-          `Skipping ${issueType} because it has an exempt milestone`
+          `Skipping $$type because it has an exempted milestone`
         );
         continue; // don't process exempt milestones
+      }
+
+      const assignees: Assignees = new Assignees(this.options, issue);
+
+      if (assignees.shouldExemptAssignees()) {
+        continue; // don't process exempt assignees
       }
 
       // should this issue be marked stale?
@@ -224,7 +223,7 @@ export class IssuesProcessor {
       // determine if this issue needs to be marked stale first
       if (!issue.isStale && shouldBeStale && shouldMarkAsStale) {
         issueLogger.info(
-          `Marking ${issueType} stale because it was last updated on ${issue.updated_at} and it does not have a stale label`
+          `Marking $$type stale because it was last updated on ${issue.updated_at} and it does not have a stale label`
         );
         await this._markStale(issue, staleMessage, staleLabel, skipMessage);
         issue.isStale = true; // this issue is now considered stale
@@ -236,7 +235,7 @@ export class IssuesProcessor {
 
       // process the issue if it was marked stale
       if (issue.isStale) {
-        issueLogger.info(`Found a stale ${issueType}`);
+        issueLogger.info(`Found a stale $$type`);
         await this._processStaleIssue(
           issue,
           issueType,
@@ -271,37 +270,27 @@ export class IssuesProcessor {
     const issueLogger: IssueLogger = new IssueLogger(issue);
     const markedStaleOn: string =
       (await this._getLabelCreationDate(issue, staleLabel)) || issue.updated_at;
-    issueLogger.info(
-      `Issue #${issue.number} marked stale on: ${markedStaleOn}`
-    );
+    issueLogger.info(`$$type marked stale on: ${markedStaleOn}`);
 
     const issueHasComments: boolean = await this._hasCommentsSince(
       issue,
       markedStaleOn,
       actor
     );
-    issueLogger.info(
-      `Issue #${issue.number} has been commented on: ${issueHasComments}`
-    );
+    issueLogger.info(`$$type has been commented on: ${issueHasComments}`);
 
     const isPr: boolean = isPullRequest(issue);
     const daysBeforeClose: number = isPr
       ? this._getDaysBeforePrClose()
       : this._getDaysBeforeIssueClose();
 
-    if (isPr) {
-      issueLogger.info(`Days before pull request close: ${daysBeforeClose}`);
-    } else {
-      issueLogger.info(`Days before issue close: ${daysBeforeClose}`);
-    }
+    issueLogger.info(`Days before $$type close: ${daysBeforeClose}`);
 
     const issueHasUpdate: boolean = IssuesProcessor._updatedSince(
       issue.updated_at,
       daysBeforeClose
     );
-    issueLogger.info(
-      `Issue #${issue.number} has been updated: ${issueHasUpdate}`
-    );
+    issueLogger.info(`$$type has been updated: ${issueHasUpdate}`);
 
     // should we un-stale this issue?
     if (this.options.removeStaleWhenUpdated && issueHasComments) {
@@ -315,20 +304,20 @@ export class IssuesProcessor {
 
     if (!issueHasComments && !issueHasUpdate) {
       issueLogger.info(
-        `Closing ${issueType} because it was last updated on ${issue.updated_at}`
+        `Closing $$type because it was last updated on ${issue.updated_at}`
       );
       await this._closeIssue(issue, closeMessage, closeLabel);
 
       if (this.options.deleteBranch && issue.pull_request) {
         issueLogger.info(
-          `Deleting branch for #${issue.number} as delete-branch option was specified`
+          `Deleting branch for as delete-branch option was specified`
         );
         await this._deleteBranch(issue);
         this.deletedBranchIssues.push(issue);
       }
     } else {
       issueLogger.info(
-        `Stale ${issueType} is not old enough to close yet (hasComments? ${issueHasComments}, hasUpdate? ${issueHasUpdate})`
+        `Stale $$type is not old enough to close yet (hasComments? ${issueHasComments}, hasUpdate? ${issueHasUpdate})`
       );
     }
   }
@@ -341,9 +330,7 @@ export class IssuesProcessor {
   ): Promise<boolean> {
     const issueLogger: IssueLogger = new IssueLogger(issue);
 
-    issueLogger.info(
-      `Checking for comments on issue #${issue.number} since ${sinceDate}`
-    );
+    issueLogger.info(`Checking for comments on $$type since ${sinceDate}`);
 
     if (!sinceDate) {
       return true;
@@ -433,7 +420,7 @@ export class IssuesProcessor {
   ): Promise<void> {
     const issueLogger: IssueLogger = new IssueLogger(issue);
 
-    issueLogger.info(`Marking issue #${issue.number} as stale`);
+    issueLogger.info(`Marking $$type as stale`);
 
     this.staleIssues.push(issue);
 
@@ -481,7 +468,7 @@ export class IssuesProcessor {
   ): Promise<void> {
     const issueLogger: IssueLogger = new IssueLogger(issue);
 
-    issueLogger.info(`Closing issue #${issue.number} for being stale`);
+    issueLogger.info(`Closing $$type for being stale`);
 
     this.closedIssues.push(issue);
 
@@ -525,7 +512,7 @@ export class IssuesProcessor {
         state: 'closed'
       });
     } catch (error) {
-      issueLogger.error(`Error updating an issue: ${error.message}`);
+      issueLogger.error(`Error updating this $$type: ${error.message}`);
     }
   }
 
@@ -544,9 +531,7 @@ export class IssuesProcessor {
 
       return pullRequest.data;
     } catch (error) {
-      issueLogger.error(
-        `Error getting pull request ${issue.number}: ${error.message}`
-      );
+      issueLogger.error(`Error getting this $$type: ${error.message}`);
     }
   }
 
@@ -554,9 +539,7 @@ export class IssuesProcessor {
   private async _deleteBranch(issue: Issue): Promise<void> {
     const issueLogger: IssueLogger = new IssueLogger(issue);
 
-    issueLogger.info(
-      `Delete branch from closed issue #${issue.number} - ${issue.title}`
-    );
+    issueLogger.info(`Delete branch from closed $$type - ${issue.title}`);
 
     if (this.options.debugOnly) {
       return;
@@ -566,15 +549,13 @@ export class IssuesProcessor {
 
     if (!pullRequest) {
       issueLogger.info(
-        `Not deleting branch as pull request not found for issue ${issue.number}`
+        `Not deleting branch as pull request not found for this $$type`
       );
       return;
     }
 
     const branch = pullRequest.head.ref;
-    issueLogger.info(
-      `Deleting branch ${branch} from closed issue #${issue.number}`
-    );
+    issueLogger.info(`Deleting branch ${branch} from closed $$type`);
 
     this._operationsLeft -= 1;
 
@@ -586,7 +567,7 @@ export class IssuesProcessor {
       });
     } catch (error) {
       issueLogger.error(
-        `Error deleting branch ${branch} from issue #${issue.number}: ${error.message}`
+        `Error deleting branch ${branch} from $$type: ${error.message}`
       );
     }
   }
@@ -595,7 +576,7 @@ export class IssuesProcessor {
   private async _removeLabel(issue: Issue, label: string): Promise<void> {
     const issueLogger: IssueLogger = new IssueLogger(issue);
 
-    issueLogger.info(`Removing label "${label}" from issue #${issue.number}`);
+    issueLogger.info(`Removing label "${label}" from $$type`);
 
     this.removedLabelIssues.push(issue);
 
@@ -626,7 +607,7 @@ export class IssuesProcessor {
   ): Promise<string | undefined> {
     const issueLogger: IssueLogger = new IssueLogger(issue);
 
-    issueLogger.info(`Checking for label on issue #${issue.number}`);
+    issueLogger.info(`Checking for label on $$type`);
 
     this._operationsLeft -= 1;
 
@@ -682,9 +663,7 @@ export class IssuesProcessor {
   ): Promise<void> {
     const issueLogger: IssueLogger = new IssueLogger(issue);
 
-    issueLogger.info(
-      `Issue #${issue.number} is no longer stale. Removing stale label.`
-    );
+    issueLogger.info(`$$type is no longer stale. Removing stale label.`);
 
     return this._removeLabel(issue, staleLabel);
   }

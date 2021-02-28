@@ -2,6 +2,146 @@ module.exports =
 /******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
+/***/ 7236:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.Assignees = void 0;
+const lodash_deburr_1 = __importDefault(__nccwpck_require__(1601));
+const words_to_list_1 = __nccwpck_require__(1883);
+const issue_logger_1 = __nccwpck_require__(2984);
+class Assignees {
+    constructor(options, issue) {
+        this._options = options;
+        this._issue = issue;
+        this._issueLogger = new issue_logger_1.IssueLogger(issue);
+    }
+    static _cleanAssignee(assignee) {
+        return lodash_deburr_1.default(assignee.toLowerCase());
+    }
+    shouldExemptAssignees() {
+        if (!this._issue.hasAssignees) {
+            this._issueLogger.info('This $$type has no assignee');
+            this._logSkip();
+            return false;
+        }
+        if (this._shouldExemptAllAssignees()) {
+            this._issueLogger.info('Skipping $$type because it has an exempt assignee');
+            return true;
+        }
+        const exemptAssignees = this._getExemptAssignees();
+        if (exemptAssignees.length === 0) {
+            this._issueLogger.info(`No option was specified to skip the stale process for this $$type`);
+            this._logSkip();
+            return false;
+        }
+        this._issueLogger.info(`Found ${exemptAssignees.length} assignee${exemptAssignees.length > 1 ? 's' : ''} on this $$type`);
+        const hasExemptAssignee = exemptAssignees.some((exemptAssignee) => this._hasAssignee(exemptAssignee));
+        if (!hasExemptAssignee) {
+            this._issueLogger.info('No assignee on this $$type can exempt the stale process');
+            this._logSkip();
+        }
+        else {
+            this._issueLogger.info('Skipping this $$type because it has an exempt assignee');
+        }
+        return hasExemptAssignee;
+    }
+    _getExemptAssignees() {
+        return this._issue.isPullRequest
+            ? this._getExemptPullRequestAssignees()
+            : this._getExemptIssueAssignees();
+    }
+    _getExemptIssueAssignees() {
+        if (this._options.exemptIssueAssignees === '') {
+            this._issueLogger.info('The option "exemptIssueAssignees" is disabled. No specific assignee can skip the stale process for this $$type');
+            if (this._options.exemptAssignees === '') {
+                this._issueLogger.info('The option "exemptAssignees" is disabled. No specific assignee can skip the stale process for this $$type');
+                return [];
+            }
+            const exemptAssignees = words_to_list_1.wordsToList(this._options.exemptAssignees);
+            this._issueLogger.info(`The option "exemptAssignees" is set. ${exemptAssignees.length} assignee${exemptAssignees.length === 1 ? '' : 's'} can skip the stale process for this $$type`);
+            return exemptAssignees;
+        }
+        const exemptAssignees = words_to_list_1.wordsToList(this._options.exemptIssueAssignees);
+        this._issueLogger.info(`The option "exemptIssueAssignees" is set. ${exemptAssignees.length} assignee${exemptAssignees.length === 1 ? '' : 's'} can skip the stale process for this $$type`);
+        return exemptAssignees;
+    }
+    _getExemptPullRequestAssignees() {
+        if (this._options.exemptPrAssignees === '') {
+            this._issueLogger.info('The option "exemptPrAssignees" is disabled. No specific assignee can skip the stale process for this $$type');
+            if (this._options.exemptAssignees === '') {
+                this._issueLogger.info('The option "exemptAssignees" is disabled. No specific assignee can skip the stale process for this $$type');
+                return [];
+            }
+            const exemptAssignees = words_to_list_1.wordsToList(this._options.exemptAssignees);
+            this._issueLogger.info(`The option "exemptAssignees" is set. ${exemptAssignees.length} assignee${exemptAssignees.length === 1 ? '' : 's'} can skip the stale process for this $$type`);
+            return exemptAssignees;
+        }
+        const exemptAssignees = words_to_list_1.wordsToList(this._options.exemptPrAssignees);
+        this._issueLogger.info(`The option "exemptPrAssignees" is set. ${exemptAssignees.length} assignee${exemptAssignees.length === 1 ? '' : 's'} can skip the stale process for this $$type`);
+        return exemptAssignees;
+    }
+    _hasAssignee(assignee) {
+        const cleanAssignee = Assignees._cleanAssignee(assignee);
+        return this._issue.assignees.some((issueAssignee) => {
+            const isSameAssignee = cleanAssignee === Assignees._cleanAssignee(issueAssignee.login);
+            if (isSameAssignee) {
+                this._issueLogger.info(`@${issueAssignee.login} is assigned on this $$type and is an exempt assignee`);
+            }
+            return isSameAssignee;
+        });
+    }
+    _shouldExemptAllAssignees() {
+        return this._issue.isPullRequest
+            ? this._shouldExemptAllPullRequestAssignees()
+            : this._shouldExemptAllIssueAssignees();
+    }
+    _shouldExemptAllIssueAssignees() {
+        if (this._options.exemptAllIssueAssignees === true) {
+            this._issueLogger.info('The option "exemptAllIssueAssignees" is enabled. Any assignee on this $$type will skip the stale process');
+            return true;
+        }
+        else if (this._options.exemptAllIssueAssignees === false) {
+            this._issueLogger.info('The option "exemptAllIssueAssignees" is disabled. Only some specific assignees on this $$type will skip the stale process');
+            return false;
+        }
+        this._logExemptAllAssigneesOption();
+        return this._options.exemptAllAssignees;
+    }
+    _shouldExemptAllPullRequestAssignees() {
+        if (this._options.exemptAllPrAssignees === true) {
+            this._issueLogger.info('The option "exemptAllPrAssignees" is enabled. Any assignee on this $$type will skip the stale process');
+            return true;
+        }
+        else if (this._options.exemptAllPrAssignees === false) {
+            this._issueLogger.info('The option "exemptAllPrAssignees" is disabled. Only some specific assignees on this $$type will skip the stale process');
+            return false;
+        }
+        this._logExemptAllAssigneesOption();
+        return this._options.exemptAllAssignees;
+    }
+    _logExemptAllAssigneesOption() {
+        if (this._options.exemptAllAssignees) {
+            this._issueLogger.info('The option "exemptAllAssignees" is enabled. Any assignee on this $$type will skip the stale process');
+        }
+        else {
+            this._issueLogger.info('The option "exemptAllAssignees" is disabled. Only some specific assignees on this $$type will skip the stale process');
+        }
+    }
+    _logSkip() {
+        this._issueLogger.info('Skip the assignees checks');
+    }
+}
+exports.Assignees = Assignees;
+
+
+/***/ }),
+
 /***/ 4783:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
@@ -23,9 +163,17 @@ class Issue {
         this.state = issue.state;
         this.locked = issue.locked;
         this.milestone = issue.milestone;
-        this.isPullRequest = is_pull_request_1.isPullRequest(this);
-        this.staleLabel = this._getStaleLabel();
+        this.assignees = issue.assignees;
         this.isStale = is_labeled_1.isLabeled(this, this.staleLabel);
+    }
+    get isPullRequest() {
+        return is_pull_request_1.isPullRequest(this);
+    }
+    get staleLabel() {
+        return this._getStaleLabel();
+    }
+    get hasAssignees() {
+        return this.assignees.length > 0;
     }
     _getStaleLabel() {
         return this.isPullRequest
@@ -63,6 +211,7 @@ const is_labeled_1 = __nccwpck_require__(6792);
 const is_pull_request_1 = __nccwpck_require__(5400);
 const should_mark_when_stale_1 = __nccwpck_require__(2461);
 const words_to_list_1 = __nccwpck_require__(1883);
+const assignees_1 = __nccwpck_require__(7236);
 const issue_1 = __nccwpck_require__(4783);
 const issue_logger_1 = __nccwpck_require__(2984);
 const logger_1 = __nccwpck_require__(6212);
@@ -115,7 +264,7 @@ class IssuesProcessor {
             }
             for (const issue of issues.values()) {
                 const issueLogger = new issue_logger_1.IssueLogger(issue);
-                issueLogger.info(`Found issue: issue #${issue.number} last updated ${issue.updated_at} (is pr? ${issue.isPullRequest})`);
+                issueLogger.info(`Found this $$type last updated ${issue.updated_at}`);
                 // calculate string based messages for this issue
                 const staleMessage = issue.isPullRequest
                     ? this.options.stalePrMessage
@@ -136,23 +285,18 @@ class IssuesProcessor {
                 const daysBeforeStale = issue.isPullRequest
                     ? this._getDaysBeforePrStale()
                     : this._getDaysBeforeIssueStale();
-                if (issue.isPullRequest) {
-                    issueLogger.info(`Days before pull request stale: ${daysBeforeStale}`);
-                }
-                else {
-                    issueLogger.info(`Days before issue stale: ${daysBeforeStale}`);
-                }
+                issueLogger.info(`Days before $$type stale: ${daysBeforeStale}`);
                 const shouldMarkAsStale = should_mark_when_stale_1.shouldMarkWhenStale(daysBeforeStale);
                 if (!staleMessage && shouldMarkAsStale) {
-                    issueLogger.info(`Skipping ${issueType} due to empty stale message`);
+                    issueLogger.info(`Skipping $$type due to empty stale message`);
                     continue;
                 }
                 if (issue.state === 'closed') {
-                    issueLogger.info(`Skipping ${issueType} because it is closed`);
+                    issueLogger.info(`Skipping $$type because it is closed`);
                     continue; // don't process closed issues
                 }
                 if (issue.locked) {
-                    issueLogger.info(`Skipping ${issueType} because it is locked`);
+                    issueLogger.info(`Skipping $$type because it is locked`);
                     continue; // don't process locked issues
                 }
                 if (this.options.startDate) {
@@ -164,17 +308,17 @@ class IssuesProcessor {
                     if (!is_valid_date_1.isValidDate(createdAt)) {
                         throw new Error(`Invalid issue field: "created_at". Expected a valid date`);
                     }
-                    issueLogger.info(`Issue created the ${get_humanized_date_1.getHumanizedDate(createdAt)} (${issue.created_at})`);
+                    issueLogger.info(`$$type created the ${get_humanized_date_1.getHumanizedDate(createdAt)} (${issue.created_at})`);
                     if (!is_date_more_recent_than_1.isDateMoreRecentThan(createdAt, startDate)) {
-                        issueLogger.info(`Skipping ${issueType} because it was created before the specified start date`);
+                        issueLogger.info(`Skipping $$type because it was created before the specified start date`);
                         continue; // don't process issues which were created before the start date
                     }
                 }
                 if (issue.isStale) {
-                    issueLogger.info(`This issue has a stale label`);
+                    issueLogger.info(`This $$type has a stale label`);
                 }
                 else {
-                    issueLogger.info(`This issue hasn't a stale label`);
+                    issueLogger.info(`This $$type hasn't a stale label`);
                 }
                 const exemptLabels = words_to_list_1.wordsToList(issue.isPullRequest
                     ? this.options.exemptPrLabels
@@ -184,19 +328,23 @@ class IssuesProcessor {
                         issueLogger.info(`An exempt label was added after the stale label.`);
                         yield this._removeStaleLabel(issue, staleLabel);
                     }
-                    issueLogger.info(`Skipping ${issueType} because it has an exempt label`);
+                    issueLogger.info(`Skipping $$type because it has an exempt label`);
                     continue; // don't process exempt issues
                 }
                 const milestones = new milestones_1.Milestones(this.options, issue);
                 if (milestones.shouldExemptMilestones()) {
-                    issueLogger.info(`Skipping ${issueType} because it has an exempt milestone`);
+                    issueLogger.info(`Skipping $$type because it has an exempted milestone`);
                     continue; // don't process exempt milestones
+                }
+                const assignees = new assignees_1.Assignees(this.options, issue);
+                if (assignees.shouldExemptAssignees()) {
+                    continue; // don't process exempt assignees
                 }
                 // should this issue be marked stale?
                 const shouldBeStale = !IssuesProcessor._updatedSince(issue.updated_at, daysBeforeStale);
                 // determine if this issue needs to be marked stale first
                 if (!issue.isStale && shouldBeStale && shouldMarkAsStale) {
-                    issueLogger.info(`Marking ${issueType} stale because it was last updated on ${issue.updated_at} and it does not have a stale label`);
+                    issueLogger.info(`Marking $$type stale because it was last updated on ${issue.updated_at} and it does not have a stale label`);
                     yield this._markStale(issue, staleMessage, staleLabel, skipMessage);
                     issue.isStale = true; // this issue is now considered stale
                 }
@@ -205,7 +353,7 @@ class IssuesProcessor {
                 }
                 // process the issue if it was marked stale
                 if (issue.isStale) {
-                    issueLogger.info(`Found a stale ${issueType}`);
+                    issueLogger.info(`Found a stale $$type`);
                     yield this._processStaleIssue(issue, issueType, staleLabel, actor, closeMessage, closeLabel);
                 }
             }
@@ -222,21 +370,16 @@ class IssuesProcessor {
         return __awaiter(this, void 0, void 0, function* () {
             const issueLogger = new issue_logger_1.IssueLogger(issue);
             const markedStaleOn = (yield this._getLabelCreationDate(issue, staleLabel)) || issue.updated_at;
-            issueLogger.info(`Issue #${issue.number} marked stale on: ${markedStaleOn}`);
+            issueLogger.info(`$$type marked stale on: ${markedStaleOn}`);
             const issueHasComments = yield this._hasCommentsSince(issue, markedStaleOn, actor);
-            issueLogger.info(`Issue #${issue.number} has been commented on: ${issueHasComments}`);
+            issueLogger.info(`$$type has been commented on: ${issueHasComments}`);
             const isPr = is_pull_request_1.isPullRequest(issue);
             const daysBeforeClose = isPr
                 ? this._getDaysBeforePrClose()
                 : this._getDaysBeforeIssueClose();
-            if (isPr) {
-                issueLogger.info(`Days before pull request close: ${daysBeforeClose}`);
-            }
-            else {
-                issueLogger.info(`Days before issue close: ${daysBeforeClose}`);
-            }
+            issueLogger.info(`Days before $$type close: ${daysBeforeClose}`);
             const issueHasUpdate = IssuesProcessor._updatedSince(issue.updated_at, daysBeforeClose);
-            issueLogger.info(`Issue #${issue.number} has been updated: ${issueHasUpdate}`);
+            issueLogger.info(`$$type has been updated: ${issueHasUpdate}`);
             // should we un-stale this issue?
             if (this.options.removeStaleWhenUpdated && issueHasComments) {
                 yield this._removeStaleLabel(issue, staleLabel);
@@ -246,16 +389,16 @@ class IssuesProcessor {
                 return; // nothing to do because we aren't closing stale issues
             }
             if (!issueHasComments && !issueHasUpdate) {
-                issueLogger.info(`Closing ${issueType} because it was last updated on ${issue.updated_at}`);
+                issueLogger.info(`Closing $$type because it was last updated on ${issue.updated_at}`);
                 yield this._closeIssue(issue, closeMessage, closeLabel);
                 if (this.options.deleteBranch && issue.pull_request) {
-                    issueLogger.info(`Deleting branch for #${issue.number} as delete-branch option was specified`);
+                    issueLogger.info(`Deleting branch for as delete-branch option was specified`);
                     yield this._deleteBranch(issue);
                     this.deletedBranchIssues.push(issue);
                 }
             }
             else {
-                issueLogger.info(`Stale ${issueType} is not old enough to close yet (hasComments? ${issueHasComments}, hasUpdate? ${issueHasUpdate})`);
+                issueLogger.info(`Stale $$type is not old enough to close yet (hasComments? ${issueHasComments}, hasUpdate? ${issueHasUpdate})`);
             }
         });
     }
@@ -263,7 +406,7 @@ class IssuesProcessor {
     _hasCommentsSince(issue, sinceDate, actor) {
         return __awaiter(this, void 0, void 0, function* () {
             const issueLogger = new issue_logger_1.IssueLogger(issue);
-            issueLogger.info(`Checking for comments on issue #${issue.number} since ${sinceDate}`);
+            issueLogger.info(`Checking for comments on $$type since ${sinceDate}`);
             if (!sinceDate) {
                 return true;
             }
@@ -334,7 +477,7 @@ class IssuesProcessor {
     _markStale(issue, staleMessage, staleLabel, skipMessage) {
         return __awaiter(this, void 0, void 0, function* () {
             const issueLogger = new issue_logger_1.IssueLogger(issue);
-            issueLogger.info(`Marking issue #${issue.number} as stale`);
+            issueLogger.info(`Marking $$type as stale`);
             this.staleIssues.push(issue);
             this._operationsLeft -= 2;
             // if the issue is being marked stale, the updated date should be changed to right now
@@ -374,7 +517,7 @@ class IssuesProcessor {
     _closeIssue(issue, closeMessage, closeLabel) {
         return __awaiter(this, void 0, void 0, function* () {
             const issueLogger = new issue_logger_1.IssueLogger(issue);
-            issueLogger.info(`Closing issue #${issue.number} for being stale`);
+            issueLogger.info(`Closing $$type for being stale`);
             this.closedIssues.push(issue);
             this._operationsLeft -= 1;
             if (this.options.debugOnly) {
@@ -415,7 +558,7 @@ class IssuesProcessor {
                 });
             }
             catch (error) {
-                issueLogger.error(`Error updating an issue: ${error.message}`);
+                issueLogger.error(`Error updating this $$type: ${error.message}`);
             }
         });
     }
@@ -432,7 +575,7 @@ class IssuesProcessor {
                 return pullRequest.data;
             }
             catch (error) {
-                issueLogger.error(`Error getting pull request ${issue.number}: ${error.message}`);
+                issueLogger.error(`Error getting this $$type: ${error.message}`);
             }
         });
     }
@@ -440,17 +583,17 @@ class IssuesProcessor {
     _deleteBranch(issue) {
         return __awaiter(this, void 0, void 0, function* () {
             const issueLogger = new issue_logger_1.IssueLogger(issue);
-            issueLogger.info(`Delete branch from closed issue #${issue.number} - ${issue.title}`);
+            issueLogger.info(`Delete branch from closed $$type - ${issue.title}`);
             if (this.options.debugOnly) {
                 return;
             }
             const pullRequest = yield this._getPullRequest(issue);
             if (!pullRequest) {
-                issueLogger.info(`Not deleting branch as pull request not found for issue ${issue.number}`);
+                issueLogger.info(`Not deleting branch as pull request not found for this $$type`);
                 return;
             }
             const branch = pullRequest.head.ref;
-            issueLogger.info(`Deleting branch ${branch} from closed issue #${issue.number}`);
+            issueLogger.info(`Deleting branch ${branch} from closed $$type`);
             this._operationsLeft -= 1;
             try {
                 yield this.client.git.deleteRef({
@@ -460,7 +603,7 @@ class IssuesProcessor {
                 });
             }
             catch (error) {
-                issueLogger.error(`Error deleting branch ${branch} from issue #${issue.number}: ${error.message}`);
+                issueLogger.error(`Error deleting branch ${branch} from $$type: ${error.message}`);
             }
         });
     }
@@ -468,7 +611,7 @@ class IssuesProcessor {
     _removeLabel(issue, label) {
         return __awaiter(this, void 0, void 0, function* () {
             const issueLogger = new issue_logger_1.IssueLogger(issue);
-            issueLogger.info(`Removing label "${label}" from issue #${issue.number}`);
+            issueLogger.info(`Removing label "${label}" from $$type`);
             this.removedLabelIssues.push(issue);
             this._operationsLeft -= 1;
             // @todo remove the debug only to be able to test the code below
@@ -493,7 +636,7 @@ class IssuesProcessor {
     _getLabelCreationDate(issue, label) {
         return __awaiter(this, void 0, void 0, function* () {
             const issueLogger = new issue_logger_1.IssueLogger(issue);
-            issueLogger.info(`Checking for label on issue #${issue.number}`);
+            issueLogger.info(`Checking for label on $$type`);
             this._operationsLeft -= 1;
             const options = this.client.issues.listEvents.endpoint.merge({
                 owner: github_1.context.repo.owner,
@@ -534,7 +677,7 @@ class IssuesProcessor {
     _removeStaleLabel(issue, staleLabel) {
         return __awaiter(this, void 0, void 0, function* () {
             const issueLogger = new issue_logger_1.IssueLogger(issue);
-            issueLogger.info(`Issue #${issue.number} is no longer stale. Removing stale label.`);
+            issueLogger.info(`$$type is no longer stale. Removing stale label.`);
             return this._removeLabel(issue, staleLabel);
         });
     }
@@ -571,24 +714,48 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.IssueLogger = void 0;
 const core = __importStar(__nccwpck_require__(2186));
+/**
+ * @description
+ * Each log will prefix the message with the issue number
+ *
+ * @example
+ * warning('No stale') => "[#123] No stale"
+ *
+ * Each log method can have special tokens:
+ * - $$type => will replace this by either "pull request" or "issue" depending of the type of issue
+ *
+ * @example
+ * warning('The $$type will stale') => "The pull request will stale"
+ */
 class IssueLogger {
     constructor(issue) {
         this._issue = issue;
     }
     warning(message) {
-        core.warning(this._prefixWithIssueNumber(message));
+        core.warning(this._format(message));
     }
     info(message) {
-        core.info(this._prefixWithIssueNumber(message));
+        core.info(this._format(message));
     }
     error(message) {
-        core.error(this._prefixWithIssueNumber(message));
+        core.error(this._format(message));
+    }
+    _replaceTokens(message) {
+        return this._replaceTypeToken(message);
+    }
+    _replaceTypeToken(message) {
+        return message
+            .replace(/^\$\$type/, this._issue.isPullRequest ? 'Pull request' : 'Issue')
+            .replace(/\$\$type/g, this._issue.isPullRequest ? 'pull request' : 'issue');
     }
     _prefixWithIssueNumber(message) {
         return `[#${this._getIssueNumber()}] ${message}`;
     }
     _getIssueNumber() {
         return this._issue.number;
+    }
+    _format(message) {
+        return this._prefixWithIssueNumber(this._replaceTokens(message));
     }
 }
 exports.IssueLogger = IssueLogger;
@@ -656,10 +823,13 @@ class Milestones {
         this._options = options;
         this._issue = issue;
     }
-    static _cleanMilestone(label) {
-        return lodash_deburr_1.default(label.toLowerCase());
+    static _cleanMilestone(milestone) {
+        return lodash_deburr_1.default(milestone.toLowerCase());
     }
     shouldExemptMilestones() {
+        if (this._shouldExemptAllMilestones()) {
+            return true;
+        }
         const exemptMilestones = this._getExemptMilestones();
         return exemptMilestones.some((exemptMilestone) => this._hasMilestone(exemptMilestone));
     }
@@ -684,6 +854,32 @@ class Milestones {
         }
         return (Milestones._cleanMilestone(milestone) ===
             Milestones._cleanMilestone(this._issue.milestone.title));
+    }
+    _shouldExemptAllMilestones() {
+        if (this._issue.milestone) {
+            return this._issue.isPullRequest
+                ? this._shouldExemptAllPullRequestMilestones()
+                : this._shouldExemptAllIssueMilestones();
+        }
+        return false;
+    }
+    _shouldExemptAllIssueMilestones() {
+        if (this._options.exemptAllIssueMilestones === true) {
+            return true;
+        }
+        else if (this._options.exemptAllIssueMilestones === false) {
+            return false;
+        }
+        return this._options.exemptAllMilestones;
+    }
+    _shouldExemptAllPullRequestMilestones() {
+        if (this._options.exemptAllPrMilestones === true) {
+            return true;
+        }
+        else if (this._options.exemptAllPrMilestones === false) {
+            return false;
+        }
+        return this._options.exemptAllMilestones;
     }
 }
 exports.Milestones = Milestones;
@@ -925,10 +1121,10 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__nccwpck_require__(2186));
 const is_valid_date_1 = __nccwpck_require__(891);
 const issues_processor_1 = __nccwpck_require__(3292);
-function run() {
+function _run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const args = getAndValidateArgs();
+            const args = _getAndValidateArgs();
             const processor = new issues_processor_1.IssuesProcessor(args);
             yield processor.processIssues();
         }
@@ -938,7 +1134,7 @@ function run() {
         }
     });
 }
-function getAndValidateArgs() {
+function _getAndValidateArgs() {
     const args = {
         repoToken: core.getInput('repo-token'),
         staleIssueMessage: core.getInput('stale-issue-message'),
@@ -970,7 +1166,16 @@ function getAndValidateArgs() {
             : undefined,
         exemptMilestones: core.getInput('exempt-milestones'),
         exemptIssueMilestones: core.getInput('exempt-issue-milestones'),
-        exemptPrMilestones: core.getInput('exempt-pr-milestones')
+        exemptPrMilestones: core.getInput('exempt-pr-milestones'),
+        exemptAllMilestones: core.getInput('exempt-all-milestones') === 'true',
+        exemptAllIssueMilestones: _toOptionalBoolean('exempt-all-issue-milestones'),
+        exemptAllPrMilestones: _toOptionalBoolean('exempt-all-pr-milestones'),
+        exemptAssignees: core.getInput('exempt-assignees'),
+        exemptIssueAssignees: core.getInput('exempt-issue-assignees'),
+        exemptPrAssignees: core.getInput('exempt-pr-assignees'),
+        exemptAllAssignees: core.getInput('exempt-all-assignees') === 'true',
+        exemptAllIssueAssignees: _toOptionalBoolean('exempt-all-issue-assignees'),
+        exemptAllPrAssignees: _toOptionalBoolean('exempt-all-pr-assignees')
     };
     for (const numberInput of [
         'days-before-stale',
@@ -991,7 +1196,17 @@ function getAndValidateArgs() {
     }
     return args;
 }
-run();
+function _toOptionalBoolean(argumentName) {
+    const argument = core.getInput(argumentName);
+    if (argument === 'true') {
+        return true;
+    }
+    else if (argument === 'false') {
+        return false;
+    }
+    return undefined;
+}
+_run();
 
 
 /***/ }),

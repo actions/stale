@@ -85,7 +85,11 @@ inputs:
     default: ''
     required: false
   only-labels:
-    description: 'Only issues or pull requests with all of these labels are checked if stale. Defaults to `[]` (disabled) and can be a comma-separated list of labels.'
+    description: 'Only issues or pull requests with all of these labels are checked if stale. Defaults to `` (disabled) and can be a comma-separated list of labels.'
+    default: ''
+    required: false
+  any-of-labels:
+    description: 'Only issues or pull requests with at least one of these labels are checked if stale. Defaults to `` (disabled) and can be a comma-separated list of labels.'
     default: ''
     required: false
   only-issue-labels:

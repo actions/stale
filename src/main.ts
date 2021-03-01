@@ -41,6 +41,7 @@ function _getAndValidateArgs(): IIssuesProcessorOptions {
     onlyLabels: core.getInput('only-labels'),
     onlyIssueLabels: core.getInput('only-issue-labels'),
     onlyPrLabels: core.getInput('only-pr-labels'),
+    anyOfLabels: core.getInput('any-of-labels'),
     operationsPerRun: parseInt(
       core.getInput('operations-per-run', {required: true})
     ),

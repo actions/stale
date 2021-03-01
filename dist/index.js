@@ -350,6 +350,12 @@ class IssuesProcessor {
                     issueLogger.info(`Skipping $$type because it has an exempt label`);
                     continue; // don't process exempt issues
                 }
+                const anyOfLabels = words_to_list_1.wordsToList(this.options.anyOfLabels);
+                if (anyOfLabels.length &&
+                    !anyOfLabels.some((label) => is_labeled_1.isLabeled(issue, label))) {
+                    issueLogger.info(`Skipping ${issueType} because it does not have any of the required labels`);
+                    continue; // don't process issues without any of the required labels
+                }
                 const milestones = new milestones_1.Milestones(this.options, issue);
                 if (milestones.shouldExemptMilestones()) {
                     issueLogger.info(`Skipping $$type because it has an exempted milestone`);
@@ -1201,6 +1207,7 @@ function _getAndValidateArgs() {
         onlyLabels: core.getInput('only-labels'),
         onlyIssueLabels: core.getInput('only-issue-labels'),
         onlyPrLabels: core.getInput('only-pr-labels'),
+        anyOfLabels: core.getInput('any-of-labels'),
         operationsPerRun: parseInt(core.getInput('operations-per-run', { required: true })),
         removeStaleWhenUpdated: !(core.getInput('remove-stale-when-updated') === 'false'),
         debugOnly: core.getInput('debug-only') === 'true',

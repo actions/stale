@@ -1,6 +1,6 @@
 import {Issue} from '../src/classes/issue';
-import {IssuesProcessor} from '../src/classes/issues-processor';
 import {IIssuesProcessorOptions} from '../src/interfaces/issues-processor-options';
+import {IssuesProcessorMock} from './classes/issues-processor-mock';
 import {DefaultProcessorOptions} from './constants/default-processor-options';
 import {generateIssue} from './functions/generate-issue';
 
@@ -95,8 +95,8 @@ class IssuesProcessorBuilder {
     return this;
   }
 
-  build(): IssuesProcessor {
-    return new IssuesProcessor(
+  build(): IssuesProcessorMock {
+    return new IssuesProcessorMock(
       this._options,
       async () => 'abot',
       async p => (p === 1 ? this._issues : []),

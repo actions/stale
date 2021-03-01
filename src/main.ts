@@ -68,7 +68,8 @@ function _getAndValidateArgs(): IIssuesProcessorOptions {
     exemptPrAssignees: core.getInput('exempt-pr-assignees'),
     exemptAllAssignees: core.getInput('exempt-all-assignees') === 'true',
     exemptAllIssueAssignees: _toOptionalBoolean('exempt-all-issue-assignees'),
-    exemptAllPrAssignees: _toOptionalBoolean('exempt-all-pr-assignees')
+    exemptAllPrAssignees: _toOptionalBoolean('exempt-all-pr-assignees'),
+    enableStatistics: core.getInput('enable-statistics') === 'true'
   };
 
   for (const numberInput of [

@@ -1,25 +1,9 @@
 import * as github from '@actions/github';
 import {Issue} from '../src/classes/issue';
-import {IssuesProcessor} from '../src/classes/issues-processor';
 import {IIssuesProcessorOptions} from '../src/interfaces/issues-processor-options';
+import {IssuesProcessorMock} from './classes/issues-processor-mock';
 import {DefaultProcessorOptions} from './constants/default-processor-options';
 import {generateIssue} from './functions/generate-issue';
-
-test('empty issue list results in 1 operation', async () => {
-  const processor = new IssuesProcessor(
-    DefaultProcessorOptions,
-    async () => 'abot',
-    async () => [],
-    async (num, dt) => [],
-    async (issue, label) => new Date().toDateString()
-  );
-
-  // process our fake issue list
-  const operationsLeft = await processor.processIssues(1);
-
-  // processing an empty issue list should result in 1 operation
-  expect(operationsLeft).toEqual(99);
-});
 
 test('processing an issue with no label will make it stale and close it, if it is old enough only if days-before-close is set to 0', async () => {
   const opts: IIssuesProcessorOptions = {
@@ -29,12 +13,12 @@ test('processing an issue with no label will make it stale and close it, if it i
   const TestIssueList: Issue[] = [
     generateIssue(opts, 1, 'An issue with no label', '2020-01-01T17:00:00Z')
   ];
-  const processor = new IssuesProcessor(
+  const processor = new IssuesProcessorMock(
     opts,
     async () => 'abot',
-    async p => (p == 1 ? TestIssueList : []),
-    async (num, dt) => [],
-    async (issue, label) => new Date().toDateString()
+    async p => (p === 1 ? TestIssueList : []),
+    async () => [],
+    async () => new Date().toDateString()
   );
 
   // process our fake issue list
@@ -61,12 +45,12 @@ test('processing an issue with no label and a start date as ECMAScript epoch in 
       '2020-01-01T17:00:00Z'
     )
   ];
-  const processor = new IssuesProcessor(
+  const processor = new IssuesProcessorMock(
     opts,
     async () => 'abot',
-    async p => (p == 1 ? TestIssueList : []),
-    async (num, dt) => [],
-    async (issue, label) => new Date().toDateString()
+    async p => (p === 1 ? TestIssueList : []),
+    async () => [],
+    async () => new Date().toDateString()
   );
 
   // process our fake issue list
@@ -93,12 +77,12 @@ test('processing an issue with no label and a start date as ECMAScript epoch in 
       '2020-01-01T17:00:00Z'
     )
   ];
-  const processor = new IssuesProcessor(
+  const processor = new IssuesProcessorMock(
     opts,
     async () => 'abot',
-    async p => (p == 1 ? TestIssueList : []),
-    async (num, dt) => [],
-    async (issue, label) => new Date().toDateString()
+    async p => (p === 1 ? TestIssueList : []),
+    async () => [],
+    async () => new Date().toDateString()
   );
 
   // process our fake issue list
@@ -125,12 +109,12 @@ test('processing an issue with no label and a start date as ECMAScript epoch in 
       '2020-01-01T17:00:00Z'
     )
   ];
-  const processor = new IssuesProcessor(
+  const processor = new IssuesProcessorMock(
     opts,
     async () => 'abot',
-    async p => (p == 1 ? TestIssueList : []),
-    async (num, dt) => [],
-    async (issue, label) => new Date().toDateString()
+    async p => (p === 1 ? TestIssueList : []),
+    async () => [],
+    async () => new Date().toDateString()
   );
 
   // process our fake issue list
@@ -157,12 +141,12 @@ test('processing an issue with no label and a start date as ECMAScript epoch in 
       '2020-01-01T17:00:00Z'
     )
   ];
-  const processor = new IssuesProcessor(
+  const processor = new IssuesProcessorMock(
     opts,
     async () => 'abot',
-    async p => (p == 1 ? TestIssueList : []),
-    async (num, dt) => [],
-    async (issue, label) => new Date().toDateString()
+    async p => (p === 1 ? TestIssueList : []),
+    async () => [],
+    async () => new Date().toDateString()
   );
 
   // process our fake issue list
@@ -189,12 +173,12 @@ test('processing an issue with no label and a start date as ISO 8601 being befor
       '2020-01-01T17:00:00Z'
     )
   ];
-  const processor = new IssuesProcessor(
+  const processor = new IssuesProcessorMock(
     opts,
     async () => 'abot',
-    async p => (p == 1 ? TestIssueList : []),
-    async (num, dt) => [],
-    async (issue, label) => new Date().toDateString()
+    async p => (p === 1 ? TestIssueList : []),
+    async () => [],
+    async () => new Date().toDateString()
   );
 
   // process our fake issue list
@@ -221,12 +205,12 @@ test('processing an issue with no label and a start date as ISO 8601 being after
       '2020-01-01T17:00:00Z'
     )
   ];
-  const processor = new IssuesProcessor(
+  const processor = new IssuesProcessorMock(
     opts,
     async () => 'abot',
-    async p => (p == 1 ? TestIssueList : []),
-    async (num, dt) => [],
-    async (issue, label) => new Date().toDateString()
+    async p => (p === 1 ? TestIssueList : []),
+    async () => [],
+    async () => new Date().toDateString()
   );
 
   // process our fake issue list
@@ -253,12 +237,12 @@ test('processing an issue with no label and a start date as RFC 2822 being befor
       '2020-01-01T17:00:00Z'
     )
   ];
-  const processor = new IssuesProcessor(
+  const processor = new IssuesProcessorMock(
     opts,
     async () => 'abot',
-    async p => (p == 1 ? TestIssueList : []),
-    async (num, dt) => [],
-    async (issue, label) => new Date().toDateString()
+    async p => (p === 1 ? TestIssueList : []),
+    async () => [],
+    async () => new Date().toDateString()
   );
 
   // process our fake issue list
@@ -285,12 +269,12 @@ test('processing an issue with no label and a start date as RFC 2822 being after
       '2020-01-01T17:00:00Z'
     )
   ];
-  const processor = new IssuesProcessor(
+  const processor = new IssuesProcessorMock(
     opts,
     async () => 'abot',
-    async p => (p == 1 ? TestIssueList : []),
-    async (num, dt) => [],
-    async (issue, label) => new Date().toDateString()
+    async p => (p === 1 ? TestIssueList : []),
+    async () => [],
+    async () => new Date().toDateString()
   );
 
   // process our fake issue list
@@ -309,12 +293,12 @@ test('processing an issue with no label will make it stale and close it, if it i
   const TestIssueList: Issue[] = [
     generateIssue(opts, 1, 'An issue with no label', '2020-01-01T17:00:00Z')
   ];
-  const processor = new IssuesProcessor(
+  const processor = new IssuesProcessorMock(
     opts,
     async () => 'abot',
-    async p => (p == 1 ? TestIssueList : []),
-    async (num, dt) => [],
-    async (issue, label) => new Date().toDateString()
+    async p => (p === 1 ? TestIssueList : []),
+    async () => [],
+    async () => new Date().toDateString()
   );
 
   // process our fake issue list
@@ -334,12 +318,12 @@ test('processing an issue with no label will make it stale and not close it, if 
   const TestIssueList: Issue[] = [
     generateIssue(opts, 1, 'An issue with no label', '2020-01-01T17:00:00Z')
   ];
-  const processor = new IssuesProcessor(
+  const processor = new IssuesProcessorMock(
     opts,
     async () => 'abot',
-    async p => (p == 1 ? TestIssueList : []),
-    async (num, dt) => [],
-    async (issue, label) => new Date().toDateString()
+    async p => (p === 1 ? TestIssueList : []),
+    async () => [],
+    async () => new Date().toDateString()
   );
 
   // process our fake issue list
@@ -357,12 +341,12 @@ test('processing an issue with no label will make it stale and not close it if d
   const TestIssueList: Issue[] = [
     generateIssue(opts, 1, 'An issue with no label', '2020-01-01T17:00:00Z')
   ];
-  const processor = new IssuesProcessor(
+  const processor = new IssuesProcessorMock(
     opts,
     async () => 'abot',
-    async p => (p == 1 ? TestIssueList : []),
-    async (num, dt) => [],
-    async (issue, label) => new Date().toDateString()
+    async p => (p === 1 ? TestIssueList : []),
+    async () => [],
+    async () => new Date().toDateString()
   );
 
   // process our fake issue list
@@ -381,12 +365,12 @@ test('processing an issue with no label will make it stale and not close it if d
   const TestIssueList: Issue[] = [
     generateIssue(opts, 1, 'An issue with no label', '2020-01-01T17:00:00Z')
   ];
-  const processor = new IssuesProcessor(
+  const processor = new IssuesProcessorMock(
     opts,
     async () => 'abot',
-    async p => (p == 1 ? TestIssueList : []),
-    async (num, dt) => [],
-    async (issue, label) => new Date().toDateString()
+    async p => (p === 1 ? TestIssueList : []),
+    async () => [],
+    async () => new Date().toDateString()
   );
 
   // process our fake issue list
@@ -405,12 +389,12 @@ test('processing an issue with no label will not make it stale if days-before-st
   const TestIssueList: Issue[] = [
     generateIssue(opts, 1, 'An issue with no label', '2020-01-01T17:00:00Z')
   ];
-  const processor = new IssuesProcessor(
+  const processor = new IssuesProcessorMock(
     opts,
     async () => 'abot',
-    async p => (p == 1 ? TestIssueList : []),
-    async (num, dt) => [],
-    async (issue, label) => new Date().toDateString()
+    async p => (p === 1 ? TestIssueList : []),
+    async () => [],
+    async () => new Date().toDateString()
   );
 
   // process our fake issue list
@@ -430,12 +414,12 @@ test('processing an issue with no label will not make it stale if days-before-st
   const TestIssueList: Issue[] = [
     generateIssue(opts, 1, 'An issue with no label', '2020-01-01T17:00:00Z')
   ];
-  const processor = new IssuesProcessor(
+  const processor = new IssuesProcessorMock(
     opts,
     async () => 'abot',
-    async p => (p == 1 ? TestIssueList : []),
-    async (num, dt) => [],
-    async (issue, label) => new Date().toDateString()
+    async p => (p === 1 ? TestIssueList : []),
+    async () => [],
+    async () => new Date().toDateString()
   );
 
   // process our fake issue list
@@ -458,12 +442,12 @@ test('processing an issue with no label will make it stale but not close it', as
       issueDate.toDateString()
     )
   ];
-  const processor = new IssuesProcessor(
+  const processor = new IssuesProcessorMock(
     DefaultProcessorOptions,
     async () => 'abot',
-    async p => (p == 1 ? TestIssueList : []),
-    async (num, dt) => [],
-    async (issue, label) => new Date().toDateString()
+    async p => (p === 1 ? TestIssueList : []),
+    async () => [],
+    async () => new Date().toDateString()
   );
 
   // process our fake issue list
@@ -489,12 +473,12 @@ test('processing a stale issue will close it', async () => {
       ['Stale']
     )
   ];
-  const processor = new IssuesProcessor(
+  const processor = new IssuesProcessorMock(
     opts,
     async () => 'abot',
-    async p => (p == 1 ? TestIssueList : []),
-    async (num, dt) => [],
-    async (issue, label) => new Date().toDateString()
+    async p => (p === 1 ? TestIssueList : []),
+    async () => [],
+    async () => new Date().toDateString()
   );
 
   // process our fake issue list
@@ -520,12 +504,12 @@ test('processing a stale issue containing a space in the label will close it', a
       ['state: stale']
     )
   ];
-  const processor = new IssuesProcessor(
+  const processor = new IssuesProcessorMock(
     opts,
     async () => 'abot',
-    async p => (p == 1 ? TestIssueList : []),
-    async (num, dt) => [],
-    async (issue, label) => new Date().toDateString()
+    async p => (p === 1 ? TestIssueList : []),
+    async () => [],
+    async () => new Date().toDateString()
   );
 
   // process our fake issue list
@@ -551,12 +535,12 @@ test('processing a stale issue containing a slash in the label will close it', a
       ['lifecycle/stale']
     )
   ];
-  const processor = new IssuesProcessor(
+  const processor = new IssuesProcessorMock(
     opts,
     async () => 'abot',
-    async p => (p == 1 ? TestIssueList : []),
-    async (num, dt) => [],
-    async (issue, label) => new Date().toDateString()
+    async p => (p === 1 ? TestIssueList : []),
+    async () => [],
+    async () => new Date().toDateString()
   );
 
   // process our fake issue list
@@ -583,12 +567,12 @@ test('processing a stale issue will close it when days-before-issue-stale overri
       ['Stale']
     )
   ];
-  const processor = new IssuesProcessor(
+  const processor = new IssuesProcessorMock(
     opts,
     async () => 'abot',
-    async p => (p == 1 ? TestIssueList : []),
-    async (num, dt) => [],
-    async (issue, label) => new Date().toDateString()
+    async p => (p === 1 ? TestIssueList : []),
+    async () => [],
+    async () => new Date().toDateString()
   );
 
   // process our fake issue list
@@ -614,12 +598,12 @@ test('processing a stale PR will close it', async () => {
       ['Stale']
     )
   ];
-  const processor = new IssuesProcessor(
+  const processor = new IssuesProcessorMock(
     opts,
     async () => 'abot',
-    async p => (p == 1 ? TestIssueList : []),
-    async (num, dt) => [],
-    async (issue, label) => new Date().toDateString()
+    async p => (p === 1 ? TestIssueList : []),
+    async () => [],
+    async () => new Date().toDateString()
   );
 
   // process our fake issue list
@@ -646,12 +630,12 @@ test('processing a stale PR will close it when days-before-pr-stale override day
       ['Stale']
     )
   ];
-  const processor = new IssuesProcessor(
+  const processor = new IssuesProcessorMock(
     opts,
     async () => 'abot',
-    async p => (p == 1 ? TestIssueList : []),
-    async (num, dt) => [],
-    async (issue, label) => new Date().toDateString()
+    async p => (p === 1 ? TestIssueList : []),
+    async () => [],
+    async () => new Date().toDateString()
   );
 
   // process our fake issue list
@@ -678,12 +662,12 @@ test('processing a stale issue will close it even if configured not to mark as s
       ['Stale']
     )
   ];
-  const processor = new IssuesProcessor(
+  const processor = new IssuesProcessorMock(
     opts,
     async () => 'abot',
-    async p => (p == 1 ? TestIssueList : []),
-    async (num, dt) => [],
-    async (issue, label) => new Date().toDateString()
+    async p => (p === 1 ? TestIssueList : []),
+    async () => [],
+    async () => new Date().toDateString()
   );
 
   // process our fake issue list
@@ -711,12 +695,12 @@ test('processing a stale issue will close it even if configured not to mark as s
       ['Stale']
     )
   ];
-  const processor = new IssuesProcessor(
+  const processor = new IssuesProcessorMock(
     opts,
     async () => 'abot',
-    async p => (p == 1 ? TestIssueList : []),
-    async (num, dt) => [],
-    async (issue, label) => new Date().toDateString()
+    async p => (p === 1 ? TestIssueList : []),
+    async () => [],
+    async () => new Date().toDateString()
   );
 
   // process our fake issue list
@@ -743,12 +727,12 @@ test('processing a stale PR will close it even if configured not to mark as stal
       ['Stale']
     )
   ];
-  const processor = new IssuesProcessor(
+  const processor = new IssuesProcessorMock(
     opts,
     async () => 'abot',
-    async p => (p == 1 ? TestIssueList : []),
-    async (num, dt) => [],
-    async (issue, label) => new Date().toDateString()
+    async p => (p === 1 ? TestIssueList : []),
+    async () => [],
+    async () => new Date().toDateString()
   );
 
   // process our fake issue list
@@ -776,12 +760,12 @@ test('processing a stale PR will close it even if configured not to mark as stal
       ['Stale']
     )
   ];
-  const processor = new IssuesProcessor(
+  const processor = new IssuesProcessorMock(
     opts,
     async () => 'abot',
-    async p => (p == 1 ? TestIssueList : []),
-    async (num, dt) => [],
-    async (issue, label) => new Date().toDateString()
+    async p => (p === 1 ? TestIssueList : []),
+    async () => [],
+    async () => new Date().toDateString()
   );
 
   // process our fake issue list
@@ -804,11 +788,11 @@ test('closed issues will not be marked stale', async () => {
       true
     )
   ];
-  const processor = new IssuesProcessor(
+  const processor = new IssuesProcessorMock(
     DefaultProcessorOptions,
     async () => 'abot',
-    async p => (p == 1 ? TestIssueList : []),
-    async (num, dt) => []
+    async p => (p === 1 ? TestIssueList : []),
+    async () => []
   );
 
   // process our fake issue list
@@ -831,12 +815,12 @@ test('stale closed issues will not be closed', async () => {
       true
     )
   ];
-  const processor = new IssuesProcessor(
+  const processor = new IssuesProcessorMock(
     DefaultProcessorOptions,
     async () => 'abot',
-    async p => (p == 1 ? TestIssueList : []),
-    async (num, dt) => [],
-    async (issue, label) => new Date().toDateString()
+    async p => (p === 1 ? TestIssueList : []),
+    async () => [],
+    async () => new Date().toDateString()
   );
 
   // process our fake issue list
@@ -859,12 +843,12 @@ test('closed prs will not be marked stale', async () => {
       true
     )
   ];
-  const processor = new IssuesProcessor(
+  const processor = new IssuesProcessorMock(
     DefaultProcessorOptions,
     async () => 'abot',
-    async p => (p == 1 ? TestIssueList : []),
-    async (num, dt) => [],
-    async (issue, label) => new Date().toDateString()
+    async p => (p === 1 ? TestIssueList : []),
+    async () => [],
+    async () => new Date().toDateString()
   );
 
   // process our fake issue list
@@ -887,12 +871,12 @@ test('stale closed prs will not be closed', async () => {
       true
     )
   ];
-  const processor = new IssuesProcessor(
+  const processor = new IssuesProcessorMock(
     DefaultProcessorOptions,
     async () => 'abot',
-    async p => (p == 1 ? TestIssueList : []),
-    async (num: number, dt: string) => [],
-    async (issue: Issue, label: string) => new Date().toDateString()
+    async p => (p === 1 ? TestIssueList : []),
+    async () => [],
+    async () => new Date().toDateString()
   );
 
   // process our fake issue list
@@ -916,10 +900,10 @@ test('locked issues will not be marked stale', async () => {
       true
     )
   ];
-  const processor = new IssuesProcessor(
+  const processor = new IssuesProcessorMock(
     DefaultProcessorOptions,
     async () => 'abot',
-    async p => (p == 1 ? TestIssueList : [])
+    async p => (p === 1 ? TestIssueList : [])
   );
 
   // process our fake issue list
@@ -943,12 +927,12 @@ test('stale locked issues will not be closed', async () => {
       true
     )
   ];
-  const processor = new IssuesProcessor(
+  const processor = new IssuesProcessorMock(
     DefaultProcessorOptions,
     async () => 'abot',
-    async p => (p == 1 ? TestIssueList : []),
-    async (num: number, dt: string) => [],
-    async (issue: Issue, label: string) => new Date().toDateString()
+    async p => (p === 1 ? TestIssueList : []),
+    async () => [],
+    async () => new Date().toDateString()
   );
 
   // process our fake issue list
@@ -972,10 +956,10 @@ test('locked prs will not be marked stale', async () => {
       true
     )
   ];
-  const processor = new IssuesProcessor(
+  const processor = new IssuesProcessorMock(
     DefaultProcessorOptions,
     async () => 'abot',
-    async p => (p == 1 ? TestIssueList : [])
+    async p => (p === 1 ? TestIssueList : [])
   );
 
   // process our fake issue list
@@ -999,12 +983,12 @@ test('stale locked prs will not be closed', async () => {
       true
     )
   ];
-  const processor = new IssuesProcessor(
+  const processor = new IssuesProcessorMock(
     DefaultProcessorOptions,
     async () => 'abot',
-    async p => (p == 1 ? TestIssueList : []),
-    async (num: number, dt: string) => [],
-    async (issue: Issue, label: string) => new Date().toDateString()
+    async p => (p === 1 ? TestIssueList : []),
+    async () => [],
+    async () => new Date().toDateString()
   );
 
   // process our fake issue list
@@ -1029,12 +1013,12 @@ test('exempt issue labels will not be marked stale', async () => {
       ['Exempt']
     )
   ];
-  const processor = new IssuesProcessor(
+  const processor = new IssuesProcessorMock(
     opts,
     async () => 'abot',
-    async p => (p == 1 ? TestIssueList : []),
-    async (num: number, dt: string) => [],
-    async (issue: Issue, label: string) => new Date().toDateString()
+    async p => (p === 1 ? TestIssueList : []),
+    async () => [],
+    async () => new Date().toDateString()
   );
 
   // process our fake issue list
@@ -1059,12 +1043,12 @@ test('exempt issue labels will not be marked stale (multi issue label with space
       ['Cool']
     )
   ];
-  const processor = new IssuesProcessor(
+  const processor = new IssuesProcessorMock(
     opts,
     async () => 'abot',
-    async p => (p == 1 ? TestIssueList : []),
-    async (num: number, dt: string) => [],
-    async (issue: Issue, label: string) => new Date().toDateString()
+    async p => (p === 1 ? TestIssueList : []),
+    async () => [],
+    async () => new Date().toDateString()
   );
 
   // process our fake issue list
@@ -1088,12 +1072,12 @@ test('exempt issue labels will not be marked stale (multi issue label)', async (
       ['Cool']
     )
   ];
-  const processor = new IssuesProcessor(
+  const processor = new IssuesProcessorMock(
     opts,
     async () => 'abot',
-    async p => (p == 1 ? TestIssueList : []),
-    async (num: number, dt: string) => [],
-    async (issue: Issue, label: string) => new Date().toDateString()
+    async p => (p === 1 ? TestIssueList : []),
+    async () => [],
+    async () => new Date().toDateString()
   );
 
   // process our fake issue list
@@ -1135,12 +1119,12 @@ test('exempt pr labels will not be marked stale', async () => {
       false
     )
   ];
-  const processor = new IssuesProcessor(
+  const processor = new IssuesProcessorMock(
     opts,
     async () => 'abot',
-    async p => (p == 1 ? TestIssueList : []),
-    async (num: number, dt: string) => [],
-    async (issue: Issue, label: string) => new Date().toDateString()
+    async p => (p === 1 ? TestIssueList : []),
+    async () => [],
+    async () => new Date().toDateString()
   );
 
   // process our fake issue list
@@ -1164,11 +1148,11 @@ test('exempt issue labels will not be marked stale and will remove the existing 
       ['Exempt', 'Stale']
     )
   ];
-  const processor = new IssuesProcessor(
+  const processor = new IssuesProcessorMock(
     opts,
     async () => 'abot',
-    async p => (p == 1 ? TestIssueList : []),
-    async (num: number, dt: string) => [
+    async p => (p === 1 ? TestIssueList : []),
+    async () => [
       {
         user: {
           login: 'notme',
@@ -1176,7 +1160,7 @@ test('exempt issue labels will not be marked stale and will remove the existing 
         }
       }
     ], // return a fake comment to indicate there was an update
-    async (issue: Issue, label: string) => new Date().toDateString()
+    async () => new Date().toDateString()
   );
 
   // process our fake issue list
@@ -1219,12 +1203,12 @@ test('stale issues should not be closed if days is set to -1', async () => {
       ['Stale']
     )
   ];
-  const processor = new IssuesProcessor(
+  const processor = new IssuesProcessorMock(
     opts,
     async () => 'abot',
-    async p => (p == 1 ? TestIssueList : []),
-    async (num: number, dt: string) => [],
-    async (issue: Issue, label: string) => new Date().toDateString()
+    async p => (p === 1 ? TestIssueList : []),
+    async () => [],
+    async () => new Date().toDateString()
   );
 
   // process our fake issue list
@@ -1248,11 +1232,11 @@ test('stale label should be removed if a comment was added to a stale issue', as
       ['Stale']
     )
   ];
-  const processor = new IssuesProcessor(
+  const processor = new IssuesProcessorMock(
     opts,
     async () => 'abot',
-    async p => (p == 1 ? TestIssueList : []),
-    async (num: number, dt: string) => [
+    async p => (p === 1 ? TestIssueList : []),
+    async () => [
       {
         user: {
           login: 'notme',
@@ -1260,7 +1244,7 @@ test('stale label should be removed if a comment was added to a stale issue', as
         }
       }
     ], // return a fake comment to indicate there was an update
-    async (issue: Issue, label: string) => new Date().toDateString()
+    async () => new Date().toDateString()
   );
 
   // process our fake issue list
@@ -1286,11 +1270,11 @@ test('stale label should not be removed if a comment was added by the bot (and t
       ['Stale']
     )
   ];
-  const processor = new IssuesProcessor(
+  const processor = new IssuesProcessorMock(
     opts,
     async () => 'abot',
-    async p => (p == 1 ? TestIssueList : []),
-    async (num: number, dt: string) => [
+    async p => (p === 1 ? TestIssueList : []),
+    async () => [
       {
         user: {
           login: 'abot',
@@ -1298,7 +1282,7 @@ test('stale label should not be removed if a comment was added by the bot (and t
         }
       }
     ], // return a fake comment to indicate there was an update by the bot
-    async (issue: Issue, label: string) => new Date().toDateString()
+    async () => new Date().toDateString()
   );
 
   // process our fake issue list
@@ -1326,12 +1310,12 @@ test('stale label containing a space should be removed if a comment was added to
       ['stat: stale']
     )
   ];
-  const processor = new IssuesProcessor(
+  const processor = new IssuesProcessorMock(
     opts,
     async () => 'abot',
-    async p => (p == 1 ? TestIssueList : []),
-    async (num: number, dt: string) => [{user: {login: 'notme', type: 'User'}}], // return a fake comment to indicate there was an update
-    async (issue: Issue, label: string) => new Date().toDateString()
+    async p => (p === 1 ? TestIssueList : []),
+    async () => [{user: {login: 'notme', type: 'User'}}], // return a fake comment to indicate there was an update
+    async () => new Date().toDateString()
   );
 
   // process our fake issue list
@@ -1358,12 +1342,12 @@ test('stale issues should not be closed until after the closed number of days', 
       false
     )
   ];
-  const processor = new IssuesProcessor(
+  const processor = new IssuesProcessorMock(
     opts,
     async () => 'abot',
-    async p => (p == 1 ? TestIssueList : []),
-    async (num, dt) => [],
-    async (issue, label) => new Date().toDateString()
+    async p => (p === 1 ? TestIssueList : []),
+    async () => [],
+    async () => new Date().toDateString()
   );
 
   // process our fake issue list
@@ -1391,12 +1375,12 @@ test('stale issues should be closed if the closed nubmer of days (additive) is a
       ['Stale']
     )
   ];
-  const processor = new IssuesProcessor(
+  const processor = new IssuesProcessorMock(
     opts,
     async () => 'abot',
-    async p => (p == 1 ? TestIssueList : []),
-    async (num: number, dt: string) => [],
-    async (issue: Issue, label: string) => new Date().toDateString()
+    async p => (p === 1 ? TestIssueList : []),
+    async () => [],
+    async () => new Date().toDateString()
   );
 
   // process our fake issue list
@@ -1423,12 +1407,12 @@ test('stale issues should not be closed until after the closed number of days (l
       false
     )
   ];
-  const processor = new IssuesProcessor(
+  const processor = new IssuesProcessorMock(
     opts,
     async () => 'abot',
-    async p => (p == 1 ? TestIssueList : []),
-    async (num, dt) => [],
-    async (issue, label) => new Date().toDateString()
+    async p => (p === 1 ? TestIssueList : []),
+    async () => [],
+    async () => new Date().toDateString()
   );
 
   // process our fake issue list
@@ -1456,12 +1440,12 @@ test('skips stale message on issues when skip-stale-issue-message is set', async
       false
     )
   ];
-  const processor = new IssuesProcessor(
+  const processor = new IssuesProcessorMock(
     opts,
     async () => 'abot',
-    async p => (p == 1 ? TestIssueList : []),
-    async (num: number, dt: string) => [],
-    async (issue: Issue, label: string) => new Date().toDateString()
+    async p => (p === 1 ? TestIssueList : []),
+    async () => [],
+    async () => new Date().toDateString()
   );
 
   // for sake of testing, mocking private function
@@ -1501,12 +1485,12 @@ test('skips stale message on prs when skip-stale-pr-message is set', async () =>
       true
     )
   ];
-  const processor = new IssuesProcessor(
+  const processor = new IssuesProcessorMock(
     opts,
     async () => 'abot',
-    async p => (p == 1 ? TestIssueList : []),
-    async (num: number, dt: string) => [],
-    async (issue: Issue, label: string) => new Date().toDateString()
+    async p => (p === 1 ? TestIssueList : []),
+    async () => [],
+    async () => new Date().toDateString()
   );
 
   // for sake of testing, mocking private function
@@ -1547,12 +1531,12 @@ test('not providing state takes precedence over skipStaleIssueMessage', async ()
       false
     )
   ];
-  const processor = new IssuesProcessor(
+  const processor = new IssuesProcessorMock(
     opts,
     async () => 'abot',
-    async p => (p == 1 ? TestIssueList : []),
-    async (num: number, dt: string) => [],
-    async (issue: Issue, label: string) => new Date().toDateString()
+    async p => (p === 1 ? TestIssueList : []),
+    async () => [],
+    async () => new Date().toDateString()
   );
 
   await processor.processIssues(1);
@@ -1581,12 +1565,12 @@ test('not providing stalePrMessage takes precedence over skipStalePrMessage', as
       true
     )
   ];
-  const processor = new IssuesProcessor(
+  const processor = new IssuesProcessorMock(
     opts,
     async () => 'abot',
-    async p => (p == 1 ? TestIssueList : []),
-    async (num: number, dt: string) => [],
-    async (issue: Issue, label: string) => new Date().toDateString()
+    async p => (p === 1 ? TestIssueList : []),
+    async () => [],
+    async () => new Date().toDateString()
   );
 
   await processor.processIssues(1);
@@ -1611,12 +1595,12 @@ test('git branch is deleted when option is enabled', async () => {
       ['Stale']
     )
   ];
-  const processor = new IssuesProcessor(
+  const processor = new IssuesProcessorMock(
     opts,
     async () => 'abot',
-    async p => (p == 1 ? TestIssueList : []),
-    async (num: number, dt: string) => [],
-    async (issue: Issue, label: string) => new Date().toDateString()
+    async p => (p === 1 ? TestIssueList : []),
+    async () => [],
+    async () => new Date().toDateString()
   );
 
   await processor.processIssues(1);
@@ -1641,12 +1625,12 @@ test('git branch is not deleted when issue is not pull request', async () => {
       ['Stale']
     )
   ];
-  const processor = new IssuesProcessor(
+  const processor = new IssuesProcessorMock(
     opts,
     async () => 'abot',
-    async p => (p == 1 ? TestIssueList : []),
-    async (num: number, dt: string) => [],
-    async (issue: Issue, label: string) => new Date().toDateString()
+    async p => (p === 1 ? TestIssueList : []),
+    async () => [],
+    async () => new Date().toDateString()
   );
 
   await processor.processIssues(1);
@@ -1673,12 +1657,12 @@ test('an issue without a milestone will be marked as stale', async () => {
       ''
     )
   ];
-  const processor = new IssuesProcessor(
+  const processor = new IssuesProcessorMock(
     DefaultProcessorOptions,
     async () => 'abot',
-    async p => (p == 1 ? TestIssueList : []),
-    async (num: number, dt: string) => [],
-    async (issue: Issue, label: string) => new Date().toDateString()
+    async p => (p === 1 ? TestIssueList : []),
+    async () => [],
+    async () => new Date().toDateString()
   );
 
   // process our fake issue list
@@ -1707,12 +1691,12 @@ test('an issue without an exempted milestone will be marked as stale', async () 
       'Milestone'
     )
   ];
-  const processor = new IssuesProcessor(
+  const processor = new IssuesProcessorMock(
     opts,
     async () => 'abot',
-    async p => (p == 1 ? TestIssueList : []),
-    async (num: number, dt: string) => [],
-    async (issue: Issue, label: string) => new Date().toDateString()
+    async p => (p === 1 ? TestIssueList : []),
+    async () => [],
+    async () => new Date().toDateString()
   );
 
   // process our fake issue list
@@ -1741,12 +1725,12 @@ test('an issue with an exempted milestone will not be marked as stale', async ()
       'Milestone1'
     )
   ];
-  const processor = new IssuesProcessor(
+  const processor = new IssuesProcessorMock(
     opts,
     async () => 'abot',
-    async p => (p == 1 ? TestIssueList : []),
-    async (num: number, dt: string) => [],
-    async (issue: Issue, label: string) => new Date().toDateString()
+    async p => (p === 1 ? TestIssueList : []),
+    async () => [],
+    async () => new Date().toDateString()
   );
 
   // process our fake issue list
@@ -1775,12 +1759,12 @@ test('an issue with an exempted milestone will not be marked as stale (multi mil
       'Milestone2'
     )
   ];
-  const processor = new IssuesProcessor(
+  const processor = new IssuesProcessorMock(
     opts,
     async () => 'abot',
-    async p => (p == 1 ? TestIssueList : []),
-    async (num: number, dt: string) => [],
-    async (issue: Issue, label: string) => new Date().toDateString()
+    async p => (p === 1 ? TestIssueList : []),
+    async () => [],
+    async () => new Date().toDateString()
   );
 
   // process our fake issue list
@@ -1809,12 +1793,12 @@ test('an issue with an exempted milestone will not be marked as stale (multi mil
       'Milestone2'
     )
   ];
-  const processor = new IssuesProcessor(
+  const processor = new IssuesProcessorMock(
     opts,
     async () => 'abot',
-    async p => (p == 1 ? TestIssueList : []),
-    async (num: number, dt: string) => [],
-    async (issue: Issue, label: string) => new Date().toDateString()
+    async p => (p === 1 ? TestIssueList : []),
+    async () => [],
+    async () => new Date().toDateString()
   );
 
   // process our fake issue list
@@ -1844,12 +1828,12 @@ test('an issue with an exempted milestone but without an exempted issue mileston
       'Milestone1'
     )
   ];
-  const processor = new IssuesProcessor(
+  const processor = new IssuesProcessorMock(
     opts,
     async () => 'abot',
-    async p => (p == 1 ? TestIssueList : []),
-    async (num: number, dt: string) => [],
-    async (issue: Issue, label: string) => new Date().toDateString()
+    async p => (p === 1 ? TestIssueList : []),
+    async () => [],
+    async () => new Date().toDateString()
   );
 
   // process our fake issue list
@@ -1879,12 +1863,12 @@ test('an issue with an exempted milestone but with another exempted issue milest
       'Milestone1'
     )
   ];
-  const processor = new IssuesProcessor(
+  const processor = new IssuesProcessorMock(
     opts,
     async () => 'abot',
-    async p => (p == 1 ? TestIssueList : []),
-    async (num: number, dt: string) => [],
-    async (issue: Issue, label: string) => new Date().toDateString()
+    async p => (p === 1 ? TestIssueList : []),
+    async () => [],
+    async () => new Date().toDateString()
   );
 
   // process our fake issue list
@@ -1914,12 +1898,12 @@ test('an issue with an exempted milestone and with an exempted issue milestone w
       'Milestone1'
     )
   ];
-  const processor = new IssuesProcessor(
+  const processor = new IssuesProcessorMock(
     opts,
     async () => 'abot',
-    async p => (p == 1 ? TestIssueList : []),
-    async (num: number, dt: string) => [],
-    async (issue: Issue, label: string) => new Date().toDateString()
+    async p => (p === 1 ? TestIssueList : []),
+    async () => [],
+    async () => new Date().toDateString()
   );
 
   // process our fake issue list
@@ -1942,12 +1926,12 @@ test('processing an issue opened since 2 days and with the option "daysBeforeIss
   const TestIssueList: Issue[] = [
     generateIssue(opts, 1, 'An issue with no label', issueDate.toDateString())
   ];
-  const processor = new IssuesProcessor(
+  const processor = new IssuesProcessorMock(
     opts,
     async () => 'abot',
-    async p => (p == 1 ? TestIssueList : []),
-    async (num, dt) => [],
-    async (issue, label) => new Date().toDateString()
+    async p => (p === 1 ? TestIssueList : []),
+    async () => [],
+    async () => new Date().toDateString()
   );
 
   // process our fake issue list
@@ -1969,12 +1953,12 @@ test('processing an issue opened since 2 days and with the option "daysBeforeIss
   const TestIssueList: Issue[] = [
     generateIssue(opts, 1, 'An issue with no label', issueDate.toDateString())
   ];
-  const processor = new IssuesProcessor(
+  const processor = new IssuesProcessorMock(
     opts,
     async () => 'abot',
-    async p => (p == 1 ? TestIssueList : []),
-    async (num, dt) => [],
-    async (issue, label) => new Date().toDateString()
+    async p => (p === 1 ? TestIssueList : []),
+    async () => [],
+    async () => new Date().toDateString()
   );
 
   // process our fake issue list
@@ -1996,12 +1980,12 @@ test('processing an issue opened since 2 days and with the option "daysBeforeIss
   const TestIssueList: Issue[] = [
     generateIssue(opts, 1, 'An issue with no label', issueDate.toDateString())
   ];
-  const processor = new IssuesProcessor(
+  const processor = new IssuesProcessorMock(
     opts,
     async () => 'abot',
-    async p => (p == 1 ? TestIssueList : []),
-    async (num, dt) => [],
-    async (issue, label) => new Date().toDateString()
+    async p => (p === 1 ? TestIssueList : []),
+    async () => [],
+    async () => new Date().toDateString()
   );
 
   // process our fake issue list
@@ -2030,12 +2014,12 @@ test('processing a pull request opened since 2 days and with the option "daysBef
       true
     )
   ];
-  const processor = new IssuesProcessor(
+  const processor = new IssuesProcessorMock(
     opts,
     async () => 'abot',
-    async p => (p == 1 ? TestIssueList : []),
-    async (num, dt) => [],
-    async (issue, label) => new Date().toDateString()
+    async p => (p === 1 ? TestIssueList : []),
+    async () => [],
+    async () => new Date().toDateString()
   );
 
   // process our fake issue list
@@ -2064,12 +2048,12 @@ test('processing a pull request opened since 2 days and with the option "daysBef
       true
     )
   ];
-  const processor = new IssuesProcessor(
+  const processor = new IssuesProcessorMock(
     opts,
     async () => 'abot',
-    async p => (p == 1 ? TestIssueList : []),
-    async (num, dt) => [],
-    async (issue, label) => new Date().toDateString()
+    async p => (p === 1 ? TestIssueList : []),
+    async () => [],
+    async () => new Date().toDateString()
   );
 
   // process our fake issue list
@@ -2098,12 +2082,12 @@ test('processing a pull request opened since 2 days and with the option "daysBef
       true
     )
   ];
-  const processor = new IssuesProcessor(
+  const processor = new IssuesProcessorMock(
     opts,
     async () => 'abot',
-    async p => (p == 1 ? TestIssueList : []),
-    async (num, dt) => [],
-    async (issue, label) => new Date().toDateString()
+    async p => (p === 1 ? TestIssueList : []),
+    async () => [],
+    async () => new Date().toDateString()
   );
 
   // process our fake issue list
@@ -2135,7 +2119,7 @@ test('processing a previously closed issue with a close label will remove the cl
       false
     )
   ];
-  const processor = new IssuesProcessor(
+  const processor = new IssuesProcessorMock(
     opts,
     async () => 'abot',
     async p => (p === 1 ? TestIssueList : []),
@@ -2171,7 +2155,7 @@ test('processing a closed issue with a close label will not remove the close lab
       false
     )
   ];
-  const processor = new IssuesProcessor(
+  const processor = new IssuesProcessorMock(
     opts,
     async () => 'abot',
     async p => (p === 1 ? TestIssueList : []),
@@ -2207,7 +2191,7 @@ test('processing a locked issue with a close label will not remove the close lab
       true
     )
   ];
-  const processor = new IssuesProcessor(
+  const processor = new IssuesProcessorMock(
     opts,
     async () => 'abot',
     async p => (p === 1 ? TestIssueList : []),

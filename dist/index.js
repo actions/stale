@@ -299,6 +299,8 @@ class IssuesProcessor {
                     issueLogger.info(`Skipping $$type because it is locked`);
                     continue; // don't process locked issues
                 }
+                // Try to remove the close label when not close/locked issue or PR
+                yield this._removeCloseLabel(issue, closeLabel);
                 if (this.options.startDate) {
                     const startDate = new Date(this.options.startDate);
                     const createdAt = new Date(issue.created_at);
@@ -677,8 +679,22 @@ class IssuesProcessor {
     _removeStaleLabel(issue, staleLabel) {
         return __awaiter(this, void 0, void 0, function* () {
             const issueLogger = new issue_logger_1.IssueLogger(issue);
-            issueLogger.info(`$$type is no longer stale. Removing stale label.`);
+            issueLogger.info(`The $$type is no longer stale. Removing the stale label...`);
             return this._removeLabel(issue, staleLabel);
+        });
+    }
+    _removeCloseLabel(issue, closeLabel) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const issueLogger = new issue_logger_1.IssueLogger(issue);
+            issueLogger.info(`The $$type is not closed nor locked. Trying to remove the close label...`);
+            if (!closeLabel) {
+                issueLogger.info(`There is no close label on this $$type. Skip`);
+                return Promise.resolve();
+            }
+            if (is_labeled_1.isLabeled(issue, closeLabel)) {
+                issueLogger.info(`The $$type has a close label "${closeLabel}". Removing the close label...`);
+                return this._removeLabel(issue, closeLabel);
+            }
         });
     }
 }

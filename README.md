@@ -17,10 +17,10 @@ Warns and then closes issues and PRs that have had no activity for a specified a
 | `stale-pr-message`            | Message to post on the stale PR.                                                                                | Optional |
 | `close-issue-message`         | Message to post on the stale issue while closing it.                                                            | Optional |
 | `close-pr-message`            | Message to post on the stale PR while closing it.                                                               | Optional |
-| `stale-issue-label`           | Label to apply on the stale issue. _Defaults to **stale**_                                                      | Optional |
-| `close-issue-label`           | Label to apply on closing issue.                                                                                | Optional |
-| `stale-pr-label`              | Label to apply on the stale PR.                                                                                 | Optional |
-| `close-pr-label`              | Label to apply on the closing PR.                                                                               | Optional |
+| `stale-issue-label`           | Label to apply on the stale issue. _Defaults to **Stale**_                                                      | Optional |
+| `close-issue-label`           | Label to apply on closing issue (automatically removed if no longer closed nor locked).                         | Optional |
+| `stale-pr-label`              | Label to apply on the stale PR. _Defaults to **Stale**_                                                         | Optional |
+| `close-pr-label`              | Label to apply on the closing PR (automatically removed if no longer closed nor locked).                        | Optional |
 | `exempt-issue-labels`         | Labels on an issue exempted from being marked as stale.                                                         | Optional |
 | `exempt-pr-labels`            | Labels on the PR exempted from being marked as stale.                                                           | Optional |
 | `only-labels`                 | Only labels checked for stale issue/PR.                                                                         | Optional |

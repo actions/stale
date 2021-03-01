@@ -15,7 +15,7 @@ export class Issue implements IIssue {
   updated_at: IsoDateString;
   readonly labels: ILabel[];
   readonly pull_request: Object | null | undefined;
-  readonly state: string;
+  readonly state: string | 'closed' | 'open';
   readonly locked: boolean;
   readonly milestone: IMilestone | undefined;
   readonly assignees: IAssignee[];

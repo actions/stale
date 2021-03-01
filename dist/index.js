@@ -345,7 +345,7 @@ class IssuesProcessor {
                 const anyOfLabels = words_to_list_1.wordsToList(this.options.anyOfLabels);
                 if (anyOfLabels.length &&
                     !anyOfLabels.some((label) => is_labeled_1.isLabeled(issue, label))) {
-                    issueLogger.info(`Skipping ${issueType} because it does not have any of the required labels`);
+                    issueLogger.info(`Skipping $$type because it does not have any of the required labels`);
                     continue; // don't process issues without any of the required labels
                 }
                 const milestones = new milestones_1.Milestones(this.options, issue);
@@ -736,12 +736,13 @@ class IssuesProcessor {
         var _a;
         return __awaiter(this, void 0, void 0, function* () {
             const issueLogger = new issue_logger_1.IssueLogger(issue);
-            issueLogger.info(`$$type is no longer stale. Removing stale label`);
+            issueLogger.info(`The $$type is no longer stale. Removing the stale label...`);
             yield this._removeLabel(issue, staleLabel);
             (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.incrementUndoStaleIssuesCount();
         });
     }
     _removeCloseLabel(issue, closeLabel) {
+        var _a;
         return __awaiter(this, void 0, void 0, function* () {
             const issueLogger = new issue_logger_1.IssueLogger(issue);
             issueLogger.info(`The $$type is not closed nor locked. Trying to remove the close label...`);
@@ -751,7 +752,8 @@ class IssuesProcessor {
             }
             if (is_labeled_1.isLabeled(issue, closeLabel)) {
                 issueLogger.info(`The $$type has a close label "${closeLabel}". Removing the close label...`);
-                return this._removeLabel(issue, closeLabel);
+                yield this._removeLabel(issue, closeLabel);
+                (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.incrementDeletedCloseLabelsCount();
             }
         });
     }
@@ -978,6 +980,7 @@ class Statistics {
         this._operationsCount = 0;
         this._closedIssuesCount = 0;
         this._deletedLabelsCount = 0;
+        this._deletedCloseLabelsCount = 0;
         this._deletedBranchesCount = 0;
         this._addedLabelsCount = 0;
         this._addedCommentsCount = 0;
@@ -1009,6 +1012,10 @@ class Statistics {
     }
     incrementDeletedLabelsCount(increment = 1) {
         this._deletedLabelsCount += increment;
+        return this;
+    }
+    incrementDeletedCloseLabelsCount(increment = 1) {
+        this._deletedCloseLabelsCount += increment;
         return this;
     }
     incrementDeletedBranchesCount(increment = 1) {
@@ -1047,6 +1054,7 @@ class Statistics {
         this._logOperationsCount();
         this._logClosedIssuesCount();
         this._logDeletedLabelsCount();
+        this._logDeletedCloseLabelsCount();
         this._logDeletedBranchesCount();
         this._logAddedLabelsCount();
         this._logAddedCommentsCount();
@@ -1074,6 +1082,9 @@ class Statistics {
     }
     _logDeletedLabelsCount() {
         this._logCount('Deleted labels', this._deletedLabelsCount);
+    }
+    _logDeletedCloseLabelsCount() {
+        this._logCount('Deleted close labels', this._deletedCloseLabelsCount);
     }
     _logDeletedBranchesCount() {
         this._logCount('Deleted branches', this._deletedBranchesCount);

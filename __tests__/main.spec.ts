@@ -2119,7 +2119,7 @@ test('processing a previously closed issue with a close label will remove the cl
       false
     )
   ];
-  const processor = new IssuesProcessor(
+  const processor = new IssuesProcessorMock(
     opts,
     async () => 'abot',
     async p => (p === 1 ? TestIssueList : []),
@@ -2155,7 +2155,7 @@ test('processing a closed issue with a close label will not remove the close lab
       false
     )
   ];
-  const processor = new IssuesProcessor(
+  const processor = new IssuesProcessorMock(
     opts,
     async () => 'abot',
     async p => (p === 1 ? TestIssueList : []),
@@ -2191,7 +2191,7 @@ test('processing a locked issue with a close label will not remove the close lab
       true
     )
   ];
-  const processor = new IssuesProcessor(
+  const processor = new IssuesProcessorMock(
     opts,
     async () => 'abot',
     async p => (p === 1 ? TestIssueList : []),

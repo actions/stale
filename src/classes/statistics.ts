@@ -10,6 +10,7 @@ export class Statistics {
   private _operationsCount = 0;
   private _closedIssuesCount = 0;
   private _deletedLabelsCount = 0;
+  private _deletedCloseLabelsCount = 0;
   private _deletedBranchesCount = 0;
   private _addedLabelsCount = 0;
   private _addedCommentsCount = 0;
@@ -54,6 +55,14 @@ export class Statistics {
 
   incrementDeletedLabelsCount(increment: Readonly<number> = 1): Statistics {
     this._deletedLabelsCount += increment;
+
+    return this;
+  }
+
+  incrementDeletedCloseLabelsCount(
+    increment: Readonly<number> = 1
+  ): Statistics {
+    this._deletedCloseLabelsCount += increment;
 
     return this;
   }
@@ -114,6 +123,7 @@ export class Statistics {
     this._logOperationsCount();
     this._logClosedIssuesCount();
     this._logDeletedLabelsCount();
+    this._logDeletedCloseLabelsCount();
     this._logDeletedBranchesCount();
     this._logAddedLabelsCount();
     this._logAddedCommentsCount();
@@ -148,6 +158,10 @@ export class Statistics {
 
   private _logDeletedLabelsCount(): void {
     this._logCount('Deleted labels', this._deletedLabelsCount);
+  }
+
+  private _logDeletedCloseLabelsCount(): void {
+    this._logCount('Deleted close labels', this._deletedCloseLabelsCount);
   }
 
   private _logDeletedBranchesCount(): void {

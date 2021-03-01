@@ -738,7 +738,8 @@ export class IssuesProcessor {
         `The $$type has a close label "${closeLabel}". Removing the close label...`
       );
 
-      return this._removeLabel(issue, closeLabel);
+      await this._removeLabel(issue, closeLabel);
+      this._statistics?.incrementDeletedCloseLabelsCount();
     }
   }
 }

@@ -52,7 +52,8 @@ describe('Issue', (): void => {
       exemptPrAssignees: '',
       exemptAllAssignees: false,
       exemptAllIssueAssignees: undefined,
-      exemptAllPrAssignees: undefined
+      exemptAllPrAssignees: undefined,
+      enableStatistics: false
     };
     issueInterface = {
       title: 'dummy-title',

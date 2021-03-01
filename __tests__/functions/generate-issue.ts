@@ -1,4 +1,5 @@
 import {Issue} from '../../src/classes/issue';
+import {IAssignee} from '../../src/interfaces/assignee';
 import {IIssuesProcessorOptions} from '../../src/interfaces/issues-processor-options';
 import {IsoDateString} from '../../src/types/iso-date-string';
 
@@ -12,7 +13,8 @@ export function generateIssue(
   labels: string[] = [],
   isClosed = false,
   isLocked = false,
-  milestone: string | undefined = undefined
+  milestone: string | undefined = undefined,
+  assignees: string[] = []
 ): Issue {
   return new Issue(options, {
     number: id,
@@ -29,6 +31,13 @@ export function generateIssue(
       ? {
           title: milestone
         }
-      : undefined
+      : undefined,
+    assignees: assignees.map(
+      (assignee: Readonly<string>): IAssignee => {
+        return {
+          login: assignee
+        };
+      }
+    )
   });
 }

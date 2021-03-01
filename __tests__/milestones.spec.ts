@@ -9,7 +9,6 @@ interface ITestData {
   milestone: string;
   name: string;
   shouldStale: boolean;
-  exemptAllMilestones: boolean;
 }
 
 describe('milestones options', (): void => {

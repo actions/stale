@@ -19,6 +19,8 @@ export const DefaultProcessorOptions: IIssuesProcessorOptions = Object.freeze({
   closePrLabel: '',
   exemptPrLabels: '',
   onlyLabels: '',
+  onlyIssueLabels: '',
+  onlyPrLabels: '',
   anyOfLabels: '',
   operationsPerRun: 100,
   debugOnly: true,
@@ -33,5 +35,11 @@ export const DefaultProcessorOptions: IIssuesProcessorOptions = Object.freeze({
   exemptPrMilestones: '',
   exemptAllMilestones: false,
   exemptAllIssueMilestones: undefined,
-  exemptAllPrMilestones: undefined
+  exemptAllPrMilestones: undefined,
+  exemptAssignees: '',
+  exemptIssueAssignees: '',
+  exemptPrAssignees: '',
+  exemptAllAssignees: false,
+  exemptAllIssueAssignees: undefined,
+  exemptAllPrAssignees: undefined
 });

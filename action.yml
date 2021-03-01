@@ -92,6 +92,14 @@ inputs:
     description: 'Only issues or pull requests with at least one of these labels are checked if stale. Defaults to `` (disabled) and can be a comma-separated list of labels.'
     default: ''
     required: false
+  only-issue-labels:
+    description: 'Only issues with all of these labels are checked if stale. Defaults to `[]` (disabled) and can be a comma-separated list of labels. Override "only-labels" option regarding only the issues.'
+    default: ''
+    required: false
+  only-pr-labels:
+    description: 'Only pull requests with all of these labels are checked if stale. Defaults to `[]` (disabled) and can be a comma-separated list of labels. Override "only-labels" option regarding only the pull requests.'
+    default: ''
+    required: false
   operations-per-run:
     description: 'The maximum number of operations per run, used to control rate limiting (GitHub API CRUD related).'
     default: '30'
@@ -122,6 +130,30 @@ inputs:
     required: false
   start-date:
     description: 'The date used to skip the stale action on issue/pull request created before it (ISO 8601 or RFC 2822).'
+    default: ''
+    required: false
+  exempt-assignees:
+    description: 'The assignees which exempt an issue or a pull request from being marked as stale. Separate multiple assignees with commas (eg. "user1,user2")'
+    default: ''
+    required: false
+  exempt-issue-assignees:
+    description: 'The assignees which exempt an issue from being marked as stale. Separate multiple assignees with commas (eg. "user1,user2"). Override "exempt-assignees" option regarding only the issues.'
+    default: ''
+    required: false
+  exempt-pr-assignees:
+    description: 'The assignees which exempt a pull request from being marked as stale. Separate multiple assignees with commas (eg. "user1,user2"). Override "exempt-assignees" option regarding only the pull requests.'
+    default: ''
+    required: false
+  exempt-all-assignees:
+    description: 'Exempt all issues and pull requests with assignees from being marked as stale. Default to false.'
+    default: 'false'
+    required: false
+  exempt-all-issue-assignees:
+    description: 'Exempt all issues with assignees from being marked as stale. Override "exempt-all-assignees" option regarding only the issues.'
+    default: ''
+    required: false
+  exempt-all-pr-assignees:
+    description: 'Exempt all pull requests with assignees from being marked as stale. Override "exempt-all-assignees" option regarding only the pull requests.'
     default: ''
     required: false
 runs:

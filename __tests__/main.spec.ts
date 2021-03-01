@@ -2112,3 +2112,111 @@ test('processing a pull request opened since 2 days and with the option "daysBef
   expect(processor.staleIssues.length).toEqual(1);
   expect(processor.closedIssues.length).toEqual(0);
 });
+
+test('processing a previously closed issue with a close label will remove the close label', async () => {
+  expect.assertions(1);
+  const opts: IIssuesProcessorOptions = {
+    ...DefaultProcessorOptions,
+    closeIssueLabel: 'close',
+    staleIssueLabel: 'stale'
+  };
+  const now: Date = new Date();
+  const oneWeekAgo: Date = new Date(now.getDate() - 7);
+  const TestIssueList: Issue[] = [
+    generateIssue(
+      opts,
+      1,
+      'An opened issue with a close label',
+      oneWeekAgo.toDateString(),
+      now.toDateString(),
+      false,
+      ['close'],
+      false,
+      false
+    )
+  ];
+  const processor = new IssuesProcessor(
+    opts,
+    async () => 'abot',
+    async p => (p === 1 ? TestIssueList : []),
+    async () => [],
+    async () => new Date().toDateString()
+  );
+
+  // process our fake issue list
+  await processor.processIssues(1);
+
+  expect(processor.removedLabelIssues).toHaveLength(1);
+});
+
+test('processing a closed issue with a close label will not remove the close label', async () => {
+  expect.assertions(1);
+  const opts: IIssuesProcessorOptions = {
+    ...DefaultProcessorOptions,
+    closeIssueLabel: 'close',
+    staleIssueLabel: 'stale'
+  };
+  const now: Date = new Date();
+  const oneWeekAgo: Date = new Date(now.getDate() - 7);
+  const TestIssueList: Issue[] = [
+    generateIssue(
+      opts,
+      1,
+      'A closed issue with a close label',
+      oneWeekAgo.toDateString(),
+      now.toDateString(),
+      false,
+      ['close'],
+      true,
+      false
+    )
+  ];
+  const processor = new IssuesProcessor(
+    opts,
+    async () => 'abot',
+    async p => (p === 1 ? TestIssueList : []),
+    async () => [],
+    async () => new Date().toDateString()
+  );
+
+  // process our fake issue list
+  await processor.processIssues(1);
+
+  expect(processor.removedLabelIssues).toHaveLength(0);
+});
+
+test('processing a locked issue with a close label will not remove the close label', async () => {
+  expect.assertions(1);
+  const opts: IIssuesProcessorOptions = {
+    ...DefaultProcessorOptions,
+    closeIssueLabel: 'close',
+    staleIssueLabel: 'stale'
+  };
+  const now: Date = new Date();
+  const oneWeekAgo: Date = new Date(now.getDate() - 7);
+  const TestIssueList: Issue[] = [
+    generateIssue(
+      opts,
+      1,
+      'A closed issue with a close label',
+      oneWeekAgo.toDateString(),
+      now.toDateString(),
+      false,
+      ['close'],
+      false,
+      true
+    )
+  ];
+  const processor = new IssuesProcessor(
+    opts,
+    async () => 'abot',
+    async p => (p === 1 ? TestIssueList : []),
+    async () => [],
+    async () => new Date().toDateString()
+  );
+
+  // process our fake issue list
+  await processor.processIssues(1);
+
+  expect(processor.removedLabelIssues).toHaveLength(0);
+});

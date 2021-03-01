@@ -39,6 +39,8 @@ function _getAndValidateArgs(): IIssuesProcessorOptions {
     closePrLabel: core.getInput('close-pr-label'),
     exemptPrLabels: core.getInput('exempt-pr-labels'),
     onlyLabels: core.getInput('only-labels'),
+    onlyIssueLabels: core.getInput('only-issue-labels'),
+    onlyPrLabels: core.getInput('only-pr-labels'),
     anyOfLabels: core.getInput('any-of-labels'),
     operationsPerRun: parseInt(
       core.getInput('operations-per-run', {required: true})
@@ -60,7 +62,13 @@ function _getAndValidateArgs(): IIssuesProcessorOptions {
     exemptPrMilestones: core.getInput('exempt-pr-milestones'),
     exemptAllMilestones: core.getInput('exempt-all-milestones') === 'true',
     exemptAllIssueMilestones: _toOptionalBoolean('exempt-all-issue-milestones'),
-    exemptAllPrMilestones: _toOptionalBoolean('exempt-all-pr-milestones')
+    exemptAllPrMilestones: _toOptionalBoolean('exempt-all-pr-milestones'),
+    exemptAssignees: core.getInput('exempt-assignees'),
+    exemptIssueAssignees: core.getInput('exempt-issue-assignees'),
+    exemptPrAssignees: core.getInput('exempt-pr-assignees'),
+    exemptAllAssignees: core.getInput('exempt-all-assignees') === 'true',
+    exemptAllIssueAssignees: _toOptionalBoolean('exempt-all-issue-assignees'),
+    exemptAllPrAssignees: _toOptionalBoolean('exempt-all-pr-assignees')
   };
 
   for (const numberInput of [
@@ -101,4 +109,4 @@ function _toOptionalBoolean(
   return undefined;
 }
 
-_run();
+void _run();

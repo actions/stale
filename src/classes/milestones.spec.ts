@@ -1,3 +1,5 @@
+import {DefaultProcessorOptions} from '../../__tests__/constants/default-processor-options';
+import {generateIIssue} from '../../__tests__/functions/generate-iissue';
 import {IIssue} from '../interfaces/issue';
 import {IIssuesProcessorOptions} from '../interfaces/issues-processor-options';
 import {Issue} from './issue';
@@ -10,52 +12,8 @@ describe('Milestones', (): void => {
   let issueInterface: IIssue;
 
   beforeEach((): void => {
-    optionsInterface = {
-      ascending: false,
-      closeIssueLabel: '',
-      closeIssueMessage: '',
-      closePrLabel: '',
-      closePrMessage: '',
-      daysBeforeClose: 0,
-      daysBeforeIssueClose: 0,
-      daysBeforeIssueStale: 0,
-      daysBeforePrClose: 0,
-      daysBeforePrStale: 0,
-      daysBeforeStale: 0,
-      debugOnly: false,
-      deleteBranch: false,
-      exemptIssueLabels: '',
-      exemptPrLabels: '',
-      onlyLabels: '',
-      anyOfLabels: '',
-      operationsPerRun: 0,
-      removeStaleWhenUpdated: false,
-      repoToken: '',
-      skipStaleIssueMessage: false,
-      skipStalePrMessage: false,
-      staleIssueLabel: '',
-      staleIssueMessage: '',
-      stalePrLabel: '',
-      stalePrMessage: '',
-      startDate: undefined,
-      exemptIssueMilestones: '',
-      exemptPrMilestones: '',
-      exemptMilestones: '',
-      exemptAllMilestones: false,
-      exemptAllIssueMilestones: undefined,
-      exemptAllPrMilestones: undefined
-    };
-    issueInterface = {
-      created_at: '',
-      locked: false,
-      milestone: undefined,
-      number: 0,
-      pull_request: undefined,
-      state: '',
-      title: '',
-      updated_at: '',
-      labels: []
-    };
+    optionsInterface = {...DefaultProcessorOptions};
+    issueInterface = generateIIssue();
   });
 
   describe('shouldExemptMilestones()', (): void => {

@@ -285,6 +285,23 @@ class IssuesProcessor {
                 const daysBeforeStale = issue.isPullRequest
                     ? this._getDaysBeforePrStale()
                     : this._getDaysBeforeIssueStale();
+                const onlyLabels = words_to_list_1.wordsToList(this._getOnlyLabels(issue));
+                if (onlyLabels.length > 0) {
+                    issueLogger.info(`The option "onlyLabels" was specified to only processed the issues and pull requests with all those labels (${onlyLabels.length})`);
+                    const hasAllWhitelistedLabels = onlyLabels.every((label) => {
+                        return is_labeled_1.isLabeled(issue, label);
+                    });
+                    if (!hasAllWhitelistedLabels) {
+                        issueLogger.info(`Skipping this $$type because it doesn't have all the required labels`);
+                        continue; // Don't process issues without all of the required labels
+                    }
+                    else {
+                        issueLogger.info(`All the required labels are present on this $$type. Continuing the process`);
+                    }
+                }
+                else {
+                    issueLogger.info(`The option "onlyLabels" was not specified. Continuing the process for this $$type`);
+                }
                 issueLogger.info(`Days before $$type stale: ${daysBeforeStale}`);
                 const shouldMarkAsStale = should_mark_when_stale_1.shouldMarkWhenStale(daysBeforeStale);
                 if (!staleMessage && shouldMarkAsStale) {
@@ -462,7 +479,6 @@ class IssuesProcessor {
                     owner: github_1.context.repo.owner,
                     repo: github_1.context.repo.repo,
                     state: 'open',
-                    labels: this.options.onlyLabels,
                     per_page: 100,
                     direction: this.options.ascending ? 'asc' : 'desc',
                     page
@@ -675,6 +691,19 @@ class IssuesProcessor {
         return isNaN(this.options.daysBeforePrClose)
             ? this.options.daysBeforeClose
             : this.options.daysBeforePrClose;
+    }
+    _getOnlyLabels(issue) {
+        if (issue.isPullRequest) {
+            if (this.options.onlyPrLabels !== '') {
+                return this.options.onlyPrLabels;
+            }
+        }
+        else {
+            if (this.options.onlyIssueLabels !== '') {
+                return this.options.onlyIssueLabels;
+            }
+        }
+        return this.options.onlyLabels;
     }
     _removeStaleLabel(issue, staleLabel) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -1170,6 +1199,8 @@ function _getAndValidateArgs() {
         closePrLabel: core.getInput('close-pr-label'),
         exemptPrLabels: core.getInput('exempt-pr-labels'),
         onlyLabels: core.getInput('only-labels'),
+        onlyIssueLabels: core.getInput('only-issue-labels'),
+        onlyPrLabels: core.getInput('only-pr-labels'),
         operationsPerRun: parseInt(core.getInput('operations-per-run', { required: true })),
         removeStaleWhenUpdated: !(core.getInput('remove-stale-when-updated') === 'false'),
         debugOnly: core.getInput('debug-only') === 'true',
@@ -1222,7 +1253,7 @@ function _toOptionalBoolean(argumentName) {
     }
     return undefined;
 }
-_run();
+void _run();
 
 
 /***/ }),

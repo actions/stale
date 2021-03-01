@@ -120,6 +120,34 @@ export class IssuesProcessor {
       const daysBeforeStale: number = issue.isPullRequest
         ? this._getDaysBeforePrStale()
         : this._getDaysBeforeIssueStale();
+      const onlyLabels: string[] = wordsToList(this._getOnlyLabels(issue));
+
+      if (onlyLabels.length > 0) {
+        issueLogger.info(
+          `The option "onlyLabels" was specified to only processed the issues and pull requests with all those labels (${onlyLabels.length})`
+        );
+
+        const hasAllWhitelistedLabels: boolean = onlyLabels.every(
+          (label: Readonly<string>): boolean => {
+            return isLabeled(issue, label);
+          }
+        );
+
+        if (!hasAllWhitelistedLabels) {
+          issueLogger.info(
+            `Skipping this $$type because it doesn't have all the required labels`
+          );
+          continue; // Don't process issues without all of the required labels
+        } else {
+          issueLogger.info(
+            `All the required labels are present on this $$type. Continuing the process`
+          );
+        }
+      } else {
+        issueLogger.info(
+          `The option "onlyLabels" was not specified. Continuing the process for this $$type`
+        );
+      }
 
       issueLogger.info(`Days before $$type stale: ${daysBeforeStale}`);
 
@@ -398,7 +426,6 @@ export class IssuesProcessor {
           owner: context.repo.owner,
           repo: context.repo.repo,
           state: 'open',
-          labels: this.options.onlyLabels,
           per_page: 100,
           direction: this.options.ascending ? 'asc' : 'desc',
           page
@@ -658,6 +685,20 @@ export class IssuesProcessor {
     return isNaN(this.options.daysBeforePrClose)
       ? this.options.daysBeforeClose
       : this.options.daysBeforePrClose;
+  }
+
+  private _getOnlyLabels(issue: Issue): string {
+    if (issue.isPullRequest) {
+      if (this.options.onlyPrLabels !== '') {
+        return this.options.onlyPrLabels;
+      }
+    } else {
+      if (this.options.onlyIssueLabels !== '') {
+        return this.options.onlyIssueLabels;
+      }
+    }
+
+    return this.options.onlyLabels;
   }
 
   private async _removeStaleLabel(

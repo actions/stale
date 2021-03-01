@@ -19,6 +19,8 @@ export interface IIssuesProcessorOptions {
   closePrLabel: string;
   exemptPrLabels: string;
   onlyLabels: string;
+  onlyIssueLabels: string;
+  onlyPrLabels: string;
   operationsPerRun: number;
   removeStaleWhenUpdated: boolean;
   debugOnly: boolean;

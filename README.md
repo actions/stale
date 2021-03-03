@@ -275,7 +275,7 @@ jobs:
 To see the debug output from this action, you must set the secret `ACTIONS_STEP_DEBUG` to `true` in your repository.  
 There is a lot of logs so this can be very helpful!
 
-**Statistics:**
+**Statistics:**  
 If the logs are enabled, you can also enable the statistics log which will be visible at the end of the logs once all issues were processed.  
 This is very helpful to have a quick understanding of the whole stale workflow.  
 Set `enable-statistics` to `true` in your workflow configuration file.

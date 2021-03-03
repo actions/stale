@@ -32,7 +32,7 @@ Every argument is optional.
 | `operations-per-run`          | Maximum number of operations per run (GitHub API CRUD related).<br>_Defaults to **30**_.                                                    |
 | `remove-stale-when-updated`   | Remove stale label from issue/PR on updates or comments.<br>_Defaults to **true**_.                                                         |
 | `debug-only`                  | Dry-run on action.<br>_Defaults to **false**_.                                                                                              |
-| `ascending`                   | Order to get issues/PR.<br>_Defaults to **false**_.                                                                                         |
+| `ascending`                   | Order to get issues/PR (true is ascending, false is descending).<br>_Defaults to **false**_.                                                |
 | `skip-stale-issue-message`    | Skip adding stale message on stale issue.<br>_Defaults to **false**_.                                                                       |
 | `skip-stale-pr-message`       | Skip adding stale message on stale PR.<br>_Defaults to **false**_.                                                                          |
 | `start-date`                  | The date used to skip the stale action on issue/PR created before it (ISO 8601 or RFC 2822).                                                |

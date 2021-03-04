@@ -1,4 +1,4 @@
 export interface IUser {
-  type: string;
+  type: string | 'User';
   login: string;
 }

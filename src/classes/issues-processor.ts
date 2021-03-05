@@ -222,9 +222,6 @@ export class IssuesProcessor {
       const milestones: Milestones = new Milestones(this.options, issue);
 
       if (milestones.shouldExemptMilestones()) {
-        issueLogger.info(
-          `Skipping $$type because it has an exempted milestone`
-        );
         continue; // don't process exempt milestones
       }
 

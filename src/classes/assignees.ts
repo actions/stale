@@ -42,7 +42,7 @@ export class Assignees {
 
     if (exemptAssignees.length === 0) {
       this._issueLogger.info(
-        `No option was specified to skip the stale process for this $$type`
+        `No assignee option was specified to skip the stale process for this $$type`
       );
       this._logSkip();
 
@@ -52,7 +52,7 @@ export class Assignees {
     this._issueLogger.info(
       `Found ${exemptAssignees.length} assignee${
         exemptAssignees.length > 1 ? 's' : ''
-      } on this $$type`
+      } that can exempt stale on this $$type`
     );
 
     const hasExemptAssignee: boolean = exemptAssignees.some(

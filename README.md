@@ -215,7 +215,7 @@ jobs:
           exempt-all-pr-milestones: true
 ```
 
-Avoid stale for specific labels:
+Check stale for specific labels:
 
 ```yaml
 name: 'Close stale issues and PRs'

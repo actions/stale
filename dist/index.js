@@ -191,6 +191,25 @@ exports.Issue = Issue;
 
 "use strict";
 
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -202,6 +221,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.IssuesProcessor = void 0;
+const core = __importStar(__nccwpck_require__(2186));
 const github_1 = __nccwpck_require__(5438);
 const get_humanized_date_1 = __nccwpck_require__(965);
 const is_date_more_recent_than_1 = __nccwpck_require__(1473);
@@ -317,7 +337,7 @@ class IssuesProcessor {
                     // Expecting that GitHub will always set a creation date on the issues and PRs
                     // But you never know!
                     if (!is_valid_date_1.isValidDate(createdAt)) {
-                        throw new Error(`Invalid issue field: "created_at". Expected a valid date`);
+                        core.setFailed(new Error(`Invalid issue field: "created_at". Expected a valid date`));
                     }
                     issueLogger.info(`$$type created the ${get_humanized_date_1.getHumanizedDate(createdAt)} (${issue.created_at})`);
                     if (!is_date_more_recent_than_1.isDateMoreRecentThan(createdAt, startDate)) {
@@ -1449,14 +1469,14 @@ function _getAndValidateArgs() {
         'operations-per-run'
     ]) {
         if (isNaN(parseInt(core.getInput(numberInput)))) {
-            throw Error(`input ${numberInput} did not parse to a valid integer`);
+            core.setFailed(new Error(`Option "${numberInput}" did not parse to a valid integer`));
         }
     }
     for (const optionalDateInput of ['start-date']) {
         // Ignore empty dates because it is considered as the right type for a default value (so a valid one)
         if (core.getInput(optionalDateInput) !== '') {
             if (!is_valid_date_1.isValidDate(new Date(core.getInput(optionalDateInput)))) {
-                throw new Error(`input ${optionalDateInput} did not parse to a valid date`);
+                core.setFailed(new Error(`Option "${optionalDateInput}" did not parse to a valid date`));
             }
         }
     }

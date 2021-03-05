@@ -1,3 +1,4 @@
+import * as core from '@actions/core';
 import {context, getOctokit} from '@actions/github';
 import {GitHub} from '@actions/github/lib/utils';
 import {GetResponseTypeFromEndpointMethod} from '@octokit/types';
@@ -160,8 +161,10 @@ export class IssuesProcessor {
         // Expecting that GitHub will always set a creation date on the issues and PRs
         // But you never know!
         if (!isValidDate(createdAt)) {
-          throw new Error(
-            `Invalid issue field: "created_at". Expected a valid date`
+          core.setFailed(
+            new Error(
+              `Invalid issue field: "created_at". Expected a valid date`
+            )
           );
         }
 

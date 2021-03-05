@@ -1,3 +1,4 @@
+import chalk from 'chalk';
 import {IIssuesProcessorOptions} from '../interfaces/issues-processor-options';
 import {Logger} from './loggers/logger';
 
@@ -116,7 +117,8 @@ export class Statistics {
   }
 
   logStats(): Statistics {
-    this._logger.info('Statistics');
+    this._logger.info(chalk.yellow('---'));
+    this._logger.info(chalk.yellow.bold('Statistics:'));
     this._logProcessedIssuesCount();
     this._logStaleIssuesCount();
     this._logUndoStaleIssuesCount();
@@ -131,7 +133,7 @@ export class Statistics {
     this._logFetchedIssuesEventsCount();
     this._logFetchedIssuesCommentsCount();
     this._logFetchedPullRequestsCount();
-    this._logger.info('---');
+    this._logger.info(chalk.yellow('---'));
 
     return this;
   }
@@ -194,7 +196,7 @@ export class Statistics {
 
   private _logCount(name: Readonly<string>, count: Readonly<number>): void {
     if (count > 0) {
-      this._logger.info(`${name}: ${count}`);
+      this._logger.info(`${name}:`, chalk.cyan(count));
     }
   }
 }

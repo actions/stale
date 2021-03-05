@@ -2,6 +2,8 @@ import * as core from '@actions/core';
 import {context, getOctokit} from '@actions/github';
 import {GitHub} from '@actions/github/lib/utils';
 import {GetResponseTypeFromEndpointMethod} from '@octokit/types';
+import chalk from 'chalk';
+import {Option} from '../enums/option';
 import {getHumanizedDate} from '../functions/dates/get-humanized-date';
 import {isDateMoreRecentThan} from '../functions/dates/is-date-more-recent-than';
 import {isValidDate} from '../functions/dates/is-valid-date';
@@ -48,9 +50,14 @@ export class IssuesProcessor {
     this._operationsLeft = this.options.operationsPerRun;
     this.client = getOctokit(this.options.repoToken);
 
+    this._logger.info(chalk.yellow('Starting the stale action process...'));
+
     if (this.options.debugOnly) {
+      this._logger.warning(chalk.yellowBright('Executing in debug mode!'));
       this._logger.warning(
-        'Executing in debug mode. Debug output will be written but no issues will be processed.'
+        chalk.yellowBright(
+          'The debug output will be written but no issues/PRs will be processed.'
+        )
       );
     }
 
@@ -59,15 +66,22 @@ export class IssuesProcessor {
     }
   }
 
-  async processIssues(page = 1): Promise<number> {
+  async processIssues(page: Readonly<number> = 1): Promise<number> {
+    this._logger.info(
+      chalk.yellow(
+        `Processing the batch of issues ${chalk.cyan(`#${page}`)}...`
+      )
+    );
+
     // get the next batch of issues
     const issues: Issue[] = await this.getIssues(page);
     const actor: string = await this.getActor();
 
     if (issues.length <= 0) {
-      this._logger.info('---');
       this._statistics?.setOperationsLeft(this._operationsLeft).logStats();
-      this._logger.info('No more issues found to process. Exiting.');
+      this._logger.info(
+        chalk.green('No more issues found to process. Exiting...')
+      );
 
       return this._operationsLeft;
     }
@@ -268,10 +282,24 @@ export class IssuesProcessor {
 
     if (this._operationsLeft <= 0) {
       this._logger.warning(
-        'Reached max number of operations to process. Exiting.'
+        chalk.yellowBright('No more operations left! Exiting...')
       );
+      this._logger.warning(
+        chalk.yellowBright(
+          `If you think that not enough issues were processed you could try to increase the quantity related to the ${this._logger.createOptionLink(
+            Option.OperationsPerRun
+          )} option which is currently set to ${chalk.cyan(
+            this.options.operationsPerRun
+          )}`
+        )
+      );
+
       return 0;
     }
+
+    this._logger.info(
+      chalk.green(`Batch ${chalk.cyan(`#${page}`)} processed.`)
+    );
 
     // do the next batch
     return this.processIssues(page + 1);
@@ -646,7 +674,6 @@ export class IssuesProcessor {
     issueLogger.info(`Removing label "${label}" from $$type`);
     this.removedLabelIssues.push(issue);
 
-    // @todo remove the debug only to be able to test the code below
     if (this.options.debugOnly) {
       return;
     }

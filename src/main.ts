@@ -7,8 +7,7 @@ async function _run(): Promise<void> {
   try {
     const args = _getAndValidateArgs();
 
-    const processor: IssuesProcessor = new IssuesProcessor(args);
-    await processor.processIssues();
+    await new IssuesProcessor(args).processIssues();
   } catch (error) {
     core.error(error);
     core.setFailed(error.message);

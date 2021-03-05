@@ -117,7 +117,6 @@ export class Statistics {
   }
 
   logStats(): Statistics {
-    this._logger.info(chalk.yellow('---'));
     this._logger.info(chalk.yellow.bold('Statistics:'));
     this._logProcessedIssuesCount();
     this._logStaleIssuesCount();
@@ -133,7 +132,6 @@ export class Statistics {
     this._logFetchedIssuesEventsCount();
     this._logFetchedIssuesCommentsCount();
     this._logFetchedPullRequestsCount();
-    this._logger.info(chalk.yellow('---'));
 
     return this;
   }

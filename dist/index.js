@@ -272,14 +272,16 @@ class IssuesProcessor {
     processIssues(page = 1) {
         var _a, _b;
         return __awaiter(this, void 0, void 0, function* () {
-            this._logger.info(chalk_1.default.yellow(`Processing the batch of issues ${chalk_1.default.cyan(`#${page}`)}...`));
             // get the next batch of issues
             const issues = yield this.getIssues(page);
             const actor = yield this.getActor();
             if (issues.length <= 0) {
-                (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.setOperationsLeft(this._operationsLeft).logStats();
                 this._logger.info(chalk_1.default.green('No more issues found to process. Exiting...'));
+                (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.setOperationsLeft(this._operationsLeft).logStats();
                 return this._operationsLeft;
+            }
+            else {
+                this._logger.info(chalk_1.default.yellow(`Processing the batch of issues ${chalk_1.default.cyan(`#${page}`)}...`));
             }
             for (const issue of issues.values()) {
                 const issueLogger = new issue_logger_1.IssueLogger(issue);
@@ -1150,7 +1152,6 @@ class Statistics {
         return this;
     }
     logStats() {
-        this._logger.info(chalk_1.default.yellow('---'));
         this._logger.info(chalk_1.default.yellow.bold('Statistics:'));
         this._logProcessedIssuesCount();
         this._logStaleIssuesCount();
@@ -1166,7 +1167,6 @@ class Statistics {
         this._logFetchedIssuesEventsCount();
         this._logFetchedIssuesCommentsCount();
         this._logFetchedPullRequestsCount();
-        this._logger.info(chalk_1.default.yellow('---'));
         return this;
     }
     _logProcessedIssuesCount() {

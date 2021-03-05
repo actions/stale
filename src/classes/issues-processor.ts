@@ -67,23 +67,23 @@ export class IssuesProcessor {
   }
 
   async processIssues(page: Readonly<number> = 1): Promise<number> {
-    this._logger.info(
-      chalk.yellow(
-        `Processing the batch of issues ${chalk.cyan(`#${page}`)}...`
-      )
-    );
-
     // get the next batch of issues
     const issues: Issue[] = await this.getIssues(page);
     const actor: string = await this.getActor();
 
     if (issues.length <= 0) {
-      this._statistics?.setOperationsLeft(this._operationsLeft).logStats();
       this._logger.info(
         chalk.green('No more issues found to process. Exiting...')
       );
+      this._statistics?.setOperationsLeft(this._operationsLeft).logStats();
 
       return this._operationsLeft;
+    } else {
+      this._logger.info(
+        chalk.yellow(
+          `Processing the batch of issues ${chalk.cyan(`#${page}`)}...`
+        )
+      );
     }
 
     for (const issue of issues.values()) {

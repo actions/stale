@@ -1,5 +1,6 @@
 import * as github from '@actions/github';
 import {Issue} from '../src/classes/issue';
+import {IComment} from '../src/interfaces/comment';
 import {IIssuesProcessorOptions} from '../src/interfaces/issues-processor-options';
 import {IssuesProcessorMock} from './classes/issues-processor-mock';
 import {DefaultProcessorOptions} from './constants/default-processor-options';
@@ -2105,7 +2106,7 @@ test('processing a previously closed issue with a close label will remove the cl
     staleIssueLabel: 'stale'
   };
   const now: Date = new Date();
-  const oneWeekAgo: Date = new Date(now.getDate() - 7);
+  const oneWeekAgo: Date = new Date(now.setDate(now.getDate() - 7));
   const TestIssueList: Issue[] = [
     generateIssue(
       opts,
@@ -2141,7 +2142,7 @@ test('processing a closed issue with a close label will not remove the close lab
     staleIssueLabel: 'stale'
   };
   const now: Date = new Date();
-  const oneWeekAgo: Date = new Date(now.getDate() - 7);
+  const oneWeekAgo: Date = new Date(now.setDate(now.getDate() - 7));
   const TestIssueList: Issue[] = [
     generateIssue(
       opts,
@@ -2177,7 +2178,7 @@ test('processing a locked issue with a close label will not remove the close lab
     staleIssueLabel: 'stale'
   };
   const now: Date = new Date();
-  const oneWeekAgo: Date = new Date(now.getDate() - 7);
+  const oneWeekAgo: Date = new Date(now.setDate(now.getDate() - 7));
   const TestIssueList: Issue[] = [
     generateIssue(
       opts,
@@ -2203,4 +2204,87 @@ test('processing a locked issue with a close label will not remove the close lab
   await processor.processIssues(1);
 
   expect(processor.removedLabelIssues).toHaveLength(0);
+});
+
+test('processing an issue stale since less than the daysBeforeStale with a stale label created after daysBeforeClose should close the issue', async () => {
+  expect.assertions(3);
+  const opts: IIssuesProcessorOptions = {
+    ...DefaultProcessorOptions,
+    staleIssueLabel: 'stale-label',
+    daysBeforeStale: 30,
+    daysBeforeClose: 7,
+    closeIssueMessage: 'close message',
+    removeStaleWhenUpdated: false
+  };
+  const now: Date = new Date();
+  const updatedAt: Date = new Date(now.setDate(now.getDate() - 9));
+  const labelCreatedAt: Date = new Date(now.setDate(now.getDate() - 17));
+  const TestIssueList: Issue[] = [
+    generateIssue(
+      opts,
+      1,
+      'A real issue example; see https://github.com/actions/stale/issues/351',
+      updatedAt.toDateString(),
+      new Date(2021, 0, 16).toDateString(),
+      false,
+      ['stale-label'], // This was the problem for the user BTW, the issue was re-opened without removing the previous stale label
+      false,
+      false
+    )
+  ];
+  const processor = new IssuesProcessorMock(
+    opts,
+    async () => 'abot',
+    async p => (p === 1 ? TestIssueList : []),
+    async (): Promise<IComment[]> => Promise.resolve([]),
+    async () => labelCreatedAt.toDateString()
+  );
+
+  // process our fake issue list
+  await processor.processIssues(1);
+
+  expect(processor.removedLabelIssues).toHaveLength(0);
+  expect(processor.deletedBranchIssues).toHaveLength(0);
+  expect(processor.closedIssues).toHaveLength(1); // Expected at 0 by the user
+});
+
+test('processing an issue stale since less than the daysBeforeStale without a stale label should close the issue', async () => {
+  expect.assertions(3);
+  const opts: IIssuesProcessorOptions = {
+    ...DefaultProcessorOptions,
+    staleIssueLabel: 'stale-label',
+    daysBeforeStale: 30,
+    daysBeforeClose: 7,
+    closeIssueMessage: 'close message',
+    removeStaleWhenUpdated: false
+  };
+  const now: Date = new Date();
+  const updatedAt: Date = new Date(now.setDate(now.getDate() - 9));
+  const TestIssueList: Issue[] = [
+    generateIssue(
+      opts,
+      1,
+      'A real issue example; see https://github.com/actions/stale/issues/351 but without the old stale label from the previous close',
+      updatedAt.toDateString(),
+      new Date(2021, 0, 16).toDateString(),
+      false,
+      [],
+      false,
+      false
+    )
+  ];
+  const processor = new IssuesProcessorMock(
+    opts,
+    async () => 'abot',
+    async p => (p === 1 ? TestIssueList : []),
+    async (): Promise<IComment[]> => Promise.resolve([]),
+    async () => new Date().toDateString()
+  );
+
+  // process our fake issue list
+  await processor.processIssues(1);
+
+  expect(processor.removedLabelIssues).toHaveLength(0);
+  expect(processor.deletedBranchIssues).toHaveLength(0);
+  expect(processor.closedIssues).toHaveLength(0);
 });

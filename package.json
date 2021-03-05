@@ -15,7 +15,7 @@
     "pack": "ncc build",
     "test": "jest",
     "test:only-errors": "jest --reporters jest-silent-reporter --silent",
-    "test:watch": "jest --watch --notify --expandf",
+    "test:watch": "jest --watch --notify --expand",
     "all": "npm run build && npm run format && npm run lint && npm run pack && npm test"
   },
   "repository": {

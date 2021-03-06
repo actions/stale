@@ -8,7 +8,6 @@ import {getHumanizedDate} from '../functions/dates/get-humanized-date';
 import {isDateMoreRecentThan} from '../functions/dates/is-date-more-recent-than';
 import {isValidDate} from '../functions/dates/is-valid-date';
 import {isLabeled} from '../functions/is-labeled';
-import {isPullRequest} from '../functions/is-pull-request';
 import {shouldMarkWhenStale} from '../functions/should-mark-when-stale';
 import {wordsToList} from '../functions/words-to-list';
 import {IComment} from '../interfaces/comment';
@@ -224,6 +223,7 @@ export class IssuesProcessor {
       }
 
       const anyOfLabels: string[] = wordsToList(this.options.anyOfLabels);
+
       if (
         anyOfLabels.length &&
         !anyOfLabels.some((label: Readonly<string>): boolean =>
@@ -424,8 +424,7 @@ export class IssuesProcessor {
     );
     issueLogger.info(`$$type has been commented on: ${issueHasComments}`);
 
-    const isPr: boolean = isPullRequest(issue);
-    const daysBeforeClose: number = isPr
+    const daysBeforeClose: number = issue.isPullRequest
       ? this._getDaysBeforePrClose()
       : this._getDaysBeforeIssueClose();
 

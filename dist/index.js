@@ -232,7 +232,6 @@ const get_humanized_date_1 = __nccwpck_require__(965);
 const is_date_more_recent_than_1 = __nccwpck_require__(1473);
 const is_valid_date_1 = __nccwpck_require__(891);
 const is_labeled_1 = __nccwpck_require__(6792);
-const is_pull_request_1 = __nccwpck_require__(5400);
 const should_mark_when_stale_1 = __nccwpck_require__(2461);
 const words_to_list_1 = __nccwpck_require__(1883);
 const assignees_1 = __nccwpck_require__(7236);
@@ -506,8 +505,7 @@ class IssuesProcessor {
             issueLogger.info(`$$type marked stale on: ${markedStaleOn}`);
             const issueHasComments = yield this._hasCommentsSince(issue, markedStaleOn, actor);
             issueLogger.info(`$$type has been commented on: ${issueHasComments}`);
-            const isPr = is_pull_request_1.isPullRequest(issue);
-            const daysBeforeClose = isPr
+            const daysBeforeClose = issue.isPullRequest
                 ? this._getDaysBeforePrClose()
                 : this._getDaysBeforeIssueClose();
             issueLogger.info(`Days before $$type close: ${daysBeforeClose}`);

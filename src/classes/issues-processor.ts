@@ -349,7 +349,6 @@ export class IssuesProcessor {
 
     try {
       this._operationsLeft -= 1;
-      this._statistics?.incrementFetchedIssuesCount();
       const issueResult: OctoKitIssueList = await this.client.issues.listForRepo(
         {
           owner: context.repo.owner,
@@ -360,6 +359,7 @@ export class IssuesProcessor {
           page
         }
       );
+      this._statistics?.incrementFetchedIssuesCount(issueResult.data.length);
 
       return issueResult.data.map(
         (issue: Readonly<IIssue>): Issue => new Issue(this.options, issue)

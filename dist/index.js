@@ -455,7 +455,6 @@ class IssuesProcessor {
             const endpoint = this.client.issues.listForRepo;
             try {
                 this._operationsLeft -= 1;
-                (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.incrementFetchedIssuesCount();
                 const issueResult = yield this.client.issues.listForRepo({
                     owner: github_1.context.repo.owner,
                     repo: github_1.context.repo.repo,
@@ -464,6 +463,7 @@ class IssuesProcessor {
                     direction: this.options.ascending ? 'asc' : 'desc',
                     page
                 });
+                (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.incrementFetchedIssuesCount(issueResult.data.length);
                 return issueResult.data.map((issue) => new issue_1.Issue(this.options, issue));
             }
             catch (error) {

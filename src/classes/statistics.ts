@@ -12,6 +12,7 @@ export class Statistics {
   private _processedIssuesCount = 0;
   private _processedPullRequestsCount = 0;
   private _staleIssuesCount = 0;
+  private _stalePullRequestsCount = 0;
   private _undoStaleIssuesCount = 0;
   private _operationsCount = 0;
   private _closedIssuesCount = 0;
@@ -25,35 +26,26 @@ export class Statistics {
   private _fetchedIssuesCommentsCount = 0;
   private _fetchedPullRequestsCount = 0;
 
-  incrementProcessedItemCount(
+  incrementProcessedItemsCount(
     issue: Readonly<Issue>,
     increment: Readonly<number> = 1
   ): Statistics {
     if (issue.isPullRequest) {
-      return this.incrementProcessedIssuesCount(increment);
+      return this._incrementProcessedPullRequestsCount(increment);
     }
 
-    return this.incrementProcessedPullRequestsCount(increment);
+    return this._incrementProcessedIssuesCount(increment);
   }
 
-  incrementProcessedIssuesCount(increment: Readonly<number> = 1): Statistics {
-    this._processedIssuesCount += increment;
-
-    return this;
-  }
-
-  incrementProcessedPullRequestsCount(
+  incrementStaleItemsCount(
+    issue: Readonly<Issue>,
     increment: Readonly<number> = 1
   ): Statistics {
-    this._processedPullRequestsCount += increment;
+    if (issue.isPullRequest) {
+      return this._incrementStalePullRequestsCount(increment);
+    }
 
-    return this;
-  }
-
-  incrementStaleIssuesCount(increment: Readonly<number> = 1): Statistics {
-    this._staleIssuesCount += increment;
-
-    return this;
+    return this._incrementStaleIssuesCount(increment);
   }
 
   incrementUndoStaleIssuesCount(increment: Readonly<number> = 1): Statistics {
@@ -139,7 +131,7 @@ export class Statistics {
   logStats(): Statistics {
     this._logger.info(chalk.yellow.bold('Statistics:'));
     this._logProcessedIssuesAndPullRequestsCount();
-    this._logStaleIssuesCount();
+    this._logStaleIssuesAndPullRequestsCount();
     this._logUndoStaleIssuesCount();
     this._logOperationsCount();
     this._logClosedIssuesCount();
@@ -152,6 +144,38 @@ export class Statistics {
     this._logFetchedIssuesEventsCount();
     this._logFetchedIssuesCommentsCount();
     this._logFetchedPullRequestsCount();
+
+    return this;
+  }
+
+  private _incrementProcessedIssuesCount(
+    increment: Readonly<number> = 1
+  ): Statistics {
+    this._processedIssuesCount += increment;
+
+    return this;
+  }
+
+  private _incrementProcessedPullRequestsCount(
+    increment: Readonly<number> = 1
+  ): Statistics {
+    this._processedPullRequestsCount += increment;
+
+    return this;
+  }
+
+  private _incrementStaleIssuesCount(
+    increment: Readonly<number> = 1
+  ): Statistics {
+    this._staleIssuesCount += increment;
+
+    return this;
+  }
+
+  private _incrementStalePullRequestsCount(
+    increment: Readonly<number> = 1
+  ): Statistics {
+    this._stalePullRequestsCount += increment;
 
     return this;
   }
@@ -169,8 +193,17 @@ export class Statistics {
     ]);
   }
 
-  private _logStaleIssuesCount(): void {
-    this._logCount('New stale issues/PRs', this._staleIssuesCount);
+  private _logStaleIssuesAndPullRequestsCount(): void {
+    this._logGroup('New stale items', [
+      {
+        name: 'New stale issues',
+        count: this._staleIssuesCount
+      },
+      {
+        name: 'New stale PRs',
+        count: this._stalePullRequestsCount
+      }
+    ]);
   }
 
   private _logUndoStaleIssuesCount(): void {

@@ -94,7 +94,7 @@ export class IssuesProcessor {
 
     for (const issue of issues.values()) {
       const issueLogger: IssueLogger = new IssueLogger(issue);
-      this._statistics?.incrementProcessedItemCount(issue, 1);
+      this._statistics?.incrementProcessedItemsCount(issue, 1);
 
       issueLogger.info(`Found this $$type last updated ${issue.updated_at}`);
 
@@ -541,7 +541,7 @@ export class IssuesProcessor {
     try {
       this._operations.consumeOperation();
       this._statistics?.incrementAddedLabel();
-      this._statistics?.incrementStaleIssuesCount();
+      this._statistics?.incrementStaleItemsCount(issue, 1);
       await this.client.issues.addLabels({
         owner: context.repo.owner,
         repo: context.repo.repo,

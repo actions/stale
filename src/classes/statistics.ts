@@ -14,6 +14,7 @@ export class Statistics {
   private _staleIssuesCount = 0;
   private _stalePullRequestsCount = 0;
   private _undoStaleIssuesCount = 0;
+  private _undoStalePullRequestsCount = 0;
   private _operationsCount = 0;
   private _closedIssuesCount = 0;
   private _deletedLabelsCount = 0;
@@ -48,10 +49,15 @@ export class Statistics {
     return this._incrementStaleIssuesCount(increment);
   }
 
-  incrementUndoStaleIssuesCount(increment: Readonly<number> = 1): Statistics {
-    this._undoStaleIssuesCount += increment;
+  incrementUndoStaleItemsCount(
+    issue: Readonly<Issue>,
+    increment: Readonly<number> = 1
+  ): Statistics {
+    if (issue.isPullRequest) {
+      return this._incrementUndoStalePullRequestsCount(increment);
+    }
 
-    return this;
+    return this._incrementUndoStaleIssuesCount(increment);
   }
 
   setOperationsLeft(operationsLeft: Readonly<number>): Statistics {
@@ -132,7 +138,7 @@ export class Statistics {
     this._logger.info(chalk.yellow.bold('Statistics:'));
     this._logProcessedIssuesAndPullRequestsCount();
     this._logStaleIssuesAndPullRequestsCount();
-    this._logUndoStaleIssuesCount();
+    this._logUndoStaleIssuesAndPullRequestsCount();
     this._logOperationsCount();
     this._logClosedIssuesCount();
     this._logDeletedLabelsCount();
@@ -180,6 +186,22 @@ export class Statistics {
     return this;
   }
 
+  private _incrementUndoStaleIssuesCount(
+    increment: Readonly<number> = 1
+  ): Statistics {
+    this._undoStaleIssuesCount += increment;
+
+    return this;
+  }
+
+  private _incrementUndoStalePullRequestsCount(
+    increment: Readonly<number> = 1
+  ): Statistics {
+    this._undoStalePullRequestsCount += increment;
+
+    return this;
+  }
+
   private _logProcessedIssuesAndPullRequestsCount(): void {
     this._logGroup('Processed items', [
       {
@@ -206,8 +228,17 @@ export class Statistics {
     ]);
   }
 
-  private _logUndoStaleIssuesCount(): void {
-    this._logCount('No longer stale issues/PRs', this._undoStaleIssuesCount);
+  private _logUndoStaleIssuesAndPullRequestsCount(): void {
+    this._logGroup('No longer stale items', [
+      {
+        name: 'No longer stale issues',
+        count: this._undoStaleIssuesCount
+      },
+      {
+        name: 'No longer stale PRs',
+        count: this._undoStalePullRequestsCount
+      }
+    ]);
   }
 
   private _logOperationsCount(): void {

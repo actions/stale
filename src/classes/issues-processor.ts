@@ -747,7 +747,7 @@ export class IssuesProcessor {
     );
 
     await this._removeLabel(issue, staleLabel);
-    this._statistics?.incrementUndoStaleIssuesCount();
+    this._statistics?.incrementUndoStaleItemsCount(issue, 1);
   }
 
   private async _removeCloseLabel(

@@ -280,7 +280,7 @@ class IssuesProcessor {
                 return this._operations.getOperationsLeftCount();
             }
             else {
-                this._logger.info(chalk_1.default.yellow(`Processing the batch of issues ${chalk_1.default.cyan(`#${page}`)}...`));
+                this._logger.info(chalk_1.default.yellow(`Processing the batch of issues ${chalk_1.default.cyan(`#${page}`)} containing ${chalk_1.default.cyan(issues.length)} issue${issues.length > 1 ? 's' : ''}...`));
             }
             for (const issue of issues.values()) {
                 const issueLogger = new issue_logger_1.IssueLogger(issue);

@@ -83,7 +83,11 @@ export class IssuesProcessor {
     } else {
       this._logger.info(
         chalk.yellow(
-          `Processing the batch of issues ${chalk.cyan(`#${page}`)}...`
+          `Processing the batch of issues ${chalk.cyan(
+            `#${page}`
+          )} containing ${chalk.cyan(issues.length)} issue${
+            issues.length > 1 ? 's' : ''
+          }...`
         )
       );
     }

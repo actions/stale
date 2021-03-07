@@ -94,7 +94,7 @@ export class IssuesProcessor {
 
     for (const issue of issues.values()) {
       const issueLogger: IssueLogger = new IssueLogger(issue);
-      this._statistics?.incrementProcessedIssuesCount();
+      this._statistics?.incrementProcessedItemCount(issue, 1);
 
       issueLogger.info(`Found this $$type last updated ${issue.updated_at}`);
 

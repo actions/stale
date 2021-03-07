@@ -1,9 +1,16 @@
 import chalk from 'chalk';
+import {Issue} from './issue';
 import {Logger} from './loggers/logger';
+
+interface IGroupValue {
+  name: string;
+  count: number;
+}
 
 export class Statistics {
   private readonly _logger: Logger = new Logger();
   private _processedIssuesCount = 0;
+  private _processedPullRequestsCount = 0;
   private _staleIssuesCount = 0;
   private _undoStaleIssuesCount = 0;
   private _operationsCount = 0;
@@ -18,8 +25,27 @@ export class Statistics {
   private _fetchedIssuesCommentsCount = 0;
   private _fetchedPullRequestsCount = 0;
 
+  incrementProcessedItemCount(
+    issue: Readonly<Issue>,
+    increment: Readonly<number> = 1
+  ): Statistics {
+    if (issue.isPullRequest) {
+      return this.incrementProcessedIssuesCount(increment);
+    }
+
+    return this.incrementProcessedPullRequestsCount(increment);
+  }
+
   incrementProcessedIssuesCount(increment: Readonly<number> = 1): Statistics {
     this._processedIssuesCount += increment;
+
+    return this;
+  }
+
+  incrementProcessedPullRequestsCount(
+    increment: Readonly<number> = 1
+  ): Statistics {
+    this._processedPullRequestsCount += increment;
 
     return this;
   }
@@ -112,7 +138,7 @@ export class Statistics {
 
   logStats(): Statistics {
     this._logger.info(chalk.yellow.bold('Statistics:'));
-    this._logProcessedIssuesCount();
+    this._logProcessedIssuesAndPullRequestsCount();
     this._logStaleIssuesCount();
     this._logUndoStaleIssuesCount();
     this._logOperationsCount();
@@ -130,8 +156,17 @@ export class Statistics {
     return this;
   }
 
-  private _logProcessedIssuesCount(): void {
-    this._logCount('Processed issues/PRs', this._processedIssuesCount);
+  private _logProcessedIssuesAndPullRequestsCount(): void {
+    this._logGroup('Processed items', [
+      {
+        name: 'Processed issues',
+        count: this._processedIssuesCount
+      },
+      {
+        name: 'Processed PRs',
+        count: this._processedPullRequestsCount
+      }
+    ]);
   }
 
   private _logStaleIssuesCount(): void {
@@ -190,5 +225,77 @@ export class Statistics {
     if (count > 0) {
       this._logger.info(`${name}:`, chalk.cyan(count));
     }
+  }
+
+  private _logGroup(groupName: Readonly<string>, values: IGroupValue[]): void {
+    if (this._isGroupValuesPartiallySet(values)) {
+      this._logCount(groupName, this._getGroupValuesTotalCount(values));
+
+      this._logGroupValues(values);
+    } else {
+      // Only one value will be display
+      for (const value of values) {
+        this._logCount(value.name, value.count);
+      }
+    }
+  }
+
+  /**
+   * @private
+   * @description
+   * If there is a least two elements with a valid count then it's partially set
+   * Useful to defined if we should display the values as a group or not
+   *
+   * @param {IGroupValue[]} values The list of group values to check
+   */
+  private _isGroupValuesPartiallySet(values: IGroupValue[]): boolean {
+    return (
+      values.map((value: Readonly<IGroupValue>): boolean => {
+        return value.count > 0;
+      }).length >= 2
+    );
+  }
+
+  private _getGroupValuesTotalCount(values: IGroupValue[]): number {
+    return values.reduce(
+      (count: Readonly<number>, value: Readonly<IGroupValue>): number => {
+        return count + value.count;
+      },
+      0
+    );
+  }
+
+  private _getAllGroupValuesSet(values: IGroupValue[]): IGroupValue[] {
+    return values.filter((value: Readonly<IGroupValue>): boolean => {
+      return value.count > 0;
+    });
+  }
+
+  private _logGroupValues(values: IGroupValue[]): void {
+    const onlyValuesSet: IGroupValue[] = this._getAllGroupValuesSet(values);
+    const longestValue: number = this._getLongestGroupValue(onlyValuesSet);
+
+    for (const [index, value] of onlyValuesSet.entries()) {
+      const prefix = index === onlyValuesSet.length - 1 ? '└──' : '├──';
+
+      this._logCount(
+        `${prefix} ${value.name.padEnd(longestValue, ' ')}`,
+        value.count
+      );
+    }
+  }
+
+  private _getLongestGroupValue(values: IGroupValue[]): number {
+    return values.reduce(
+      (
+        longestValue: Readonly<number>,
+        value: Readonly<IGroupValue>
+      ): number => {
+        return value.name.length > longestValue
+          ? value.name.length
+          : longestValue;
+      },
+      0
+    );
   }
 }

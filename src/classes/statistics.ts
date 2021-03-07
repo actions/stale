@@ -1,10 +1,8 @@
 import chalk from 'chalk';
-import {IIssuesProcessorOptions} from '../interfaces/issues-processor-options';
 import {Logger} from './loggers/logger';
 
 export class Statistics {
   private readonly _logger: Logger = new Logger();
-  private readonly _options: IIssuesProcessorOptions;
   private _processedIssuesCount = 0;
   private _staleIssuesCount = 0;
   private _undoStaleIssuesCount = 0;
@@ -19,10 +17,6 @@ export class Statistics {
   private _fetchedIssuesEventsCount = 0;
   private _fetchedIssuesCommentsCount = 0;
   private _fetchedPullRequestsCount = 0;
-
-  constructor(options: IIssuesProcessorOptions) {
-    this._options = options;
-  }
 
   incrementProcessedIssuesCount(increment: Readonly<number> = 1): Statistics {
     this._processedIssuesCount += increment;
@@ -43,7 +37,7 @@ export class Statistics {
   }
 
   setOperationsLeft(operationsLeft: Readonly<number>): Statistics {
-    this._operationsCount = this._options.operationsPerRun - operationsLeft;
+    this._operationsCount = operationsLeft;
 
     return this;
   }

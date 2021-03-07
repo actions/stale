@@ -239,6 +239,7 @@ const issue_1 = __nccwpck_require__(4783);
 const issue_logger_1 = __nccwpck_require__(2984);
 const logger_1 = __nccwpck_require__(6212);
 const milestones_1 = __nccwpck_require__(4601);
+const operations_1 = __nccwpck_require__(7957);
 const statistics_1 = __nccwpck_require__(3334);
 /***
  * Handle processing of issues for staleness/closure.
@@ -246,21 +247,20 @@ const statistics_1 = __nccwpck_require__(3334);
 class IssuesProcessor {
     constructor(options) {
         this._logger = new logger_1.Logger();
-        this._operationsLeft = 0;
         this.staleIssues = [];
         this.closedIssues = [];
         this.deletedBranchIssues = [];
         this.removedLabelIssues = [];
         this.options = options;
-        this._operationsLeft = this.options.operationsPerRun;
         this.client = github_1.getOctokit(this.options.repoToken);
+        this._operations = new operations_1.Operations(this.options);
         this._logger.info(chalk_1.default.yellow('Starting the stale action process...'));
         if (this.options.debugOnly) {
             this._logger.warning(chalk_1.default.yellowBright('Executing in debug mode!'));
             this._logger.warning(chalk_1.default.yellowBright('The debug output will be written but no issues/PRs will be processed.'));
         }
         if (this.options.enableStatistics) {
-            this._statistics = new statistics_1.Statistics(this.options);
+            this._statistics = new statistics_1.Statistics();
         }
     }
     static _updatedSince(timestamp, num_days) {
@@ -276,8 +276,8 @@ class IssuesProcessor {
             const actor = yield this.getActor();
             if (issues.length <= 0) {
                 this._logger.info(chalk_1.default.green('No more issues found to process. Exiting...'));
-                (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.setOperationsLeft(this._operationsLeft).logStats();
-                return this._operationsLeft;
+                (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.setOperationsLeft(this._operations.getUnconsumedOperationsCount()).logStats();
+                return this._operations.getOperationsLeftCount();
             }
             else {
                 this._logger.info(chalk_1.default.yellow(`Processing the batch of issues ${chalk_1.default.cyan(`#${page}`)}...`));
@@ -401,7 +401,7 @@ class IssuesProcessor {
                     yield this._processStaleIssue(issue, staleLabel, actor, closeMessage, closeLabel);
                 }
             }
-            if (this._operationsLeft <= 0) {
+            if (this._operations.hasOperationsLeft()) {
                 this._logger.warning(chalk_1.default.yellowBright('No more operations left! Exiting...'));
                 this._logger.warning(chalk_1.default.yellowBright(`If you think that not enough issues were processed you could try to increase the quantity related to the ${this._logger.createOptionLink(option_1.Option.OperationsPerRun)} option which is currently set to ${chalk_1.default.cyan(this.options.operationsPerRun)}`));
                 return 0;
@@ -417,7 +417,7 @@ class IssuesProcessor {
         return __awaiter(this, void 0, void 0, function* () {
             // find any comments since date on the given issue
             try {
-                this._operationsLeft -= 1;
+                this._operations.consumeOperation();
                 (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.incrementFetchedIssuesCommentsCount();
                 const comments = yield this.client.issues.listComments({
                     owner: github_1.context.repo.owner,
@@ -438,7 +438,7 @@ class IssuesProcessor {
         return __awaiter(this, void 0, void 0, function* () {
             let actor;
             try {
-                this._operationsLeft -= 1;
+                this._operations.consumeOperation();
                 actor = yield this.client.users.getAuthenticated();
             }
             catch (error) {
@@ -454,7 +454,7 @@ class IssuesProcessor {
             // generate type for response
             const endpoint = this.client.issues.listForRepo;
             try {
-                this._operationsLeft -= 1;
+                this._operations.consumeOperation();
                 const issueResult = yield this.client.issues.listForRepo({
                     owner: github_1.context.repo.owner,
                     repo: github_1.context.repo.repo,
@@ -479,7 +479,7 @@ class IssuesProcessor {
         return __awaiter(this, void 0, void 0, function* () {
             const issueLogger = new issue_logger_1.IssueLogger(issue);
             issueLogger.info(`Checking for label on $$type`);
-            this._operationsLeft -= 1;
+            this._operations.consumeOperation();
             (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.incrementFetchedIssuesEventsCount();
             const options = this.client.issues.listEvents.endpoint.merge({
                 owner: github_1.context.repo.owner,
@@ -565,7 +565,7 @@ class IssuesProcessor {
             }
             if (!skipMessage) {
                 try {
-                    this._operationsLeft -= 1;
+                    this._operations.consumeOperation();
                     (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.incrementAddedComment();
                     yield this.client.issues.createComment({
                         owner: github_1.context.repo.owner,
@@ -579,7 +579,7 @@ class IssuesProcessor {
                 }
             }
             try {
-                this._operationsLeft -= 1;
+                this._operations.consumeOperation();
                 (_b = this._statistics) === null || _b === void 0 ? void 0 : _b.incrementAddedLabel();
                 (_c = this._statistics) === null || _c === void 0 ? void 0 : _c.incrementStaleIssuesCount();
                 yield this.client.issues.addLabels({
@@ -606,7 +606,7 @@ class IssuesProcessor {
             }
             if (closeMessage) {
                 try {
-                    this._operationsLeft -= 1;
+                    this._operations.consumeOperation();
                     (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.incrementAddedComment();
                     yield this.client.issues.createComment({
                         owner: github_1.context.repo.owner,
@@ -621,7 +621,7 @@ class IssuesProcessor {
             }
             if (closeLabel) {
                 try {
-                    this._operationsLeft -= 1;
+                    this._operations.consumeOperation();
                     (_b = this._statistics) === null || _b === void 0 ? void 0 : _b.incrementAddedLabel();
                     yield this.client.issues.addLabels({
                         owner: github_1.context.repo.owner,
@@ -635,7 +635,7 @@ class IssuesProcessor {
                 }
             }
             try {
-                this._operationsLeft -= 1;
+                this._operations.consumeOperation();
                 (_c = this._statistics) === null || _c === void 0 ? void 0 : _c.incrementClosedIssuesCount();
                 yield this.client.issues.update({
                     owner: github_1.context.repo.owner,
@@ -657,7 +657,7 @@ class IssuesProcessor {
                 return;
             }
             try {
-                this._operationsLeft -= 1;
+                this._operations.consumeOperation();
                 (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.incrementFetchedPullRequestsCount();
                 const pullRequest = yield this.client.pulls.get({
                     owner: github_1.context.repo.owner,
@@ -688,7 +688,7 @@ class IssuesProcessor {
             const branch = pullRequest.head.ref;
             issueLogger.info(`Deleting branch ${branch} from closed $$type`);
             try {
-                this._operationsLeft -= 1;
+                this._operations.consumeOperation();
                 (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.incrementDeletedBranchesCount();
                 yield this.client.git.deleteRef({
                     owner: github_1.context.repo.owner,
@@ -712,7 +712,7 @@ class IssuesProcessor {
                 return;
             }
             try {
-                this._operationsLeft -= 1;
+                this._operations.consumeOperation();
                 (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.incrementDeletedLabelsCount();
                 yield this.client.issues.removeLabel({
                     owner: github_1.context.repo.owner,
@@ -1062,6 +1062,40 @@ exports.Milestones = Milestones;
 
 /***/ }),
 
+/***/ 7957:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.Operations = void 0;
+class Operations {
+    constructor(options) {
+        this._options = options;
+        this._operationsLeft = this._options.operationsPerRun;
+    }
+    consumeOperation() {
+        return this.consumeOperations(1);
+    }
+    consumeOperations(quantity) {
+        this._operationsLeft -= quantity;
+        return this;
+    }
+    getUnconsumedOperationsCount() {
+        return this._options.operationsPerRun - this._operationsLeft;
+    }
+    hasOperationsLeft() {
+        return this._operationsLeft <= 0;
+    }
+    getOperationsLeftCount() {
+        return this._operationsLeft;
+    }
+}
+exports.Operations = Operations;
+
+
+/***/ }),
+
 /***/ 3334:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
@@ -1075,7 +1109,7 @@ exports.Statistics = void 0;
 const chalk_1 = __importDefault(__nccwpck_require__(8818));
 const logger_1 = __nccwpck_require__(6212);
 class Statistics {
-    constructor(options) {
+    constructor() {
         this._logger = new logger_1.Logger();
         this._processedIssuesCount = 0;
         this._staleIssuesCount = 0;
@@ -1091,7 +1125,6 @@ class Statistics {
         this._fetchedIssuesEventsCount = 0;
         this._fetchedIssuesCommentsCount = 0;
         this._fetchedPullRequestsCount = 0;
-        this._options = options;
     }
     incrementProcessedIssuesCount(increment = 1) {
         this._processedIssuesCount += increment;
@@ -1106,7 +1139,7 @@ class Statistics {
         return this;
     }
     setOperationsLeft(operationsLeft) {
-        this._operationsCount = this._options.operationsPerRun - operationsLeft;
+        this._operationsCount = operationsLeft;
         return this;
     }
     incrementClosedIssuesCount(increment = 1) {

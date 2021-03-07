@@ -139,7 +139,6 @@ export class Statistics {
     this._logProcessedIssuesAndPullRequestsCount();
     this._logStaleIssuesAndPullRequestsCount();
     this._logUndoStaleIssuesAndPullRequestsCount();
-    this._logOperationsCount();
     this._logClosedIssuesCount();
     this._logDeletedLabelsCount();
     this._logDeletedCloseLabelsCount();
@@ -150,6 +149,7 @@ export class Statistics {
     this._logFetchedIssuesEventsCount();
     this._logFetchedIssuesCommentsCount();
     this._logFetchedPullRequestsCount();
+    this._logOperationsCount();
 
     return this;
   }
@@ -241,10 +241,6 @@ export class Statistics {
     ]);
   }
 
-  private _logOperationsCount(): void {
-    this._logCount('Operations performed', this._operationsCount);
-  }
-
   private _logClosedIssuesCount(): void {
     this._logCount('Closed issues', this._closedIssuesCount);
   }
@@ -283,6 +279,10 @@ export class Statistics {
 
   private _logFetchedPullRequestsCount(): void {
     this._logCount('Fetched pull requests', this._fetchedPullRequestsCount);
+  }
+
+  private _logOperationsCount(): void {
+    this._logCount('Operations performed', this._operationsCount);
   }
 
   private _logCount(name: Readonly<string>, count: Readonly<number>): void {

@@ -1,4 +1,5 @@
 import {Issue} from '../../src/classes/issue';
+import {IssueFactory} from '../../src/classes/issue-factory';
 import {IAssignee} from '../../src/interfaces/assignee';
 import {IIssuesProcessorOptions} from '../../src/interfaces/issues-processor-options';
 import {IsoDateString} from '../../src/types/iso-date-string';
@@ -16,7 +17,7 @@ export function generateIssue(
   milestone: string | undefined = undefined,
   assignees: string[] = []
 ): Issue {
-  return new Issue(options, {
+  return new IssueFactory(options).createIssue({
     number: id,
     labels: labels.map(l => {
       return {name: l};

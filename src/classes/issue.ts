@@ -8,7 +8,7 @@ import {IMilestone} from '../interfaces/milestone';
 import {IsoDateString} from '../types/iso-date-string';
 
 export class Issue implements IIssue {
-  private readonly _options: IIssuesProcessorOptions;
+  protected readonly _options: IIssuesProcessorOptions;
   readonly title: string;
   readonly number: number;
   created_at: IsoDateString;
@@ -45,16 +45,62 @@ export class Issue implements IIssue {
   }
 
   get staleLabel(): string {
-    return this._getStaleLabel();
+    return this._options.staleIssueLabel;
+  }
+
+  get staleMessage(): string {
+    return this._options.staleIssueMessage;
+  }
+
+  get closeLabel(): string {
+    return this._options.closeIssueLabel;
+  }
+
+  get closeMessage(): string {
+    return this._options.closeIssueMessage;
+  }
+
+  get skipMessage(): boolean {
+    return this._options.skipStaleIssueMessage;
+  }
+
+  get daysBeforeStale(): number {
+    return isNaN(this._options.daysBeforeIssueStale)
+      ? this._options.daysBeforeStale
+      : this._options.daysBeforeIssueStale;
+  }
+
+  get daysBeforeClose(): number {
+    return isNaN(this._options.daysBeforeIssueClose)
+      ? this._options.daysBeforeClose
+      : this._options.daysBeforeIssueClose;
   }
 
   get hasAssignees(): boolean {
     return this.assignees.length > 0;
   }
 
-  private _getStaleLabel(): string {
-    return this.isPullRequest
-      ? this._options.stalePrLabel
-      : this._options.staleIssueLabel;
+  get shouldBeStale(): boolean {
+    return !this._updatedSince(this.updated_at, this.daysBeforeStale);
+  }
+
+  get hasUpdate(): boolean {
+    return this._updatedSince(this.updated_at, this.daysBeforeClose);
+  }
+
+  hasAllLabels(labels: Readonly<string[]>): boolean {
+    return labels.every(label => isLabeled(this, label));
+  }
+
+  hasAnyLabels(labels: string[]): boolean {
+    return labels.some(label => isLabeled(this, label));
+  }
+
+  private _updatedSince(timestamp: string, num_days: number): boolean {
+    const daysInMillis = 1000 * 60 * 60 * 24 * num_days;
+    const millisSinceLastUpdated =
+      new Date().getTime() - new Date(timestamp).getTime();
+
+    return millisSinceLastUpdated <= daysInMillis;
   }
 }

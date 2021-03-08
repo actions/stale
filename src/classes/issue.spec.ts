@@ -4,6 +4,7 @@ import {IIssuesProcessorOptions} from '../interfaces/issues-processor-options';
 import {ILabel} from '../interfaces/label';
 import {IMilestone} from '../interfaces/milestone';
 import {Issue} from './issue';
+import {IssueFactory} from './issue-factory';
 
 describe('Issue', (): void => {
   let issue: Issue;
@@ -77,7 +78,7 @@ describe('Issue', (): void => {
         }
       ]
     };
-    issue = new Issue(optionsInterface, issueInterface);
+    issue = new IssueFactory(optionsInterface).createIssue(issueInterface);
   });
 
   describe('constructor()', (): void => {
@@ -155,7 +156,7 @@ describe('Issue', (): void => {
       beforeEach((): void => {
         issueInterface.pull_request = undefined;
         issueInterface.labels = [];
-        issue = new Issue(optionsInterface, issueInterface);
+        issue = new IssueFactory(optionsInterface).createIssue(issueInterface);
       });
 
       it('should set the isStale to false', (): void => {
@@ -173,7 +174,7 @@ describe('Issue', (): void => {
             name: 'dummy-stale-issue-label'
           } as ILabel
         ];
-        issue = new Issue(optionsInterface, issueInterface);
+        issue = new IssueFactory(optionsInterface).createIssue(issueInterface);
       });
 
       it('should set the isStale to true', (): void => {
@@ -188,7 +189,7 @@ describe('Issue', (): void => {
     describe('when the issue pull_request is not set', (): void => {
       beforeEach((): void => {
         issueInterface.pull_request = undefined;
-        issue = new Issue(optionsInterface, issueInterface);
+        issue = new IssueFactory(optionsInterface).createIssue(issueInterface);
       });
 
       it('should return false', (): void => {
@@ -203,7 +204,7 @@ describe('Issue', (): void => {
     describe('when the issue pull_request is set', (): void => {
       beforeEach((): void => {
         issueInterface.pull_request = {};
-        issue = new Issue(optionsInterface, issueInterface);
+        issue = new IssueFactory(optionsInterface).createIssue(issueInterface);
       });
 
       it('should return true', (): void => {
@@ -220,7 +221,7 @@ describe('Issue', (): void => {
     describe('when the issue is not a pull request', (): void => {
       beforeEach((): void => {
         issueInterface.pull_request = undefined;
-        issue = new Issue(optionsInterface, issueInterface);
+        issue = new IssueFactory(optionsInterface).createIssue(issueInterface);
       });
 
       it('should return the issue stale label', (): void => {
@@ -235,7 +236,7 @@ describe('Issue', (): void => {
     describe('when the given issue is a pull request', (): void => {
       beforeEach((): void => {
         issueInterface.pull_request = {};
-        issue = new Issue(optionsInterface, issueInterface);
+        issue = new IssueFactory(optionsInterface).createIssue(issueInterface);
       });
 
       it('should return the pull request stale label', (): void => {
@@ -252,7 +253,7 @@ describe('Issue', (): void => {
     describe('when the issue has no assignee', (): void => {
       beforeEach((): void => {
         issueInterface.assignees = [];
-        issue = new Issue(optionsInterface, issueInterface);
+        issue = new IssueFactory(optionsInterface).createIssue(issueInterface);
       });
 
       it('should return false', (): void => {
@@ -271,7 +272,7 @@ describe('Issue', (): void => {
             login: 'dummy-login'
           }
         ];
-        issue = new Issue(optionsInterface, issueInterface);
+        issue = new IssueFactory(optionsInterface).createIssue(issueInterface);
       });
 
       it('should return true', (): void => {

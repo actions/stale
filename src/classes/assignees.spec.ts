@@ -4,6 +4,7 @@ import {IIssue} from '../interfaces/issue';
 import {IIssuesProcessorOptions} from '../interfaces/issues-processor-options';
 import {Issue} from './issue';
 import {Assignees} from './assignees';
+import {IssueFactory} from './issue-factory';
 
 describe('Assignees', (): void => {
   let assignees: Assignees;
@@ -39,7 +40,9 @@ describe('Assignees', (): void => {
 
             it('should return false', (): void => {
               expect.assertions(1);
-              issue = new Issue(optionsInterface, issueInterface);
+              issue = new IssueFactory(optionsInterface).createIssue(
+                issueInterface
+              );
               assignees = new Assignees(optionsInterface, issue);
 
               const result = assignees.shouldExemptAssignees();
@@ -59,7 +62,10 @@ describe('Assignees', (): void => {
 
             it('should return false', (): void => {
               expect.assertions(1);
-              issue = new Issue(optionsInterface, issueInterface);
+              issue = new IssueFactory(optionsInterface).createIssue(
+                issueInterface
+              );
+
               assignees = new Assignees(optionsInterface, issue);
 
               const result = assignees.shouldExemptAssignees();
@@ -82,7 +88,9 @@ describe('Assignees', (): void => {
 
             it('should return false', (): void => {
               expect.assertions(1);
-              issue = new Issue(optionsInterface, issueInterface);
+              issue = new IssueFactory(optionsInterface).createIssue(
+                issueInterface
+              );
               assignees = new Assignees(optionsInterface, issue);
 
               const result = assignees.shouldExemptAssignees();
@@ -102,7 +110,9 @@ describe('Assignees', (): void => {
 
             it('should return false', (): void => {
               expect.assertions(1);
-              issue = new Issue(optionsInterface, issueInterface);
+              issue = new IssueFactory(optionsInterface).createIssue(
+                issueInterface
+              );
               assignees = new Assignees(optionsInterface, issue);
 
               const result = assignees.shouldExemptAssignees();
@@ -122,7 +132,9 @@ describe('Assignees', (): void => {
 
             it('should return true', (): void => {
               expect.assertions(1);
-              issue = new Issue(optionsInterface, issueInterface);
+              issue = new IssueFactory(optionsInterface).createIssue(
+                issueInterface
+              );
               assignees = new Assignees(optionsInterface, issue);
 
               const result = assignees.shouldExemptAssignees();
@@ -150,7 +162,9 @@ describe('Assignees', (): void => {
 
             it('should return false', (): void => {
               expect.assertions(1);
-              issue = new Issue(optionsInterface, issueInterface);
+              issue = new IssueFactory(optionsInterface).createIssue(
+                issueInterface
+              );
               assignees = new Assignees(optionsInterface, issue);
 
               const result = assignees.shouldExemptAssignees();
@@ -170,7 +184,9 @@ describe('Assignees', (): void => {
 
             it('should return false', (): void => {
               expect.assertions(1);
-              issue = new Issue(optionsInterface, issueInterface);
+              issue = new IssueFactory(optionsInterface).createIssue(
+                issueInterface
+              );
               assignees = new Assignees(optionsInterface, issue);
 
               const result = assignees.shouldExemptAssignees();
@@ -190,7 +206,9 @@ describe('Assignees', (): void => {
 
             it('should return true', (): void => {
               expect.assertions(1);
-              issue = new Issue(optionsInterface, issueInterface);
+              issue = new IssueFactory(optionsInterface).createIssue(
+                issueInterface
+              );
               assignees = new Assignees(optionsInterface, issue);
 
               const result = assignees.shouldExemptAssignees();
@@ -213,7 +231,9 @@ describe('Assignees', (): void => {
 
             it('should return false', (): void => {
               expect.assertions(1);
-              issue = new Issue(optionsInterface, issueInterface);
+              issue = new IssueFactory(optionsInterface).createIssue(
+                issueInterface
+              );
               assignees = new Assignees(optionsInterface, issue);
 
               const result = assignees.shouldExemptAssignees();
@@ -233,7 +253,9 @@ describe('Assignees', (): void => {
 
             it('should return false', (): void => {
               expect.assertions(1);
-              issue = new Issue(optionsInterface, issueInterface);
+              issue = new IssueFactory(optionsInterface).createIssue(
+                issueInterface
+              );
               assignees = new Assignees(optionsInterface, issue);
 
               const result = assignees.shouldExemptAssignees();
@@ -253,7 +275,9 @@ describe('Assignees', (): void => {
 
             it('should return true', (): void => {
               expect.assertions(1);
-              issue = new Issue(optionsInterface, issueInterface);
+              issue = new IssueFactory(optionsInterface).createIssue(
+                issueInterface
+              );
               assignees = new Assignees(optionsInterface, issue);
 
               const result = assignees.shouldExemptAssignees();
@@ -273,7 +297,9 @@ describe('Assignees', (): void => {
 
             it('should return false', (): void => {
               expect.assertions(1);
-              issue = new Issue(optionsInterface, issueInterface);
+              issue = new IssueFactory(optionsInterface).createIssue(
+                issueInterface
+              );
               assignees = new Assignees(optionsInterface, issue);
 
               const result = assignees.shouldExemptAssignees();
@@ -293,7 +319,9 @@ describe('Assignees', (): void => {
 
             it('should return false', (): void => {
               expect.assertions(1);
-              issue = new Issue(optionsInterface, issueInterface);
+              issue = new IssueFactory(optionsInterface).createIssue(
+                issueInterface
+              );
               assignees = new Assignees(optionsInterface, issue);
 
               const result = assignees.shouldExemptAssignees();
@@ -327,7 +355,9 @@ describe('Assignees', (): void => {
 
             it('should return false', (): void => {
               expect.assertions(1);
-              issue = new Issue(optionsInterface, issueInterface);
+              issue = new IssueFactory(optionsInterface).createIssue(
+                issueInterface
+              );
               assignees = new Assignees(optionsInterface, issue);
 
               const result = assignees.shouldExemptAssignees();
@@ -347,7 +377,9 @@ describe('Assignees', (): void => {
 
             it('should return false', (): void => {
               expect.assertions(1);
-              issue = new Issue(optionsInterface, issueInterface);
+              issue = new IssueFactory(optionsInterface).createIssue(
+                issueInterface
+              );
               assignees = new Assignees(optionsInterface, issue);
 
               const result = assignees.shouldExemptAssignees();
@@ -369,7 +401,9 @@ describe('Assignees', (): void => {
 
             it('should return false', (): void => {
               expect.assertions(1);
-              issue = new Issue(optionsInterface, issueInterface);
+              issue = new IssueFactory(optionsInterface).createIssue(
+                issueInterface
+              );
               assignees = new Assignees(optionsInterface, issue);
 
               const result = assignees.shouldExemptAssignees();
@@ -389,7 +423,9 @@ describe('Assignees', (): void => {
 
             it('should return false', (): void => {
               expect.assertions(1);
-              issue = new Issue(optionsInterface, issueInterface);
+              issue = new IssueFactory(optionsInterface).createIssue(
+                issueInterface
+              );
               assignees = new Assignees(optionsInterface, issue);
 
               const result = assignees.shouldExemptAssignees();
@@ -409,7 +445,9 @@ describe('Assignees', (): void => {
 
             it('should return true', (): void => {
               expect.assertions(1);
-              issue = new Issue(optionsInterface, issueInterface);
+              issue = new IssueFactory(optionsInterface).createIssue(
+                issueInterface
+              );
               assignees = new Assignees(optionsInterface, issue);
 
               const result = assignees.shouldExemptAssignees();
@@ -437,7 +475,9 @@ describe('Assignees', (): void => {
 
             it('should return false', (): void => {
               expect.assertions(1);
-              issue = new Issue(optionsInterface, issueInterface);
+              issue = new IssueFactory(optionsInterface).createIssue(
+                issueInterface
+              );
               assignees = new Assignees(optionsInterface, issue);
 
               const result = assignees.shouldExemptAssignees();
@@ -457,7 +497,9 @@ describe('Assignees', (): void => {
 
             it('should return false', (): void => {
               expect.assertions(1);
-              issue = new Issue(optionsInterface, issueInterface);
+              issue = new IssueFactory(optionsInterface).createIssue(
+                issueInterface
+              );
               assignees = new Assignees(optionsInterface, issue);
 
               const result = assignees.shouldExemptAssignees();
@@ -477,7 +519,9 @@ describe('Assignees', (): void => {
 
             it('should return true', (): void => {
               expect.assertions(1);
-              issue = new Issue(optionsInterface, issueInterface);
+              issue = new IssueFactory(optionsInterface).createIssue(
+                issueInterface
+              );
               assignees = new Assignees(optionsInterface, issue);
 
               const result = assignees.shouldExemptAssignees();
@@ -499,7 +543,9 @@ describe('Assignees', (): void => {
 
             it('should return false', (): void => {
               expect.assertions(1);
-              issue = new Issue(optionsInterface, issueInterface);
+              issue = new IssueFactory(optionsInterface).createIssue(
+                issueInterface
+              );
               assignees = new Assignees(optionsInterface, issue);
 
               const result = assignees.shouldExemptAssignees();
@@ -519,7 +565,9 @@ describe('Assignees', (): void => {
 
             it('should return false', (): void => {
               expect.assertions(1);
-              issue = new Issue(optionsInterface, issueInterface);
+              issue = new IssueFactory(optionsInterface).createIssue(
+                issueInterface
+              );
               assignees = new Assignees(optionsInterface, issue);
 
               const result = assignees.shouldExemptAssignees();
@@ -539,7 +587,9 @@ describe('Assignees', (): void => {
 
             it('should return true', (): void => {
               expect.assertions(1);
-              issue = new Issue(optionsInterface, issueInterface);
+              issue = new IssueFactory(optionsInterface).createIssue(
+                issueInterface
+              );
               assignees = new Assignees(optionsInterface, issue);
 
               const result = assignees.shouldExemptAssignees();
@@ -559,7 +609,9 @@ describe('Assignees', (): void => {
 
             it('should return false', (): void => {
               expect.assertions(1);
-              issue = new Issue(optionsInterface, issueInterface);
+              issue = new IssueFactory(optionsInterface).createIssue(
+                issueInterface
+              );
               assignees = new Assignees(optionsInterface, issue);
 
               const result = assignees.shouldExemptAssignees();
@@ -579,7 +631,9 @@ describe('Assignees', (): void => {
 
             it('should return false', (): void => {
               expect.assertions(1);
-              issue = new Issue(optionsInterface, issueInterface);
+              issue = new IssueFactory(optionsInterface).createIssue(
+                issueInterface
+              );
               assignees = new Assignees(optionsInterface, issue);
 
               const result = assignees.shouldExemptAssignees();

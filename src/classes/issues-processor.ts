@@ -5,7 +5,6 @@ import {getHumanizedDate} from '../functions/dates/get-humanized-date';
 import {isDateMoreRecentThan} from '../functions/dates/is-date-more-recent-than';
 import {isValidDate} from '../functions/dates/is-valid-date';
 import {isLabeled} from '../functions/is-labeled';
-import {isPullRequest} from '../functions/is-pull-request';
 import {shouldMarkWhenStale} from '../functions/should-mark-when-stale';
 import {wordsToList} from '../functions/words-to-list';
 import {IComment} from '../interfaces/comment';
@@ -15,6 +14,7 @@ import {IIssuesProcessorOptions} from '../interfaces/issues-processor-options';
 import {IPullRequest} from '../interfaces/pull-request';
 import {Assignees} from './assignees';
 import {Issue} from './issue';
+import {IssueFactory} from './issue-factory';
 import {IssueLogger} from './loggers/issue-logger';
 import {Logger} from './loggers/logger';
 import {Milestones} from './milestones';
@@ -24,14 +24,6 @@ import {Statistics} from './statistics';
  * Handle processing of issues for staleness/closure.
  */
 export class IssuesProcessor {
-  private static _updatedSince(timestamp: string, num_days: number): boolean {
-    const daysInMillis = 1000 * 60 * 60 * 24 * num_days;
-    const millisSinceLastUpdated =
-      new Date().getTime() - new Date(timestamp).getTime();
-
-    return millisSinceLastUpdated <= daysInMillis;
-  }
-
   private readonly _logger: Logger = new Logger();
   private readonly _statistics: Statistics | undefined;
   private _operationsLeft = 0;
@@ -78,24 +70,6 @@ export class IssuesProcessor {
       issueLogger.info(`Found this $$type last updated ${issue.updated_at}`);
 
       // calculate string based messages for this issue
-      const staleMessage: string = issue.isPullRequest
-        ? this.options.stalePrMessage
-        : this.options.staleIssueMessage;
-      const closeMessage: string = issue.isPullRequest
-        ? this.options.closePrMessage
-        : this.options.closeIssueMessage;
-      const staleLabel: string = issue.isPullRequest
-        ? this.options.stalePrLabel
-        : this.options.staleIssueLabel;
-      const closeLabel: string = issue.isPullRequest
-        ? this.options.closePrLabel
-        : this.options.closeIssueLabel;
-      const skipMessage = issue.isPullRequest
-        ? this.options.skipStalePrMessage
-        : this.options.skipStaleIssueMessage;
-      const daysBeforeStale: number = issue.isPullRequest
-        ? this._getDaysBeforePrStale()
-        : this._getDaysBeforeIssueStale();
       const onlyLabels: string[] = wordsToList(this._getOnlyLabels(issue));
 
       if (onlyLabels.length > 0) {
@@ -103,11 +77,7 @@ export class IssuesProcessor {
           `The option "onlyLabels" was specified to only processed the issues and pull requests with all those labels (${onlyLabels.length})`
         );
 
-        const hasAllWhitelistedLabels: boolean = onlyLabels.every(
-          (label: Readonly<string>): boolean => {
-            return isLabeled(issue, label);
-          }
-        );
+        const hasAllWhitelistedLabels = issue.hasAllLabels(onlyLabels);
 
         if (!hasAllWhitelistedLabels) {
           issueLogger.info(
@@ -125,11 +95,13 @@ export class IssuesProcessor {
         );
       }
 
-      issueLogger.info(`Days before $$type stale: ${daysBeforeStale}`);
+      issueLogger.info(`Days before $$type stale: ${issue.daysBeforeStale}`);
 
-      const shouldMarkAsStale: boolean = shouldMarkWhenStale(daysBeforeStale);
+      const shouldMarkAsStale: boolean = shouldMarkWhenStale(
+        issue.daysBeforeStale
+      );
 
-      if (!staleMessage && shouldMarkAsStale) {
+      if (!issue.staleMessage && shouldMarkAsStale) {
         issueLogger.info(`Skipping $$type due to empty stale message`);
         continue;
       }
@@ -145,7 +117,7 @@ export class IssuesProcessor {
       }
 
       // Try to remove the close label when not close/locked issue or PR
-      await this._removeCloseLabel(issue, closeLabel);
+      await this._removeCloseLabel(issue, issue.closeLabel);
 
       if (this.options.startDate) {
         const startDate: Date = new Date(this.options.startDate);
@@ -192,14 +164,10 @@ export class IssuesProcessor {
           : this.options.exemptIssueLabels
       );
 
-      if (
-        exemptLabels.some((exemptLabel: Readonly<string>): boolean =>
-          isLabeled(issue, exemptLabel)
-        )
-      ) {
+      if (issue.hasAnyLabels(exemptLabels)) {
         if (issue.isStale) {
           issueLogger.info(`An exempt label was added after the stale label.`);
-          await this._removeStaleLabel(issue, staleLabel);
+          await this._removeStaleLabel(issue, issue.staleLabel);
         }
 
         issueLogger.info(`Skipping $$type because it has an exempt label`);
@@ -234,22 +202,21 @@ export class IssuesProcessor {
         continue; // don't process exempt assignees
       }
 
-      // should this issue be marked stale?
-      const shouldBeStale = !IssuesProcessor._updatedSince(
-        issue.updated_at,
-        daysBeforeStale
-      );
-
       // determine if this issue needs to be marked stale first
-      if (!issue.isStale && shouldBeStale && shouldMarkAsStale) {
+      if (!issue.isStale && issue.shouldBeStale && shouldMarkAsStale) {
         issueLogger.info(
           `Marking $$type stale because it was last updated on ${issue.updated_at} and it does not have a stale label`
         );
-        await this._markStale(issue, staleMessage, staleLabel, skipMessage);
+        await this._markStale(
+          issue,
+          issue.staleMessage,
+          issue.staleLabel,
+          issue.skipMessage
+        );
         issue.isStale = true; // this issue is now considered stale
       } else if (!issue.isStale) {
         issueLogger.info(
-          `Not marking as stale: shouldBeStale=${shouldBeStale}, shouldMarkAsStale=${shouldMarkAsStale}`
+          `Not marking as stale: shouldBeStale=${issue.shouldBeStale}, shouldMarkAsStale=${shouldMarkAsStale}`
         );
       }
 
@@ -258,10 +225,10 @@ export class IssuesProcessor {
         issueLogger.info(`Found a stale $$type`);
         await this._processStaleIssue(
           issue,
-          staleLabel,
+          issue.staleLabel,
           actor,
-          closeMessage,
-          closeLabel
+          issue.closeMessage,
+          issue.closeLabel
         );
       }
     }
@@ -333,8 +300,9 @@ export class IssuesProcessor {
         }
       );
 
+      const issueFactory = new IssueFactory(this.options);
       return issueResult.data.map(
-        (issue: Readonly<IIssue>): Issue => new Issue(this.options, issue)
+        (issue: Readonly<IIssue>): Issue => issueFactory.createIssue(issue)
       );
     } catch (error) {
       this._logger.error(`Get issues for repo error: ${error.message}`);
@@ -396,18 +364,9 @@ export class IssuesProcessor {
     );
     issueLogger.info(`$$type has been commented on: ${issueHasComments}`);
 
-    const isPr: boolean = isPullRequest(issue);
-    const daysBeforeClose: number = isPr
-      ? this._getDaysBeforePrClose()
-      : this._getDaysBeforeIssueClose();
+    issueLogger.info(`Days before $$type close: ${issue.daysBeforeClose}`);
 
-    issueLogger.info(`Days before $$type close: ${daysBeforeClose}`);
-
-    const issueHasUpdate: boolean = IssuesProcessor._updatedSince(
-      issue.updated_at,
-      daysBeforeClose
-    );
-    issueLogger.info(`$$type has been updated: ${issueHasUpdate}`);
+    issueLogger.info(`$$type has been updated: ${issue.hasUpdate}`);
 
     // should we un-stale this issue?
     if (this.options.removeStaleWhenUpdated && issueHasComments) {
@@ -415,11 +374,11 @@ export class IssuesProcessor {
     }
 
     // now start closing logic
-    if (daysBeforeClose < 0) {
+    if (issue.daysBeforeClose < 0) {
       return; // nothing to do because we aren't closing stale issues
     }
 
-    if (!issueHasComments && !issueHasUpdate) {
+    if (!issueHasComments && !issue.hasUpdate) {
       issueLogger.info(
         `Closing $$type because it was last updated on ${issue.updated_at}`
       );
@@ -434,7 +393,7 @@ export class IssuesProcessor {
       }
     } else {
       issueLogger.info(
-        `Stale $$type is not old enough to close yet (hasComments? ${issueHasComments}, hasUpdate? ${issueHasUpdate})`
+        `Stale $$type is not old enough to close yet (hasComments? ${issueHasComments}, hasUpdate? ${issue.hasUpdate})`
       );
     }
   }
@@ -663,30 +622,6 @@ export class IssuesProcessor {
     } catch (error) {
       issueLogger.error(`Error removing a label: ${error.message}`);
     }
-  }
-
-  private _getDaysBeforeIssueStale(): number {
-    return isNaN(this.options.daysBeforeIssueStale)
-      ? this.options.daysBeforeStale
-      : this.options.daysBeforeIssueStale;
-  }
-
-  private _getDaysBeforePrStale(): number {
-    return isNaN(this.options.daysBeforePrStale)
-      ? this.options.daysBeforeStale
-      : this.options.daysBeforePrStale;
-  }
-
-  private _getDaysBeforeIssueClose(): number {
-    return isNaN(this.options.daysBeforeIssueClose)
-      ? this.options.daysBeforeClose
-      : this.options.daysBeforeIssueClose;
-  }
-
-  private _getDaysBeforePrClose(): number {
-    return isNaN(this.options.daysBeforePrClose)
-      ? this.options.daysBeforeClose
-      : this.options.daysBeforePrClose;
   }
 
   private _getOnlyLabels(issue: Issue): string {

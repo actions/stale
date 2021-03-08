@@ -3,6 +3,7 @@ import {generateIIssue} from '../../__tests__/functions/generate-iissue';
 import {IIssue} from '../interfaces/issue';
 import {IIssuesProcessorOptions} from '../interfaces/issues-processor-options';
 import {Issue} from './issue';
+import {IssueFactory} from './issue-factory';
 import {Milestones} from './milestones';
 
 describe('Milestones', (): void => {
@@ -39,7 +40,9 @@ describe('Milestones', (): void => {
 
             it('should return false', (): void => {
               expect.assertions(1);
-              issue = new Issue(optionsInterface, issueInterface);
+              issue = new IssueFactory(optionsInterface).createIssue(
+                issueInterface
+              );
               milestones = new Milestones(optionsInterface, issue);
 
               const result = milestones.shouldExemptMilestones();
@@ -57,7 +60,9 @@ describe('Milestones', (): void => {
 
             it('should return false', (): void => {
               expect.assertions(1);
-              issue = new Issue(optionsInterface, issueInterface);
+              issue = new IssueFactory(optionsInterface).createIssue(
+                issueInterface
+              );
               milestones = new Milestones(optionsInterface, issue);
 
               const result = milestones.shouldExemptMilestones();
@@ -80,7 +85,9 @@ describe('Milestones', (): void => {
 
             it('should return false', (): void => {
               expect.assertions(1);
-              issue = new Issue(optionsInterface, issueInterface);
+              issue = new IssueFactory(optionsInterface).createIssue(
+                issueInterface
+              );
               milestones = new Milestones(optionsInterface, issue);
 
               const result = milestones.shouldExemptMilestones();
@@ -98,7 +105,9 @@ describe('Milestones', (): void => {
 
             it('should return false', (): void => {
               expect.assertions(1);
-              issue = new Issue(optionsInterface, issueInterface);
+              issue = new IssueFactory(optionsInterface).createIssue(
+                issueInterface
+              );
               milestones = new Milestones(optionsInterface, issue);
 
               const result = milestones.shouldExemptMilestones();
@@ -116,7 +125,9 @@ describe('Milestones', (): void => {
 
             it('should return true', (): void => {
               expect.assertions(1);
-              issue = new Issue(optionsInterface, issueInterface);
+              issue = new IssueFactory(optionsInterface).createIssue(
+                issueInterface
+              );
               milestones = new Milestones(optionsInterface, issue);
 
               const result = milestones.shouldExemptMilestones();
@@ -144,7 +155,9 @@ describe('Milestones', (): void => {
 
             it('should return false', (): void => {
               expect.assertions(1);
-              issue = new Issue(optionsInterface, issueInterface);
+              issue = new IssueFactory(optionsInterface).createIssue(
+                issueInterface
+              );
               milestones = new Milestones(optionsInterface, issue);
 
               const result = milestones.shouldExemptMilestones();
@@ -162,7 +175,9 @@ describe('Milestones', (): void => {
 
             it('should return false', (): void => {
               expect.assertions(1);
-              issue = new Issue(optionsInterface, issueInterface);
+              issue = new IssueFactory(optionsInterface).createIssue(
+                issueInterface
+              );
               milestones = new Milestones(optionsInterface, issue);
 
               const result = milestones.shouldExemptMilestones();
@@ -180,7 +195,9 @@ describe('Milestones', (): void => {
 
             it('should return true', (): void => {
               expect.assertions(1);
-              issue = new Issue(optionsInterface, issueInterface);
+              issue = new IssueFactory(optionsInterface).createIssue(
+                issueInterface
+              );
               milestones = new Milestones(optionsInterface, issue);
 
               const result = milestones.shouldExemptMilestones();
@@ -203,7 +220,9 @@ describe('Milestones', (): void => {
 
             it('should return false', (): void => {
               expect.assertions(1);
-              issue = new Issue(optionsInterface, issueInterface);
+              issue = new IssueFactory(optionsInterface).createIssue(
+                issueInterface
+              );
               milestones = new Milestones(optionsInterface, issue);
 
               const result = milestones.shouldExemptMilestones();
@@ -221,7 +240,9 @@ describe('Milestones', (): void => {
 
             it('should return false', (): void => {
               expect.assertions(1);
-              issue = new Issue(optionsInterface, issueInterface);
+              issue = new IssueFactory(optionsInterface).createIssue(
+                issueInterface
+              );
               milestones = new Milestones(optionsInterface, issue);
 
               const result = milestones.shouldExemptMilestones();
@@ -239,7 +260,9 @@ describe('Milestones', (): void => {
 
             it('should return true', (): void => {
               expect.assertions(1);
-              issue = new Issue(optionsInterface, issueInterface);
+              issue = new IssueFactory(optionsInterface).createIssue(
+                issueInterface
+              );
               milestones = new Milestones(optionsInterface, issue);
 
               const result = milestones.shouldExemptMilestones();
@@ -257,7 +280,9 @@ describe('Milestones', (): void => {
 
             it('should return false', (): void => {
               expect.assertions(1);
-              issue = new Issue(optionsInterface, issueInterface);
+              issue = new IssueFactory(optionsInterface).createIssue(
+                issueInterface
+              );
               milestones = new Milestones(optionsInterface, issue);
 
               const result = milestones.shouldExemptMilestones();
@@ -275,7 +300,9 @@ describe('Milestones', (): void => {
 
             it('should return false', (): void => {
               expect.assertions(1);
-              issue = new Issue(optionsInterface, issueInterface);
+              issue = new IssueFactory(optionsInterface).createIssue(
+                issueInterface
+              );
               milestones = new Milestones(optionsInterface, issue);
 
               const result = milestones.shouldExemptMilestones();
@@ -309,7 +336,9 @@ describe('Milestones', (): void => {
 
             it('should return false', (): void => {
               expect.assertions(1);
-              issue = new Issue(optionsInterface, issueInterface);
+              issue = new IssueFactory(optionsInterface).createIssue(
+                issueInterface
+              );
               milestones = new Milestones(optionsInterface, issue);
 
               const result = milestones.shouldExemptMilestones();
@@ -327,7 +356,9 @@ describe('Milestones', (): void => {
 
             it('should return false', (): void => {
               expect.assertions(1);
-              issue = new Issue(optionsInterface, issueInterface);
+              issue = new IssueFactory(optionsInterface).createIssue(
+                issueInterface
+              );
               milestones = new Milestones(optionsInterface, issue);
 
               const result = milestones.shouldExemptMilestones();
@@ -349,7 +380,9 @@ describe('Milestones', (): void => {
 
             it('should return false', (): void => {
               expect.assertions(1);
-              issue = new Issue(optionsInterface, issueInterface);
+              issue = new IssueFactory(optionsInterface).createIssue(
+                issueInterface
+              );
               milestones = new Milestones(optionsInterface, issue);
 
               const result = milestones.shouldExemptMilestones();
@@ -367,7 +400,9 @@ describe('Milestones', (): void => {
 
             it('should return false', (): void => {
               expect.assertions(1);
-              issue = new Issue(optionsInterface, issueInterface);
+              issue = new IssueFactory(optionsInterface).createIssue(
+                issueInterface
+              );
               milestones = new Milestones(optionsInterface, issue);
 
               const result = milestones.shouldExemptMilestones();
@@ -385,7 +420,9 @@ describe('Milestones', (): void => {
 
             it('should return true', (): void => {
               expect.assertions(1);
-              issue = new Issue(optionsInterface, issueInterface);
+              issue = new IssueFactory(optionsInterface).createIssue(
+                issueInterface
+              );
               milestones = new Milestones(optionsInterface, issue);
 
               const result = milestones.shouldExemptMilestones();
@@ -413,7 +450,9 @@ describe('Milestones', (): void => {
 
             it('should return false', (): void => {
               expect.assertions(1);
-              issue = new Issue(optionsInterface, issueInterface);
+              issue = new IssueFactory(optionsInterface).createIssue(
+                issueInterface
+              );
               milestones = new Milestones(optionsInterface, issue);
 
               const result = milestones.shouldExemptMilestones();
@@ -431,7 +470,9 @@ describe('Milestones', (): void => {
 
             it('should return false', (): void => {
               expect.assertions(1);
-              issue = new Issue(optionsInterface, issueInterface);
+              issue = new IssueFactory(optionsInterface).createIssue(
+                issueInterface
+              );
               milestones = new Milestones(optionsInterface, issue);
 
               const result = milestones.shouldExemptMilestones();
@@ -449,7 +490,9 @@ describe('Milestones', (): void => {
 
             it('should return true', (): void => {
               expect.assertions(1);
-              issue = new Issue(optionsInterface, issueInterface);
+              issue = new IssueFactory(optionsInterface).createIssue(
+                issueInterface
+              );
               milestones = new Milestones(optionsInterface, issue);
 
               const result = milestones.shouldExemptMilestones();
@@ -471,7 +514,9 @@ describe('Milestones', (): void => {
 
             it('should return false', (): void => {
               expect.assertions(1);
-              issue = new Issue(optionsInterface, issueInterface);
+              issue = new IssueFactory(optionsInterface).createIssue(
+                issueInterface
+              );
               milestones = new Milestones(optionsInterface, issue);
 
               const result = milestones.shouldExemptMilestones();
@@ -489,7 +534,9 @@ describe('Milestones', (): void => {
 
             it('should return false', (): void => {
               expect.assertions(1);
-              issue = new Issue(optionsInterface, issueInterface);
+              issue = new IssueFactory(optionsInterface).createIssue(
+                issueInterface
+              );
               milestones = new Milestones(optionsInterface, issue);
 
               const result = milestones.shouldExemptMilestones();
@@ -507,7 +554,9 @@ describe('Milestones', (): void => {
 
             it('should return true', (): void => {
               expect.assertions(1);
-              issue = new Issue(optionsInterface, issueInterface);
+              issue = new IssueFactory(optionsInterface).createIssue(
+                issueInterface
+              );
               milestones = new Milestones(optionsInterface, issue);
 
               const result = milestones.shouldExemptMilestones();
@@ -525,7 +574,9 @@ describe('Milestones', (): void => {
 
             it('should return false', (): void => {
               expect.assertions(1);
-              issue = new Issue(optionsInterface, issueInterface);
+              issue = new IssueFactory(optionsInterface).createIssue(
+                issueInterface
+              );
               milestones = new Milestones(optionsInterface, issue);
 
               const result = milestones.shouldExemptMilestones();
@@ -543,7 +594,9 @@ describe('Milestones', (): void => {
 
             it('should return false', (): void => {
               expect.assertions(1);
-              issue = new Issue(optionsInterface, issueInterface);
+              issue = new IssueFactory(optionsInterface).createIssue(
+                issueInterface
+              );
               milestones = new Milestones(optionsInterface, issue);
 
               const result = milestones.shouldExemptMilestones();

@@ -1,5 +1,5 @@
 import {Issue} from '../issue';
-import {ChalkLoggerDecorator} from './chalk-logger-decorator';
+import {StylingLoggerDecorator} from './styling-logger-decorator';
 import {IssueLogger} from './issue-logger';
 import {Logger} from './logger';
 
@@ -8,7 +8,7 @@ export class LoggerFactory {
    * Create generic logger with colors.
    */
   createLogger(): Logger {
-    return new ChalkLoggerDecorator(new Logger());
+    return new StylingLoggerDecorator(new Logger());
   }
 
   /**
@@ -16,6 +16,6 @@ export class LoggerFactory {
    * @param issue Issue info to be used.
    */
   createIssueLogger(issue: Issue): Logger {
-    return new ChalkLoggerDecorator(new IssueLogger(issue));
+    return new StylingLoggerDecorator(new IssueLogger(issue));
   }
 }

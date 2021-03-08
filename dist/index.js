@@ -797,44 +797,6 @@ exports.IssuesProcessor = IssuesProcessor;
 
 /***/ }),
 
-/***/ 9368:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
-
-"use strict";
-
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.ChalkLoggerDecorator = void 0;
-const chalk_1 = __importDefault(__nccwpck_require__(8818));
-const logger_1 = __nccwpck_require__(6212);
-/**
- * @description Pretiffy log messages using chalk api
- */
-class ChalkLoggerDecorator extends logger_1.Logger {
-    constructor(_logger) {
-        super();
-        this._logger = _logger;
-    }
-    warning(...message) {
-        this._logger.warning(chalk_1.default.whiteBright(...message));
-    }
-    info(...message) {
-        this._logger.info(chalk_1.default.whiteBright(...message));
-    }
-    error(...message) {
-        this._logger.error(chalk_1.default.whiteBright(...message));
-    }
-    createOptionLink(option) {
-        return chalk_1.default.magenta(this._logger.createOptionLink(option));
-    }
-}
-exports.ChalkLoggerDecorator = ChalkLoggerDecorator;
-
-
-/***/ }),
-
 /***/ 2984:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
@@ -913,15 +875,22 @@ exports.IssueLogger = IssueLogger;
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.LoggerFactory = void 0;
-const chalk_logger_decorator_1 = __nccwpck_require__(9368);
+const styling_logger_decorator_1 = __nccwpck_require__(7017);
 const issue_logger_1 = __nccwpck_require__(2984);
 const logger_1 = __nccwpck_require__(6212);
 class LoggerFactory {
+    /**
+     * Create generic logger with colors.
+     */
     createLogger() {
-        return new chalk_logger_decorator_1.ChalkLoggerDecorator(new logger_1.Logger());
+        return new styling_logger_decorator_1.StylingLoggerDecorator(new logger_1.Logger());
     }
+    /**
+     * Create issue specific logger.
+     * @param issue Issue info to be used.
+     */
     createIssueLogger(issue) {
-        return new chalk_logger_decorator_1.ChalkLoggerDecorator(new issue_logger_1.IssueLogger(issue));
+        return new styling_logger_decorator_1.StylingLoggerDecorator(new issue_logger_1.IssueLogger(issue));
     }
 }
 exports.LoggerFactory = LoggerFactory;
@@ -978,6 +947,44 @@ class Logger {
     }
 }
 exports.Logger = Logger;
+
+
+/***/ }),
+
+/***/ 7017:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.StylingLoggerDecorator = void 0;
+const chalk_1 = __importDefault(__nccwpck_require__(8818));
+const logger_1 = __nccwpck_require__(6212);
+/**
+ * @description Pretiffy log messages using chalk api
+ */
+class StylingLoggerDecorator extends logger_1.Logger {
+    constructor(_logger) {
+        super();
+        this._logger = _logger;
+    }
+    warning(...message) {
+        this._logger.warning(chalk_1.default.whiteBright(...message));
+    }
+    info(...message) {
+        this._logger.info(chalk_1.default.whiteBright(...message));
+    }
+    error(...message) {
+        this._logger.error(chalk_1.default.whiteBright(...message));
+    }
+    createOptionLink(option) {
+        return chalk_1.default.magenta(this._logger.createOptionLink(option));
+    }
+}
+exports.StylingLoggerDecorator = StylingLoggerDecorator;
 
 
 /***/ }),

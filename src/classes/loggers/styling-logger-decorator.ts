@@ -5,7 +5,7 @@ import {Logger} from './logger';
 /**
  * @description Pretiffy log messages using chalk api
  */
-export class ChalkLoggerDecorator extends Logger {
+export class StylingLoggerDecorator extends Logger {
   constructor(private readonly _logger: Logger) {
     super();
   }

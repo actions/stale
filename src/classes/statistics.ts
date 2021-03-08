@@ -1,9 +1,8 @@
-import {IIssuesProcessorOptions} from '../interfaces/issues-processor-options';
+import chalk from 'chalk';
 import {Logger} from './loggers/logger';
 
 export class Statistics {
   private readonly _logger: Logger = new Logger();
-  private readonly _options: IIssuesProcessorOptions;
   private _processedIssuesCount = 0;
   private _staleIssuesCount = 0;
   private _undoStaleIssuesCount = 0;
@@ -18,10 +17,6 @@ export class Statistics {
   private _fetchedIssuesEventsCount = 0;
   private _fetchedIssuesCommentsCount = 0;
   private _fetchedPullRequestsCount = 0;
-
-  constructor(options: IIssuesProcessorOptions) {
-    this._options = options;
-  }
 
   incrementProcessedIssuesCount(increment: Readonly<number> = 1): Statistics {
     this._processedIssuesCount += increment;
@@ -42,7 +37,7 @@ export class Statistics {
   }
 
   setOperationsLeft(operationsLeft: Readonly<number>): Statistics {
-    this._operationsCount = this._options.operationsPerRun - operationsLeft;
+    this._operationsCount = operationsLeft;
 
     return this;
   }
@@ -116,7 +111,7 @@ export class Statistics {
   }
 
   logStats(): Statistics {
-    this._logger.info('Statistics');
+    this._logger.info(chalk.yellow.bold('Statistics:'));
     this._logProcessedIssuesCount();
     this._logStaleIssuesCount();
     this._logUndoStaleIssuesCount();
@@ -131,7 +126,6 @@ export class Statistics {
     this._logFetchedIssuesEventsCount();
     this._logFetchedIssuesCommentsCount();
     this._logFetchedPullRequestsCount();
-    this._logger.info('---');
 
     return this;
   }
@@ -194,7 +188,7 @@ export class Statistics {
 
   private _logCount(name: Readonly<string>, count: Readonly<number>): void {
     if (count > 0) {
-      this._logger.info(`${name}: ${count}`);
+      this._logger.info(`${name}:`, chalk.cyan(count));
     }
   }
 }

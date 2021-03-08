@@ -32,7 +32,7 @@
   "dependencies": {
     "@actions/core": "^1.2.6",
     "@actions/github": "^4.0.0",
-    "@octokit/rest": "^18.3.3",
+    "@octokit/rest": "^18.3.4",
     "lodash.deburr": "^4.1.0",
     "semver": "^7.3.4"
   },

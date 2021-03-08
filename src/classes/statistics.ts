@@ -1,8 +1,9 @@
 import chalk from 'chalk';
 import {Logger} from './loggers/logger';
+import {LoggerFactory} from './loggers/logger-factory';
 
 export class Statistics {
-  private readonly _logger: Logger = new Logger();
+  private readonly _logger: Logger;
   private _processedIssuesCount = 0;
   private _staleIssuesCount = 0;
   private _undoStaleIssuesCount = 0;
@@ -17,6 +18,10 @@ export class Statistics {
   private _fetchedIssuesEventsCount = 0;
   private _fetchedIssuesCommentsCount = 0;
   private _fetchedPullRequestsCount = 0;
+
+  constructor(loggerFactory: LoggerFactory) {
+    this._logger = loggerFactory.createLogger();
+  }
 
   incrementProcessedIssuesCount(increment: Readonly<number> = 1): Statistics {
     this._processedIssuesCount += increment;

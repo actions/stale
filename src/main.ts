@@ -2,12 +2,13 @@ import * as core from '@actions/core';
 import {isValidDate} from './functions/dates/is-valid-date';
 import {IssuesProcessor} from './classes/issues-processor';
 import {IIssuesProcessorOptions} from './interfaces/issues-processor-options';
+import {LoggerFactory} from './classes/loggers/logger-factory';
 
 async function _run(): Promise<void> {
   try {
     const args = _getAndValidateArgs();
 
-    await new IssuesProcessor(args).processIssues();
+    await new IssuesProcessor(args, new LoggerFactory()).processIssues();
   } catch (error) {
     core.error(error);
     core.setFailed(error.message);

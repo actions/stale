@@ -3,7 +3,8 @@ import {wordsToList} from '../functions/words-to-list';
 import {IAssignee} from '../interfaces/assignee';
 import {IIssuesProcessorOptions} from '../interfaces/issues-processor-options';
 import {Issue} from './issue';
-import {IssueLogger} from './loggers/issue-logger';
+import {Logger} from './loggers/logger';
+import {LoggerFactory} from './loggers/logger-factory';
 
 type CleanAssignee = string;
 
@@ -14,12 +15,16 @@ export class Assignees {
 
   private readonly _options: IIssuesProcessorOptions;
   private readonly _issue: Issue;
-  private readonly _issueLogger: IssueLogger;
+  private readonly _issueLogger: Logger;
 
-  constructor(options: Readonly<IIssuesProcessorOptions>, issue: Issue) {
+  constructor(
+    options: Readonly<IIssuesProcessorOptions>,
+    issue: Issue,
+    loggerFactory: LoggerFactory
+  ) {
     this._options = options;
     this._issue = issue;
-    this._issueLogger = new IssueLogger(issue);
+    this._issueLogger = loggerFactory.createIssueLogger(this._issue);
   }
 
   shouldExemptAssignees(): boolean {

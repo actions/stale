@@ -2,6 +2,7 @@ import {Issue} from '../../src/classes/issue';
 import {IssuesProcessor} from '../../src/classes/issues-processor';
 import {IComment} from '../../src/interfaces/comment';
 import {IIssuesProcessorOptions} from '../../src/interfaces/issues-processor-options';
+import {NoopLoggerFactory} from './noop-logger-factory';
 
 export class IssuesProcessorMock extends IssuesProcessor {
   constructor(
@@ -17,7 +18,7 @@ export class IssuesProcessorMock extends IssuesProcessor {
       label: string
     ) => Promise<string | undefined>
   ) {
-    super(options);
+    super(options, new NoopLoggerFactory());
 
     if (getActor) {
       this.getActor = getActor;

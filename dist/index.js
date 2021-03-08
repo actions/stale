@@ -14,12 +14,11 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.Assignees = void 0;
 const lodash_deburr_1 = __importDefault(__nccwpck_require__(1601));
 const words_to_list_1 = __nccwpck_require__(1883);
-const issue_logger_1 = __nccwpck_require__(2984);
 class Assignees {
-    constructor(options, issue) {
+    constructor(options, issue, loggerFactory) {
         this._options = options;
         this._issue = issue;
-        this._issueLogger = new issue_logger_1.IssueLogger(issue);
+        this._issueLogger = loggerFactory.createIssueLogger(this._issue);
     }
     static _cleanAssignee(assignee) {
         return lodash_deburr_1.default(assignee.toLowerCase());
@@ -142,6 +141,31 @@ exports.Assignees = Assignees;
 
 /***/ }),
 
+/***/ 4828:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.IssueFactory = void 0;
+const is_pull_request_1 = __nccwpck_require__(5400);
+const issue_1 = __nccwpck_require__(4783);
+const pull_request_1 = __nccwpck_require__(7346);
+class IssueFactory {
+    constructor(options) {
+        this.options = options;
+    }
+    createIssue(issue) {
+        return is_pull_request_1.isPullRequest(issue)
+            ? new pull_request_1.PullRequest(this.options, issue)
+            : new issue_1.Issue(this.options, issue);
+    }
+}
+exports.IssueFactory = IssueFactory;
+
+
+/***/ }),
+
 /***/ 4783:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
@@ -170,15 +194,49 @@ class Issue {
         return is_pull_request_1.isPullRequest(this);
     }
     get staleLabel() {
-        return this._getStaleLabel();
+        return this._options.staleIssueLabel;
+    }
+    get staleMessage() {
+        return this._options.staleIssueMessage;
+    }
+    get closeLabel() {
+        return this._options.closeIssueLabel;
+    }
+    get closeMessage() {
+        return this._options.closeIssueMessage;
+    }
+    get skipMessage() {
+        return this._options.skipStaleIssueMessage;
+    }
+    get daysBeforeStale() {
+        return isNaN(this._options.daysBeforeIssueStale)
+            ? this._options.daysBeforeStale
+            : this._options.daysBeforeIssueStale;
+    }
+    get daysBeforeClose() {
+        return isNaN(this._options.daysBeforeIssueClose)
+            ? this._options.daysBeforeClose
+            : this._options.daysBeforeIssueClose;
     }
     get hasAssignees() {
         return this.assignees.length > 0;
     }
-    _getStaleLabel() {
-        return this.isPullRequest
-            ? this._options.stalePrLabel
-            : this._options.staleIssueLabel;
+    get shouldBeStale() {
+        return !this._updatedSince(this.updated_at, this.daysBeforeStale);
+    }
+    get hasUpdate() {
+        return this._updatedSince(this.updated_at, this.daysBeforeClose);
+    }
+    hasAllLabels(labels) {
+        return labels.every(label => is_labeled_1.isLabeled(this, label));
+    }
+    hasAnyLabels(labels) {
+        return labels.some(label => is_labeled_1.isLabeled(this, label));
+    }
+    _updatedSince(timestamp, num_days) {
+        const daysInMillis = 1000 * 60 * 60 * 24 * num_days;
+        const millisSinceLastUpdated = new Date().getTime() - new Date(timestamp).getTime();
+        return millisSinceLastUpdated <= daysInMillis;
     }
 }
 exports.Issue = Issue;
@@ -235,9 +293,7 @@ const is_labeled_1 = __nccwpck_require__(6792);
 const should_mark_when_stale_1 = __nccwpck_require__(2461);
 const words_to_list_1 = __nccwpck_require__(1883);
 const assignees_1 = __nccwpck_require__(7236);
-const issue_1 = __nccwpck_require__(4783);
-const issue_logger_1 = __nccwpck_require__(2984);
-const logger_1 = __nccwpck_require__(6212);
+const issue_factory_1 = __nccwpck_require__(4828);
 const milestones_1 = __nccwpck_require__(4601);
 const operations_1 = __nccwpck_require__(7957);
 const statistics_1 = __nccwpck_require__(3334);
@@ -245,13 +301,14 @@ const statistics_1 = __nccwpck_require__(3334);
  * Handle processing of issues for staleness/closure.
  */
 class IssuesProcessor {
-    constructor(options) {
-        this._logger = new logger_1.Logger();
+    constructor(options, loggerFactory) {
+        this.loggerFactory = loggerFactory;
         this.staleIssues = [];
         this.closedIssues = [];
         this.deletedBranchIssues = [];
         this.removedLabelIssues = [];
         this.options = options;
+        this._logger = loggerFactory.createLogger();
         this.client = github_1.getOctokit(this.options.repoToken);
         this._operations = new operations_1.Operations(this.options);
         this._logger.info(chalk_1.default.yellow('Starting the stale action process...'));
@@ -260,13 +317,8 @@ class IssuesProcessor {
             this._logger.warning(chalk_1.default.yellowBright('The debug output will be written but no issues/PRs will be processed.'));
         }
         if (this.options.enableStatistics) {
-            this._statistics = new statistics_1.Statistics();
+            this._statistics = new statistics_1.Statistics(this.loggerFactory);
         }
-    }
-    static _updatedSince(timestamp, num_days) {
-        const daysInMillis = 1000 * 60 * 60 * 24 * num_days;
-        const millisSinceLastUpdated = new Date().getTime() - new Date(timestamp).getTime();
-        return millisSinceLastUpdated <= daysInMillis;
     }
     processIssues(page = 1) {
         var _a, _b;
@@ -283,34 +335,14 @@ class IssuesProcessor {
                 this._logger.info(chalk_1.default.yellow(`Processing the batch of issues ${chalk_1.default.cyan(`#${page}`)} containing ${chalk_1.default.cyan(issues.length)} issue${issues.length > 1 ? 's' : ''}...`));
             }
             for (const issue of issues.values()) {
-                const issueLogger = new issue_logger_1.IssueLogger(issue);
+                const issueLogger = this.loggerFactory.createIssueLogger(issue);
                 (_b = this._statistics) === null || _b === void 0 ? void 0 : _b.incrementProcessedIssuesCount();
                 issueLogger.info(`Found this $$type last updated ${issue.updated_at}`);
                 // calculate string based messages for this issue
-                const staleMessage = issue.isPullRequest
-                    ? this.options.stalePrMessage
-                    : this.options.staleIssueMessage;
-                const closeMessage = issue.isPullRequest
-                    ? this.options.closePrMessage
-                    : this.options.closeIssueMessage;
-                const staleLabel = issue.isPullRequest
-                    ? this.options.stalePrLabel
-                    : this.options.staleIssueLabel;
-                const closeLabel = issue.isPullRequest
-                    ? this.options.closePrLabel
-                    : this.options.closeIssueLabel;
-                const skipMessage = issue.isPullRequest
-                    ? this.options.skipStalePrMessage
-                    : this.options.skipStaleIssueMessage;
-                const daysBeforeStale = issue.isPullRequest
-                    ? this._getDaysBeforePrStale()
-                    : this._getDaysBeforeIssueStale();
                 const onlyLabels = words_to_list_1.wordsToList(this._getOnlyLabels(issue));
                 if (onlyLabels.length > 0) {
                     issueLogger.info(`The option "onlyLabels" was specified to only processed the issues and pull requests with all those labels (${onlyLabels.length})`);
-                    const hasAllWhitelistedLabels = onlyLabels.every((label) => {
-                        return is_labeled_1.isLabeled(issue, label);
-                    });
+                    const hasAllWhitelistedLabels = issue.hasAllLabels(onlyLabels);
                     if (!hasAllWhitelistedLabels) {
                         issueLogger.info(`Skipping this $$type because it doesn't have all the required labels`);
                         continue; // Don't process issues without all of the required labels
@@ -322,9 +354,9 @@ class IssuesProcessor {
                 else {
                     issueLogger.info(`The option "onlyLabels" was not specified. Continuing the process for this $$type`);
                 }
-                issueLogger.info(`Days before $$type stale: ${daysBeforeStale}`);
-                const shouldMarkAsStale = should_mark_when_stale_1.shouldMarkWhenStale(daysBeforeStale);
-                if (!staleMessage && shouldMarkAsStale) {
+                issueLogger.info(`Days before $$type stale: ${issue.daysBeforeStale}`);
+                const shouldMarkAsStale = should_mark_when_stale_1.shouldMarkWhenStale(issue.daysBeforeStale);
+                if (!issue.staleMessage && shouldMarkAsStale) {
                     issueLogger.info(`Skipping $$type due to empty stale message`);
                     continue;
                 }
@@ -337,7 +369,7 @@ class IssuesProcessor {
                     continue; // don't process locked issues
                 }
                 // Try to remove the close label when not close/locked issue or PR
-                yield this._removeCloseLabel(issue, closeLabel);
+                yield this._removeCloseLabel(issue, issue.closeLabel);
                 if (this.options.startDate) {
                     const startDate = new Date(this.options.startDate);
                     const createdAt = new Date(issue.created_at);
@@ -362,10 +394,10 @@ class IssuesProcessor {
                 const exemptLabels = words_to_list_1.wordsToList(issue.isPullRequest
                     ? this.options.exemptPrLabels
                     : this.options.exemptIssueLabels);
-                if (exemptLabels.some((exemptLabel) => is_labeled_1.isLabeled(issue, exemptLabel))) {
+                if (issue.hasAnyLabels(exemptLabels)) {
                     if (issue.isStale) {
                         issueLogger.info(`An exempt label was added after the stale label.`);
-                        yield this._removeStaleLabel(issue, staleLabel);
+                        yield this._removeStaleLabel(issue, issue.staleLabel);
                     }
                     issueLogger.info(`Skipping $$type because it has an exempt label`);
                     continue; // don't process exempt issues
@@ -376,29 +408,27 @@ class IssuesProcessor {
                     issueLogger.info(`Skipping $$type because it does not have any of the required labels`);
                     continue; // don't process issues without any of the required labels
                 }
-                const milestones = new milestones_1.Milestones(this.options, issue);
+                const milestones = new milestones_1.Milestones(this.options, issue, this.loggerFactory);
                 if (milestones.shouldExemptMilestones()) {
                     continue; // don't process exempt milestones
                 }
-                const assignees = new assignees_1.Assignees(this.options, issue);
+                const assignees = new assignees_1.Assignees(this.options, issue, this.loggerFactory);
                 if (assignees.shouldExemptAssignees()) {
                     continue; // don't process exempt assignees
                 }
-                // should this issue be marked stale?
-                const shouldBeStale = !IssuesProcessor._updatedSince(issue.updated_at, daysBeforeStale);
                 // determine if this issue needs to be marked stale first
-                if (!issue.isStale && shouldBeStale && shouldMarkAsStale) {
+                if (!issue.isStale && issue.shouldBeStale && shouldMarkAsStale) {
                     issueLogger.info(`Marking $$type stale because it was last updated on ${issue.updated_at} and it does not have a stale label`);
-                    yield this._markStale(issue, staleMessage, staleLabel, skipMessage);
+                    yield this._markStale(issue, issue.staleMessage, issue.staleLabel, issue.skipMessage);
                     issue.isStale = true; // this issue is now considered stale
                 }
                 else if (!issue.isStale) {
-                    issueLogger.info(`Not marking as stale: shouldBeStale=${shouldBeStale}, shouldMarkAsStale=${shouldMarkAsStale}`);
+                    issueLogger.info(`Not marking as stale: shouldBeStale=${issue.shouldBeStale}, shouldMarkAsStale=${shouldMarkAsStale}`);
                 }
                 // process the issue if it was marked stale
                 if (issue.isStale) {
                     issueLogger.info(`Found a stale $$type`);
-                    yield this._processStaleIssue(issue, staleLabel, actor, closeMessage, closeLabel);
+                    yield this._processStaleIssue(issue, issue.staleLabel, actor, issue.closeMessage, issue.closeLabel);
                 }
             }
             if (this._operations.hasOperationsLeft()) {
@@ -464,7 +494,8 @@ class IssuesProcessor {
                     page
                 });
                 (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.incrementFetchedIssuesCount(issueResult.data.length);
-                return issueResult.data.map((issue) => new issue_1.Issue(this.options, issue));
+                const issueFactory = new issue_factory_1.IssueFactory(this.options);
+                return issueResult.data.map((issue) => issueFactory.createIssue(issue));
             }
             catch (error) {
                 this._logger.error(`Get issues for repo error: ${error.message}`);
@@ -477,7 +508,7 @@ class IssuesProcessor {
     getLabelCreationDate(issue, label) {
         var _a;
         return __awaiter(this, void 0, void 0, function* () {
-            const issueLogger = new issue_logger_1.IssueLogger(issue);
+            const issueLogger = this.loggerFactory.createIssueLogger(issue);
             issueLogger.info(`Checking for label on $$type`);
             this._operations.consumeOperation();
             (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.incrementFetchedIssuesEventsCount();
@@ -500,26 +531,22 @@ class IssuesProcessor {
     // handle all of the stale issue logic when we find a stale issue
     _processStaleIssue(issue, staleLabel, actor, closeMessage, closeLabel) {
         return __awaiter(this, void 0, void 0, function* () {
-            const issueLogger = new issue_logger_1.IssueLogger(issue);
+            const issueLogger = this.loggerFactory.createIssueLogger(issue);
             const markedStaleOn = (yield this.getLabelCreationDate(issue, staleLabel)) || issue.updated_at;
             issueLogger.info(`$$type marked stale on: ${markedStaleOn}`);
             const issueHasComments = yield this._hasCommentsSince(issue, markedStaleOn, actor);
             issueLogger.info(`$$type has been commented on: ${issueHasComments}`);
-            const daysBeforeClose = issue.isPullRequest
-                ? this._getDaysBeforePrClose()
-                : this._getDaysBeforeIssueClose();
-            issueLogger.info(`Days before $$type close: ${daysBeforeClose}`);
-            const issueHasUpdate = IssuesProcessor._updatedSince(issue.updated_at, daysBeforeClose);
-            issueLogger.info(`$$type has been updated: ${issueHasUpdate}`);
+            issueLogger.info(`Days before $$type close: ${issue.daysBeforeClose}`);
+            issueLogger.info(`$$type has been updated: ${issue.hasUpdate}`);
             // should we un-stale this issue?
             if (this.options.removeStaleWhenUpdated && issueHasComments) {
                 yield this._removeStaleLabel(issue, staleLabel);
             }
             // now start closing logic
-            if (daysBeforeClose < 0) {
+            if (issue.daysBeforeClose < 0) {
                 return; // nothing to do because we aren't closing stale issues
             }
-            if (!issueHasComments && !issueHasUpdate) {
+            if (!issueHasComments && !issue.hasUpdate) {
                 issueLogger.info(`Closing $$type because it was last updated on ${issue.updated_at}`);
                 yield this._closeIssue(issue, closeMessage, closeLabel);
                 if (this.options.deleteBranch && issue.pull_request) {
@@ -529,14 +556,14 @@ class IssuesProcessor {
                 }
             }
             else {
-                issueLogger.info(`Stale $$type is not old enough to close yet (hasComments? ${issueHasComments}, hasUpdate? ${issueHasUpdate})`);
+                issueLogger.info(`Stale $$type is not old enough to close yet (hasComments? ${issueHasComments}, hasUpdate? ${issue.hasUpdate})`);
             }
         });
     }
     // checks to see if a given issue is still stale (has had activity on it)
     _hasCommentsSince(issue, sinceDate, actor) {
         return __awaiter(this, void 0, void 0, function* () {
-            const issueLogger = new issue_logger_1.IssueLogger(issue);
+            const issueLogger = this.loggerFactory.createIssueLogger(issue);
             issueLogger.info(`Checking for comments on $$type since ${sinceDate}`);
             if (!sinceDate) {
                 return true;
@@ -553,7 +580,7 @@ class IssuesProcessor {
     _markStale(issue, staleMessage, staleLabel, skipMessage) {
         var _a, _b, _c;
         return __awaiter(this, void 0, void 0, function* () {
-            const issueLogger = new issue_logger_1.IssueLogger(issue);
+            const issueLogger = this.loggerFactory.createIssueLogger(issue);
             issueLogger.info(`Marking $$type as stale`);
             this.staleIssues.push(issue);
             // if the issue is being marked stale, the updated date should be changed to right now
@@ -598,7 +625,7 @@ class IssuesProcessor {
     _closeIssue(issue, closeMessage, closeLabel) {
         var _a, _b, _c;
         return __awaiter(this, void 0, void 0, function* () {
-            const issueLogger = new issue_logger_1.IssueLogger(issue);
+            const issueLogger = this.loggerFactory.createIssueLogger(issue);
             issueLogger.info(`Closing $$type for being stale`);
             this.closedIssues.push(issue);
             if (this.options.debugOnly) {
@@ -652,7 +679,7 @@ class IssuesProcessor {
     _getPullRequest(issue) {
         var _a;
         return __awaiter(this, void 0, void 0, function* () {
-            const issueLogger = new issue_logger_1.IssueLogger(issue);
+            const issueLogger = this.loggerFactory.createIssueLogger(issue);
             if (this.options.debugOnly) {
                 return;
             }
@@ -675,7 +702,7 @@ class IssuesProcessor {
     _deleteBranch(issue) {
         var _a;
         return __awaiter(this, void 0, void 0, function* () {
-            const issueLogger = new issue_logger_1.IssueLogger(issue);
+            const issueLogger = this.loggerFactory.createIssueLogger(issue);
             issueLogger.info(`Delete branch from closed $$type - ${issue.title}`);
             const pullRequest = yield this._getPullRequest(issue);
             if (!pullRequest) {
@@ -705,7 +732,7 @@ class IssuesProcessor {
     _removeLabel(issue, label) {
         var _a;
         return __awaiter(this, void 0, void 0, function* () {
-            const issueLogger = new issue_logger_1.IssueLogger(issue);
+            const issueLogger = this.loggerFactory.createIssueLogger(issue);
             issueLogger.info(`Removing label "${label}" from $$type`);
             this.removedLabelIssues.push(issue);
             if (this.options.debugOnly) {
@@ -726,26 +753,6 @@ class IssuesProcessor {
             }
         });
     }
-    _getDaysBeforeIssueStale() {
-        return isNaN(this.options.daysBeforeIssueStale)
-            ? this.options.daysBeforeStale
-            : this.options.daysBeforeIssueStale;
-    }
-    _getDaysBeforePrStale() {
-        return isNaN(this.options.daysBeforePrStale)
-            ? this.options.daysBeforeStale
-            : this.options.daysBeforePrStale;
-    }
-    _getDaysBeforeIssueClose() {
-        return isNaN(this.options.daysBeforeIssueClose)
-            ? this.options.daysBeforeClose
-            : this.options.daysBeforeIssueClose;
-    }
-    _getDaysBeforePrClose() {
-        return isNaN(this.options.daysBeforePrClose)
-            ? this.options.daysBeforeClose
-            : this.options.daysBeforePrClose;
-    }
     _getOnlyLabels(issue) {
         if (issue.isPullRequest) {
             if (this.options.onlyPrLabels !== '') {
@@ -762,7 +769,7 @@ class IssuesProcessor {
     _removeStaleLabel(issue, staleLabel) {
         var _a;
         return __awaiter(this, void 0, void 0, function* () {
-            const issueLogger = new issue_logger_1.IssueLogger(issue);
+            const issueLogger = this.loggerFactory.createIssueLogger(issue);
             issueLogger.info(`The $$type is no longer stale. Removing the stale label...`);
             yield this._removeLabel(issue, staleLabel);
             (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.incrementUndoStaleIssuesCount();
@@ -771,7 +778,7 @@ class IssuesProcessor {
     _removeCloseLabel(issue, closeLabel) {
         var _a;
         return __awaiter(this, void 0, void 0, function* () {
-            const issueLogger = new issue_logger_1.IssueLogger(issue);
+            const issueLogger = this.loggerFactory.createIssueLogger(issue);
             issueLogger.info(`The $$type is not closed nor locked. Trying to remove the close label...`);
             if (!closeLabel) {
                 issueLogger.info(`There is no close label on this $$type. Skip`);
@@ -790,7 +797,7 @@ exports.IssuesProcessor = IssuesProcessor;
 
 /***/ }),
 
-/***/ 2984:
+/***/ 9368:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
@@ -799,8 +806,42 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.IssueLogger = void 0;
+exports.ChalkLoggerDecorator = void 0;
 const chalk_1 = __importDefault(__nccwpck_require__(8818));
+const logger_1 = __nccwpck_require__(6212);
+/**
+ * @description Pretiffy log messages using chalk api
+ */
+class ChalkLoggerDecorator extends logger_1.Logger {
+    constructor(_logger) {
+        super();
+        this._logger = _logger;
+    }
+    warning(...message) {
+        this._logger.warning(chalk_1.default.whiteBright(...message));
+    }
+    info(...message) {
+        this._logger.info(chalk_1.default.whiteBright(...message));
+    }
+    error(...message) {
+        this._logger.error(chalk_1.default.whiteBright(...message));
+    }
+    createOptionLink(option) {
+        return chalk_1.default.magenta(this._logger.createOptionLink(option));
+    }
+}
+exports.ChalkLoggerDecorator = ChalkLoggerDecorator;
+
+
+/***/ }),
+
+/***/ 2984:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.IssueLogger = void 0;
 const logger_1 = __nccwpck_require__(6212);
 /**
  * @description
@@ -852,13 +893,38 @@ class IssueLogger extends logger_1.Logger {
             : this._getIssuePrefix();
     }
     _getIssuePrefix() {
-        return chalk_1.default.red(`[#${this._getIssueNumber()}]`);
+        // return chalk.red(`[#${this._getIssueNumber()}]`);
+        return `[#${this._getIssueNumber()}]`;
     }
     _getPullRequestPrefix() {
-        return chalk_1.default.blue(`[#${this._getIssueNumber()}]`);
+        // return chalk.blue(`[#${this._getIssueNumber()}]`);
+        return `[#${this._getIssueNumber()}]`;
     }
 }
 exports.IssueLogger = IssueLogger;
+
+
+/***/ }),
+
+/***/ 2775:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.LoggerFactory = void 0;
+const chalk_logger_decorator_1 = __nccwpck_require__(9368);
+const issue_logger_1 = __nccwpck_require__(2984);
+const logger_1 = __nccwpck_require__(6212);
+class LoggerFactory {
+    createLogger() {
+        return new chalk_logger_decorator_1.ChalkLoggerDecorator(new logger_1.Logger());
+    }
+    createIssueLogger(issue) {
+        return new chalk_logger_decorator_1.ChalkLoggerDecorator(new issue_logger_1.IssueLogger(issue));
+    }
+}
+exports.LoggerFactory = LoggerFactory;
 
 
 /***/ }),
@@ -893,23 +959,22 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.Logger = void 0;
 const core = __importStar(__nccwpck_require__(2186));
-const chalk_1 = __importDefault(__nccwpck_require__(8818));
 const terminal_link_1 = __importDefault(__nccwpck_require__(1898));
 class Logger {
     warning(...message) {
-        core.warning(chalk_1.default.whiteBright(...message));
+        core.warning(message.join(' '));
     }
     info(...message) {
-        core.info(chalk_1.default.whiteBright(...message));
+        core.info(message.join(' '));
     }
     error(...message) {
-        core.error(chalk_1.default.whiteBright(...message));
+        core.error(message.join(' '));
     }
     createLink(name, link) {
         return terminal_link_1.default(name, link);
     }
     createOptionLink(option) {
-        return chalk_1.default.magenta(this.createLink(option, `https://github.com/actions/stale#${option}`));
+        return this.createLink(option, `https://github.com/actions/stale#${option}`);
     }
 }
 exports.Logger = Logger;
@@ -929,12 +994,11 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.Milestones = void 0;
 const lodash_deburr_1 = __importDefault(__nccwpck_require__(1601));
 const words_to_list_1 = __nccwpck_require__(1883);
-const issue_logger_1 = __nccwpck_require__(2984);
 class Milestones {
-    constructor(options, issue) {
+    constructor(options, issue, loggerFactory) {
         this._options = options;
         this._issue = issue;
-        this._issueLogger = new issue_logger_1.IssueLogger(issue);
+        this._issueLogger = loggerFactory.createIssueLogger(this._issue);
     }
     static _cleanMilestone(milestone) {
         return lodash_deburr_1.default(milestone.toLowerCase());
@@ -1096,6 +1160,46 @@ exports.Operations = Operations;
 
 /***/ }),
 
+/***/ 7346:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.PullRequest = void 0;
+const issue_1 = __nccwpck_require__(4783);
+class PullRequest extends issue_1.Issue {
+    get staleLabel() {
+        return this._options.stalePrLabel;
+    }
+    get staleMessage() {
+        return this._options.stalePrMessage;
+    }
+    get closeLabel() {
+        return this._options.closePrLabel;
+    }
+    get closeMessage() {
+        return this._options.closePrMessage;
+    }
+    get skipMessage() {
+        return this._options.skipStalePrMessage;
+    }
+    get daysBeforeStale() {
+        return isNaN(this._options.daysBeforePrStale)
+            ? this._options.daysBeforeStale
+            : this._options.daysBeforePrStale;
+    }
+    get daysBeforeClose() {
+        return isNaN(this._options.daysBeforePrClose)
+            ? this._options.daysBeforeClose
+            : this._options.daysBeforePrClose;
+    }
+}
+exports.PullRequest = PullRequest;
+
+
+/***/ }),
+
 /***/ 3334:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
@@ -1107,10 +1211,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.Statistics = void 0;
 const chalk_1 = __importDefault(__nccwpck_require__(8818));
-const logger_1 = __nccwpck_require__(6212);
 class Statistics {
-    constructor() {
-        this._logger = new logger_1.Logger();
+    constructor(loggerFactory) {
         this._processedIssuesCount = 0;
         this._staleIssuesCount = 0;
         this._undoStaleIssuesCount = 0;
@@ -1125,6 +1227,7 @@ class Statistics {
         this._fetchedIssuesEventsCount = 0;
         this._fetchedIssuesCommentsCount = 0;
         this._fetchedPullRequestsCount = 0;
+        this._logger = loggerFactory.createLogger();
     }
     incrementProcessedIssuesCount(increment = 1) {
         this._processedIssuesCount += increment;
@@ -1511,11 +1614,12 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__nccwpck_require__(2186));
 const is_valid_date_1 = __nccwpck_require__(891);
 const issues_processor_1 = __nccwpck_require__(3292);
+const logger_factory_1 = __nccwpck_require__(2775);
 function _run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const args = _getAndValidateArgs();
-            yield new issues_processor_1.IssuesProcessor(args).processIssues();
+            yield new issues_processor_1.IssuesProcessor(args, new logger_factory_1.LoggerFactory()).processIssues();
         }
         catch (error) {
             core.error(error);

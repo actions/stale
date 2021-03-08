@@ -5,16 +5,20 @@ import {IIssuesProcessorOptions} from '../interfaces/issues-processor-options';
 import {Issue} from './issue';
 import {Assignees} from './assignees';
 import {IssueFactory} from './issue-factory';
+import {LoggerFactory} from './loggers/logger-factory';
+import {NoopLoggerFactory} from '../../__tests__/classes/noop-logger-factory';
 
 describe('Assignees', (): void => {
   let assignees: Assignees;
   let optionsInterface: IIssuesProcessorOptions;
   let issue: Issue;
   let issueInterface: IIssue;
+  let loggerFactory: LoggerFactory;
 
   beforeEach((): void => {
     optionsInterface = {...DefaultProcessorOptions};
     issueInterface = generateIIssue();
+    loggerFactory = new NoopLoggerFactory();
   });
 
   describe('shouldExemptAssignees()', (): void => {
@@ -43,7 +47,7 @@ describe('Assignees', (): void => {
               issue = new IssueFactory(optionsInterface).createIssue(
                 issueInterface
               );
-              assignees = new Assignees(optionsInterface, issue);
+              assignees = new Assignees(optionsInterface, issue, loggerFactory);
 
               const result = assignees.shouldExemptAssignees();
 
@@ -66,7 +70,7 @@ describe('Assignees', (): void => {
                 issueInterface
               );
 
-              assignees = new Assignees(optionsInterface, issue);
+              assignees = new Assignees(optionsInterface, issue, loggerFactory);
 
               const result = assignees.shouldExemptAssignees();
 
@@ -91,7 +95,7 @@ describe('Assignees', (): void => {
               issue = new IssueFactory(optionsInterface).createIssue(
                 issueInterface
               );
-              assignees = new Assignees(optionsInterface, issue);
+              assignees = new Assignees(optionsInterface, issue, loggerFactory);
 
               const result = assignees.shouldExemptAssignees();
 
@@ -113,7 +117,7 @@ describe('Assignees', (): void => {
               issue = new IssueFactory(optionsInterface).createIssue(
                 issueInterface
               );
-              assignees = new Assignees(optionsInterface, issue);
+              assignees = new Assignees(optionsInterface, issue, loggerFactory);
 
               const result = assignees.shouldExemptAssignees();
 
@@ -135,7 +139,7 @@ describe('Assignees', (): void => {
               issue = new IssueFactory(optionsInterface).createIssue(
                 issueInterface
               );
-              assignees = new Assignees(optionsInterface, issue);
+              assignees = new Assignees(optionsInterface, issue, loggerFactory);
 
               const result = assignees.shouldExemptAssignees();
 
@@ -165,7 +169,7 @@ describe('Assignees', (): void => {
               issue = new IssueFactory(optionsInterface).createIssue(
                 issueInterface
               );
-              assignees = new Assignees(optionsInterface, issue);
+              assignees = new Assignees(optionsInterface, issue, loggerFactory);
 
               const result = assignees.shouldExemptAssignees();
 
@@ -187,7 +191,7 @@ describe('Assignees', (): void => {
               issue = new IssueFactory(optionsInterface).createIssue(
                 issueInterface
               );
-              assignees = new Assignees(optionsInterface, issue);
+              assignees = new Assignees(optionsInterface, issue, loggerFactory);
 
               const result = assignees.shouldExemptAssignees();
 
@@ -209,7 +213,7 @@ describe('Assignees', (): void => {
               issue = new IssueFactory(optionsInterface).createIssue(
                 issueInterface
               );
-              assignees = new Assignees(optionsInterface, issue);
+              assignees = new Assignees(optionsInterface, issue, loggerFactory);
 
               const result = assignees.shouldExemptAssignees();
 
@@ -234,7 +238,7 @@ describe('Assignees', (): void => {
               issue = new IssueFactory(optionsInterface).createIssue(
                 issueInterface
               );
-              assignees = new Assignees(optionsInterface, issue);
+              assignees = new Assignees(optionsInterface, issue, loggerFactory);
 
               const result = assignees.shouldExemptAssignees();
 
@@ -256,7 +260,7 @@ describe('Assignees', (): void => {
               issue = new IssueFactory(optionsInterface).createIssue(
                 issueInterface
               );
-              assignees = new Assignees(optionsInterface, issue);
+              assignees = new Assignees(optionsInterface, issue, loggerFactory);
 
               const result = assignees.shouldExemptAssignees();
 
@@ -278,7 +282,7 @@ describe('Assignees', (): void => {
               issue = new IssueFactory(optionsInterface).createIssue(
                 issueInterface
               );
-              assignees = new Assignees(optionsInterface, issue);
+              assignees = new Assignees(optionsInterface, issue, loggerFactory);
 
               const result = assignees.shouldExemptAssignees();
 
@@ -300,7 +304,7 @@ describe('Assignees', (): void => {
               issue = new IssueFactory(optionsInterface).createIssue(
                 issueInterface
               );
-              assignees = new Assignees(optionsInterface, issue);
+              assignees = new Assignees(optionsInterface, issue, loggerFactory);
 
               const result = assignees.shouldExemptAssignees();
 
@@ -322,7 +326,7 @@ describe('Assignees', (): void => {
               issue = new IssueFactory(optionsInterface).createIssue(
                 issueInterface
               );
-              assignees = new Assignees(optionsInterface, issue);
+              assignees = new Assignees(optionsInterface, issue, loggerFactory);
 
               const result = assignees.shouldExemptAssignees();
 
@@ -358,7 +362,7 @@ describe('Assignees', (): void => {
               issue = new IssueFactory(optionsInterface).createIssue(
                 issueInterface
               );
-              assignees = new Assignees(optionsInterface, issue);
+              assignees = new Assignees(optionsInterface, issue, loggerFactory);
 
               const result = assignees.shouldExemptAssignees();
 
@@ -380,7 +384,7 @@ describe('Assignees', (): void => {
               issue = new IssueFactory(optionsInterface).createIssue(
                 issueInterface
               );
-              assignees = new Assignees(optionsInterface, issue);
+              assignees = new Assignees(optionsInterface, issue, loggerFactory);
 
               const result = assignees.shouldExemptAssignees();
 
@@ -404,7 +408,7 @@ describe('Assignees', (): void => {
               issue = new IssueFactory(optionsInterface).createIssue(
                 issueInterface
               );
-              assignees = new Assignees(optionsInterface, issue);
+              assignees = new Assignees(optionsInterface, issue, loggerFactory);
 
               const result = assignees.shouldExemptAssignees();
 
@@ -426,7 +430,7 @@ describe('Assignees', (): void => {
               issue = new IssueFactory(optionsInterface).createIssue(
                 issueInterface
               );
-              assignees = new Assignees(optionsInterface, issue);
+              assignees = new Assignees(optionsInterface, issue, loggerFactory);
 
               const result = assignees.shouldExemptAssignees();
 
@@ -448,7 +452,7 @@ describe('Assignees', (): void => {
               issue = new IssueFactory(optionsInterface).createIssue(
                 issueInterface
               );
-              assignees = new Assignees(optionsInterface, issue);
+              assignees = new Assignees(optionsInterface, issue, loggerFactory);
 
               const result = assignees.shouldExemptAssignees();
 
@@ -478,7 +482,7 @@ describe('Assignees', (): void => {
               issue = new IssueFactory(optionsInterface).createIssue(
                 issueInterface
               );
-              assignees = new Assignees(optionsInterface, issue);
+              assignees = new Assignees(optionsInterface, issue, loggerFactory);
 
               const result = assignees.shouldExemptAssignees();
 
@@ -500,7 +504,7 @@ describe('Assignees', (): void => {
               issue = new IssueFactory(optionsInterface).createIssue(
                 issueInterface
               );
-              assignees = new Assignees(optionsInterface, issue);
+              assignees = new Assignees(optionsInterface, issue, loggerFactory);
 
               const result = assignees.shouldExemptAssignees();
 
@@ -522,7 +526,7 @@ describe('Assignees', (): void => {
               issue = new IssueFactory(optionsInterface).createIssue(
                 issueInterface
               );
-              assignees = new Assignees(optionsInterface, issue);
+              assignees = new Assignees(optionsInterface, issue, loggerFactory);
 
               const result = assignees.shouldExemptAssignees();
 
@@ -546,7 +550,7 @@ describe('Assignees', (): void => {
               issue = new IssueFactory(optionsInterface).createIssue(
                 issueInterface
               );
-              assignees = new Assignees(optionsInterface, issue);
+              assignees = new Assignees(optionsInterface, issue, loggerFactory);
 
               const result = assignees.shouldExemptAssignees();
 
@@ -568,7 +572,7 @@ describe('Assignees', (): void => {
               issue = new IssueFactory(optionsInterface).createIssue(
                 issueInterface
               );
-              assignees = new Assignees(optionsInterface, issue);
+              assignees = new Assignees(optionsInterface, issue, loggerFactory);
 
               const result = assignees.shouldExemptAssignees();
 
@@ -590,7 +594,7 @@ describe('Assignees', (): void => {
               issue = new IssueFactory(optionsInterface).createIssue(
                 issueInterface
               );
-              assignees = new Assignees(optionsInterface, issue);
+              assignees = new Assignees(optionsInterface, issue, loggerFactory);
 
               const result = assignees.shouldExemptAssignees();
 
@@ -612,7 +616,7 @@ describe('Assignees', (): void => {
               issue = new IssueFactory(optionsInterface).createIssue(
                 issueInterface
               );
-              assignees = new Assignees(optionsInterface, issue);
+              assignees = new Assignees(optionsInterface, issue, loggerFactory);
 
               const result = assignees.shouldExemptAssignees();
 
@@ -634,7 +638,7 @@ describe('Assignees', (): void => {
               issue = new IssueFactory(optionsInterface).createIssue(
                 issueInterface
               );
-              assignees = new Assignees(optionsInterface, issue);
+              assignees = new Assignees(optionsInterface, issue, loggerFactory);
 
               const result = assignees.shouldExemptAssignees();
 

@@ -18,8 +18,8 @@ import {IPullRequest} from '../interfaces/pull-request';
 import {Assignees} from './assignees';
 import {Issue} from './issue';
 import {IssueFactory} from './issue-factory';
-import {IssueLogger} from './loggers/issue-logger';
 import {Logger} from './loggers/logger';
+import {LoggerFactory} from './loggers/logger-factory';
 import {Milestones} from './milestones';
 import {Operations} from './operations';
 import {Statistics} from './statistics';
@@ -28,7 +28,7 @@ import {Statistics} from './statistics';
  * Handle processing of issues for staleness/closure.
  */
 export class IssuesProcessor {
-  private readonly _logger: Logger = new Logger();
+  private readonly _logger: Logger;
   private readonly _operations: Operations;
   private readonly _statistics: Statistics | undefined;
   readonly client: InstanceType<typeof GitHub>;
@@ -38,8 +38,12 @@ export class IssuesProcessor {
   readonly deletedBranchIssues: Issue[] = [];
   readonly removedLabelIssues: Issue[] = [];
 
-  constructor(options: IIssuesProcessorOptions) {
+  constructor(
+    options: IIssuesProcessorOptions,
+    private readonly loggerFactory: LoggerFactory
+  ) {
     this.options = options;
+    this._logger = loggerFactory.createLogger();
     this.client = getOctokit(this.options.repoToken);
     this._operations = new Operations(this.options);
 
@@ -55,7 +59,7 @@ export class IssuesProcessor {
     }
 
     if (this.options.enableStatistics) {
-      this._statistics = new Statistics();
+      this._statistics = new Statistics(this.loggerFactory);
     }
   }
 
@@ -86,7 +90,7 @@ export class IssuesProcessor {
     }
 
     for (const issue of issues.values()) {
-      const issueLogger: IssueLogger = new IssueLogger(issue);
+      const issueLogger = this.loggerFactory.createIssueLogger(issue);
       this._statistics?.incrementProcessedIssuesCount();
 
       issueLogger.info(`Found this $$type last updated ${issue.updated_at}`);
@@ -212,13 +216,21 @@ export class IssuesProcessor {
         continue; // don't process issues without any of the required labels
       }
 
-      const milestones: Milestones = new Milestones(this.options, issue);
+      const milestones: Milestones = new Milestones(
+        this.options,
+        issue,
+        this.loggerFactory
+      );
 
       if (milestones.shouldExemptMilestones()) {
         continue; // don't process exempt milestones
       }
 
-      const assignees: Assignees = new Assignees(this.options, issue);
+      const assignees: Assignees = new Assignees(
+        this.options,
+        issue,
+        this.loggerFactory
+      );
 
       if (assignees.shouldExemptAssignees()) {
         continue; // don't process exempt assignees
@@ -352,7 +364,7 @@ export class IssuesProcessor {
     issue: Issue,
     label: string
   ): Promise<string | undefined> {
-    const issueLogger: IssueLogger = new IssueLogger(issue);
+    const issueLogger = this.loggerFactory.createIssueLogger(issue);
 
     issueLogger.info(`Checking for label on $$type`);
 
@@ -388,7 +400,7 @@ export class IssuesProcessor {
     closeMessage?: string,
     closeLabel?: string
   ) {
-    const issueLogger: IssueLogger = new IssueLogger(issue);
+    const issueLogger = this.loggerFactory.createIssueLogger(issue);
     const markedStaleOn: string =
       (await this.getLabelCreationDate(issue, staleLabel)) || issue.updated_at;
     issueLogger.info(`$$type marked stale on: ${markedStaleOn}`);
@@ -440,7 +452,7 @@ export class IssuesProcessor {
     sinceDate: string,
     actor: string
   ): Promise<boolean> {
-    const issueLogger: IssueLogger = new IssueLogger(issue);
+    const issueLogger = this.loggerFactory.createIssueLogger(issue);
 
     issueLogger.info(`Checking for comments on $$type since ${sinceDate}`);
 
@@ -470,7 +482,7 @@ export class IssuesProcessor {
     staleLabel: string,
     skipMessage: boolean
   ): Promise<void> {
-    const issueLogger: IssueLogger = new IssueLogger(issue);
+    const issueLogger = this.loggerFactory.createIssueLogger(issue);
 
     issueLogger.info(`Marking $$type as stale`);
     this.staleIssues.push(issue);
@@ -520,7 +532,7 @@ export class IssuesProcessor {
     closeMessage?: string,
     closeLabel?: string
   ): Promise<void> {
-    const issueLogger: IssueLogger = new IssueLogger(issue);
+    const issueLogger = this.loggerFactory.createIssueLogger(issue);
 
     issueLogger.info(`Closing $$type for being stale`);
     this.closedIssues.push(issue);
@@ -576,7 +588,7 @@ export class IssuesProcessor {
   private async _getPullRequest(
     issue: Issue
   ): Promise<IPullRequest | undefined | void> {
-    const issueLogger: IssueLogger = new IssueLogger(issue);
+    const issueLogger = this.loggerFactory.createIssueLogger(issue);
 
     if (this.options.debugOnly) {
       return;
@@ -599,7 +611,7 @@ export class IssuesProcessor {
 
   // Delete the branch on closed pull request
   private async _deleteBranch(issue: Issue): Promise<void> {
-    const issueLogger: IssueLogger = new IssueLogger(issue);
+    const issueLogger = this.loggerFactory.createIssueLogger(issue);
 
     issueLogger.info(`Delete branch from closed $$type - ${issue.title}`);
 
@@ -636,7 +648,7 @@ export class IssuesProcessor {
 
   // Remove a label from an issue
   private async _removeLabel(issue: Issue, label: string): Promise<void> {
-    const issueLogger: IssueLogger = new IssueLogger(issue);
+    const issueLogger = this.loggerFactory.createIssueLogger(issue);
 
     issueLogger.info(`Removing label "${label}" from $$type`);
     this.removedLabelIssues.push(issue);
@@ -677,7 +689,7 @@ export class IssuesProcessor {
     issue: Issue,
     staleLabel: Readonly<string>
   ): Promise<void> {
-    const issueLogger: IssueLogger = new IssueLogger(issue);
+    const issueLogger = this.loggerFactory.createIssueLogger(issue);
 
     issueLogger.info(
       `The $$type is no longer stale. Removing the stale label...`
@@ -691,7 +703,7 @@ export class IssuesProcessor {
     issue: Issue,
     closeLabel: Readonly<string | undefined>
   ): Promise<void> {
-    const issueLogger: IssueLogger = new IssueLogger(issue);
+    const issueLogger = this.loggerFactory.createIssueLogger(issue);
 
     issueLogger.info(
       `The $$type is not closed nor locked. Trying to remove the close label...`

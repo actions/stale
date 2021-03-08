@@ -1,9 +1,11 @@
+import {NoopLoggerFactory} from '../../__tests__/classes/noop-logger-factory';
 import {DefaultProcessorOptions} from '../../__tests__/constants/default-processor-options';
 import {generateIIssue} from '../../__tests__/functions/generate-iissue';
 import {IIssue} from '../interfaces/issue';
 import {IIssuesProcessorOptions} from '../interfaces/issues-processor-options';
 import {Issue} from './issue';
 import {IssueFactory} from './issue-factory';
+import {LoggerFactory} from './loggers/logger-factory';
 import {Milestones} from './milestones';
 
 describe('Milestones', (): void => {
@@ -11,10 +13,12 @@ describe('Milestones', (): void => {
   let optionsInterface: IIssuesProcessorOptions;
   let issue: Issue;
   let issueInterface: IIssue;
+  let loggerFactory: LoggerFactory;
 
   beforeEach((): void => {
     optionsInterface = {...DefaultProcessorOptions};
     issueInterface = generateIIssue();
+    loggerFactory = new NoopLoggerFactory();
   });
 
   describe('shouldExemptMilestones()', (): void => {
@@ -43,7 +47,11 @@ describe('Milestones', (): void => {
               issue = new IssueFactory(optionsInterface).createIssue(
                 issueInterface
               );
-              milestones = new Milestones(optionsInterface, issue);
+              milestones = new Milestones(
+                optionsInterface,
+                issue,
+                loggerFactory
+              );
 
               const result = milestones.shouldExemptMilestones();
 
@@ -63,7 +71,11 @@ describe('Milestones', (): void => {
               issue = new IssueFactory(optionsInterface).createIssue(
                 issueInterface
               );
-              milestones = new Milestones(optionsInterface, issue);
+              milestones = new Milestones(
+                optionsInterface,
+                issue,
+                loggerFactory
+              );
 
               const result = milestones.shouldExemptMilestones();
 
@@ -88,7 +100,11 @@ describe('Milestones', (): void => {
               issue = new IssueFactory(optionsInterface).createIssue(
                 issueInterface
               );
-              milestones = new Milestones(optionsInterface, issue);
+              milestones = new Milestones(
+                optionsInterface,
+                issue,
+                loggerFactory
+              );
 
               const result = milestones.shouldExemptMilestones();
 
@@ -108,7 +124,11 @@ describe('Milestones', (): void => {
               issue = new IssueFactory(optionsInterface).createIssue(
                 issueInterface
               );
-              milestones = new Milestones(optionsInterface, issue);
+              milestones = new Milestones(
+                optionsInterface,
+                issue,
+                loggerFactory
+              );
 
               const result = milestones.shouldExemptMilestones();
 
@@ -128,7 +148,11 @@ describe('Milestones', (): void => {
               issue = new IssueFactory(optionsInterface).createIssue(
                 issueInterface
               );
-              milestones = new Milestones(optionsInterface, issue);
+              milestones = new Milestones(
+                optionsInterface,
+                issue,
+                loggerFactory
+              );
 
               const result = milestones.shouldExemptMilestones();
 
@@ -158,7 +182,11 @@ describe('Milestones', (): void => {
               issue = new IssueFactory(optionsInterface).createIssue(
                 issueInterface
               );
-              milestones = new Milestones(optionsInterface, issue);
+              milestones = new Milestones(
+                optionsInterface,
+                issue,
+                loggerFactory
+              );
 
               const result = milestones.shouldExemptMilestones();
 
@@ -178,7 +206,11 @@ describe('Milestones', (): void => {
               issue = new IssueFactory(optionsInterface).createIssue(
                 issueInterface
               );
-              milestones = new Milestones(optionsInterface, issue);
+              milestones = new Milestones(
+                optionsInterface,
+                issue,
+                loggerFactory
+              );
 
               const result = milestones.shouldExemptMilestones();
 
@@ -198,7 +230,11 @@ describe('Milestones', (): void => {
               issue = new IssueFactory(optionsInterface).createIssue(
                 issueInterface
               );
-              milestones = new Milestones(optionsInterface, issue);
+              milestones = new Milestones(
+                optionsInterface,
+                issue,
+                loggerFactory
+              );
 
               const result = milestones.shouldExemptMilestones();
 
@@ -223,7 +259,11 @@ describe('Milestones', (): void => {
               issue = new IssueFactory(optionsInterface).createIssue(
                 issueInterface
               );
-              milestones = new Milestones(optionsInterface, issue);
+              milestones = new Milestones(
+                optionsInterface,
+                issue,
+                loggerFactory
+              );
 
               const result = milestones.shouldExemptMilestones();
 
@@ -243,7 +283,11 @@ describe('Milestones', (): void => {
               issue = new IssueFactory(optionsInterface).createIssue(
                 issueInterface
               );
-              milestones = new Milestones(optionsInterface, issue);
+              milestones = new Milestones(
+                optionsInterface,
+                issue,
+                loggerFactory
+              );
 
               const result = milestones.shouldExemptMilestones();
 
@@ -263,7 +307,11 @@ describe('Milestones', (): void => {
               issue = new IssueFactory(optionsInterface).createIssue(
                 issueInterface
               );
-              milestones = new Milestones(optionsInterface, issue);
+              milestones = new Milestones(
+                optionsInterface,
+                issue,
+                loggerFactory
+              );
 
               const result = milestones.shouldExemptMilestones();
 
@@ -283,7 +331,11 @@ describe('Milestones', (): void => {
               issue = new IssueFactory(optionsInterface).createIssue(
                 issueInterface
               );
-              milestones = new Milestones(optionsInterface, issue);
+              milestones = new Milestones(
+                optionsInterface,
+                issue,
+                loggerFactory
+              );
 
               const result = milestones.shouldExemptMilestones();
 
@@ -303,7 +355,11 @@ describe('Milestones', (): void => {
               issue = new IssueFactory(optionsInterface).createIssue(
                 issueInterface
               );
-              milestones = new Milestones(optionsInterface, issue);
+              milestones = new Milestones(
+                optionsInterface,
+                issue,
+                loggerFactory
+              );
 
               const result = milestones.shouldExemptMilestones();
 
@@ -339,7 +395,11 @@ describe('Milestones', (): void => {
               issue = new IssueFactory(optionsInterface).createIssue(
                 issueInterface
               );
-              milestones = new Milestones(optionsInterface, issue);
+              milestones = new Milestones(
+                optionsInterface,
+                issue,
+                loggerFactory
+              );
 
               const result = milestones.shouldExemptMilestones();
 
@@ -359,7 +419,11 @@ describe('Milestones', (): void => {
               issue = new IssueFactory(optionsInterface).createIssue(
                 issueInterface
               );
-              milestones = new Milestones(optionsInterface, issue);
+              milestones = new Milestones(
+                optionsInterface,
+                issue,
+                loggerFactory
+              );
 
               const result = milestones.shouldExemptMilestones();
 
@@ -383,7 +447,11 @@ describe('Milestones', (): void => {
               issue = new IssueFactory(optionsInterface).createIssue(
                 issueInterface
               );
-              milestones = new Milestones(optionsInterface, issue);
+              milestones = new Milestones(
+                optionsInterface,
+                issue,
+                loggerFactory
+              );
 
               const result = milestones.shouldExemptMilestones();
 
@@ -403,7 +471,11 @@ describe('Milestones', (): void => {
               issue = new IssueFactory(optionsInterface).createIssue(
                 issueInterface
               );
-              milestones = new Milestones(optionsInterface, issue);
+              milestones = new Milestones(
+                optionsInterface,
+                issue,
+                loggerFactory
+              );
 
               const result = milestones.shouldExemptMilestones();
 
@@ -423,7 +495,11 @@ describe('Milestones', (): void => {
               issue = new IssueFactory(optionsInterface).createIssue(
                 issueInterface
               );
-              milestones = new Milestones(optionsInterface, issue);
+              milestones = new Milestones(
+                optionsInterface,
+                issue,
+                loggerFactory
+              );
 
               const result = milestones.shouldExemptMilestones();
 
@@ -453,7 +529,11 @@ describe('Milestones', (): void => {
               issue = new IssueFactory(optionsInterface).createIssue(
                 issueInterface
               );
-              milestones = new Milestones(optionsInterface, issue);
+              milestones = new Milestones(
+                optionsInterface,
+                issue,
+                loggerFactory
+              );
 
               const result = milestones.shouldExemptMilestones();
 
@@ -473,7 +553,11 @@ describe('Milestones', (): void => {
               issue = new IssueFactory(optionsInterface).createIssue(
                 issueInterface
               );
-              milestones = new Milestones(optionsInterface, issue);
+              milestones = new Milestones(
+                optionsInterface,
+                issue,
+                loggerFactory
+              );
 
               const result = milestones.shouldExemptMilestones();
 
@@ -493,7 +577,11 @@ describe('Milestones', (): void => {
               issue = new IssueFactory(optionsInterface).createIssue(
                 issueInterface
               );
-              milestones = new Milestones(optionsInterface, issue);
+              milestones = new Milestones(
+                optionsInterface,
+                issue,
+                loggerFactory
+              );
 
               const result = milestones.shouldExemptMilestones();
 
@@ -517,7 +605,11 @@ describe('Milestones', (): void => {
               issue = new IssueFactory(optionsInterface).createIssue(
                 issueInterface
               );
-              milestones = new Milestones(optionsInterface, issue);
+              milestones = new Milestones(
+                optionsInterface,
+                issue,
+                loggerFactory
+              );
 
               const result = milestones.shouldExemptMilestones();
 
@@ -537,7 +629,11 @@ describe('Milestones', (): void => {
               issue = new IssueFactory(optionsInterface).createIssue(
                 issueInterface
               );
-              milestones = new Milestones(optionsInterface, issue);
+              milestones = new Milestones(
+                optionsInterface,
+                issue,
+                loggerFactory
+              );
 
               const result = milestones.shouldExemptMilestones();
 
@@ -557,7 +653,11 @@ describe('Milestones', (): void => {
               issue = new IssueFactory(optionsInterface).createIssue(
                 issueInterface
               );
-              milestones = new Milestones(optionsInterface, issue);
+              milestones = new Milestones(
+                optionsInterface,
+                issue,
+                loggerFactory
+              );
 
               const result = milestones.shouldExemptMilestones();
 
@@ -577,7 +677,11 @@ describe('Milestones', (): void => {
               issue = new IssueFactory(optionsInterface).createIssue(
                 issueInterface
               );
-              milestones = new Milestones(optionsInterface, issue);
+              milestones = new Milestones(
+                optionsInterface,
+                issue,
+                loggerFactory
+              );
 
               const result = milestones.shouldExemptMilestones();
 
@@ -597,7 +701,11 @@ describe('Milestones', (): void => {
               issue = new IssueFactory(optionsInterface).createIssue(
                 issueInterface
               );
-              milestones = new Milestones(optionsInterface, issue);
+              milestones = new Milestones(
+                optionsInterface,
+                issue,
+                loggerFactory
+              );
 
               const result = milestones.shouldExemptMilestones();
 

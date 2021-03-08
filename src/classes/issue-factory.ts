@@ -6,6 +6,7 @@ import {PullRequest} from './pull-request';
 
 export class IssueFactory {
   constructor(private readonly options: IIssuesProcessorOptions) {}
+
   createIssue(issue: Readonly<IIssue>): Issue {
     return isPullRequest(issue)
       ? new PullRequest(this.options, issue)

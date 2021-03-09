@@ -320,7 +320,7 @@ export class IssuesProcessor {
     // find any comments since date on the given issue
     try {
       this._operations.consumeOperation();
-      this._statistics?.incrementFetchedIssuesCommentsCount();
+      this._statistics?.incrementFetchedItemsCommentsCount();
       const comments = await this.client.issues.listComments({
         owner: context.repo.owner,
         repo: context.repo.repo,
@@ -366,7 +366,7 @@ export class IssuesProcessor {
           page
         }
       );
-      this._statistics?.incrementFetchedIssuesCount(issueResult.data.length);
+      this._statistics?.incrementFetchedItemsCount(issueResult.data.length);
 
       return issueResult.data.map(
         (issue: Readonly<IIssue>): Issue => new Issue(this.options, issue)
@@ -388,7 +388,7 @@ export class IssuesProcessor {
     issueLogger.info(`Checking for label on $$type`);
 
     this._operations.consumeOperation();
-    this._statistics?.incrementFetchedIssuesEventsCount();
+    this._statistics?.incrementFetchedItemsEventsCount();
     const options = this.client.issues.listEvents.endpoint.merge({
       owner: context.repo.owner,
       repo: context.repo.repo,

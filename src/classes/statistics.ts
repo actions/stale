@@ -23,9 +23,9 @@ export class Statistics {
   private _deletedBranchesCount = 0;
   private _addedLabelsCount = 0;
   private _addedCommentsCount = 0;
-  private _fetchedIssuesCount = 0;
-  private _fetchedIssuesEventsCount = 0;
-  private _fetchedIssuesCommentsCount = 0;
+  private _fetchedItemsCount = 0;
+  private _fetchedItemsEventsCount = 0;
+  private _fetchedItemsCommentsCount = 0;
   private _fetchedPullRequestsCount = 0;
 
   incrementProcessedItemsCount(
@@ -110,24 +110,24 @@ export class Statistics {
     return this;
   }
 
-  incrementFetchedIssuesCount(increment: Readonly<number> = 1): Statistics {
-    this._fetchedIssuesCount += increment;
+  incrementFetchedItemsCount(increment: Readonly<number> = 1): Statistics {
+    this._fetchedItemsCount += increment;
 
     return this;
   }
 
-  incrementFetchedIssuesEventsCount(
+  incrementFetchedItemsEventsCount(
     increment: Readonly<number> = 1
   ): Statistics {
-    this._fetchedIssuesEventsCount += increment;
+    this._fetchedItemsEventsCount += increment;
 
     return this;
   }
 
-  incrementFetchedIssuesCommentsCount(
+  incrementFetchedItemsCommentsCount(
     increment: Readonly<number> = 1
   ): Statistics {
-    this._fetchedIssuesCommentsCount += increment;
+    this._fetchedItemsCommentsCount += increment;
 
     return this;
   }
@@ -151,9 +151,9 @@ export class Statistics {
     this._logDeletedBranchesCount();
     this._logAddedLabelsCount();
     this._logAddedCommentsCount();
-    this._logFetchedIssuesCount();
-    this._logFetchedIssuesEventsCount();
-    this._logFetchedIssuesCommentsCount();
+    this._logFetchedItemsCount();
+    this._logFetchedItemsEventsCount();
+    this._logFetchedItemsCommentsCount();
     this._logFetchedPullRequestsCount();
     this._logOperationsCount();
 
@@ -296,16 +296,16 @@ export class Statistics {
     this._logCount('Added comments', this._addedCommentsCount);
   }
 
-  private _logFetchedIssuesCount(): void {
-    this._logCount('Fetched issues', this._fetchedIssuesCount);
+  private _logFetchedItemsCount(): void {
+    this._logCount('Fetched items', this._fetchedItemsCount);
   }
 
-  private _logFetchedIssuesEventsCount(): void {
-    this._logCount('Fetched issues events', this._fetchedIssuesEventsCount);
+  private _logFetchedItemsEventsCount(): void {
+    this._logCount('Fetched items events', this._fetchedItemsEventsCount);
   }
 
-  private _logFetchedIssuesCommentsCount(): void {
-    this._logCount('Fetched issues comments', this._fetchedIssuesCommentsCount);
+  private _logFetchedItemsCommentsCount(): void {
+    this._logCount('Fetched items comments', this._fetchedItemsCommentsCount);
   }
 
   private _logFetchedPullRequestsCount(): void {
@@ -376,7 +376,7 @@ export class Statistics {
       const prefix = index === onlyValuesSet.length - 1 ? '└──' : '├──';
 
       this._logCount(
-        `${prefix} ${value.name.padEnd(longestValue, ' ')}`,
+        `${chalk.white(prefix)} ${value.name.padEnd(longestValue, ' ')}`,
         value.count
       );
     }

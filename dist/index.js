@@ -418,7 +418,7 @@ class IssuesProcessor {
             // find any comments since date on the given issue
             try {
                 this._operations.consumeOperation();
-                (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.incrementFetchedIssuesCommentsCount();
+                (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.incrementFetchedItemsCommentsCount();
                 const comments = yield this.client.issues.listComments({
                     owner: github_1.context.repo.owner,
                     repo: github_1.context.repo.repo,
@@ -463,7 +463,7 @@ class IssuesProcessor {
                     direction: this.options.ascending ? 'asc' : 'desc',
                     page
                 });
-                (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.incrementFetchedIssuesCount(issueResult.data.length);
+                (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.incrementFetchedItemsCount(issueResult.data.length);
                 return issueResult.data.map((issue) => new issue_1.Issue(this.options, issue));
             }
             catch (error) {
@@ -480,7 +480,7 @@ class IssuesProcessor {
             const issueLogger = new issue_logger_1.IssueLogger(issue);
             issueLogger.info(`Checking for label on $$type`);
             this._operations.consumeOperation();
-            (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.incrementFetchedIssuesEventsCount();
+            (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.incrementFetchedItemsEventsCount();
             const options = this.client.issues.listEvents.endpoint.merge({
                 owner: github_1.context.repo.owner,
                 repo: github_1.context.repo.repo,
@@ -1125,9 +1125,9 @@ class Statistics {
         this._deletedBranchesCount = 0;
         this._addedLabelsCount = 0;
         this._addedCommentsCount = 0;
-        this._fetchedIssuesCount = 0;
-        this._fetchedIssuesEventsCount = 0;
-        this._fetchedIssuesCommentsCount = 0;
+        this._fetchedItemsCount = 0;
+        this._fetchedItemsEventsCount = 0;
+        this._fetchedItemsCommentsCount = 0;
         this._fetchedPullRequestsCount = 0;
     }
     incrementProcessedItemsCount(issue, increment = 1) {
@@ -1178,16 +1178,16 @@ class Statistics {
         this._addedCommentsCount += increment;
         return this;
     }
-    incrementFetchedIssuesCount(increment = 1) {
-        this._fetchedIssuesCount += increment;
+    incrementFetchedItemsCount(increment = 1) {
+        this._fetchedItemsCount += increment;
         return this;
     }
-    incrementFetchedIssuesEventsCount(increment = 1) {
-        this._fetchedIssuesEventsCount += increment;
+    incrementFetchedItemsEventsCount(increment = 1) {
+        this._fetchedItemsEventsCount += increment;
         return this;
     }
-    incrementFetchedIssuesCommentsCount(increment = 1) {
-        this._fetchedIssuesCommentsCount += increment;
+    incrementFetchedItemsCommentsCount(increment = 1) {
+        this._fetchedItemsCommentsCount += increment;
         return this;
     }
     incrementFetchedPullRequestsCount(increment = 1) {
@@ -1205,12 +1205,11 @@ class Statistics {
         this._logDeletedBranchesCount();
         this._logAddedLabelsCount();
         this._logAddedCommentsCount();
-        this._logFetchedIssuesCount();
-        this._logFetchedIssuesEventsCount();
-        this._logFetchedIssuesCommentsCount();
+        this._logFetchedItemsCount();
+        this._logFetchedItemsEventsCount();
+        this._logFetchedItemsCommentsCount();
         this._logFetchedPullRequestsCount();
         this._logOperationsCount();
-        this._logger.info('---');
         return this;
     }
     _incrementProcessedIssuesCount(increment = 1) {
@@ -1308,14 +1307,14 @@ class Statistics {
     _logAddedCommentsCount() {
         this._logCount('Added comments', this._addedCommentsCount);
     }
-    _logFetchedIssuesCount() {
-        this._logCount('Fetched issues', this._fetchedIssuesCount);
+    _logFetchedItemsCount() {
+        this._logCount('Fetched items', this._fetchedItemsCount);
     }
-    _logFetchedIssuesEventsCount() {
-        this._logCount('Fetched issues events', this._fetchedIssuesEventsCount);
+    _logFetchedItemsEventsCount() {
+        this._logCount('Fetched items events', this._fetchedItemsEventsCount);
     }
-    _logFetchedIssuesCommentsCount() {
-        this._logCount('Fetched issues comments', this._fetchedIssuesCommentsCount);
+    _logFetchedItemsCommentsCount() {
+        this._logCount('Fetched items comments', this._fetchedItemsCommentsCount);
     }
     _logFetchedPullRequestsCount() {
         this._logCount('Fetched pull requests', this._fetchedPullRequestsCount);
@@ -1370,7 +1369,7 @@ class Statistics {
         const longestValue = this._getLongestGroupValue(onlyValuesSet);
         for (const [index, value] of onlyValuesSet.entries()) {
             const prefix = index === onlyValuesSet.length - 1 ? '└──' : '├──';
-            this._logCount(`${prefix} ${value.name.padEnd(longestValue, ' ')}`, value.count);
+            this._logCount(`${chalk_1.default.white(prefix)} ${value.name.padEnd(longestValue, ' ')}`, value.count);
         }
     }
     _getLongestGroupValue(values) {
@@ -10361,7 +10360,7 @@ module.exports = require("zlib");;
 /******/ 	
 /******/ 		// Flag the module as loaded
 /******/ 		module.loaded = true;
-/******/
+/******/ 	
 /******/ 		// Return the exports of the module
 /******/ 		return module.exports;
 /******/ 	}
@@ -10375,7 +10374,7 @@ module.exports = require("zlib");;
 /******/ 			return module;
 /******/ 		};
 /******/ 	})();
-/******/
+/******/ 	
 /******/ 	/* webpack/runtime/compat */
 /******/ 	
 /******/ 	__nccwpck_require__.ab = __dirname + "/";/************************************************************************/

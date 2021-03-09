@@ -256,7 +256,7 @@ class IssuesProcessor {
             }
             for (const issue of issues.values()) {
                 const issueLogger = new issue_logger_1.IssueLogger(issue);
-                (_b = this._statistics) === null || _b === void 0 ? void 0 : _b.incrementProcessedIssuesCount();
+                (_b = this._statistics) === null || _b === void 0 ? void 0 : _b.incrementProcessedItemsCount(issue);
                 issueLogger.info(`Found this $$type last updated ${issue.updated_at}`);
                 // calculate string based messages for this issue
                 const staleMessage = issue.isPullRequest
@@ -553,7 +553,7 @@ class IssuesProcessor {
             try {
                 this._operationsLeft -= 1;
                 (_b = this._statistics) === null || _b === void 0 ? void 0 : _b.incrementAddedLabel();
-                (_c = this._statistics) === null || _c === void 0 ? void 0 : _c.incrementStaleIssuesCount();
+                (_c = this._statistics) === null || _c === void 0 ? void 0 : _c.incrementStaleItemsCount(issue);
                 yield this.client.issues.addLabels({
                     owner: github_1.context.repo.owner,
                     repo: github_1.context.repo.repo,
@@ -608,7 +608,7 @@ class IssuesProcessor {
             }
             try {
                 this._operationsLeft -= 1;
-                (_c = this._statistics) === null || _c === void 0 ? void 0 : _c.incrementClosedIssuesCount();
+                (_c = this._statistics) === null || _c === void 0 ? void 0 : _c.incrementClosedItemsCount(issue);
                 yield this.client.issues.update({
                     owner: github_1.context.repo.owner,
                     repo: github_1.context.repo.repo,
@@ -738,7 +738,7 @@ class IssuesProcessor {
             const issueLogger = new issue_logger_1.IssueLogger(issue);
             issueLogger.info(`The $$type is no longer stale. Removing the stale label...`);
             yield this._removeLabel(issue, staleLabel);
-            (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.incrementUndoStaleIssuesCount();
+            (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.incrementUndoStaleItemsCount(issue);
         });
     }
     _removeCloseLabel(issue, closeLabel) {
@@ -975,10 +975,14 @@ class Statistics {
     constructor(options) {
         this._logger = new logger_1.Logger();
         this._processedIssuesCount = 0;
+        this._processedPullRequestsCount = 0;
         this._staleIssuesCount = 0;
+        this._stalePullRequestsCount = 0;
         this._undoStaleIssuesCount = 0;
+        this._undoStalePullRequestsCount = 0;
         this._operationsCount = 0;
         this._closedIssuesCount = 0;
+        this._closedPullRequestsCount = 0;
         this._deletedLabelsCount = 0;
         this._deletedCloseLabelsCount = 0;
         this._deletedBranchesCount = 0;
@@ -990,25 +994,33 @@ class Statistics {
         this._fetchedPullRequestsCount = 0;
         this._options = options;
     }
-    incrementProcessedIssuesCount(increment = 1) {
-        this._processedIssuesCount += increment;
-        return this;
+    incrementProcessedItemsCount(issue, increment = 1) {
+        if (issue.isPullRequest) {
+            return this._incrementProcessedPullRequestsCount(increment);
+        }
+        return this._incrementProcessedIssuesCount(increment);
     }
-    incrementStaleIssuesCount(increment = 1) {
-        this._staleIssuesCount += increment;
-        return this;
+    incrementStaleItemsCount(issue, increment = 1) {
+        if (issue.isPullRequest) {
+            return this._incrementStalePullRequestsCount(increment);
+        }
+        return this._incrementStaleIssuesCount(increment);
     }
-    incrementUndoStaleIssuesCount(increment = 1) {
-        this._undoStaleIssuesCount += increment;
-        return this;
+    incrementUndoStaleItemsCount(issue, increment = 1) {
+        if (issue.isPullRequest) {
+            return this._incrementUndoStalePullRequestsCount(increment);
+        }
+        return this._incrementUndoStaleIssuesCount(increment);
     }
     setOperationsLeft(operationsLeft) {
         this._operationsCount = this._options.operationsPerRun - operationsLeft;
         return this;
     }
-    incrementClosedIssuesCount(increment = 1) {
-        this._closedIssuesCount += increment;
-        return this;
+    incrementClosedItemsCount(issue, increment = 1) {
+        if (issue.isPullRequest) {
+            return this._incrementClosedPullRequestsCount(increment);
+        }
+        return this._incrementClosedIssuesCount(increment);
     }
     incrementDeletedLabelsCount(increment = 1) {
         this._deletedLabelsCount += increment;
@@ -1048,11 +1060,10 @@ class Statistics {
     }
     logStats() {
         this._logger.info('Statistics');
-        this._logProcessedIssuesCount();
-        this._logStaleIssuesCount();
-        this._logUndoStaleIssuesCount();
-        this._logOperationsCount();
-        this._logClosedIssuesCount();
+        this._logProcessedIssuesAndPullRequestsCount();
+        this._logStaleIssuesAndPullRequestsCount();
+        this._logUndoStaleIssuesAndPullRequestsCount();
+        this._logClosedIssuesAndPullRequestsCount();
         this._logDeletedLabelsCount();
         this._logDeletedCloseLabelsCount();
         this._logDeletedBranchesCount();
@@ -1062,23 +1073,89 @@ class Statistics {
         this._logFetchedIssuesEventsCount();
         this._logFetchedIssuesCommentsCount();
         this._logFetchedPullRequestsCount();
+        this._logOperationsCount();
         this._logger.info('---');
         return this;
     }
-    _logProcessedIssuesCount() {
-        this._logCount('Processed issues/PRs', this._processedIssuesCount);
+    _incrementProcessedIssuesCount(increment = 1) {
+        this._processedIssuesCount += increment;
+        return this;
     }
-    _logStaleIssuesCount() {
-        this._logCount('New stale issues/PRs', this._staleIssuesCount);
+    _incrementProcessedPullRequestsCount(increment = 1) {
+        this._processedPullRequestsCount += increment;
+        return this;
     }
-    _logUndoStaleIssuesCount() {
-        this._logCount('No longer stale issues/PRs', this._undoStaleIssuesCount);
+    _incrementStaleIssuesCount(increment = 1) {
+        this._staleIssuesCount += increment;
+        return this;
     }
-    _logOperationsCount() {
-        this._logCount('Operations performed', this._operationsCount);
+    _incrementStalePullRequestsCount(increment = 1) {
+        this._stalePullRequestsCount += increment;
+        return this;
     }
-    _logClosedIssuesCount() {
-        this._logCount('Closed issues', this._closedIssuesCount);
+    _incrementUndoStaleIssuesCount(increment = 1) {
+        this._undoStaleIssuesCount += increment;
+        return this;
+    }
+    _incrementUndoStalePullRequestsCount(increment = 1) {
+        this._undoStalePullRequestsCount += increment;
+        return this;
+    }
+    _incrementClosedIssuesCount(increment = 1) {
+        this._closedIssuesCount += increment;
+        return this;
+    }
+    _incrementClosedPullRequestsCount(increment = 1) {
+        this._closedPullRequestsCount += increment;
+        return this;
+    }
+    _logProcessedIssuesAndPullRequestsCount() {
+        this._logGroup('Processed items', [
+            {
+                name: 'Processed issues',
+                count: this._processedIssuesCount
+            },
+            {
+                name: 'Processed PRs',
+                count: this._processedPullRequestsCount
+            }
+        ]);
+    }
+    _logStaleIssuesAndPullRequestsCount() {
+        this._logGroup('New stale items', [
+            {
+                name: 'New stale issues',
+                count: this._staleIssuesCount
+            },
+            {
+                name: 'New stale PRs',
+                count: this._stalePullRequestsCount
+            }
+        ]);
+    }
+    _logUndoStaleIssuesAndPullRequestsCount() {
+        this._logGroup('No longer stale items', [
+            {
+                name: 'No longer stale issues',
+                count: this._undoStaleIssuesCount
+            },
+            {
+                name: 'No longer stale PRs',
+                count: this._undoStalePullRequestsCount
+            }
+        ]);
+    }
+    _logClosedIssuesAndPullRequestsCount() {
+        this._logGroup('Closed items', [
+            {
+                name: 'Closed issues',
+                count: this._closedIssuesCount
+            },
+            {
+                name: 'Closed PRs',
+                count: this._closedPullRequestsCount
+            }
+        ]);
     }
     _logDeletedLabelsCount() {
         this._logCount('Deleted labels', this._deletedLabelsCount);
@@ -1107,10 +1184,65 @@ class Statistics {
     _logFetchedPullRequestsCount() {
         this._logCount('Fetched pull requests', this._fetchedPullRequestsCount);
     }
+    _logOperationsCount() {
+        this._logCount('Operations performed', this._operationsCount);
+    }
     _logCount(name, count) {
         if (count > 0) {
             this._logger.info(`${name}: ${count}`);
         }
+    }
+    _logGroup(groupName, values) {
+        if (this._isGroupValuesPartiallySet(values)) {
+            this._logCount(groupName, this._getGroupValuesTotalCount(values));
+            this._logGroupValues(values);
+        }
+        else {
+            // Only one value will be display
+            for (const value of values) {
+                this._logCount(value.name, value.count);
+            }
+        }
+    }
+    /**
+     * @private
+     * @description
+     * If there is a least two elements with a valid count then it's partially set
+     * Useful to defined if we should display the values as a group or not
+     *
+     * @param {IGroupValue[]} values The list of group values to check
+     */
+    _isGroupValuesPartiallySet(values) {
+        return (values
+            .map((value) => {
+            return value.count > 0;
+        })
+            .filter((isSet) => isSet).length >= 2);
+    }
+    _getGroupValuesTotalCount(values) {
+        return values.reduce((count, value) => {
+            return count + value.count;
+        }, 0);
+    }
+    _getAllGroupValuesSet(values) {
+        return values.filter((value) => {
+            return value.count > 0;
+        });
+    }
+    _logGroupValues(values) {
+        const onlyValuesSet = this._getAllGroupValuesSet(values);
+        const longestValue = this._getLongestGroupValue(onlyValuesSet);
+        for (const [index, value] of onlyValuesSet.entries()) {
+            const prefix = index === onlyValuesSet.length - 1 ? '└──' : '├──';
+            this._logCount(`${prefix} ${value.name.padEnd(longestValue, ' ')}`, value.count);
+        }
+    }
+    _getLongestGroupValue(values) {
+        return values.reduce((longestValue, value) => {
+            return value.name.length > longestValue
+                ? value.name.length
+                : longestValue;
+        }, 0);
     }
 }
 exports.Statistics = Statistics;

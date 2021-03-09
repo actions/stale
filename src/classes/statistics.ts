@@ -1,14 +1,24 @@
 import {IIssuesProcessorOptions} from '../interfaces/issues-processor-options';
+import {Issue} from './issue';
 import {Logger} from './loggers/logger';
+
+interface IGroupValue {
+  name: string;
+  count: number;
+}
 
 export class Statistics {
   private readonly _logger: Logger = new Logger();
   private readonly _options: IIssuesProcessorOptions;
   private _processedIssuesCount = 0;
+  private _processedPullRequestsCount = 0;
   private _staleIssuesCount = 0;
+  private _stalePullRequestsCount = 0;
   private _undoStaleIssuesCount = 0;
+  private _undoStalePullRequestsCount = 0;
   private _operationsCount = 0;
   private _closedIssuesCount = 0;
+  private _closedPullRequestsCount = 0;
   private _deletedLabelsCount = 0;
   private _deletedCloseLabelsCount = 0;
   private _deletedBranchesCount = 0;
@@ -23,22 +33,37 @@ export class Statistics {
     this._options = options;
   }
 
-  incrementProcessedIssuesCount(increment: Readonly<number> = 1): Statistics {
-    this._processedIssuesCount += increment;
+  incrementProcessedItemsCount(
+    issue: Readonly<Issue>,
+    increment: Readonly<number> = 1
+  ): Statistics {
+    if (issue.isPullRequest) {
+      return this._incrementProcessedPullRequestsCount(increment);
+    }
 
-    return this;
+    return this._incrementProcessedIssuesCount(increment);
   }
 
-  incrementStaleIssuesCount(increment: Readonly<number> = 1): Statistics {
-    this._staleIssuesCount += increment;
+  incrementStaleItemsCount(
+    issue: Readonly<Issue>,
+    increment: Readonly<number> = 1
+  ): Statistics {
+    if (issue.isPullRequest) {
+      return this._incrementStalePullRequestsCount(increment);
+    }
 
-    return this;
+    return this._incrementStaleIssuesCount(increment);
   }
 
-  incrementUndoStaleIssuesCount(increment: Readonly<number> = 1): Statistics {
-    this._undoStaleIssuesCount += increment;
+  incrementUndoStaleItemsCount(
+    issue: Readonly<Issue>,
+    increment: Readonly<number> = 1
+  ): Statistics {
+    if (issue.isPullRequest) {
+      return this._incrementUndoStalePullRequestsCount(increment);
+    }
 
-    return this;
+    return this._incrementUndoStaleIssuesCount(increment);
   }
 
   setOperationsLeft(operationsLeft: Readonly<number>): Statistics {
@@ -47,10 +72,15 @@ export class Statistics {
     return this;
   }
 
-  incrementClosedIssuesCount(increment: Readonly<number> = 1): Statistics {
-    this._closedIssuesCount += increment;
+  incrementClosedItemsCount(
+    issue: Readonly<Issue>,
+    increment: Readonly<number> = 1
+  ): Statistics {
+    if (issue.isPullRequest) {
+      return this._incrementClosedPullRequestsCount(increment);
+    }
 
-    return this;
+    return this._incrementClosedIssuesCount(increment);
   }
 
   incrementDeletedLabelsCount(increment: Readonly<number> = 1): Statistics {
@@ -117,11 +147,10 @@ export class Statistics {
 
   logStats(): Statistics {
     this._logger.info('Statistics');
-    this._logProcessedIssuesCount();
-    this._logStaleIssuesCount();
-    this._logUndoStaleIssuesCount();
-    this._logOperationsCount();
-    this._logClosedIssuesCount();
+    this._logProcessedIssuesAndPullRequestsCount();
+    this._logStaleIssuesAndPullRequestsCount();
+    this._logUndoStaleIssuesAndPullRequestsCount();
+    this._logClosedIssuesAndPullRequestsCount();
     this._logDeletedLabelsCount();
     this._logDeletedCloseLabelsCount();
     this._logDeletedBranchesCount();
@@ -131,29 +160,126 @@ export class Statistics {
     this._logFetchedIssuesEventsCount();
     this._logFetchedIssuesCommentsCount();
     this._logFetchedPullRequestsCount();
+    this._logOperationsCount();
     this._logger.info('---');
 
     return this;
   }
 
-  private _logProcessedIssuesCount(): void {
-    this._logCount('Processed issues/PRs', this._processedIssuesCount);
+  private _incrementProcessedIssuesCount(
+    increment: Readonly<number> = 1
+  ): Statistics {
+    this._processedIssuesCount += increment;
+
+    return this;
   }
 
-  private _logStaleIssuesCount(): void {
-    this._logCount('New stale issues/PRs', this._staleIssuesCount);
+  private _incrementProcessedPullRequestsCount(
+    increment: Readonly<number> = 1
+  ): Statistics {
+    this._processedPullRequestsCount += increment;
+
+    return this;
   }
 
-  private _logUndoStaleIssuesCount(): void {
-    this._logCount('No longer stale issues/PRs', this._undoStaleIssuesCount);
+  private _incrementStaleIssuesCount(
+    increment: Readonly<number> = 1
+  ): Statistics {
+    this._staleIssuesCount += increment;
+
+    return this;
   }
 
-  private _logOperationsCount(): void {
-    this._logCount('Operations performed', this._operationsCount);
+  private _incrementStalePullRequestsCount(
+    increment: Readonly<number> = 1
+  ): Statistics {
+    this._stalePullRequestsCount += increment;
+
+    return this;
   }
 
-  private _logClosedIssuesCount(): void {
-    this._logCount('Closed issues', this._closedIssuesCount);
+  private _incrementUndoStaleIssuesCount(
+    increment: Readonly<number> = 1
+  ): Statistics {
+    this._undoStaleIssuesCount += increment;
+
+    return this;
+  }
+
+  private _incrementUndoStalePullRequestsCount(
+    increment: Readonly<number> = 1
+  ): Statistics {
+    this._undoStalePullRequestsCount += increment;
+
+    return this;
+  }
+
+  private _incrementClosedIssuesCount(
+    increment: Readonly<number> = 1
+  ): Statistics {
+    this._closedIssuesCount += increment;
+
+    return this;
+  }
+
+  private _incrementClosedPullRequestsCount(
+    increment: Readonly<number> = 1
+  ): Statistics {
+    this._closedPullRequestsCount += increment;
+
+    return this;
+  }
+
+  private _logProcessedIssuesAndPullRequestsCount(): void {
+    this._logGroup('Processed items', [
+      {
+        name: 'Processed issues',
+        count: this._processedIssuesCount
+      },
+      {
+        name: 'Processed PRs',
+        count: this._processedPullRequestsCount
+      }
+    ]);
+  }
+
+  private _logStaleIssuesAndPullRequestsCount(): void {
+    this._logGroup('New stale items', [
+      {
+        name: 'New stale issues',
+        count: this._staleIssuesCount
+      },
+      {
+        name: 'New stale PRs',
+        count: this._stalePullRequestsCount
+      }
+    ]);
+  }
+
+  private _logUndoStaleIssuesAndPullRequestsCount(): void {
+    this._logGroup('No longer stale items', [
+      {
+        name: 'No longer stale issues',
+        count: this._undoStaleIssuesCount
+      },
+      {
+        name: 'No longer stale PRs',
+        count: this._undoStalePullRequestsCount
+      }
+    ]);
+  }
+
+  private _logClosedIssuesAndPullRequestsCount(): void {
+    this._logGroup('Closed items', [
+      {
+        name: 'Closed issues',
+        count: this._closedIssuesCount
+      },
+      {
+        name: 'Closed PRs',
+        count: this._closedPullRequestsCount
+      }
+    ]);
   }
 
   private _logDeletedLabelsCount(): void {
@@ -192,9 +318,87 @@ export class Statistics {
     this._logCount('Fetched pull requests', this._fetchedPullRequestsCount);
   }
 
+  private _logOperationsCount(): void {
+    this._logCount('Operations performed', this._operationsCount);
+  }
+
   private _logCount(name: Readonly<string>, count: Readonly<number>): void {
     if (count > 0) {
       this._logger.info(`${name}: ${count}`);
     }
+  }
+
+  private _logGroup(groupName: Readonly<string>, values: IGroupValue[]): void {
+    if (this._isGroupValuesPartiallySet(values)) {
+      this._logCount(groupName, this._getGroupValuesTotalCount(values));
+
+      this._logGroupValues(values);
+    } else {
+      // Only one value will be display
+      for (const value of values) {
+        this._logCount(value.name, value.count);
+      }
+    }
+  }
+
+  /**
+   * @private
+   * @description
+   * If there is a least two elements with a valid count then it's partially set
+   * Useful to defined if we should display the values as a group or not
+   *
+   * @param {IGroupValue[]} values The list of group values to check
+   */
+  private _isGroupValuesPartiallySet(values: IGroupValue[]): boolean {
+    return (
+      values
+        .map((value: Readonly<IGroupValue>): boolean => {
+          return value.count > 0;
+        })
+        .filter((isSet: Readonly<boolean>): boolean => isSet).length >= 2
+    );
+  }
+
+  private _getGroupValuesTotalCount(values: IGroupValue[]): number {
+    return values.reduce(
+      (count: Readonly<number>, value: Readonly<IGroupValue>): number => {
+        return count + value.count;
+      },
+      0
+    );
+  }
+
+  private _getAllGroupValuesSet(values: IGroupValue[]): IGroupValue[] {
+    return values.filter((value: Readonly<IGroupValue>): boolean => {
+      return value.count > 0;
+    });
+  }
+
+  private _logGroupValues(values: IGroupValue[]): void {
+    const onlyValuesSet: IGroupValue[] = this._getAllGroupValuesSet(values);
+    const longestValue: number = this._getLongestGroupValue(onlyValuesSet);
+
+    for (const [index, value] of onlyValuesSet.entries()) {
+      const prefix = index === onlyValuesSet.length - 1 ? '└──' : '├──';
+
+      this._logCount(
+        `${prefix} ${value.name.padEnd(longestValue, ' ')}`,
+        value.count
+      );
+    }
+  }
+
+  private _getLongestGroupValue(values: IGroupValue[]): number {
+    return values.reduce(
+      (
+        longestValue: Readonly<number>,
+        value: Readonly<IGroupValue>
+      ): number => {
+        return value.name.length > longestValue
+          ? value.name.length
+          : longestValue;
+      },
+      0
+    );
   }
 }

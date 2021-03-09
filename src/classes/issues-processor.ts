@@ -673,7 +673,7 @@ export class IssuesProcessor {
     }
   }
 
-  // Remove a label from an issue
+  // Remove a label from an issue or a pull request
   private async _removeLabel(issue: Issue, label: string): Promise<void> {
     const issueLogger: IssueLogger = new IssueLogger(issue);
 
@@ -686,7 +686,7 @@ export class IssuesProcessor {
 
     try {
       this._operations.consumeOperation();
-      this._statistics?.incrementDeletedLabelsCount();
+      this._statistics?.incrementDeletedItemsLabelsCount(issue);
       await this.client.issues.removeLabel({
         owner: context.repo.owner,
         repo: context.repo.repo,
@@ -772,7 +772,7 @@ export class IssuesProcessor {
       );
 
       await this._removeLabel(issue, closeLabel);
-      this._statistics?.incrementDeletedCloseLabelsCount();
+      this._statistics?.incrementDeletedCloseItemsLabelsCount(issue);
     }
   }
 }

@@ -701,7 +701,7 @@ class IssuesProcessor {
             }
         });
     }
-    // Remove a label from an issue
+    // Remove a label from an issue or a pull request
     _removeLabel(issue, label) {
         var _a;
         return __awaiter(this, void 0, void 0, function* () {
@@ -713,7 +713,7 @@ class IssuesProcessor {
             }
             try {
                 this._operations.consumeOperation();
-                (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.incrementDeletedLabelsCount();
+                (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.incrementDeletedItemsLabelsCount(issue);
                 yield this.client.issues.removeLabel({
                     owner: github_1.context.repo.owner,
                     repo: github_1.context.repo.repo,
@@ -780,7 +780,7 @@ class IssuesProcessor {
             if (is_labeled_1.isLabeled(issue, closeLabel)) {
                 issueLogger.info(`The $$type has a close label "${closeLabel}". Removing the close label...`);
                 yield this._removeLabel(issue, closeLabel);
-                (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.incrementDeletedCloseLabelsCount();
+                (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.incrementDeletedCloseItemsLabelsCount(issue);
             }
         });
     }
@@ -1120,8 +1120,10 @@ class Statistics {
         this._operationsCount = 0;
         this._closedIssuesCount = 0;
         this._closedPullRequestsCount = 0;
-        this._deletedLabelsCount = 0;
-        this._deletedCloseLabelsCount = 0;
+        this._deletedIssuesLabelsCount = 0;
+        this._deletedPullRequestsLabelsCount = 0;
+        this._deletedCloseIssuesLabelsCount = 0;
+        this._deletedClosePullRequestsLabelsCount = 0;
         this._deletedBranchesCount = 0;
         this._addedLabelsCount = 0;
         this._addedCommentsCount = 0;
@@ -1158,13 +1160,17 @@ class Statistics {
         }
         return this._incrementClosedIssuesCount(increment);
     }
-    incrementDeletedLabelsCount(increment = 1) {
-        this._deletedLabelsCount += increment;
-        return this;
+    incrementDeletedItemsLabelsCount(issue, increment = 1) {
+        if (issue.isPullRequest) {
+            return this._incrementDeletedPullRequestsLabelsCount(increment);
+        }
+        return this._incrementDeletedIssuesLabelsCount(increment);
     }
-    incrementDeletedCloseLabelsCount(increment = 1) {
-        this._deletedCloseLabelsCount += increment;
-        return this;
+    incrementDeletedCloseItemsLabelsCount(issue, increment = 1) {
+        if (issue.isPullRequest) {
+            return this._incrementDeletedClosePullRequestsLabelsCount(increment);
+        }
+        return this._incrementDeletedCloseIssuesLabelsCount(increment);
     }
     incrementDeletedBranchesCount(increment = 1) {
         this._deletedBranchesCount += increment;
@@ -1200,8 +1206,8 @@ class Statistics {
         this._logStaleIssuesAndPullRequestsCount();
         this._logUndoStaleIssuesAndPullRequestsCount();
         this._logClosedIssuesAndPullRequestsCount();
-        this._logDeletedLabelsCount();
-        this._logDeletedCloseLabelsCount();
+        this._logDeletedIssuesAndPullRequestsLabelsCount();
+        this._logDeletedCloseIssuesAndPullRequestsLabelsCount();
         this._logDeletedBranchesCount();
         this._logAddedLabelsCount();
         this._logAddedCommentsCount();
@@ -1242,6 +1248,22 @@ class Statistics {
     }
     _incrementClosedPullRequestsCount(increment = 1) {
         this._closedPullRequestsCount += increment;
+        return this;
+    }
+    _incrementDeletedIssuesLabelsCount(increment = 1) {
+        this._deletedIssuesLabelsCount += increment;
+        return this;
+    }
+    _incrementDeletedPullRequestsLabelsCount(increment = 1) {
+        this._deletedPullRequestsLabelsCount += increment;
+        return this;
+    }
+    _incrementDeletedCloseIssuesLabelsCount(increment = 1) {
+        this._deletedCloseIssuesLabelsCount += increment;
+        return this;
+    }
+    _incrementDeletedClosePullRequestsLabelsCount(increment = 1) {
+        this._deletedClosePullRequestsLabelsCount += increment;
         return this;
     }
     _logProcessedIssuesAndPullRequestsCount() {
@@ -1292,11 +1314,29 @@ class Statistics {
             }
         ]);
     }
-    _logDeletedLabelsCount() {
-        this._logCount('Deleted labels', this._deletedLabelsCount);
+    _logDeletedIssuesAndPullRequestsLabelsCount() {
+        this._logGroup('Deleted items labels', [
+            {
+                name: 'Deleted issues labels',
+                count: this._deletedIssuesLabelsCount
+            },
+            {
+                name: 'Deleted PRs labels',
+                count: this._deletedPullRequestsLabelsCount
+            }
+        ]);
     }
-    _logDeletedCloseLabelsCount() {
-        this._logCount('Deleted close labels', this._deletedCloseLabelsCount);
+    _logDeletedCloseIssuesAndPullRequestsLabelsCount() {
+        this._logGroup('Deleted close items labels', [
+            {
+                name: 'Deleted close issues labels',
+                count: this._deletedCloseIssuesLabelsCount
+            },
+            {
+                name: 'Deleted close PRs labels',
+                count: this._deletedClosePullRequestsLabelsCount
+            }
+        ]);
     }
     _logDeletedBranchesCount() {
         this._logCount('Deleted branches', this._deletedBranchesCount);

@@ -18,8 +18,10 @@ export class Statistics {
   private _operationsCount = 0;
   private _closedIssuesCount = 0;
   private _closedPullRequestsCount = 0;
-  private _deletedLabelsCount = 0;
-  private _deletedCloseLabelsCount = 0;
+  private _deletedIssuesLabelsCount = 0;
+  private _deletedPullRequestsLabelsCount = 0;
+  private _deletedCloseIssuesLabelsCount = 0;
+  private _deletedClosePullRequestsLabelsCount = 0;
   private _deletedBranchesCount = 0;
   private _addedLabelsCount = 0;
   private _addedCommentsCount = 0;
@@ -78,18 +80,26 @@ export class Statistics {
     return this._incrementClosedIssuesCount(increment);
   }
 
-  incrementDeletedLabelsCount(increment: Readonly<number> = 1): Statistics {
-    this._deletedLabelsCount += increment;
-
-    return this;
-  }
-
-  incrementDeletedCloseLabelsCount(
+  incrementDeletedItemsLabelsCount(
+    issue: Readonly<Issue>,
     increment: Readonly<number> = 1
   ): Statistics {
-    this._deletedCloseLabelsCount += increment;
+    if (issue.isPullRequest) {
+      return this._incrementDeletedPullRequestsLabelsCount(increment);
+    }
 
-    return this;
+    return this._incrementDeletedIssuesLabelsCount(increment);
+  }
+
+  incrementDeletedCloseItemsLabelsCount(
+    issue: Readonly<Issue>,
+    increment: Readonly<number> = 1
+  ): Statistics {
+    if (issue.isPullRequest) {
+      return this._incrementDeletedClosePullRequestsLabelsCount(increment);
+    }
+
+    return this._incrementDeletedCloseIssuesLabelsCount(increment);
   }
 
   incrementDeletedBranchesCount(increment: Readonly<number> = 1): Statistics {
@@ -146,8 +156,8 @@ export class Statistics {
     this._logStaleIssuesAndPullRequestsCount();
     this._logUndoStaleIssuesAndPullRequestsCount();
     this._logClosedIssuesAndPullRequestsCount();
-    this._logDeletedLabelsCount();
-    this._logDeletedCloseLabelsCount();
+    this._logDeletedIssuesAndPullRequestsLabelsCount();
+    this._logDeletedCloseIssuesAndPullRequestsLabelsCount();
     this._logDeletedBranchesCount();
     this._logAddedLabelsCount();
     this._logAddedCommentsCount();
@@ -224,6 +234,38 @@ export class Statistics {
     return this;
   }
 
+  private _incrementDeletedIssuesLabelsCount(
+    increment: Readonly<number> = 1
+  ): Statistics {
+    this._deletedIssuesLabelsCount += increment;
+
+    return this;
+  }
+
+  private _incrementDeletedPullRequestsLabelsCount(
+    increment: Readonly<number> = 1
+  ): Statistics {
+    this._deletedPullRequestsLabelsCount += increment;
+
+    return this;
+  }
+
+  private _incrementDeletedCloseIssuesLabelsCount(
+    increment: Readonly<number> = 1
+  ): Statistics {
+    this._deletedCloseIssuesLabelsCount += increment;
+
+    return this;
+  }
+
+  private _incrementDeletedClosePullRequestsLabelsCount(
+    increment: Readonly<number> = 1
+  ): Statistics {
+    this._deletedClosePullRequestsLabelsCount += increment;
+
+    return this;
+  }
+
   private _logProcessedIssuesAndPullRequestsCount(): void {
     this._logGroup('Processed items', [
       {
@@ -276,12 +318,30 @@ export class Statistics {
     ]);
   }
 
-  private _logDeletedLabelsCount(): void {
-    this._logCount('Deleted labels', this._deletedLabelsCount);
+  private _logDeletedIssuesAndPullRequestsLabelsCount(): void {
+    this._logGroup('Deleted items labels', [
+      {
+        name: 'Deleted issues labels',
+        count: this._deletedIssuesLabelsCount
+      },
+      {
+        name: 'Deleted PRs labels',
+        count: this._deletedPullRequestsLabelsCount
+      }
+    ]);
   }
 
-  private _logDeletedCloseLabelsCount(): void {
-    this._logCount('Deleted close labels', this._deletedCloseLabelsCount);
+  private _logDeletedCloseIssuesAndPullRequestsLabelsCount(): void {
+    this._logGroup('Deleted close items labels', [
+      {
+        name: 'Deleted close issues labels',
+        count: this._deletedCloseIssuesLabelsCount
+      },
+      {
+        name: 'Deleted close PRs labels',
+        count: this._deletedClosePullRequestsLabelsCount
+      }
+    ]);
   }
 
   private _logDeletedBranchesCount(): void {

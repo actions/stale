@@ -526,7 +526,7 @@ export class IssuesProcessor {
     if (!skipMessage) {
       try {
         this._operations.consumeOperation();
-        this._statistics?.incrementAddedComment();
+        this._statistics?.incrementAddedItemsComment(issue);
         await this.client.issues.createComment({
           owner: context.repo.owner,
           repo: context.repo.repo,
@@ -540,7 +540,7 @@ export class IssuesProcessor {
 
     try {
       this._operations.consumeOperation();
-      this._statistics?.incrementAddedLabel();
+      this._statistics?.incrementAddedItemsLabel(issue);
       this._statistics?.incrementStaleItemsCount(issue);
       await this.client.issues.addLabels({
         owner: context.repo.owner,
@@ -571,7 +571,7 @@ export class IssuesProcessor {
     if (closeMessage) {
       try {
         this._operations.consumeOperation();
-        this._statistics?.incrementAddedComment();
+        this._statistics?.incrementAddedItemsComment(issue);
         await this.client.issues.createComment({
           owner: context.repo.owner,
           repo: context.repo.repo,
@@ -586,7 +586,7 @@ export class IssuesProcessor {
     if (closeLabel) {
       try {
         this._operations.consumeOperation();
-        this._statistics?.incrementAddedLabel();
+        this._statistics?.incrementAddedItemsLabel(issue);
         await this.client.issues.addLabels({
           owner: context.repo.owner,
           repo: context.repo.repo,

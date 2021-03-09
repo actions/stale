@@ -566,7 +566,7 @@ class IssuesProcessor {
             if (!skipMessage) {
                 try {
                     this._operations.consumeOperation();
-                    (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.incrementAddedComment();
+                    (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.incrementAddedItemsComment(issue);
                     yield this.client.issues.createComment({
                         owner: github_1.context.repo.owner,
                         repo: github_1.context.repo.repo,
@@ -580,7 +580,7 @@ class IssuesProcessor {
             }
             try {
                 this._operations.consumeOperation();
-                (_b = this._statistics) === null || _b === void 0 ? void 0 : _b.incrementAddedLabel();
+                (_b = this._statistics) === null || _b === void 0 ? void 0 : _b.incrementAddedItemsLabel(issue);
                 (_c = this._statistics) === null || _c === void 0 ? void 0 : _c.incrementStaleItemsCount(issue);
                 yield this.client.issues.addLabels({
                     owner: github_1.context.repo.owner,
@@ -607,7 +607,7 @@ class IssuesProcessor {
             if (closeMessage) {
                 try {
                     this._operations.consumeOperation();
-                    (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.incrementAddedComment();
+                    (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.incrementAddedItemsComment(issue);
                     yield this.client.issues.createComment({
                         owner: github_1.context.repo.owner,
                         repo: github_1.context.repo.repo,
@@ -622,7 +622,7 @@ class IssuesProcessor {
             if (closeLabel) {
                 try {
                     this._operations.consumeOperation();
-                    (_b = this._statistics) === null || _b === void 0 ? void 0 : _b.incrementAddedLabel();
+                    (_b = this._statistics) === null || _b === void 0 ? void 0 : _b.incrementAddedItemsLabel(issue);
                     yield this.client.issues.addLabels({
                         owner: github_1.context.repo.owner,
                         repo: github_1.context.repo.repo,
@@ -1125,8 +1125,10 @@ class Statistics {
         this._deletedCloseIssuesLabelsCount = 0;
         this._deletedClosePullRequestsLabelsCount = 0;
         this._deletedBranchesCount = 0;
-        this._addedLabelsCount = 0;
-        this._addedCommentsCount = 0;
+        this._addedIssuesLabelsCount = 0;
+        this._addedPullRequestsLabelsCount = 0;
+        this._addedIssuesCommentsCount = 0;
+        this._addedPullRequestsCommentsCount = 0;
         this._fetchedItemsCount = 0;
         this._fetchedItemsEventsCount = 0;
         this._fetchedItemsCommentsCount = 0;
@@ -1176,13 +1178,17 @@ class Statistics {
         this._deletedBranchesCount += increment;
         return this;
     }
-    incrementAddedLabel(increment = 1) {
-        this._addedLabelsCount += increment;
-        return this;
+    incrementAddedItemsLabel(issue, increment = 1) {
+        if (issue.isPullRequest) {
+            return this._incrementAddedPullRequestsLabel(increment);
+        }
+        return this._incrementAddedIssuesLabel(increment);
     }
-    incrementAddedComment(increment = 1) {
-        this._addedCommentsCount += increment;
-        return this;
+    incrementAddedItemsComment(issue, increment = 1) {
+        if (issue.isPullRequest) {
+            return this._incrementAddedPullRequestsComment(increment);
+        }
+        return this._incrementAddedIssuesComment(increment);
     }
     incrementFetchedItemsCount(increment = 1) {
         this._fetchedItemsCount += increment;
@@ -1209,8 +1215,8 @@ class Statistics {
         this._logDeletedIssuesAndPullRequestsLabelsCount();
         this._logDeletedCloseIssuesAndPullRequestsLabelsCount();
         this._logDeletedBranchesCount();
-        this._logAddedLabelsCount();
-        this._logAddedCommentsCount();
+        this._logAddedIssuesAndPullRequestsLabelsCount();
+        this._logAddedIssuesAndPullRequestsCommentsCount();
         this._logFetchedItemsCount();
         this._logFetchedItemsEventsCount();
         this._logFetchedItemsCommentsCount();
@@ -1264,6 +1270,22 @@ class Statistics {
     }
     _incrementDeletedClosePullRequestsLabelsCount(increment = 1) {
         this._deletedClosePullRequestsLabelsCount += increment;
+        return this;
+    }
+    _incrementAddedIssuesLabel(increment = 1) {
+        this._addedIssuesLabelsCount += increment;
+        return this;
+    }
+    _incrementAddedPullRequestsLabel(increment = 1) {
+        this._addedPullRequestsLabelsCount += increment;
+        return this;
+    }
+    _incrementAddedIssuesComment(increment = 1) {
+        this._addedIssuesCommentsCount += increment;
+        return this;
+    }
+    _incrementAddedPullRequestsComment(increment = 1) {
+        this._addedPullRequestsCommentsCount += increment;
         return this;
     }
     _logProcessedIssuesAndPullRequestsCount() {
@@ -1341,11 +1363,29 @@ class Statistics {
     _logDeletedBranchesCount() {
         this._logCount('Deleted branches', this._deletedBranchesCount);
     }
-    _logAddedLabelsCount() {
-        this._logCount('Added labels', this._addedLabelsCount);
+    _logAddedIssuesAndPullRequestsLabelsCount() {
+        this._logGroup('Added items labels', [
+            {
+                name: 'Added issues labels',
+                count: this._addedIssuesLabelsCount
+            },
+            {
+                name: 'Added PRs labels',
+                count: this._addedPullRequestsLabelsCount
+            }
+        ]);
     }
-    _logAddedCommentsCount() {
-        this._logCount('Added comments', this._addedCommentsCount);
+    _logAddedIssuesAndPullRequestsCommentsCount() {
+        this._logGroup('Added items comments', [
+            {
+                name: 'Added issues comments',
+                count: this._addedIssuesCommentsCount
+            },
+            {
+                name: 'Added PRs comments',
+                count: this._addedPullRequestsCommentsCount
+            }
+        ]);
     }
     _logFetchedItemsCount() {
         this._logCount('Fetched items', this._fetchedItemsCount);

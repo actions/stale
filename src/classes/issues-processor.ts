@@ -94,7 +94,7 @@ export class IssuesProcessor {
 
     for (const issue of issues.values()) {
       const issueLogger: IssueLogger = new IssueLogger(issue);
-      this._statistics?.incrementProcessedItemsCount(issue, 1);
+      this._statistics?.incrementProcessedItemsCount(issue);
 
       issueLogger.info(`Found this $$type last updated ${issue.updated_at}`);
 
@@ -541,7 +541,7 @@ export class IssuesProcessor {
     try {
       this._operations.consumeOperation();
       this._statistics?.incrementAddedLabel();
-      this._statistics?.incrementStaleItemsCount(issue, 1);
+      this._statistics?.incrementStaleItemsCount(issue);
       await this.client.issues.addLabels({
         owner: context.repo.owner,
         repo: context.repo.repo,
@@ -600,7 +600,7 @@ export class IssuesProcessor {
 
     try {
       this._operations.consumeOperation();
-      this._statistics?.incrementClosedIssuesCount();
+      this._statistics?.incrementClosedItemsCount(issue);
       await this.client.issues.update({
         owner: context.repo.owner,
         repo: context.repo.repo,
@@ -747,7 +747,7 @@ export class IssuesProcessor {
     );
 
     await this._removeLabel(issue, staleLabel);
-    this._statistics?.incrementUndoStaleItemsCount(issue, 1);
+    this._statistics?.incrementUndoStaleItemsCount(issue);
   }
 
   private async _removeCloseLabel(

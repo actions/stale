@@ -17,6 +17,7 @@ export class Statistics {
   private _undoStalePullRequestsCount = 0;
   private _operationsCount = 0;
   private _closedIssuesCount = 0;
+  private _closedPullRequestsCount = 0;
   private _deletedLabelsCount = 0;
   private _deletedCloseLabelsCount = 0;
   private _deletedBranchesCount = 0;
@@ -66,10 +67,15 @@ export class Statistics {
     return this;
   }
 
-  incrementClosedIssuesCount(increment: Readonly<number> = 1): Statistics {
-    this._closedIssuesCount += increment;
+  incrementClosedItemsCount(
+    issue: Readonly<Issue>,
+    increment: Readonly<number> = 1
+  ): Statistics {
+    if (issue.isPullRequest) {
+      return this._incrementClosedPullRequestsCount(increment);
+    }
 
-    return this;
+    return this._incrementClosedIssuesCount(increment);
   }
 
   incrementDeletedLabelsCount(increment: Readonly<number> = 1): Statistics {
@@ -139,7 +145,7 @@ export class Statistics {
     this._logProcessedIssuesAndPullRequestsCount();
     this._logStaleIssuesAndPullRequestsCount();
     this._logUndoStaleIssuesAndPullRequestsCount();
-    this._logClosedIssuesCount();
+    this._logClosedIssuesAndPullRequestsCount();
     this._logDeletedLabelsCount();
     this._logDeletedCloseLabelsCount();
     this._logDeletedBranchesCount();
@@ -202,6 +208,22 @@ export class Statistics {
     return this;
   }
 
+  private _incrementClosedIssuesCount(
+    increment: Readonly<number> = 1
+  ): Statistics {
+    this._closedIssuesCount += increment;
+
+    return this;
+  }
+
+  private _incrementClosedPullRequestsCount(
+    increment: Readonly<number> = 1
+  ): Statistics {
+    this._closedPullRequestsCount += increment;
+
+    return this;
+  }
+
   private _logProcessedIssuesAndPullRequestsCount(): void {
     this._logGroup('Processed items', [
       {
@@ -241,8 +263,17 @@ export class Statistics {
     ]);
   }
 
-  private _logClosedIssuesCount(): void {
-    this._logCount('Closed issues', this._closedIssuesCount);
+  private _logClosedIssuesAndPullRequestsCount(): void {
+    this._logGroup('Closed items', [
+      {
+        name: 'Closed issues',
+        count: this._closedIssuesCount
+      },
+      {
+        name: 'Closed PRs',
+        count: this._closedPullRequestsCount
+      }
+    ]);
   }
 
   private _logDeletedLabelsCount(): void {
@@ -314,9 +345,11 @@ export class Statistics {
    */
   private _isGroupValuesPartiallySet(values: IGroupValue[]): boolean {
     return (
-      values.map((value: Readonly<IGroupValue>): boolean => {
-        return value.count > 0;
-      }).length >= 2
+      values
+        .map((value: Readonly<IGroupValue>): boolean => {
+          return value.count > 0;
+        })
+        .filter((isSet: Readonly<boolean>): boolean => isSet).length >= 2
     );
   }
 

@@ -1,11 +1,13 @@
+import * as core from '@actions/core';
 import {context, getOctokit} from '@actions/github';
 import {GitHub} from '@actions/github/lib/utils';
 import {GetResponseTypeFromEndpointMethod} from '@octokit/types';
+import chalk from 'chalk';
+import {Option} from '../enums/option';
 import {getHumanizedDate} from '../functions/dates/get-humanized-date';
 import {isDateMoreRecentThan} from '../functions/dates/is-date-more-recent-than';
 import {isValidDate} from '../functions/dates/is-valid-date';
 import {isLabeled} from '../functions/is-labeled';
-import {isPullRequest} from '../functions/is-pull-request';
 import {shouldMarkWhenStale} from '../functions/should-mark-when-stale';
 import {wordsToList} from '../functions/words-to-list';
 import {IComment} from '../interfaces/comment';
@@ -18,6 +20,7 @@ import {Issue} from './issue';
 import {IssueLogger} from './loggers/issue-logger';
 import {Logger} from './loggers/logger';
 import {Milestones} from './milestones';
+import {Operations} from './operations';
 import {Statistics} from './statistics';
 
 /***
@@ -33,8 +36,8 @@ export class IssuesProcessor {
   }
 
   private readonly _logger: Logger = new Logger();
+  private readonly _operations: Operations;
   private readonly _statistics: Statistics | undefined;
-  private _operationsLeft = 0;
   readonly client: InstanceType<typeof GitHub>;
   readonly options: IIssuesProcessorOptions;
   readonly staleIssues: Issue[] = [];
@@ -44,36 +47,54 @@ export class IssuesProcessor {
 
   constructor(options: IIssuesProcessorOptions) {
     this.options = options;
-    this._operationsLeft = this.options.operationsPerRun;
     this.client = getOctokit(this.options.repoToken);
+    this._operations = new Operations(this.options);
+
+    this._logger.info(chalk.yellow('Starting the stale action process...'));
 
     if (this.options.debugOnly) {
+      this._logger.warning(chalk.yellowBright('Executing in debug mode!'));
       this._logger.warning(
-        'Executing in debug mode. Debug output will be written but no issues will be processed.'
+        chalk.yellowBright(
+          'The debug output will be written but no issues/PRs will be processed.'
+        )
       );
     }
 
     if (this.options.enableStatistics) {
-      this._statistics = new Statistics(this.options);
+      this._statistics = new Statistics();
     }
   }
 
-  async processIssues(page = 1): Promise<number> {
+  async processIssues(page: Readonly<number> = 1): Promise<number> {
     // get the next batch of issues
     const issues: Issue[] = await this.getIssues(page);
     const actor: string = await this.getActor();
 
     if (issues.length <= 0) {
-      this._logger.info('---');
-      this._statistics?.setOperationsLeft(this._operationsLeft).logStats();
-      this._logger.info('No more issues found to process. Exiting.');
+      this._logger.info(
+        chalk.green('No more issues found to process. Exiting...')
+      );
+      this._statistics
+        ?.setOperationsLeft(this._operations.getUnconsumedOperationsCount())
+        .logStats();
 
-      return this._operationsLeft;
+      return this._operations.getOperationsLeftCount();
+    } else {
+      this._logger.info(
+        chalk.yellow(
+          `Processing the batch of issues ${chalk.cyan(
+            `#${page}`
+          )} containing ${chalk.cyan(issues.length)} issue${
+            issues.length > 1 ? 's' : ''
+          }...`
+        )
+      );
     }
 
     for (const issue of issues.values()) {
       const issueLogger: IssueLogger = new IssueLogger(issue);
-      this._statistics?.incrementProcessedItemsCount(issue);
+      this._statistics?.incrementProcessedIssuesCount();
 
       issueLogger.info(`Found this $$type last updated ${issue.updated_at}`);
 
@@ -160,8 +181,10 @@ export class IssuesProcessor {
         // Expecting that GitHub will always set a creation date on the issues and PRs
         // But you never know!
         if (!isValidDate(createdAt)) {
-          throw new Error(
-            `Invalid issue field: "created_at". Expected a valid date`
+          core.setFailed(
+            new Error(
+              `Invalid issue field: "created_at". Expected a valid date`
+            )
           );
         }
 
@@ -207,6 +230,7 @@ export class IssuesProcessor {
       }
 
       const anyOfLabels: string[] = wordsToList(this.options.anyOfLabels);
+
       if (
         anyOfLabels.length &&
         !anyOfLabels.some((label: Readonly<string>): boolean =>
@@ -222,9 +246,6 @@ export class IssuesProcessor {
       const milestones: Milestones = new Milestones(this.options, issue);
 
       if (milestones.shouldExemptMilestones()) {
-        issueLogger.info(
-          `Skipping $$type because it has an exempted milestone`
-        );
         continue; // don't process exempt milestones
       }
 
@@ -266,12 +287,26 @@ export class IssuesProcessor {
       }
     }
 
-    if (this._operationsLeft <= 0) {
+    if (this._operations.hasOperationsLeft()) {
       this._logger.warning(
-        'Reached max number of operations to process. Exiting.'
+        chalk.yellowBright('No more operations left! Exiting...')
       );
+      this._logger.warning(
+        chalk.yellowBright(
+          `If you think that not enough issues were processed you could try to increase the quantity related to the ${this._logger.createOptionLink(
+            Option.OperationsPerRun
+          )} option which is currently set to ${chalk.cyan(
+            this.options.operationsPerRun
+          )}`
+        )
+      );
+
       return 0;
     }
+
+    this._logger.info(
+      chalk.green(`Batch ${chalk.cyan(`#${page}`)} processed.`)
+    );
 
     // do the next batch
     return this.processIssues(page + 1);
@@ -284,7 +319,7 @@ export class IssuesProcessor {
   ): Promise<IComment[]> {
     // find any comments since date on the given issue
     try {
-      this._operationsLeft -= 1;
+      this._operations.consumeOperation();
       this._statistics?.incrementFetchedIssuesCommentsCount();
       const comments = await this.client.issues.listComments({
         owner: context.repo.owner,
@@ -304,7 +339,7 @@ export class IssuesProcessor {
     let actor;
 
     try {
-      this._operationsLeft -= 1;
+      this._operations.consumeOperation();
       actor = await this.client.users.getAuthenticated();
     } catch (error) {
       return context.actor;
@@ -320,8 +355,7 @@ export class IssuesProcessor {
     type OctoKitIssueList = GetResponseTypeFromEndpointMethod<typeof endpoint>;
 
     try {
-      this._operationsLeft -= 1;
-      this._statistics?.incrementFetchedIssuesCount();
+      this._operations.consumeOperation();
       const issueResult: OctoKitIssueList = await this.client.issues.listForRepo(
         {
           owner: context.repo.owner,
@@ -332,6 +366,7 @@ export class IssuesProcessor {
           page
         }
       );
+      this._statistics?.incrementFetchedIssuesCount(issueResult.data.length);
 
       return issueResult.data.map(
         (issue: Readonly<IIssue>): Issue => new Issue(this.options, issue)
@@ -352,7 +387,7 @@ export class IssuesProcessor {
 
     issueLogger.info(`Checking for label on $$type`);
 
-    this._operationsLeft -= 1;
+    this._operations.consumeOperation();
     this._statistics?.incrementFetchedIssuesEventsCount();
     const options = this.client.issues.listEvents.endpoint.merge({
       owner: context.repo.owner,
@@ -396,8 +431,7 @@ export class IssuesProcessor {
     );
     issueLogger.info(`$$type has been commented on: ${issueHasComments}`);
 
-    const isPr: boolean = isPullRequest(issue);
-    const daysBeforeClose: number = isPr
+    const daysBeforeClose: number = issue.isPullRequest
       ? this._getDaysBeforePrClose()
       : this._getDaysBeforeIssueClose();
 
@@ -491,7 +525,7 @@ export class IssuesProcessor {
 
     if (!skipMessage) {
       try {
-        this._operationsLeft -= 1;
+        this._operations.consumeOperation();
         this._statistics?.incrementAddedComment();
         await this.client.issues.createComment({
           owner: context.repo.owner,
@@ -505,9 +539,9 @@ export class IssuesProcessor {
     }
 
     try {
-      this._operationsLeft -= 1;
+      this._operations.consumeOperation();
       this._statistics?.incrementAddedLabel();
-      this._statistics?.incrementStaleItemsCount(issue);
+      this._statistics?.incrementStaleIssuesCount();
       await this.client.issues.addLabels({
         owner: context.repo.owner,
         repo: context.repo.repo,
@@ -536,7 +570,7 @@ export class IssuesProcessor {
 
     if (closeMessage) {
       try {
-        this._operationsLeft -= 1;
+        this._operations.consumeOperation();
         this._statistics?.incrementAddedComment();
         await this.client.issues.createComment({
           owner: context.repo.owner,
@@ -551,7 +585,7 @@ export class IssuesProcessor {
 
     if (closeLabel) {
       try {
-        this._operationsLeft -= 1;
+        this._operations.consumeOperation();
         this._statistics?.incrementAddedLabel();
         await this.client.issues.addLabels({
           owner: context.repo.owner,
@@ -565,8 +599,8 @@ export class IssuesProcessor {
     }
 
     try {
-      this._operationsLeft -= 1;
-      this._statistics?.incrementClosedItemsCount(issue);
+      this._operations.consumeOperation();
+      this._statistics?.incrementClosedIssuesCount();
       await this.client.issues.update({
         owner: context.repo.owner,
         repo: context.repo.repo,
@@ -588,7 +622,7 @@ export class IssuesProcessor {
     }
 
     try {
-      this._operationsLeft -= 1;
+      this._operations.consumeOperation();
       this._statistics?.incrementFetchedPullRequestsCount();
       const pullRequest = await this.client.pulls.get({
         owner: context.repo.owner,
@@ -625,7 +659,7 @@ export class IssuesProcessor {
     issueLogger.info(`Deleting branch ${branch} from closed $$type`);
 
     try {
-      this._operationsLeft -= 1;
+      this._operations.consumeOperation();
       this._statistics?.incrementDeletedBranchesCount();
       await this.client.git.deleteRef({
         owner: context.repo.owner,
@@ -646,13 +680,12 @@ export class IssuesProcessor {
     issueLogger.info(`Removing label "${label}" from $$type`);
     this.removedLabelIssues.push(issue);
 
-    // @todo remove the debug only to be able to test the code below
     if (this.options.debugOnly) {
       return;
     }
 
     try {
-      this._operationsLeft -= 1;
+      this._operations.consumeOperation();
       this._statistics?.incrementDeletedLabelsCount();
       await this.client.issues.removeLabel({
         owner: context.repo.owner,
@@ -714,7 +747,7 @@ export class IssuesProcessor {
     );
 
     await this._removeLabel(issue, staleLabel);
-    this._statistics?.incrementUndoStaleItemsCount(issue);
+    this._statistics?.incrementUndoStaleIssuesCount();
   }
 
   private async _removeCloseLabel(

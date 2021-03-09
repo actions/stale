@@ -1,4 +1,4 @@
-import * as core from '@actions/core';
+import chalk from 'chalk';
 import {Issue} from '../issue';
 import {Logger} from './logger';
 
@@ -15,23 +15,24 @@ import {Logger} from './logger';
  * @example
  * warning('The $$type will stale') => "The pull request will stale"
  */
-export class IssueLogger implements Logger {
+export class IssueLogger extends Logger {
   private readonly _issue: Issue;
 
   constructor(issue: Issue) {
+    super();
     this._issue = issue;
   }
 
-  warning(message: Readonly<string>): void {
-    core.warning(this._format(message));
+  warning(...message: string[]): void {
+    super.warning(this._format(...message));
   }
 
-  info(message: Readonly<string>): void {
-    core.info(this._format(message));
+  info(...message: string[]): void {
+    super.info(this._format(...message));
   }
 
-  error(message: Readonly<string>): void {
-    core.error(this._format(message));
+  error(...message: string[]): void {
+    super.error(this._format(...message));
   }
 
   private _replaceTokens(message: Readonly<string>): string {
@@ -51,14 +52,28 @@ export class IssueLogger implements Logger {
   }
 
   private _prefixWithIssueNumber(message: Readonly<string>): string {
-    return `[#${this._getIssueNumber()}] ${message}`;
+    return `${this._getPrefix()} ${message}`;
   }
 
   private _getIssueNumber(): number {
     return this._issue.number;
   }
 
-  private _format(message: Readonly<string>): string {
-    return this._prefixWithIssueNumber(this._replaceTokens(message));
+  private _format(...message: string[]): string {
+    return this._prefixWithIssueNumber(this._replaceTokens(message.join(' ')));
+  }
+
+  private _getPrefix(): string {
+    return this._issue.isPullRequest
+      ? this._getPullRequestPrefix()
+      : this._getIssuePrefix();
+  }
+
+  private _getIssuePrefix(): string {
+    return chalk.red(`[#${this._getIssueNumber()}]`);
+  }
+
+  private _getPullRequestPrefix(): string {
+    return chalk.blue(`[#${this._getIssueNumber()}]`);
   }
 }

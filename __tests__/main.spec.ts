@@ -25,8 +25,8 @@ test('processing an issue with no label will make it stale and close it, if it i
   // process our fake issue list
   await processor.processIssues(1);
 
-  expect(processor.staleIssues).toHaveLength(1);
-  expect(processor.closedIssues).toHaveLength(1);
+  expect(processor.staleIssues.length).toEqual(1);
+  expect(processor.closedIssues.length).toEqual(1);
 });
 
 test('processing an issue with no label and a start date as ECMAScript epoch in seconds being before the issue creation date will not make it stale nor close it when it is old enough and days-before-close is set to 0', async () => {
@@ -305,9 +305,9 @@ test('processing an issue with no label will make it stale and close it, if it i
   // process our fake issue list
   await processor.processIssues(1);
 
-  expect(processor.staleIssues).toHaveLength(1);
-  expect(processor.closedIssues).toHaveLength(1);
-  expect(processor.deletedBranchIssues).toHaveLength(0);
+  expect(processor.staleIssues.length).toEqual(1);
+  expect(processor.closedIssues.length).toEqual(1);
+  expect(processor.deletedBranchIssues.length).toEqual(0);
 });
 
 test('processing an issue with no label will make it stale and not close it, if it is old enough only if days-before-close is set to > 0 and days-before-issue-close is set to > 0', async () => {
@@ -330,8 +330,8 @@ test('processing an issue with no label will make it stale and not close it, if 
   // process our fake issue list
   await processor.processIssues(1);
 
-  expect(processor.staleIssues).toHaveLength(1);
-  expect(processor.closedIssues).toHaveLength(0);
+  expect(processor.staleIssues.length).toEqual(1);
+  expect(processor.closedIssues.length).toEqual(0);
 });
 
 test('processing an issue with no label will make it stale and not close it if days-before-close is set to > 0', async () => {
@@ -353,8 +353,8 @@ test('processing an issue with no label will make it stale and not close it if d
   // process our fake issue list
   await processor.processIssues(1);
 
-  expect(processor.staleIssues).toHaveLength(1);
-  expect(processor.closedIssues).toHaveLength(0);
+  expect(processor.staleIssues.length).toEqual(1);
+  expect(processor.closedIssues.length).toEqual(0);
 });
 
 test('processing an issue with no label will make it stale and not close it if days-before-close is set to -1 and days-before-issue-close is set to > 0', async () => {
@@ -377,8 +377,8 @@ test('processing an issue with no label will make it stale and not close it if d
   // process our fake issue list
   await processor.processIssues(1);
 
-  expect(processor.staleIssues).toHaveLength(1);
-  expect(processor.closedIssues).toHaveLength(0);
+  expect(processor.staleIssues.length).toEqual(1);
+  expect(processor.closedIssues.length).toEqual(0);
 });
 
 test('processing an issue with no label will not make it stale if days-before-stale is set to -1', async () => {
@@ -401,8 +401,8 @@ test('processing an issue with no label will not make it stale if days-before-st
   // process our fake issue list
   await processor.processIssues(1);
 
-  expect(processor.staleIssues).toHaveLength(0);
-  expect(processor.closedIssues).toHaveLength(0);
+  expect(processor.staleIssues.length).toEqual(0);
+  expect(processor.closedIssues.length).toEqual(0);
 });
 
 test('processing an issue with no label will not make it stale if days-before-stale and days-before-issue-stale are set to -1', async () => {
@@ -426,8 +426,8 @@ test('processing an issue with no label will not make it stale if days-before-st
   // process our fake issue list
   await processor.processIssues(1);
 
-  expect(processor.staleIssues).toHaveLength(0);
-  expect(processor.closedIssues).toHaveLength(0);
+  expect(processor.staleIssues.length).toEqual(0);
+  expect(processor.closedIssues.length).toEqual(0);
 });
 
 test('processing an issue with no label will make it stale but not close it', async () => {
@@ -454,8 +454,8 @@ test('processing an issue with no label will make it stale but not close it', as
   // process our fake issue list
   await processor.processIssues(1);
 
-  expect(processor.staleIssues).toHaveLength(1);
-  expect(processor.closedIssues).toHaveLength(0);
+  expect(processor.staleIssues.length).toEqual(1);
+  expect(processor.closedIssues.length).toEqual(0);
 });
 
 test('processing a stale issue will close it', async () => {
@@ -485,8 +485,8 @@ test('processing a stale issue will close it', async () => {
   // process our fake issue list
   await processor.processIssues(1);
 
-  expect(processor.staleIssues).toHaveLength(0);
-  expect(processor.closedIssues).toHaveLength(1);
+  expect(processor.staleIssues.length).toEqual(0);
+  expect(processor.closedIssues.length).toEqual(1);
 });
 
 test('processing a stale issue containing a space in the label will close it', async () => {
@@ -516,8 +516,8 @@ test('processing a stale issue containing a space in the label will close it', a
   // process our fake issue list
   await processor.processIssues(1);
 
-  expect(processor.staleIssues).toHaveLength(0);
-  expect(processor.closedIssues).toHaveLength(1);
+  expect(processor.staleIssues.length).toEqual(0);
+  expect(processor.closedIssues.length).toEqual(1);
 });
 
 test('processing a stale issue containing a slash in the label will close it', async () => {
@@ -547,8 +547,8 @@ test('processing a stale issue containing a slash in the label will close it', a
   // process our fake issue list
   await processor.processIssues(1);
 
-  expect(processor.staleIssues).toHaveLength(0);
-  expect(processor.closedIssues).toHaveLength(1);
+  expect(processor.staleIssues.length).toEqual(0);
+  expect(processor.closedIssues.length).toEqual(1);
 });
 
 test('processing a stale issue will close it when days-before-issue-stale override days-before-stale', async () => {
@@ -579,8 +579,8 @@ test('processing a stale issue will close it when days-before-issue-stale overri
   // process our fake issue list
   await processor.processIssues(1);
 
-  expect(processor.staleIssues).toHaveLength(0);
-  expect(processor.closedIssues).toHaveLength(1);
+  expect(processor.staleIssues.length).toEqual(0);
+  expect(processor.closedIssues.length).toEqual(1);
 });
 
 test('processing a stale PR will close it', async () => {
@@ -610,8 +610,8 @@ test('processing a stale PR will close it', async () => {
   // process our fake issue list
   await processor.processIssues(1);
 
-  expect(processor.staleIssues).toHaveLength(0);
-  expect(processor.closedIssues).toHaveLength(1);
+  expect(processor.staleIssues.length).toEqual(0);
+  expect(processor.closedIssues.length).toEqual(1);
 });
 
 test('processing a stale PR will close it when days-before-pr-stale override days-before-stale', async () => {
@@ -642,8 +642,8 @@ test('processing a stale PR will close it when days-before-pr-stale override day
   // process our fake issue list
   await processor.processIssues(1);
 
-  expect(processor.staleIssues).toHaveLength(0);
-  expect(processor.closedIssues).toHaveLength(1);
+  expect(processor.staleIssues.length).toEqual(0);
+  expect(processor.closedIssues.length).toEqual(1);
 });
 
 test('processing a stale issue will close it even if configured not to mark as stale', async () => {
@@ -674,8 +674,8 @@ test('processing a stale issue will close it even if configured not to mark as s
   // process our fake issue list
   await processor.processIssues(1);
 
-  expect(processor.staleIssues).toHaveLength(0);
-  expect(processor.closedIssues).toHaveLength(1);
+  expect(processor.staleIssues.length).toEqual(0);
+  expect(processor.closedIssues.length).toEqual(1);
 });
 
 test('processing a stale issue will close it even if configured not to mark as stale when days-before-issue-stale override days-before-stale', async () => {
@@ -707,8 +707,8 @@ test('processing a stale issue will close it even if configured not to mark as s
   // process our fake issue list
   await processor.processIssues(1);
 
-  expect(processor.staleIssues).toHaveLength(0);
-  expect(processor.closedIssues).toHaveLength(1);
+  expect(processor.staleIssues.length).toEqual(0);
+  expect(processor.closedIssues.length).toEqual(1);
 });
 
 test('processing a stale PR will close it even if configured not to mark as stale', async () => {
@@ -739,8 +739,8 @@ test('processing a stale PR will close it even if configured not to mark as stal
   // process our fake issue list
   await processor.processIssues(1);
 
-  expect(processor.staleIssues).toHaveLength(0);
-  expect(processor.closedIssues).toHaveLength(1);
+  expect(processor.staleIssues.length).toEqual(0);
+  expect(processor.closedIssues.length).toEqual(1);
 });
 
 test('processing a stale PR will close it even if configured not to mark as stale when days-before-pr-stale override days-before-stale', async () => {
@@ -772,8 +772,8 @@ test('processing a stale PR will close it even if configured not to mark as stal
   // process our fake issue list
   await processor.processIssues(1);
 
-  expect(processor.staleIssues).toHaveLength(0);
-  expect(processor.closedIssues).toHaveLength(1);
+  expect(processor.staleIssues.length).toEqual(0);
+  expect(processor.closedIssues.length).toEqual(1);
 });
 
 test('closed issues will not be marked stale', async () => {
@@ -799,8 +799,8 @@ test('closed issues will not be marked stale', async () => {
   // process our fake issue list
   await processor.processIssues(1);
 
-  expect(processor.staleIssues).toHaveLength(0);
-  expect(processor.closedIssues).toHaveLength(0);
+  expect(processor.staleIssues.length).toEqual(0);
+  expect(processor.closedIssues.length).toEqual(0);
 });
 
 test('stale closed issues will not be closed', async () => {
@@ -827,8 +827,8 @@ test('stale closed issues will not be closed', async () => {
   // process our fake issue list
   await processor.processIssues(1);
 
-  expect(processor.staleIssues).toHaveLength(0);
-  expect(processor.closedIssues).toHaveLength(0);
+  expect(processor.staleIssues.length).toEqual(0);
+  expect(processor.closedIssues.length).toEqual(0);
 });
 
 test('closed prs will not be marked stale', async () => {
@@ -855,8 +855,8 @@ test('closed prs will not be marked stale', async () => {
   // process our fake issue list
   await processor.processIssues(1);
 
-  expect(processor.staleIssues).toHaveLength(0);
-  expect(processor.closedIssues).toHaveLength(0);
+  expect(processor.staleIssues.length).toEqual(0);
+  expect(processor.closedIssues.length).toEqual(0);
 });
 
 test('stale closed prs will not be closed', async () => {
@@ -883,8 +883,8 @@ test('stale closed prs will not be closed', async () => {
   // process our fake issue list
   await processor.processIssues(1);
 
-  expect(processor.staleIssues).toHaveLength(0);
-  expect(processor.closedIssues).toHaveLength(0);
+  expect(processor.staleIssues.length).toEqual(0);
+  expect(processor.closedIssues.length).toEqual(0);
 });
 
 test('locked issues will not be marked stale', async () => {
@@ -910,8 +910,8 @@ test('locked issues will not be marked stale', async () => {
   // process our fake issue list
   await processor.processIssues(1);
 
-  expect(processor.staleIssues).toHaveLength(0);
-  expect(processor.closedIssues).toHaveLength(0);
+  expect(processor.staleIssues.length).toEqual(0);
+  expect(processor.closedIssues.length).toEqual(0);
 });
 
 test('stale locked issues will not be closed', async () => {
@@ -939,8 +939,8 @@ test('stale locked issues will not be closed', async () => {
   // process our fake issue list
   await processor.processIssues(1);
 
-  expect(processor.staleIssues).toHaveLength(0);
-  expect(processor.closedIssues).toHaveLength(0);
+  expect(processor.staleIssues.length).toEqual(0);
+  expect(processor.closedIssues.length).toEqual(0);
 });
 
 test('locked prs will not be marked stale', async () => {
@@ -966,8 +966,8 @@ test('locked prs will not be marked stale', async () => {
   // process our fake issue list
   await processor.processIssues(1);
 
-  expect(processor.staleIssues).toHaveLength(0);
-  expect(processor.closedIssues).toHaveLength(0);
+  expect(processor.staleIssues.length).toEqual(0);
+  expect(processor.closedIssues.length).toEqual(0);
 });
 
 test('stale locked prs will not be closed', async () => {
@@ -995,8 +995,8 @@ test('stale locked prs will not be closed', async () => {
   // process our fake issue list
   await processor.processIssues(1);
 
-  expect(processor.staleIssues).toHaveLength(0);
-  expect(processor.closedIssues).toHaveLength(0);
+  expect(processor.staleIssues.length).toEqual(0);
+  expect(processor.closedIssues.length).toEqual(0);
 });
 
 test('exempt issue labels will not be marked stale', async () => {
@@ -1055,8 +1055,8 @@ test('exempt issue labels will not be marked stale (multi issue label with space
   // process our fake issue list
   await processor.processIssues(1);
 
-  expect(processor.staleIssues).toHaveLength(0);
-  expect(processor.closedIssues).toHaveLength(0);
+  expect(processor.staleIssues.length).toEqual(0);
+  expect(processor.closedIssues.length).toEqual(0);
 });
 
 test('exempt issue labels will not be marked stale (multi issue label)', async () => {
@@ -1084,9 +1084,9 @@ test('exempt issue labels will not be marked stale (multi issue label)', async (
   // process our fake issue list
   await processor.processIssues(1);
 
-  expect(processor.staleIssues).toHaveLength(0);
-  expect(processor.closedIssues).toHaveLength(0);
-  expect(processor.removedLabelIssues).toHaveLength(0);
+  expect(processor.staleIssues.length).toEqual(0);
+  expect(processor.closedIssues.length).toEqual(0);
+  expect(processor.removedLabelIssues.length).toEqual(0);
 });
 
 test('exempt pr labels will not be marked stale', async () => {
@@ -1131,7 +1131,7 @@ test('exempt pr labels will not be marked stale', async () => {
   // process our fake issue list
   await processor.processIssues(1);
 
-  expect(processor.staleIssues).toHaveLength(2); // PR should get processed even though it has an exempt **issue** label
+  expect(processor.staleIssues.length).toEqual(2); // PR should get processed even though it has an exempt **issue** label
 });
 
 test('exempt issue labels will not be marked stale and will remove the existing stale label', async () => {
@@ -1215,8 +1215,8 @@ test('stale issues should not be closed if days is set to -1', async () => {
   // process our fake issue list
   await processor.processIssues(1);
 
-  expect(processor.closedIssues).toHaveLength(0);
-  expect(processor.removedLabelIssues).toHaveLength(0);
+  expect(processor.closedIssues.length).toEqual(0);
+  expect(processor.removedLabelIssues.length).toEqual(0);
 });
 
 test('stale label should be removed if a comment was added to a stale issue', async () => {
@@ -1251,9 +1251,9 @@ test('stale label should be removed if a comment was added to a stale issue', as
   // process our fake issue list
   await processor.processIssues(1);
 
-  expect(processor.closedIssues).toHaveLength(0);
-  expect(processor.staleIssues).toHaveLength(0);
-  expect(processor.removedLabelIssues).toHaveLength(1);
+  expect(processor.closedIssues.length).toEqual(0);
+  expect(processor.staleIssues.length).toEqual(0);
+  expect(processor.removedLabelIssues.length).toEqual(1);
 });
 
 test('stale label should not be removed if a comment was added by the bot (and the issue should be closed)', async () => {
@@ -1289,9 +1289,9 @@ test('stale label should not be removed if a comment was added by the bot (and t
   // process our fake issue list
   await processor.processIssues(1);
 
-  expect(processor.closedIssues).toHaveLength(1);
-  expect(processor.staleIssues).toHaveLength(0);
-  expect(processor.removedLabelIssues).toHaveLength(0);
+  expect(processor.closedIssues.length).toEqual(1);
+  expect(processor.staleIssues.length).toEqual(0);
+  expect(processor.removedLabelIssues.length).toEqual(0);
 });
 
 test('stale label containing a space should be removed if a comment was added to a stale issue', async () => {
@@ -1322,9 +1322,9 @@ test('stale label containing a space should be removed if a comment was added to
   // process our fake issue list
   await processor.processIssues(1);
 
-  expect(processor.closedIssues).toHaveLength(0);
-  expect(processor.staleIssues).toHaveLength(0);
-  expect(processor.removedLabelIssues).toHaveLength(1);
+  expect(processor.closedIssues.length).toEqual(0);
+  expect(processor.staleIssues.length).toEqual(0);
+  expect(processor.removedLabelIssues.length).toEqual(1);
 });
 
 test('stale issues should not be closed until after the closed number of days', async () => {
@@ -1354,9 +1354,9 @@ test('stale issues should not be closed until after the closed number of days', 
   // process our fake issue list
   await processor.processIssues(1);
 
-  expect(processor.closedIssues).toHaveLength(0);
-  expect(processor.removedLabelIssues).toHaveLength(0);
-  expect(processor.staleIssues).toHaveLength(1);
+  expect(processor.closedIssues.length).toEqual(0);
+  expect(processor.removedLabelIssues.length).toEqual(0);
+  expect(processor.staleIssues.length).toEqual(1);
 });
 
 test('stale issues should be closed if the closed nubmer of days (additive) is also passed', async () => {
@@ -1387,9 +1387,9 @@ test('stale issues should be closed if the closed nubmer of days (additive) is a
   // process our fake issue list
   await processor.processIssues(1);
 
-  expect(processor.closedIssues).toHaveLength(1);
-  expect(processor.removedLabelIssues).toHaveLength(0);
-  expect(processor.staleIssues).toHaveLength(0);
+  expect(processor.closedIssues.length).toEqual(1);
+  expect(processor.removedLabelIssues.length).toEqual(0);
+  expect(processor.staleIssues.length).toEqual(0);
 });
 
 test('stale issues should not be closed until after the closed number of days (long)', async () => {
@@ -1419,9 +1419,9 @@ test('stale issues should not be closed until after the closed number of days (l
   // process our fake issue list
   await processor.processIssues(1);
 
-  expect(processor.closedIssues).toHaveLength(0);
-  expect(processor.removedLabelIssues).toHaveLength(0);
-  expect(processor.staleIssues).toHaveLength(1);
+  expect(processor.closedIssues.length).toEqual(0);
+  expect(processor.removedLabelIssues.length).toEqual(0);
+  expect(processor.staleIssues.length).toEqual(1);
 });
 
 test('skips stale message on issues when skip-stale-issue-message is set', async () => {
@@ -1455,9 +1455,9 @@ test('skips stale message on issues when skip-stale-issue-message is set', async
   await processor.processIssues(1);
 
   // issue should be staled
-  expect(processor.closedIssues).toHaveLength(0);
-  expect(processor.removedLabelIssues).toHaveLength(0);
-  expect(processor.staleIssues).toHaveLength(1);
+  expect(processor.closedIssues.length).toEqual(0);
+  expect(processor.removedLabelIssues.length).toEqual(0);
+  expect(processor.staleIssues.length).toEqual(1);
 
   // comment should not be created
   expect(markSpy).toHaveBeenCalledWith(
@@ -1500,9 +1500,9 @@ test('skips stale message on prs when skip-stale-pr-message is set', async () =>
   await processor.processIssues(1);
 
   // issue should be staled
-  expect(processor.closedIssues).toHaveLength(0);
-  expect(processor.removedLabelIssues).toHaveLength(0);
-  expect(processor.staleIssues).toHaveLength(1);
+  expect(processor.closedIssues.length).toEqual(0);
+  expect(processor.removedLabelIssues.length).toEqual(0);
+  expect(processor.staleIssues.length).toEqual(1);
 
   // comment should not be created
   expect(markSpy).toHaveBeenCalledWith(
@@ -1543,9 +1543,9 @@ test('not providing state takes precedence over skipStaleIssueMessage', async ()
   await processor.processIssues(1);
 
   // issue should be staled
-  expect(processor.closedIssues).toHaveLength(0);
-  expect(processor.removedLabelIssues).toHaveLength(0);
-  expect(processor.staleIssues).toHaveLength(0);
+  expect(processor.closedIssues.length).toEqual(0);
+  expect(processor.removedLabelIssues.length).toEqual(0);
+  expect(processor.staleIssues.length).toEqual(0);
 });
 
 test('not providing stalePrMessage takes precedence over skipStalePrMessage', async () => {
@@ -1577,9 +1577,9 @@ test('not providing stalePrMessage takes precedence over skipStalePrMessage', as
   await processor.processIssues(1);
 
   // issue should be staled
-  expect(processor.closedIssues).toHaveLength(0);
-  expect(processor.removedLabelIssues).toHaveLength(0);
-  expect(processor.staleIssues).toHaveLength(0);
+  expect(processor.closedIssues.length).toEqual(0);
+  expect(processor.removedLabelIssues.length).toEqual(0);
+  expect(processor.staleIssues.length).toEqual(0);
 });
 
 test('git branch is deleted when option is enabled', async () => {
@@ -1606,10 +1606,10 @@ test('git branch is deleted when option is enabled', async () => {
 
   await processor.processIssues(1);
 
-  expect(processor.closedIssues).toHaveLength(1);
-  expect(processor.removedLabelIssues).toHaveLength(0);
-  expect(processor.staleIssues).toHaveLength(0);
-  expect(processor.deletedBranchIssues).toHaveLength(1);
+  expect(processor.closedIssues.length).toEqual(1);
+  expect(processor.removedLabelIssues.length).toEqual(0);
+  expect(processor.staleIssues.length).toEqual(0);
+  expect(processor.deletedBranchIssues.length).toEqual(1);
 });
 
 test('git branch is not deleted when issue is not pull request', async () => {
@@ -1636,10 +1636,10 @@ test('git branch is not deleted when issue is not pull request', async () => {
 
   await processor.processIssues(1);
 
-  expect(processor.closedIssues).toHaveLength(1);
-  expect(processor.removedLabelIssues).toHaveLength(0);
-  expect(processor.staleIssues).toHaveLength(0);
-  expect(processor.deletedBranchIssues).toHaveLength(0);
+  expect(processor.closedIssues.length).toEqual(1);
+  expect(processor.removedLabelIssues.length).toEqual(0);
+  expect(processor.staleIssues.length).toEqual(0);
+  expect(processor.deletedBranchIssues.length).toEqual(0);
 });
 
 test('an issue without a milestone will be marked as stale', async () => {
@@ -1938,8 +1938,8 @@ test('processing an issue opened since 2 days and with the option "daysBeforeIss
   // process our fake issue list
   await processor.processIssues(1);
 
-  expect(processor.staleIssues).toHaveLength(0);
-  expect(processor.closedIssues).toHaveLength(0);
+  expect(processor.staleIssues.length).toEqual(0);
+  expect(processor.closedIssues.length).toEqual(0);
 });
 
 test('processing an issue opened since 2 days and with the option "daysBeforeIssueStale" at 2 will make it stale', async () => {
@@ -1965,8 +1965,8 @@ test('processing an issue opened since 2 days and with the option "daysBeforeIss
   // process our fake issue list
   await processor.processIssues(1);
 
-  expect(processor.staleIssues).toHaveLength(1);
-  expect(processor.closedIssues).toHaveLength(0);
+  expect(processor.staleIssues.length).toEqual(1);
+  expect(processor.closedIssues.length).toEqual(0);
 });
 
 test('processing an issue opened since 2 days and with the option "daysBeforeIssueStale" at 1 will make it stale', async () => {
@@ -1992,8 +1992,8 @@ test('processing an issue opened since 2 days and with the option "daysBeforeIss
   // process our fake issue list
   await processor.processIssues(1);
 
-  expect(processor.staleIssues).toHaveLength(1);
-  expect(processor.closedIssues).toHaveLength(0);
+  expect(processor.staleIssues.length).toEqual(1);
+  expect(processor.closedIssues.length).toEqual(0);
 });
 
 test('processing a pull request opened since 2 days and with the option "daysBeforePrStale" at 3 will not make it stale', async () => {
@@ -2026,8 +2026,8 @@ test('processing a pull request opened since 2 days and with the option "daysBef
   // process our fake issue list
   await processor.processIssues(1);
 
-  expect(processor.staleIssues).toHaveLength(0);
-  expect(processor.closedIssues).toHaveLength(0);
+  expect(processor.staleIssues.length).toEqual(0);
+  expect(processor.closedIssues.length).toEqual(0);
 });
 
 test('processing a pull request opened since 2 days and with the option "daysBeforePrStale" at 2 will make it stale', async () => {
@@ -2060,8 +2060,8 @@ test('processing a pull request opened since 2 days and with the option "daysBef
   // process our fake issue list
   await processor.processIssues(1);
 
-  expect(processor.staleIssues).toHaveLength(1);
-  expect(processor.closedIssues).toHaveLength(0);
+  expect(processor.staleIssues.length).toEqual(1);
+  expect(processor.closedIssues.length).toEqual(0);
 });
 
 test('processing a pull request opened since 2 days and with the option "daysBeforePrStale" at 1 will make it stale', async () => {
@@ -2094,8 +2094,8 @@ test('processing a pull request opened since 2 days and with the option "daysBef
   // process our fake issue list
   await processor.processIssues(1);
 
-  expect(processor.staleIssues).toHaveLength(1);
-  expect(processor.closedIssues).toHaveLength(0);
+  expect(processor.staleIssues.length).toEqual(1);
+  expect(processor.closedIssues.length).toEqual(0);
 });
 
 test('processing a previously closed issue with a close label will remove the close label', async () => {

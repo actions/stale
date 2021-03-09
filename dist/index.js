@@ -512,8 +512,10 @@ class IssuesProcessor {
             const issueHasUpdate = IssuesProcessor._updatedSince(issue.updated_at, daysBeforeClose);
             issueLogger.info(`$$type has been updated: ${issueHasUpdate}`);
             // should we un-stale this issue?
-            if (this.options.removeStaleWhenUpdated && issueHasComments) {
+            if (this._shouldRemoveStaleWhenUpdated(issue) && issueHasComments) {
                 yield this._removeStaleLabel(issue, staleLabel);
+                issueLogger.info(`Skipping the process since the $$type is now un-stale`);
+                return; // nothing to do because it is no longer stale
             }
             // now start closing logic
             if (daysBeforeClose < 0) {
@@ -706,7 +708,7 @@ class IssuesProcessor {
         var _a;
         return __awaiter(this, void 0, void 0, function* () {
             const issueLogger = new issue_logger_1.IssueLogger(issue);
-            issueLogger.info(`Removing label "${label}" from $$type`);
+            issueLogger.info(`Removing the label "${chalk_1.default.cyan(label)}" from $$type...`);
             this.removedLabelIssues.push(issue);
             if (this.options.debugOnly) {
                 return;
@@ -720,9 +722,10 @@ class IssuesProcessor {
                     issue_number: issue.number,
                     name: label
                 });
+                issueLogger.info(`The label "${chalk_1.default.cyan(label)}" was removed`);
             }
             catch (error) {
-                issueLogger.error(`Error removing a label: ${error.message}`);
+                issueLogger.error(`Error when removing the label: "${chalk_1.default.cyan(error.message)}"`);
             }
         });
     }
@@ -759,6 +762,24 @@ class IssuesProcessor {
         }
         return this.options.onlyLabels;
     }
+    _shouldRemoveStaleWhenUpdated(issue) {
+        if (issue.isPullRequest) {
+            if (this.options.removePrStaleWhenUpdated === true) {
+                return true;
+            }
+            else if (this.options.removePrStaleWhenUpdated === false) {
+                return false;
+            }
+            return this.options.removeStaleWhenUpdated;
+        }
+        if (this.options.removeIssueStaleWhenUpdated === true) {
+            return true;
+        }
+        else if (this.options.removeIssueStaleWhenUpdated === false) {
+            return false;
+        }
+        return this.options.removeStaleWhenUpdated;
+    }
     _removeStaleLabel(issue, staleLabel) {
         var _a;
         return __awaiter(this, void 0, void 0, function* () {
@@ -778,7 +799,7 @@ class IssuesProcessor {
                 return Promise.resolve();
             }
             if (is_labeled_1.isLabeled(issue, closeLabel)) {
-                issueLogger.info(`The $$type has a close label "${closeLabel}". Removing the close label...`);
+                issueLogger.info(`The $$type has a close label "${chalk_1.default.cyan(closeLabel)}". Removing the close label...`);
                 yield this._removeLabel(issue, closeLabel);
                 (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.incrementDeletedCloseLabelsCount();
             }
@@ -1548,6 +1569,8 @@ function _getAndValidateArgs() {
         anyOfLabels: core.getInput('any-of-labels'),
         operationsPerRun: parseInt(core.getInput('operations-per-run', { required: true })),
         removeStaleWhenUpdated: !(core.getInput('remove-stale-when-updated') === 'false'),
+        removeIssueStaleWhenUpdated: _toOptionalBoolean(core.getInput('remove-issue-stale-when-updated')),
+        removePrStaleWhenUpdated: _toOptionalBoolean(core.getInput('remove-pr-stale-when-updated')),
         debugOnly: core.getInput('debug-only') === 'true',
         ascending: core.getInput('ascending') === 'true',
         skipStalePrMessage: core.getInput('skip-stale-pr-message') === 'true',

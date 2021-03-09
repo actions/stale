@@ -447,6 +447,8 @@ export class IssuesProcessor {
     if (this._shouldRemoveStaleWhenUpdated(issue) && issueHasComments) {
       await this._removeStaleLabel(issue, staleLabel);
 
+      issueLogger.info(`Skipping the process since the $$type is now un-stale`);
+
       return; // nothing to do because it is no longer stale
     }
 
@@ -679,7 +681,9 @@ export class IssuesProcessor {
   private async _removeLabel(issue: Issue, label: string): Promise<void> {
     const issueLogger: IssueLogger = new IssueLogger(issue);
 
-    issueLogger.info(`Removing label "${label}" from $$type`);
+    issueLogger.info(
+      `Removing the label "${chalk.cyan(label)}" from $$type...`
+    );
     this.removedLabelIssues.push(issue);
 
     if (this.options.debugOnly) {
@@ -695,8 +699,11 @@ export class IssuesProcessor {
         issue_number: issue.number,
         name: label
       });
+      issueLogger.info(`The label "${chalk.cyan(label)}" was removed`);
     } catch (error) {
-      issueLogger.error(`Error removing a label: ${error.message}`);
+      issueLogger.error(
+        `Error when removing the label: "${chalk.cyan(error.message)}"`
+      );
     }
   }
 
@@ -790,7 +797,9 @@ export class IssuesProcessor {
 
     if (isLabeled(issue, closeLabel)) {
       issueLogger.info(
-        `The $$type has a close label "${closeLabel}". Removing the close label...`
+        `The $$type has a close label "${chalk.cyan(
+          closeLabel
+        )}". Removing the close label...`
       );
 
       await this._removeLabel(issue, closeLabel);

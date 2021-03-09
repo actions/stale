@@ -132,17 +132,25 @@ export class IssuesProcessor {
 
         if (!hasAllWhitelistedLabels) {
           issueLogger.info(
+            chalk.white('└──'),
             `Skipping this $$type because it doesn't have all the required labels`
           );
           continue; // Don't process issues without all of the required labels
         } else {
           issueLogger.info(
-            `All the required labels are present on this $$type. Continuing the process`
+            chalk.white('├──'),
+            `All the required labels are present on this $$type`
+          );
+          issueLogger.info(
+            chalk.white('└──'),
+            `Continuing the process for this $$type`
           );
         }
       } else {
+        issueLogger.info(`The option "onlyLabels" was not specified`);
         issueLogger.info(
-          `The option "onlyLabels" was not specified. Continuing the process for this $$type`
+          chalk.white('└──'),
+          `Continuing the process for this $$type`
         );
       }
 
@@ -229,18 +237,41 @@ export class IssuesProcessor {
         continue; // don't process exempt issues
       }
 
-      const anyOfLabels: string[] = wordsToList(this.options.anyOfLabels);
+      const anyOfLabels: string[] = wordsToList(this._getAnyOfLabels(issue));
 
-      if (
-        anyOfLabels.length &&
-        !anyOfLabels.some((label: Readonly<string>): boolean =>
-          isLabeled(issue, label)
-        )
-      ) {
+      if (anyOfLabels.length > 0) {
         issueLogger.info(
-          `Skipping $$type because it does not have any of the required labels`
+          `The option "anyOfLabels" was specified to only processed the issues and pull requests with one of those labels (${anyOfLabels.length})`
         );
-        continue; // don't process issues without any of the required labels
+
+        const hasOneOfWhitelistedLabels: boolean = anyOfLabels.some(
+          (label: Readonly<string>): boolean => {
+            return isLabeled(issue, label);
+          }
+        );
+
+        if (!hasOneOfWhitelistedLabels) {
+          issueLogger.info(
+            chalk.white('└──'),
+            `Skipping this $$type because it doesn't have one of the required labels`
+          );
+          continue; // Don't process issues without any of the required labels
+        } else {
+          issueLogger.info(
+            chalk.white('├──'),
+            `One of the required labels is present on this $$type`
+          );
+          issueLogger.info(
+            chalk.white('└──'),
+            `Continuing the process for this $$type`
+          );
+        }
+      } else {
+        issueLogger.info(`The option "anyOfLabels" was not specified`);
+        issueLogger.info(
+          chalk.white('└──'),
+          `Continuing the process for this $$type`
+        );
       }
 
       const milestones: Milestones = new Milestones(this.options, issue);
@@ -734,6 +765,20 @@ export class IssuesProcessor {
     }
 
     return this.options.onlyLabels;
+  }
+
+  private _getAnyOfLabels(issue: Issue): string {
+    if (issue.isPullRequest) {
+      if (this.options.anyOfPrLabels !== '') {
+        return this.options.anyOfPrLabels;
+      }
+    } else {
+      if (this.options.anyOfIssueLabels !== '') {
+        return this.options.anyOfIssueLabels;
+      }
+    }
+
+    return this.options.anyOfLabels;
   }
 
   private async _removeStaleLabel(

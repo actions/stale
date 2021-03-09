@@ -24,6 +24,8 @@ export interface IIssuesProcessorOptions {
   anyOfLabels: string;
   operationsPerRun: number;
   removeStaleWhenUpdated: boolean;
+  removeIssueStaleWhenUpdated: boolean | undefined;
+  removePrStaleWhenUpdated: boolean | undefined;
   debugOnly: boolean;
   ascending: boolean;
   skipStaleIssueMessage: boolean;

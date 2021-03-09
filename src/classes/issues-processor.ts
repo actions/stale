@@ -444,8 +444,10 @@ export class IssuesProcessor {
     issueLogger.info(`$$type has been updated: ${issueHasUpdate}`);
 
     // should we un-stale this issue?
-    if (this.options.removeStaleWhenUpdated && issueHasComments) {
+    if (this._shouldRemoveStaleWhenUpdated(issue) && issueHasComments) {
       await this._removeStaleLabel(issue, staleLabel);
+
+      return; // nothing to do because it is no longer stale
     }
 
     // now start closing logic
@@ -734,6 +736,26 @@ export class IssuesProcessor {
     }
 
     return this.options.onlyLabels;
+  }
+
+  private _shouldRemoveStaleWhenUpdated(issue: Issue): boolean {
+    if (issue.isPullRequest) {
+      if (this.options.removePrStaleWhenUpdated === true) {
+        return true;
+      } else if (this.options.removePrStaleWhenUpdated === false) {
+        return false;
+      }
+
+      return this.options.removeStaleWhenUpdated;
+    }
+
+    if (this.options.removeIssueStaleWhenUpdated === true) {
+      return true;
+    } else if (this.options.removeIssueStaleWhenUpdated === false) {
+      return false;
+    }
+
+    return this.options.removeStaleWhenUpdated;
   }
 
   private async _removeStaleLabel(

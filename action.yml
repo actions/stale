@@ -105,7 +105,15 @@ inputs:
     default: '30'
     required: false
   remove-stale-when-updated:
-    description: 'Remove stale labels from issues when they are updated or commented on.'
+    description: 'Remove stale labels from issues and pull requests when they are updated or commented on.'
+    default: 'true'
+    required: false
+  remove-issue-stale-when-updated:
+    description: 'Remove stale labels from issues when they are updated or commented on. Override "remove-stale-when-updated" option regarding only the issues.'
+    default: 'true'
+    required: false
+  remove-pr-stale-when-updated:
+    description: 'Remove stale labels from pull requests when they are updated or commented on. Override "remove-stale-when-updated" option regarding only the pull requests.'
     default: 'true'
     required: false
   debug-only:

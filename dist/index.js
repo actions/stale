@@ -502,15 +502,15 @@ class IssuesProcessor {
         return __awaiter(this, void 0, void 0, function* () {
             const issueLogger = new issue_logger_1.IssueLogger(issue);
             const markedStaleOn = (yield this.getLabelCreationDate(issue, staleLabel)) || issue.updated_at;
-            issueLogger.info(`$$type marked stale on: ${markedStaleOn}`);
+            issueLogger.info(`$$type marked stale on: ${chalk_1.default.cyan(markedStaleOn)}`);
             const issueHasComments = yield this._hasCommentsSince(issue, markedStaleOn, actor);
-            issueLogger.info(`$$type has been commented on: ${issueHasComments}`);
+            issueLogger.info(`$$type has been commented on: ${chalk_1.default.cyan(issueHasComments)}`);
             const daysBeforeClose = issue.isPullRequest
                 ? this._getDaysBeforePrClose()
                 : this._getDaysBeforeIssueClose();
             issueLogger.info(`Days before $$type close: ${daysBeforeClose}`);
             const issueHasUpdate = IssuesProcessor._updatedSince(issue.updated_at, daysBeforeClose);
-            issueLogger.info(`$$type has been updated: ${issueHasUpdate}`);
+            issueLogger.info(`$$type has been updated: ${chalk_1.default.cyan(issueHasUpdate)}`);
             // should we un-stale this issue?
             if (this._shouldRemoveStaleWhenUpdated(issue) && issueHasComments) {
                 yield this._removeStaleLabel(issue, staleLabel);
@@ -577,7 +577,7 @@ class IssuesProcessor {
                     });
                 }
                 catch (error) {
-                    issueLogger.error(`Error creating a comment: ${error.message}`);
+                    issueLogger.error(`Error when creating a comment: ${error.message}`);
                 }
             }
             try {
@@ -592,7 +592,7 @@ class IssuesProcessor {
                 });
             }
             catch (error) {
-                issueLogger.error(`Error adding a label: ${error.message}`);
+                issueLogger.error(`Error when adding a label: ${error.message}`);
             }
         });
     }
@@ -618,7 +618,7 @@ class IssuesProcessor {
                     });
                 }
                 catch (error) {
-                    issueLogger.error(`Error creating a comment: ${error.message}`);
+                    issueLogger.error(`Error when creating a comment: ${error.message}`);
                 }
             }
             if (closeLabel) {
@@ -633,7 +633,7 @@ class IssuesProcessor {
                     });
                 }
                 catch (error) {
-                    issueLogger.error(`Error adding a label: ${error.message}`);
+                    issueLogger.error(`Error when adding a label: ${error.message}`);
                 }
             }
             try {
@@ -647,7 +647,7 @@ class IssuesProcessor {
                 });
             }
             catch (error) {
-                issueLogger.error(`Error updating this $$type: ${error.message}`);
+                issueLogger.error(`Error when updating this $$type: ${error.message}`);
             }
         });
     }
@@ -669,7 +669,7 @@ class IssuesProcessor {
                 return pullRequest.data;
             }
             catch (error) {
-                issueLogger.error(`Error getting this $$type: ${error.message}`);
+                issueLogger.error(`Error when getting this $$type: ${error.message}`);
             }
         });
     }
@@ -688,7 +688,7 @@ class IssuesProcessor {
                 return;
             }
             const branch = pullRequest.head.ref;
-            issueLogger.info(`Deleting branch ${branch} from closed $$type`);
+            issueLogger.info(`Deleting the branch "${chalk_1.default.cyan(branch)}" from closed $$type`);
             try {
                 this._operations.consumeOperation();
                 (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.incrementDeletedBranchesCount();
@@ -699,7 +699,7 @@ class IssuesProcessor {
                 });
             }
             catch (error) {
-                issueLogger.error(`Error deleting branch ${branch} from $$type: ${error.message}`);
+                issueLogger.error(`Error when deleting the branch "${chalk_1.default.cyan(branch)}" from $$type: ${error.message}`);
             }
         });
     }
@@ -708,7 +708,7 @@ class IssuesProcessor {
         var _a;
         return __awaiter(this, void 0, void 0, function* () {
             const issueLogger = new issue_logger_1.IssueLogger(issue);
-            issueLogger.info(`Removing the label "${chalk_1.default.cyan(label)}" from $$type...`);
+            issueLogger.info(`Removing the label "${chalk_1.default.cyan(label)}" from the $$type...`);
             this.removedLabelIssues.push(issue);
             if (this.options.debugOnly) {
                 return;

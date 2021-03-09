@@ -422,14 +422,16 @@ export class IssuesProcessor {
     const issueLogger: IssueLogger = new IssueLogger(issue);
     const markedStaleOn: string =
       (await this.getLabelCreationDate(issue, staleLabel)) || issue.updated_at;
-    issueLogger.info(`$$type marked stale on: ${markedStaleOn}`);
+    issueLogger.info(`$$type marked stale on: ${chalk.cyan(markedStaleOn)}`);
 
     const issueHasComments: boolean = await this._hasCommentsSince(
       issue,
       markedStaleOn,
       actor
     );
-    issueLogger.info(`$$type has been commented on: ${issueHasComments}`);
+    issueLogger.info(
+      `$$type has been commented on: ${chalk.cyan(issueHasComments)}`
+    );
 
     const daysBeforeClose: number = issue.isPullRequest
       ? this._getDaysBeforePrClose()
@@ -441,7 +443,7 @@ export class IssuesProcessor {
       issue.updated_at,
       daysBeforeClose
     );
-    issueLogger.info(`$$type has been updated: ${issueHasUpdate}`);
+    issueLogger.info(`$$type has been updated: ${chalk.cyan(issueHasUpdate)}`);
 
     // should we un-stale this issue?
     if (this._shouldRemoveStaleWhenUpdated(issue) && issueHasComments) {
@@ -538,7 +540,7 @@ export class IssuesProcessor {
           body: staleMessage
         });
       } catch (error) {
-        issueLogger.error(`Error creating a comment: ${error.message}`);
+        issueLogger.error(`Error when creating a comment: ${error.message}`);
       }
     }
 
@@ -553,7 +555,7 @@ export class IssuesProcessor {
         labels: [staleLabel]
       });
     } catch (error) {
-      issueLogger.error(`Error adding a label: ${error.message}`);
+      issueLogger.error(`Error when adding a label: ${error.message}`);
     }
   }
 
@@ -583,7 +585,7 @@ export class IssuesProcessor {
           body: closeMessage
         });
       } catch (error) {
-        issueLogger.error(`Error creating a comment: ${error.message}`);
+        issueLogger.error(`Error when creating a comment: ${error.message}`);
       }
     }
 
@@ -598,7 +600,7 @@ export class IssuesProcessor {
           labels: [closeLabel]
         });
       } catch (error) {
-        issueLogger.error(`Error adding a label: ${error.message}`);
+        issueLogger.error(`Error when adding a label: ${error.message}`);
       }
     }
 
@@ -612,7 +614,7 @@ export class IssuesProcessor {
         state: 'closed'
       });
     } catch (error) {
-      issueLogger.error(`Error updating this $$type: ${error.message}`);
+      issueLogger.error(`Error when updating this $$type: ${error.message}`);
     }
   }
 
@@ -636,7 +638,7 @@ export class IssuesProcessor {
 
       return pullRequest.data;
     } catch (error) {
-      issueLogger.error(`Error getting this $$type: ${error.message}`);
+      issueLogger.error(`Error when getting this $$type: ${error.message}`);
     }
   }
 
@@ -660,7 +662,9 @@ export class IssuesProcessor {
     }
 
     const branch = pullRequest.head.ref;
-    issueLogger.info(`Deleting branch ${branch} from closed $$type`);
+    issueLogger.info(
+      `Deleting the branch "${chalk.cyan(branch)}" from closed $$type`
+    );
 
     try {
       this._operations.consumeOperation();
@@ -672,7 +676,9 @@ export class IssuesProcessor {
       });
     } catch (error) {
       issueLogger.error(
-        `Error deleting branch ${branch} from $$type: ${error.message}`
+        `Error when deleting the branch "${chalk.cyan(branch)}" from $$type: ${
+          error.message
+        }`
       );
     }
   }
@@ -682,7 +688,7 @@ export class IssuesProcessor {
     const issueLogger: IssueLogger = new IssueLogger(issue);
 
     issueLogger.info(
-      `Removing the label "${chalk.cyan(label)}" from $$type...`
+      `Removing the label "${chalk.cyan(label)}" from the $$type...`
     );
     this.removedLabelIssues.push(issue);
 

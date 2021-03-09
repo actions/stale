@@ -7,8 +7,7 @@ async function _run(): Promise<void> {
   try {
     const args = _getAndValidateArgs();
 
-    const processor: IssuesProcessor = new IssuesProcessor(args);
-    await processor.processIssues();
+    await new IssuesProcessor(args).processIssues();
   } catch (error) {
     core.error(error);
     core.setFailed(error.message);
@@ -78,7 +77,9 @@ function _getAndValidateArgs(): IIssuesProcessorOptions {
     'operations-per-run'
   ]) {
     if (isNaN(parseInt(core.getInput(numberInput)))) {
-      throw Error(`input ${numberInput} did not parse to a valid integer`);
+      core.setFailed(
+        new Error(`Option "${numberInput}" did not parse to a valid integer`)
+      );
     }
   }
 
@@ -86,8 +87,10 @@ function _getAndValidateArgs(): IIssuesProcessorOptions {
     // Ignore empty dates because it is considered as the right type for a default value (so a valid one)
     if (core.getInput(optionalDateInput) !== '') {
       if (!isValidDate(new Date(core.getInput(optionalDateInput)))) {
-        throw new Error(
-          `input ${optionalDateInput} did not parse to a valid date`
+        core.setFailed(
+          new Error(
+            `Option "${optionalDateInput}" did not parse to a valid date`
+          )
         );
       }
     }

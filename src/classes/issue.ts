@@ -6,8 +6,9 @@ import {IIssuesProcessorOptions} from '../interfaces/issues-processor-options';
 import {ILabel} from '../interfaces/label';
 import {IMilestone} from '../interfaces/milestone';
 import {IsoDateString} from '../types/iso-date-string';
+import {Operations} from './operations';
 
-export class Issue implements IIssue {
+export class Issue extends Operations implements IIssue {
   private readonly _options: IIssuesProcessorOptions;
   readonly title: string;
   readonly number: number;
@@ -21,10 +22,23 @@ export class Issue implements IIssue {
   readonly assignees: IAssignee[];
   isStale: boolean;
 
+  get isPullRequest(): boolean {
+    return isPullRequest(this);
+  }
+
+  get staleLabel(): string {
+    return this._getStaleLabel();
+  }
+
+  get hasAssignees(): boolean {
+    return this.assignees.length > 0;
+  }
+
   constructor(
     options: Readonly<IIssuesProcessorOptions>,
     issue: Readonly<IIssue>
   ) {
+    super();
     this._options = options;
     this.title = issue.title;
     this.number = issue.number;
@@ -38,18 +52,6 @@ export class Issue implements IIssue {
     this.assignees = issue.assignees;
 
     this.isStale = isLabeled(this, this.staleLabel);
-  }
-
-  get isPullRequest(): boolean {
-    return isPullRequest(this);
-  }
-
-  get staleLabel(): string {
-    return this._getStaleLabel();
-  }
-
-  get hasAssignees(): boolean {
-    return this.assignees.length > 0;
   }
 
   private _getStaleLabel(): string {

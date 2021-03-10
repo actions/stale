@@ -151,8 +151,10 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.Issue = void 0;
 const is_labeled_1 = __nccwpck_require__(6792);
 const is_pull_request_1 = __nccwpck_require__(5400);
-class Issue {
+const operations_1 = __nccwpck_require__(7957);
+class Issue extends operations_1.Operations {
     constructor(options, issue) {
+        super();
         this._options = options;
         this.title = issue.title;
         this.number = issue.number;
@@ -239,7 +241,7 @@ const issue_1 = __nccwpck_require__(4783);
 const issue_logger_1 = __nccwpck_require__(2984);
 const logger_1 = __nccwpck_require__(6212);
 const milestones_1 = __nccwpck_require__(4601);
-const operations_1 = __nccwpck_require__(7957);
+const stale_operations_1 = __nccwpck_require__(5080);
 const statistics_1 = __nccwpck_require__(3334);
 /***
  * Handle processing of issues for staleness/closure.
@@ -253,7 +255,7 @@ class IssuesProcessor {
         this.removedLabelIssues = [];
         this.options = options;
         this.client = github_1.getOctokit(this.options.repoToken);
-        this._operations = new operations_1.Operations(this.options);
+        this._operations = new stale_operations_1.StaleOperations(this.options);
         this._logger.info(chalk_1.default.yellow('Starting the stale action process...'));
         if (this.options.debugOnly) {
             this._logger.warning(chalk_1.default.yellowBright('Executing in debug mode!'));
@@ -268,6 +270,13 @@ class IssuesProcessor {
         const millisSinceLastUpdated = new Date().getTime() - new Date(timestamp).getTime();
         return millisSinceLastUpdated <= daysInMillis;
     }
+    static _endIssueProcessing(issue) {
+        const consumedOperationsCount = issue.getConsumedOperationsCount();
+        if (consumedOperationsCount > 0) {
+            const issueLogger = new issue_logger_1.IssueLogger(issue);
+            issueLogger.info(chalk_1.default.cyan(consumedOperationsCount), `operation${consumedOperationsCount > 1 ? '' : ''} consumed for this $$type`);
+        }
+    }
     processIssues(page = 1) {
         var _a, _b;
         return __awaiter(this, void 0, void 0, function* () {
@@ -276,7 +285,7 @@ class IssuesProcessor {
             const actor = yield this.getActor();
             if (issues.length <= 0) {
                 this._logger.info(chalk_1.default.green('No more issues found to process. Exiting...'));
-                (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.setOperationsLeft(this._operations.getUnconsumedOperationsCount()).logStats();
+                (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.setOperationsLeft(this._operations.getOperationsLeftCount()).logStats();
                 return this._operations.getOperationsLeftCount();
             }
             else {
@@ -313,6 +322,7 @@ class IssuesProcessor {
                     });
                     if (!hasAllWhitelistedLabels) {
                         issueLogger.info(`Skipping this $$type because it doesn't have all the required labels`);
+                        IssuesProcessor._endIssueProcessing(issue);
                         continue; // Don't process issues without all of the required labels
                     }
                     else {
@@ -326,14 +336,17 @@ class IssuesProcessor {
                 const shouldMarkAsStale = should_mark_when_stale_1.shouldMarkWhenStale(daysBeforeStale);
                 if (!staleMessage && shouldMarkAsStale) {
                     issueLogger.info(`Skipping $$type due to empty stale message`);
+                    IssuesProcessor._endIssueProcessing(issue);
                     continue;
                 }
                 if (issue.state === 'closed') {
                     issueLogger.info(`Skipping $$type because it is closed`);
+                    IssuesProcessor._endIssueProcessing(issue);
                     continue; // don't process closed issues
                 }
                 if (issue.locked) {
                     issueLogger.info(`Skipping $$type because it is locked`);
+                    IssuesProcessor._endIssueProcessing(issue);
                     continue; // don't process locked issues
                 }
                 // Try to remove the close label when not close/locked issue or PR
@@ -345,11 +358,15 @@ class IssuesProcessor {
                     // Expecting that GitHub will always set a creation date on the issues and PRs
                     // But you never know!
                     if (!is_valid_date_1.isValidDate(createdAt)) {
-                        core.setFailed(new Error(`Invalid issue field: "created_at". Expected a valid date`));
+                        IssuesProcessor._endIssueProcessing(issue);
+                        const errorMessage = `Invalid issue field: "created_at". Expected a valid date`;
+                        core.setFailed(new Error(errorMessage));
+                        throw new Error(errorMessage);
                     }
                     issueLogger.info(`$$type created the ${get_humanized_date_1.getHumanizedDate(createdAt)} (${issue.created_at})`);
                     if (!is_date_more_recent_than_1.isDateMoreRecentThan(createdAt, startDate)) {
                         issueLogger.info(`Skipping $$type because it was created before the specified start date`);
+                        IssuesProcessor._endIssueProcessing(issue);
                         continue; // don't process issues which were created before the start date
                     }
                 }
@@ -368,20 +385,24 @@ class IssuesProcessor {
                         yield this._removeStaleLabel(issue, staleLabel);
                     }
                     issueLogger.info(`Skipping $$type because it has an exempt label`);
+                    IssuesProcessor._endIssueProcessing(issue);
                     continue; // don't process exempt issues
                 }
                 const anyOfLabels = words_to_list_1.wordsToList(this.options.anyOfLabels);
                 if (anyOfLabels.length &&
                     !anyOfLabels.some((label) => is_labeled_1.isLabeled(issue, label))) {
                     issueLogger.info(`Skipping $$type because it does not have any of the required labels`);
+                    IssuesProcessor._endIssueProcessing(issue);
                     continue; // don't process issues without any of the required labels
                 }
                 const milestones = new milestones_1.Milestones(this.options, issue);
                 if (milestones.shouldExemptMilestones()) {
+                    IssuesProcessor._endIssueProcessing(issue);
                     continue; // don't process exempt milestones
                 }
                 const assignees = new assignees_1.Assignees(this.options, issue);
                 if (assignees.shouldExemptAssignees()) {
+                    IssuesProcessor._endIssueProcessing(issue);
                     continue; // don't process exempt assignees
                 }
                 // should this issue be marked stale?
@@ -400,8 +421,9 @@ class IssuesProcessor {
                     issueLogger.info(`Found a stale $$type`);
                     yield this._processStaleIssue(issue, staleLabel, actor, closeMessage, closeLabel);
                 }
+                IssuesProcessor._endIssueProcessing(issue);
             }
-            if (this._operations.hasOperationsLeft()) {
+            if (!this._operations.hasOperationsLeft()) {
                 this._logger.warning(chalk_1.default.yellowBright('No more operations left! Exiting...'));
                 this._logger.warning(chalk_1.default.yellowBright(`If you think that not enough issues were processed you could try to increase the quantity related to the ${this._logger.createOptionLink(option_1.Option.OperationsPerRun)} option which is currently set to ${chalk_1.default.cyan(this.options.operationsPerRun)}`));
                 return 0;
@@ -480,6 +502,7 @@ class IssuesProcessor {
             const issueLogger = new issue_logger_1.IssueLogger(issue);
             issueLogger.info(`Checking for label on $$type`);
             this._operations.consumeOperation();
+            issue.consumeOperation();
             (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.incrementFetchedIssuesEventsCount();
             const options = this.client.issues.listEvents.endpoint.merge({
                 owner: github_1.context.repo.owner,
@@ -566,6 +589,7 @@ class IssuesProcessor {
             if (!skipMessage) {
                 try {
                     this._operations.consumeOperation();
+                    issue.consumeOperation();
                     (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.incrementAddedComment();
                     yield this.client.issues.createComment({
                         owner: github_1.context.repo.owner,
@@ -580,6 +604,7 @@ class IssuesProcessor {
             }
             try {
                 this._operations.consumeOperation();
+                issue.consumeOperation();
                 (_b = this._statistics) === null || _b === void 0 ? void 0 : _b.incrementAddedLabel();
                 (_c = this._statistics) === null || _c === void 0 ? void 0 : _c.incrementStaleIssuesCount();
                 yield this.client.issues.addLabels({
@@ -607,6 +632,7 @@ class IssuesProcessor {
             if (closeMessage) {
                 try {
                     this._operations.consumeOperation();
+                    issue.consumeOperation();
                     (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.incrementAddedComment();
                     yield this.client.issues.createComment({
                         owner: github_1.context.repo.owner,
@@ -622,6 +648,7 @@ class IssuesProcessor {
             if (closeLabel) {
                 try {
                     this._operations.consumeOperation();
+                    issue.consumeOperation();
                     (_b = this._statistics) === null || _b === void 0 ? void 0 : _b.incrementAddedLabel();
                     yield this.client.issues.addLabels({
                         owner: github_1.context.repo.owner,
@@ -636,6 +663,7 @@ class IssuesProcessor {
             }
             try {
                 this._operations.consumeOperation();
+                issue.consumeOperation();
                 (_c = this._statistics) === null || _c === void 0 ? void 0 : _c.incrementClosedIssuesCount();
                 yield this.client.issues.update({
                     owner: github_1.context.repo.owner,
@@ -658,6 +686,7 @@ class IssuesProcessor {
             }
             try {
                 this._operations.consumeOperation();
+                issue.consumeOperation();
                 (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.incrementFetchedPullRequestsCount();
                 const pullRequest = yield this.client.pulls.get({
                     owner: github_1.context.repo.owner,
@@ -689,6 +718,7 @@ class IssuesProcessor {
             issueLogger.info(`Deleting branch ${branch} from closed $$type`);
             try {
                 this._operations.consumeOperation();
+                issue.consumeOperation();
                 (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.incrementDeletedBranchesCount();
                 yield this.client.git.deleteRef({
                     owner: github_1.context.repo.owner,
@@ -713,6 +743,7 @@ class IssuesProcessor {
             }
             try {
                 this._operations.consumeOperation();
+                issue.consumeOperation();
                 (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.incrementDeletedLabelsCount();
                 yield this.client.issues.removeLabel({
                     owner: github_1.context.repo.owner,
@@ -1070,28 +1101,46 @@ exports.Milestones = Milestones;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.Operations = void 0;
 class Operations {
-    constructor(options) {
-        this._options = options;
-        this._operationsLeft = this._options.operationsPerRun;
+    constructor() {
+        this._operationsConsumed = 0;
     }
     consumeOperation() {
         return this.consumeOperations(1);
     }
     consumeOperations(quantity) {
-        this._operationsLeft -= quantity;
+        this._operationsConsumed += quantity;
         return this;
     }
-    getUnconsumedOperationsCount() {
-        return this._options.operationsPerRun - this._operationsLeft;
-    }
-    hasOperationsLeft() {
-        return this._operationsLeft <= 0;
-    }
-    getOperationsLeftCount() {
-        return this._operationsLeft;
+    getConsumedOperationsCount() {
+        return this._operationsConsumed;
     }
 }
 exports.Operations = Operations;
+
+
+/***/ }),
+
+/***/ 5080:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.StaleOperations = void 0;
+const operations_1 = __nccwpck_require__(7957);
+class StaleOperations extends operations_1.Operations {
+    constructor(options) {
+        super();
+        this._options = options;
+    }
+    hasOperationsLeft() {
+        return this._operationsConsumed < this._options.operationsPerRun;
+    }
+    getOperationsLeftCount() {
+        return this._options.operationsPerRun - this._operationsConsumed;
+    }
+}
+exports.StaleOperations = StaleOperations;
 
 
 /***/ }),
@@ -1509,8 +1558,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__nccwpck_require__(2186));
-const is_valid_date_1 = __nccwpck_require__(891);
 const issues_processor_1 = __nccwpck_require__(3292);
+const is_valid_date_1 = __nccwpck_require__(891);
 function _run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -1576,14 +1625,18 @@ function _getAndValidateArgs() {
         'operations-per-run'
     ]) {
         if (isNaN(parseInt(core.getInput(numberInput)))) {
-            core.setFailed(new Error(`Option "${numberInput}" did not parse to a valid integer`));
+            const errorMessage = `Option "${numberInput}" did not parse to a valid integer`;
+            core.setFailed(errorMessage);
+            throw new Error(errorMessage);
         }
     }
     for (const optionalDateInput of ['start-date']) {
         // Ignore empty dates because it is considered as the right type for a default value (so a valid one)
         if (core.getInput(optionalDateInput) !== '') {
             if (!is_valid_date_1.isValidDate(new Date(core.getInput(optionalDateInput)))) {
-                core.setFailed(new Error(`Option "${optionalDateInput}" did not parse to a valid date`));
+                const errorMessage = `Option "${optionalDateInput}" did not parse to a valid date`;
+                core.setFailed(errorMessage);
+                throw new Error(errorMessage);
             }
         }
     }

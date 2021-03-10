@@ -20,7 +20,7 @@ import {Issue} from './issue';
 import {IssueLogger} from './loggers/issue-logger';
 import {Logger} from './loggers/logger';
 import {Milestones} from './milestones';
-import {Operations} from './operations';
+import {StaleOperations} from './stale-operations';
 import {Statistics} from './statistics';
 
 /***
@@ -35,8 +35,23 @@ export class IssuesProcessor {
     return millisSinceLastUpdated <= daysInMillis;
   }
 
+  private static _endIssueProcessing(issue: Issue): void {
+    const consumedOperationsCount: number = issue.getConsumedOperationsCount();
+
+    if (consumedOperationsCount > 0) {
+      const issueLogger: IssueLogger = new IssueLogger(issue);
+
+      issueLogger.info(
+        chalk.cyan(consumedOperationsCount),
+        `operation${
+          consumedOperationsCount > 1 ? '' : ''
+        } consumed for this $$type`
+      );
+    }
+  }
+
   private readonly _logger: Logger = new Logger();
-  private readonly _operations: Operations;
+  private readonly _operations: StaleOperations;
   private readonly _statistics: Statistics | undefined;
   readonly client: InstanceType<typeof GitHub>;
   readonly options: IIssuesProcessorOptions;
@@ -48,7 +63,7 @@ export class IssuesProcessor {
   constructor(options: IIssuesProcessorOptions) {
     this.options = options;
     this.client = getOctokit(this.options.repoToken);
-    this._operations = new Operations(this.options);
+    this._operations = new StaleOperations(this.options);
 
     this._logger.info(chalk.yellow('Starting the stale action process...'));
 
@@ -76,7 +91,7 @@ export class IssuesProcessor {
         chalk.green('No more issues found to process. Exiting...')
       );
       this._statistics
-        ?.setOperationsLeft(this._operations.getUnconsumedOperationsCount())
+        ?.setOperationsLeft(this._operations.getOperationsLeftCount())
         .logStats();
 
       return this._operations.getOperationsLeftCount();
@@ -134,6 +149,8 @@ export class IssuesProcessor {
           issueLogger.info(
             `Skipping this $$type because it doesn't have all the required labels`
           );
+
+          IssuesProcessor._endIssueProcessing(issue);
           continue; // Don't process issues without all of the required labels
         } else {
           issueLogger.info(
@@ -152,16 +169,19 @@ export class IssuesProcessor {
 
       if (!staleMessage && shouldMarkAsStale) {
         issueLogger.info(`Skipping $$type due to empty stale message`);
+        IssuesProcessor._endIssueProcessing(issue);
         continue;
       }
 
       if (issue.state === 'closed') {
         issueLogger.info(`Skipping $$type because it is closed`);
+        IssuesProcessor._endIssueProcessing(issue);
         continue; // don't process closed issues
       }
 
       if (issue.locked) {
         issueLogger.info(`Skipping $$type because it is locked`);
+        IssuesProcessor._endIssueProcessing(issue);
         continue; // don't process locked issues
       }
 
@@ -181,11 +201,10 @@ export class IssuesProcessor {
         // Expecting that GitHub will always set a creation date on the issues and PRs
         // But you never know!
         if (!isValidDate(createdAt)) {
-          core.setFailed(
-            new Error(
-              `Invalid issue field: "created_at". Expected a valid date`
-            )
-          );
+          IssuesProcessor._endIssueProcessing(issue);
+          const errorMessage = `Invalid issue field: "created_at". Expected a valid date`;
+          core.setFailed(new Error(errorMessage));
+          throw new Error(errorMessage);
         }
 
         issueLogger.info(
@@ -199,6 +218,7 @@ export class IssuesProcessor {
             `Skipping $$type because it was created before the specified start date`
           );
 
+          IssuesProcessor._endIssueProcessing(issue);
           continue; // don't process issues which were created before the start date
         }
       }
@@ -226,6 +246,7 @@ export class IssuesProcessor {
         }
 
         issueLogger.info(`Skipping $$type because it has an exempt label`);
+        IssuesProcessor._endIssueProcessing(issue);
         continue; // don't process exempt issues
       }
 
@@ -240,18 +261,21 @@ export class IssuesProcessor {
         issueLogger.info(
           `Skipping $$type because it does not have any of the required labels`
         );
+        IssuesProcessor._endIssueProcessing(issue);
         continue; // don't process issues without any of the required labels
       }
 
       const milestones: Milestones = new Milestones(this.options, issue);
 
       if (milestones.shouldExemptMilestones()) {
+        IssuesProcessor._endIssueProcessing(issue);
         continue; // don't process exempt milestones
       }
 
       const assignees: Assignees = new Assignees(this.options, issue);
 
       if (assignees.shouldExemptAssignees()) {
+        IssuesProcessor._endIssueProcessing(issue);
         continue; // don't process exempt assignees
       }
 
@@ -285,9 +309,11 @@ export class IssuesProcessor {
           closeLabel
         );
       }
+
+      IssuesProcessor._endIssueProcessing(issue);
     }
 
-    if (this._operations.hasOperationsLeft()) {
+    if (!this._operations.hasOperationsLeft()) {
       this._logger.warning(
         chalk.yellowBright('No more operations left! Exiting...')
       );
@@ -388,6 +414,7 @@ export class IssuesProcessor {
     issueLogger.info(`Checking for label on $$type`);
 
     this._operations.consumeOperation();
+    issue.consumeOperation();
     this._statistics?.incrementFetchedIssuesEventsCount();
     const options = this.client.issues.listEvents.endpoint.merge({
       owner: context.repo.owner,
@@ -526,6 +553,7 @@ export class IssuesProcessor {
     if (!skipMessage) {
       try {
         this._operations.consumeOperation();
+        issue.consumeOperation();
         this._statistics?.incrementAddedComment();
         await this.client.issues.createComment({
           owner: context.repo.owner,
@@ -540,6 +568,7 @@ export class IssuesProcessor {
 
     try {
       this._operations.consumeOperation();
+      issue.consumeOperation();
       this._statistics?.incrementAddedLabel();
       this._statistics?.incrementStaleIssuesCount();
       await this.client.issues.addLabels({
@@ -571,6 +600,7 @@ export class IssuesProcessor {
     if (closeMessage) {
       try {
         this._operations.consumeOperation();
+        issue.consumeOperation();
         this._statistics?.incrementAddedComment();
         await this.client.issues.createComment({
           owner: context.repo.owner,
@@ -586,6 +616,7 @@ export class IssuesProcessor {
     if (closeLabel) {
       try {
         this._operations.consumeOperation();
+        issue.consumeOperation();
         this._statistics?.incrementAddedLabel();
         await this.client.issues.addLabels({
           owner: context.repo.owner,
@@ -600,6 +631,7 @@ export class IssuesProcessor {
 
     try {
       this._operations.consumeOperation();
+      issue.consumeOperation();
       this._statistics?.incrementClosedIssuesCount();
       await this.client.issues.update({
         owner: context.repo.owner,
@@ -623,6 +655,7 @@ export class IssuesProcessor {
 
     try {
       this._operations.consumeOperation();
+      issue.consumeOperation();
       this._statistics?.incrementFetchedPullRequestsCount();
       const pullRequest = await this.client.pulls.get({
         owner: context.repo.owner,
@@ -660,6 +693,7 @@ export class IssuesProcessor {
 
     try {
       this._operations.consumeOperation();
+      issue.consumeOperation();
       this._statistics?.incrementDeletedBranchesCount();
       await this.client.git.deleteRef({
         owner: context.repo.owner,
@@ -686,6 +720,7 @@ export class IssuesProcessor {
 
     try {
       this._operations.consumeOperation();
+      issue.consumeOperation();
       this._statistics?.incrementDeletedLabelsCount();
       await this.client.issues.removeLabel({
         owner: context.repo.owner,

@@ -1,6 +1,6 @@
 import * as core from '@actions/core';
-import {isValidDate} from './functions/dates/is-valid-date';
 import {IssuesProcessor} from './classes/issues-processor';
+import {isValidDate} from './functions/dates/is-valid-date';
 import {IIssuesProcessorOptions} from './interfaces/issues-processor-options';
 
 async function _run(): Promise<void> {
@@ -77,9 +77,9 @@ function _getAndValidateArgs(): IIssuesProcessorOptions {
     'operations-per-run'
   ]) {
     if (isNaN(parseInt(core.getInput(numberInput)))) {
-      core.setFailed(
-        new Error(`Option "${numberInput}" did not parse to a valid integer`)
-      );
+      const errorMessage = `Option "${numberInput}" did not parse to a valid integer`;
+      core.setFailed(errorMessage);
+      throw new Error(errorMessage);
     }
   }
 
@@ -87,11 +87,9 @@ function _getAndValidateArgs(): IIssuesProcessorOptions {
     // Ignore empty dates because it is considered as the right type for a default value (so a valid one)
     if (core.getInput(optionalDateInput) !== '') {
       if (!isValidDate(new Date(core.getInput(optionalDateInput)))) {
-        core.setFailed(
-          new Error(
-            `Option "${optionalDateInput}" did not parse to a valid date`
-          )
-        );
+        const errorMessage = `Option "${optionalDateInput}" did not parse to a valid date`;
+        core.setFailed(errorMessage);
+        throw new Error(errorMessage);
       }
     }
   }

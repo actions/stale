@@ -63,7 +63,7 @@ _Context:_
 This action performs some API calls to GitHub to fetch or close issues and pull requests, set or update labels, add comments, delete branches, etc.  
 These operations are made in a very short period of time - because the action is very fast to run - and can be numerous based on your project action configuration and the quantity of issues and pull requests within it.  
 GitHub has a [rate limit](https://docs.github.com/en/rest/overview/resources-in-the-rest-api#rate-limiting) and if reached will block all of these API calls for one hour (or API calls from other actions using the same user (a.k.a: the github-token from the [repo-token](#repo-token) option)).  
-This option aim to avoid crossing this situation by limiting the number of operations for a single run.
+This option helps you to stay within the GitHub rate limits, as you can use this option to limit the number of operations for a single run.
 
 _Purpose:_  
 This option aim to limit the number of operations made with the GitHub API to avoid reaching the [rate limit](https://docs.github.com/en/rest/overview/resources-in-the-rest-api#rate-limiting).

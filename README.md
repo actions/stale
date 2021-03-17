@@ -71,7 +71,7 @@ This option aim to limit the number of operations made with the GitHub API to av
 Based on your project, your GitHub business plan and the date of the cron job you set for this action, you can increase this limit to a higher number.
 If you are not sure which is the right value for you or if the default value is good enough, you could enable the logs and look at the end of the stale action.  
 If you reached the limit, you will see a warning message in the logs, telling you that you should increase the number of operations.
-If you don't increase it, the risk is to have un-processed issues or pull requests, that's all.
+If you choose not to increase the limit, you might end up with un-processed issues or pull requests after a stale action run.
 
 When [debugging](#Debugging), you can set it to a much higher number like `1000` since there will be fewer operations made with the GitHub API.  
 Only the [actor](#repo-token) and the batch of issues (100 per batch) will consume the operations.

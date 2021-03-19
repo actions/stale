@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security concerns
+    url: https://hackerone.com/github
+    about: Report security concerns on HackerOne.
+  - name: Questions about writing workflow or action files?
+    url: https://github.community/c/code-to-cloud/github-actions
+    about: Visit the GitHub Community Forum's Actions Board.
+  - name: Issue or question about GitHub Actions
+    url: https://help.github.com/en/articles/about-github-actions#contacting-support
+    about: If you are having an issue or question about GitHub Actions then please contact customer support

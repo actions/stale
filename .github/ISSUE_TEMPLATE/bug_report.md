@@ -12,7 +12,7 @@ assignees: ''
 
 ## Steps to reproduce the bug
 
-## Describe the expected behavior
+## Describe the expected behaviour
 
 ## Further context
 

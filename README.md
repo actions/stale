@@ -66,7 +66,7 @@ GitHub has a [rate limit](https://docs.github.com/en/rest/overview/resources-in-
 This option helps you to stay within the GitHub rate limits, as you can use this option to limit the number of operations for a single run.
 
 _Purpose:_  
-This option aim to limit the number of operations made with the GitHub API to avoid reaching the [rate limit](https://docs.github.com/en/rest/overview/resources-in-the-rest-api#rate-limiting).
+This option aims to limit the number of operations made with the GitHub API to avoid reaching the [rate limit](https://docs.github.com/en/rest/overview/resources-in-the-rest-api#rate-limiting).
 
 Based on your project, your GitHub business plan and the date of the cron job you set for this action, you can increase this limit to a higher number.
 If you are not sure which is the right value for you or if the default value is good enough, you could enable the logs and look at the end of the stale action.  

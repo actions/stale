@@ -6,8 +6,6 @@ labels: enhancement
 assignees: ''
 ---
 
-<!-- Please do not talk about security concerns here. Go to https://hackerone.com/github to report security concerns. -->
-
 ## Describe your idea
 
 ## What problem does your idea solve?

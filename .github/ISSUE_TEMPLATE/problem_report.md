@@ -10,8 +10,6 @@ assignees: ''
 
 ## Describe your problem
 
-## Steps to reproduce the problem
-
 ## Provide your stale action configuration
 
 ## Further context

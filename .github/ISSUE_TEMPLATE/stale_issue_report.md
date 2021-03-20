@@ -1,12 +1,12 @@
 ---
-name: Problem report
-about: Report problems with using the stale action.
+name: Stale issue report
+about: Report issues with using the stale action
 title: ''
 labels: bug
 assignees: ''
 ---
 
-- [ ] I've read the [debugging](https://github.com/actions/stale#debugging) section of the readme.
+<!-- Have you tried the [debugging](https://github.com/actions/stale#debugging) section of the readme? -->
 
 ## Describe your issue
 

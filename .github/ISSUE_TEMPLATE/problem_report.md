@@ -8,7 +8,7 @@ assignees: ''
 
 - [ ] I've read the [debugging](https://github.com/actions/stale#debugging) section of the readme.
 
-## Describe your problem
+## Describe your issue
 
 ## Provide your stale action configuration
 

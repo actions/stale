@@ -11,7 +11,6 @@ assignees: ''
 ## Describe your issue
 
 ## Your stale action configuration
-<!-- You can include a link with the issue or pull request having concerning this issue report. -->
 
 ## Further context
 

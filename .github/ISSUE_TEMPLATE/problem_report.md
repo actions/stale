@@ -10,7 +10,8 @@ assignees: ''
 
 ## Describe your issue
 
-## Provide your stale action configuration
+## Your stale action configuration
+<!-- You can include a link with the issue or pull request having concerning this issue report. -->
 
 ## Further context
 

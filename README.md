@@ -32,7 +32,8 @@ Every argument is optional.
 | `only-pr-labels`              | Only PRs with ALL these labels are checked.<br>Separate multiple labels with commas (eg. "question,answered").<br>_Override `only-labels`_.    |
 | `any-of-labels`               | Only issues and PRs with ANY of these labels are checked.<br>Separate multiple labels with commas (eg. "incomplete,waiting-feedback").         |
 | `operations-per-run`          | Maximum number of operations per run.<br>GitHub API CRUD related.<br>_Defaults to **30**_.                                                     |
-| `remove-stale-when-updated`   | Remove stale label from issue/PR on updates or comments.<br>_Defaults to **true**_.                                                            |
+| `remove-stale-when-commented` | Remove stale label from issue/PR on comments.<br>_Defaults to **true**_.                                                                       |
+| `remove-stale-when-updated`   | Remove stale label from issue/PR on any update, including comments.<br>_Defaults to **true**_.                                                 |
 | `debug-only`                  | Dry-run on action.<br>_Defaults to **false**_.                                                                                                 |
 | `ascending`                   | Order to get issues/PR.<br>`true` is ascending, `false` is descending.<br>_Defaults to **false**_.                                             |
 | `skip-stale-issue-message`    | Skip adding stale message on stale issue.<br>_Defaults to **false**_.                                                                          |

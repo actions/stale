@@ -444,7 +444,10 @@ export class IssuesProcessor {
     issueLogger.info(`$$type has been updated: ${issueHasUpdate}`);
 
     // should we un-stale this issue?
-    if (this.options.removeStaleWhenUpdated && issueHasComments) {
+    if (
+      (this.options.removeStaleWhenCommented && issueHasComments) ||
+      (this.options.removeStaleWhenUpdated && issueHasUpdate)
+    ) {
       await this._removeStaleLabel(issue, staleLabel);
     }
 

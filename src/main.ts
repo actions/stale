@@ -44,6 +44,9 @@ function _getAndValidateArgs(): IIssuesProcessorOptions {
     operationsPerRun: parseInt(
       core.getInput('operations-per-run', {required: true})
     ),
+    removeStaleWhenCommented: !(
+      core.getInput('remove-stale-when-commented') === 'false'
+    ),
     removeStaleWhenUpdated: !(
       core.getInput('remove-stale-when-updated') === 'false'
     ),

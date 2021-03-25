@@ -512,7 +512,8 @@ class IssuesProcessor {
             const issueHasUpdate = IssuesProcessor._updatedSince(issue.updated_at, daysBeforeClose);
             issueLogger.info(`$$type has been updated: ${issueHasUpdate}`);
             // should we un-stale this issue?
-            if (this.options.removeStaleWhenUpdated && issueHasComments) {
+            if ((this.options.removeStaleWhenCommented && issueHasComments) ||
+                (this.options.removeStaleWhenUpdated && issueHasUpdate)) {
                 yield this._removeStaleLabel(issue, staleLabel);
             }
             // now start closing logic
@@ -1547,6 +1548,7 @@ function _getAndValidateArgs() {
         onlyPrLabels: core.getInput('only-pr-labels'),
         anyOfLabels: core.getInput('any-of-labels'),
         operationsPerRun: parseInt(core.getInput('operations-per-run', { required: true })),
+        removeStaleWhenCommented: !(core.getInput('remove-stale-when-commented') === 'false'),
         removeStaleWhenUpdated: !(core.getInput('remove-stale-when-updated') === 'false'),
         debugOnly: core.getInput('debug-only') === 'true',
         ascending: core.getInput('ascending') === 'true',

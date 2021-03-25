@@ -32,6 +32,7 @@ describe('Issue', (): void => {
       onlyPrLabels: '',
       anyOfLabels: '',
       operationsPerRun: 0,
+      removeStaleWhenCommented: false,
       removeStaleWhenUpdated: false,
       repoToken: '',
       skipStaleIssueMessage: false,

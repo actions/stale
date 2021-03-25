@@ -23,6 +23,7 @@ export interface IIssuesProcessorOptions {
   onlyPrLabels: string;
   anyOfLabels: string;
   operationsPerRun: number;
+  removeStaleWhenCommented: boolean;
   removeStaleWhenUpdated: boolean;
   debugOnly: boolean;
   ascending: boolean;

@@ -94,7 +94,7 @@ export class IssuesProcessor {
 
     for (const issue of issues.values()) {
       const issueLogger: IssueLogger = new IssueLogger(issue);
-      this._statistics?.incrementProcessedIssuesCount();
+      this._statistics?.incrementProcessedItemsCount(issue);
 
       issueLogger.info(`Found this $$type last updated ${issue.updated_at}`);
 
@@ -320,7 +320,7 @@ export class IssuesProcessor {
     // find any comments since date on the given issue
     try {
       this._operations.consumeOperation();
-      this._statistics?.incrementFetchedIssuesCommentsCount();
+      this._statistics?.incrementFetchedItemsCommentsCount();
       const comments = await this.client.issues.listComments({
         owner: context.repo.owner,
         repo: context.repo.repo,
@@ -366,7 +366,7 @@ export class IssuesProcessor {
           page
         }
       );
-      this._statistics?.incrementFetchedIssuesCount(issueResult.data.length);
+      this._statistics?.incrementFetchedItemsCount(issueResult.data.length);
 
       return issueResult.data.map(
         (issue: Readonly<IIssue>): Issue => new Issue(this.options, issue)
@@ -388,7 +388,7 @@ export class IssuesProcessor {
     issueLogger.info(`Checking for label on $$type`);
 
     this._operations.consumeOperation();
-    this._statistics?.incrementFetchedIssuesEventsCount();
+    this._statistics?.incrementFetchedItemsEventsCount();
     const options = this.client.issues.listEvents.endpoint.merge({
       owner: context.repo.owner,
       repo: context.repo.repo,
@@ -526,7 +526,7 @@ export class IssuesProcessor {
     if (!skipMessage) {
       try {
         this._operations.consumeOperation();
-        this._statistics?.incrementAddedComment();
+        this._statistics?.incrementAddedItemsComment(issue);
         await this.client.issues.createComment({
           owner: context.repo.owner,
           repo: context.repo.repo,
@@ -540,8 +540,8 @@ export class IssuesProcessor {
 
     try {
       this._operations.consumeOperation();
-      this._statistics?.incrementAddedLabel();
-      this._statistics?.incrementStaleIssuesCount();
+      this._statistics?.incrementAddedItemsLabel(issue);
+      this._statistics?.incrementStaleItemsCount(issue);
       await this.client.issues.addLabels({
         owner: context.repo.owner,
         repo: context.repo.repo,
@@ -571,7 +571,7 @@ export class IssuesProcessor {
     if (closeMessage) {
       try {
         this._operations.consumeOperation();
-        this._statistics?.incrementAddedComment();
+        this._statistics?.incrementAddedItemsComment(issue);
         await this.client.issues.createComment({
           owner: context.repo.owner,
           repo: context.repo.repo,
@@ -586,7 +586,7 @@ export class IssuesProcessor {
     if (closeLabel) {
       try {
         this._operations.consumeOperation();
-        this._statistics?.incrementAddedLabel();
+        this._statistics?.incrementAddedItemsLabel(issue);
         await this.client.issues.addLabels({
           owner: context.repo.owner,
           repo: context.repo.repo,
@@ -600,7 +600,7 @@ export class IssuesProcessor {
 
     try {
       this._operations.consumeOperation();
-      this._statistics?.incrementClosedIssuesCount();
+      this._statistics?.incrementClosedItemsCount(issue);
       await this.client.issues.update({
         owner: context.repo.owner,
         repo: context.repo.repo,
@@ -673,7 +673,7 @@ export class IssuesProcessor {
     }
   }
 
-  // Remove a label from an issue
+  // Remove a label from an issue or a pull request
   private async _removeLabel(issue: Issue, label: string): Promise<void> {
     const issueLogger: IssueLogger = new IssueLogger(issue);
 
@@ -686,7 +686,7 @@ export class IssuesProcessor {
 
     try {
       this._operations.consumeOperation();
-      this._statistics?.incrementDeletedLabelsCount();
+      this._statistics?.incrementDeletedItemsLabelsCount(issue);
       await this.client.issues.removeLabel({
         owner: context.repo.owner,
         repo: context.repo.repo,
@@ -747,7 +747,7 @@ export class IssuesProcessor {
     );
 
     await this._removeLabel(issue, staleLabel);
-    this._statistics?.incrementUndoStaleIssuesCount();
+    this._statistics?.incrementUndoStaleItemsCount(issue);
   }
 
   private async _removeCloseLabel(
@@ -772,7 +772,7 @@ export class IssuesProcessor {
       );
 
       await this._removeLabel(issue, closeLabel);
-      this._statistics?.incrementDeletedCloseLabelsCount();
+      this._statistics?.incrementDeletedCloseItemsLabelsCount(issue);
     }
   }
 }

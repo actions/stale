@@ -1,4 +1,6 @@
+import chalk from 'chalk';
 import deburr from 'lodash.deburr';
+import {Option} from '../enums/option';
 import {wordsToList} from '../functions/words-to-list';
 import {IAssignee} from '../interfaces/assignee';
 import {IIssuesProcessorOptions} from '../interfaces/issues-processor-options';
@@ -32,6 +34,7 @@ export class Assignees {
 
     if (this._shouldExemptAllAssignees()) {
       this._issueLogger.info(
+        chalk.white('└──'),
         'Skipping $$type because it has an exempt assignee'
       );
 
@@ -42,6 +45,7 @@ export class Assignees {
 
     if (exemptAssignees.length === 0) {
       this._issueLogger.info(
+        chalk.white('├──'),
         `No assignee option was specified to skip the stale process for this $$type`
       );
       this._logSkip();
@@ -50,7 +54,8 @@ export class Assignees {
     }
 
     this._issueLogger.info(
-      `Found ${exemptAssignees.length} assignee${
+      chalk.white('├──'),
+      `Found ${chalk.cyan(exemptAssignees.length)} assignee${
         exemptAssignees.length > 1 ? 's' : ''
       } that can exempt stale on this $$type`
     );
@@ -62,11 +67,13 @@ export class Assignees {
 
     if (!hasExemptAssignee) {
       this._issueLogger.info(
+        chalk.white('├──'),
         'No assignee on this $$type can exempt the stale process'
       );
       this._logSkip();
     } else {
       this._issueLogger.info(
+        chalk.white('└──'),
         'Skipping this $$type because it has an exempt assignee'
       );
     }
@@ -83,12 +90,18 @@ export class Assignees {
   private _getExemptIssueAssignees(): string[] {
     if (this._options.exemptIssueAssignees === '') {
       this._issueLogger.info(
-        'The option "exemptIssueAssignees" is disabled. No specific assignee can skip the stale process for this $$type'
+        chalk.white('├──'),
+        `The option ${this._issueLogger.createOptionLink(
+          Option.ExemptIssueAssignees
+        )} is disabled. No specific assignee can skip the stale process for this $$type`
       );
 
       if (this._options.exemptAssignees === '') {
         this._issueLogger.info(
-          'The option "exemptAssignees" is disabled. No specific assignee can skip the stale process for this $$type'
+          chalk.white('├──'),
+          `The option ${this._issueLogger.createOptionLink(
+            Option.ExemptAssignees
+          )} is disabled. No specific assignee can skip the stale process for this $$type`
         );
 
         return [];
@@ -99,9 +112,10 @@ export class Assignees {
       );
 
       this._issueLogger.info(
-        `The option "exemptAssignees" is set. ${
-          exemptAssignees.length
-        } assignee${
+        chalk.white('├──'),
+        `The option ${this._issueLogger.createOptionLink(
+          Option.ExemptAssignees
+        )} is set. ${chalk.cyan(exemptAssignees.length)} assignee${
           exemptAssignees.length === 1 ? '' : 's'
         } can skip the stale process for this $$type`
       );
@@ -114,9 +128,10 @@ export class Assignees {
     );
 
     this._issueLogger.info(
-      `The option "exemptIssueAssignees" is set. ${
-        exemptAssignees.length
-      } assignee${
+      chalk.white('├──'),
+      `The option ${this._issueLogger.createOptionLink(
+        Option.ExemptIssueAssignees
+      )} is set. ${chalk.cyan(exemptAssignees.length)} assignee${
         exemptAssignees.length === 1 ? '' : 's'
       } can skip the stale process for this $$type`
     );
@@ -127,12 +142,18 @@ export class Assignees {
   private _getExemptPullRequestAssignees(): string[] {
     if (this._options.exemptPrAssignees === '') {
       this._issueLogger.info(
-        'The option "exemptPrAssignees" is disabled. No specific assignee can skip the stale process for this $$type'
+        chalk.white('├──'),
+        `The option ${this._issueLogger.createOptionLink(
+          Option.ExemptPrAssignees
+        )} is disabled. No specific assignee can skip the stale process for this $$type`
       );
 
       if (this._options.exemptAssignees === '') {
         this._issueLogger.info(
-          'The option "exemptAssignees" is disabled. No specific assignee can skip the stale process for this $$type'
+          chalk.white('├──'),
+          `The option ${this._issueLogger.createOptionLink(
+            Option.ExemptAssignees
+          )} is disabled. No specific assignee can skip the stale process for this $$type`
         );
 
         return [];
@@ -143,9 +164,10 @@ export class Assignees {
       );
 
       this._issueLogger.info(
-        `The option "exemptAssignees" is set. ${
-          exemptAssignees.length
-        } assignee${
+        chalk.white('├──'),
+        `The option ${this._issueLogger.createOptionLink(
+          Option.ExemptAssignees
+        )} is set. ${chalk.cyan(exemptAssignees.length)} assignee${
           exemptAssignees.length === 1 ? '' : 's'
         } can skip the stale process for this $$type`
       );
@@ -158,9 +180,10 @@ export class Assignees {
     );
 
     this._issueLogger.info(
-      `The option "exemptPrAssignees" is set. ${
-        exemptAssignees.length
-      } assignee${
+      chalk.white('├──'),
+      `The option ${this._issueLogger.createOptionLink(
+        Option.ExemptPrAssignees
+      )} is set. ${chalk.cyan(exemptAssignees.length)} assignee${
         exemptAssignees.length === 1 ? '' : 's'
       } can skip the stale process for this $$type`
     );
@@ -178,6 +201,7 @@ export class Assignees {
 
         if (isSameAssignee) {
           this._issueLogger.info(
+            chalk.white('├──'),
             `@${issueAssignee.login} is assigned on this $$type and is an exempt assignee`
           );
         }
@@ -196,13 +220,17 @@ export class Assignees {
   private _shouldExemptAllIssueAssignees(): boolean {
     if (this._options.exemptAllIssueAssignees === true) {
       this._issueLogger.info(
-        'The option "exemptAllIssueAssignees" is enabled. Any assignee on this $$type will skip the stale process'
+        `The option ${this._issueLogger.createOptionLink(
+          Option.ExemptAllIssueAssignees
+        )} is enabled. Any assignee on this $$type will skip the stale process`
       );
 
       return true;
     } else if (this._options.exemptAllIssueAssignees === false) {
       this._issueLogger.info(
-        'The option "exemptAllIssueAssignees" is disabled. Only some specific assignees on this $$type will skip the stale process'
+        `The option ${this._issueLogger.createOptionLink(
+          Option.ExemptAllIssueAssignees
+        )} is disabled. Only some specific assignees on this $$type will skip the stale process`
       );
 
       return false;
@@ -216,13 +244,17 @@ export class Assignees {
   private _shouldExemptAllPullRequestAssignees(): boolean {
     if (this._options.exemptAllPrAssignees === true) {
       this._issueLogger.info(
-        'The option "exemptAllPrAssignees" is enabled. Any assignee on this $$type will skip the stale process'
+        `The option ${this._issueLogger.createOptionLink(
+          Option.ExemptAllPrAssignees
+        )} is enabled. Any assignee on this $$type will skip the stale process`
       );
 
       return true;
     } else if (this._options.exemptAllPrAssignees === false) {
       this._issueLogger.info(
-        'The option "exemptAllPrAssignees" is disabled. Only some specific assignees on this $$type will skip the stale process'
+        `The option ${this._issueLogger.createOptionLink(
+          Option.ExemptAllPrAssignees
+        )} is disabled. Only some specific assignees on this $$type will skip the stale process`
       );
 
       return false;
@@ -236,16 +268,20 @@ export class Assignees {
   private _logExemptAllAssigneesOption(): void {
     if (this._options.exemptAllAssignees) {
       this._issueLogger.info(
-        'The option "exemptAllAssignees" is enabled. Any assignee on this $$type will skip the stale process'
+        `The option ${this._issueLogger.createOptionLink(
+          Option.ExemptAllAssignees
+        )} is enabled. Any assignee on this $$type will skip the stale process`
       );
     } else {
       this._issueLogger.info(
-        'The option "exemptAllAssignees" is disabled. Only some specific assignees on this $$type will skip the stale process'
+        `The option ${this._issueLogger.createOptionLink(
+          Option.ExemptAllAssignees
+        )} is disabled. Only some specific assignees on this $$type will skip the stale process`
       );
     }
   }
 
   private _logSkip(): void {
-    this._issueLogger.info('Skip the assignees checks');
+    this._issueLogger.info(chalk.white('└──'), 'Skip the assignees checks');
   }
 }

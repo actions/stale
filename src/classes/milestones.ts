@@ -1,4 +1,6 @@
+import chalk from 'chalk';
 import deburr from 'lodash.deburr';
+import {Option} from '../enums/option';
 import {wordsToList} from '../functions/words-to-list';
 import {IIssuesProcessorOptions} from '../interfaces/issues-processor-options';
 import {Issue} from './issue';
@@ -31,7 +33,8 @@ export class Milestones {
 
     if (this._shouldExemptAllMilestones()) {
       this._issueLogger.info(
-        'Skipping $$type because it has an exempt milestone'
+        chalk.white('└──'),
+        'Skipping $$type because it has a milestone'
       );
 
       return true;
@@ -41,6 +44,7 @@ export class Milestones {
 
     if (exemptMilestones.length === 0) {
       this._issueLogger.info(
+        chalk.white('├──'),
         `No milestone option was specified to skip the stale process for this $$type`
       );
       this._logSkip();
@@ -49,7 +53,8 @@ export class Milestones {
     }
 
     this._issueLogger.info(
-      `Found ${exemptMilestones.length} milestone${
+      chalk.white('├──'),
+      `Found ${chalk.cyan(exemptMilestones.length)} milestone${
         exemptMilestones.length > 1 ? 's' : ''
       } that can exempt stale on this $$type`
     );
@@ -61,11 +66,13 @@ export class Milestones {
 
     if (!hasExemptMilestone) {
       this._issueLogger.info(
+        chalk.white('├──'),
         'No milestone on this $$type can exempt the stale process'
       );
       this._logSkip();
     } else {
       this._issueLogger.info(
+        chalk.white('└──'),
         'Skipping this $$type because it has an exempt milestone'
       );
     }
@@ -82,12 +89,18 @@ export class Milestones {
   private _getExemptIssueMilestones(): string[] {
     if (this._options.exemptIssueMilestones === '') {
       this._issueLogger.info(
-        'The option "exemptIssueMilestones" is disabled. No specific milestone can skip the stale process for this $$type'
+        chalk.white('├──'),
+        `The option ${this._issueLogger.createOptionLink(
+          Option.ExemptIssueMilestones
+        )} is disabled. No specific milestone can skip the stale process for this $$type`
       );
 
       if (this._options.exemptMilestones === '') {
         this._issueLogger.info(
-          'The option "exemptMilestones" is disabled. No specific milestone can skip the stale process for this $$type'
+          chalk.white('├──'),
+          `The option ${this._issueLogger.createOptionLink(
+            Option.ExemptMilestones
+          )} is disabled. No specific milestone can skip the stale process for this $$type`
         );
 
         return [];
@@ -98,9 +111,10 @@ export class Milestones {
       );
 
       this._issueLogger.info(
-        `The option "exemptMilestones" is set. ${
-          exemptMilestones.length
-        } milestone${
+        chalk.white('├──'),
+        `The option ${this._issueLogger.createOptionLink(
+          Option.ExemptMilestones
+        )} is set. ${chalk.cyan(exemptMilestones.length)} milestone${
           exemptMilestones.length === 1 ? '' : 's'
         } can skip the stale process for this $$type`
       );
@@ -113,9 +127,10 @@ export class Milestones {
     );
 
     this._issueLogger.info(
-      `The option "exemptIssueMilestones" is set. ${
-        exemptMilestones.length
-      } milestone${
+      chalk.white('├──'),
+      `The option ${this._issueLogger.createOptionLink(
+        Option.ExemptIssueMilestones
+      )} is set. ${chalk.cyan(exemptMilestones.length)} milestone${
         exemptMilestones.length === 1 ? '' : 's'
       } can skip the stale process for this $$type`
     );
@@ -126,12 +141,18 @@ export class Milestones {
   private _getExemptPullRequestMilestones(): string[] {
     if (this._options.exemptPrMilestones === '') {
       this._issueLogger.info(
-        'The option "exemptPrMilestones" is disabled. No specific milestone can skip the stale process for this $$type'
+        chalk.white('├──'),
+        `The option ${this._issueLogger.createOptionLink(
+          Option.ExemptPrMilestones
+        )} is disabled. No specific milestone can skip the stale process for this $$type`
       );
 
       if (this._options.exemptMilestones === '') {
         this._issueLogger.info(
-          'The option "exemptMilestones" is disabled. No specific milestone can skip the stale process for this $$type'
+          chalk.white('├──'),
+          `The option ${this._issueLogger.createOptionLink(
+            Option.ExemptMilestones
+          )} is disabled. No specific milestone can skip the stale process for this $$type`
         );
 
         return [];
@@ -142,9 +163,10 @@ export class Milestones {
       );
 
       this._issueLogger.info(
-        `The option "exemptMilestones" is set. ${
-          exemptMilestones.length
-        } milestone${
+        chalk.white('├──'),
+        `The option ${this._issueLogger.createOptionLink(
+          Option.ExemptMilestones
+        )} is set. ${chalk.cyan(exemptMilestones.length)} milestone${
           exemptMilestones.length === 1 ? '' : 's'
         } can skip the stale process for this $$type`
       );
@@ -157,9 +179,10 @@ export class Milestones {
     );
 
     this._issueLogger.info(
-      `The option "exemptPrMilestones" is set. ${
-        exemptMilestones.length
-      } milestone${
+      chalk.white('├──'),
+      `The option ${this._issueLogger.createOptionLink(
+        Option.ExemptPrMilestones
+      )} is set. ${chalk.cyan(exemptMilestones.length)} milestone${
         exemptMilestones.length === 1 ? '' : 's'
       } can skip the stale process for this $$type`
     );
@@ -182,6 +205,7 @@ export class Milestones {
 
     if (isSameMilestone) {
       this._issueLogger.info(
+        chalk.white('├──'),
         `The milestone "${milestone}" is set on this $$type and is an exempt milestone`
       );
     }
@@ -202,13 +226,17 @@ export class Milestones {
   private _shouldExemptAllIssueMilestones(): boolean {
     if (this._options.exemptAllIssueMilestones === true) {
       this._issueLogger.info(
-        'The option "exemptAllIssueMilestones" is enabled. Any milestone on this $$type will skip the stale process'
+        `The option ${this._issueLogger.createOptionLink(
+          Option.ExemptAllIssueMilestones
+        )} is enabled. Any milestone on this $$type will skip the stale process`
       );
 
       return true;
     } else if (this._options.exemptAllIssueMilestones === false) {
       this._issueLogger.info(
-        'The option "exemptAllIssueMilestones" is disabled. Only some specific milestones on this $$type will skip the stale process'
+        `The option ${this._issueLogger.createOptionLink(
+          Option.ExemptAllIssueMilestones
+        )} is disabled. Only some specific milestones on this $$type will skip the stale process`
       );
 
       return false;
@@ -222,13 +250,17 @@ export class Milestones {
   private _shouldExemptAllPullRequestMilestones(): boolean {
     if (this._options.exemptAllPrMilestones === true) {
       this._issueLogger.info(
-        'The option "exemptAllPrMilestones" is enabled. Any milestone on this $$type will skip the stale process'
+        `The option ${this._issueLogger.createOptionLink(
+          Option.ExemptAllPrMilestones
+        )} is enabled. Any milestone on this $$type will skip the stale process`
       );
 
       return true;
     } else if (this._options.exemptAllPrMilestones === false) {
       this._issueLogger.info(
-        'The option "exemptAllPrMilestones" is disabled. Only some specific milestones on this $$type will skip the stale process'
+        `The option ${this._issueLogger.createOptionLink(
+          Option.ExemptAllPrMilestones
+        )} is disabled. Only some specific milestones on this $$type will skip the stale process`
       );
 
       return false;
@@ -242,16 +274,20 @@ export class Milestones {
   private _logExemptAllMilestonesOption(): void {
     if (this._options.exemptAllMilestones) {
       this._issueLogger.info(
-        'The option "exemptAllMilestones" is enabled. Any milestone on this $$type will skip the stale process'
+        `The option ${this._issueLogger.createOptionLink(
+          Option.ExemptAllMilestones
+        )} is enabled. Any milestone on this $$type will skip the stale process`
       );
     } else {
       this._issueLogger.info(
-        'The option "exemptAllMilestones" is disabled. Only some specific milestones on this $$type will skip the stale process'
+        `The option ${this._issueLogger.createOptionLink(
+          Option.ExemptAllMilestones
+        )} is disabled. Only some specific milestones on this $$type will skip the stale process`
       );
     }
   }
 
   private _logSkip(): void {
-    this._issueLogger.info('Skip the milestones checks');
+    this._issueLogger.info(chalk.white('└──'), 'Skip the milestones checks');
   }
 }

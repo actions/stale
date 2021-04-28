@@ -346,12 +346,12 @@ class IssuesProcessor {
                 if (issue.state === 'closed') {
                     issueLogger.info(`Skipping $$type because it is closed`);
                     IssuesProcessor._endIssueProcessing(issue);
-                    continue; // don't process closed issues
+                    continue; // Don't process closed issues
                 }
                 if (issue.locked) {
                     issueLogger.info(`Skipping $$type because it is locked`);
                     IssuesProcessor._endIssueProcessing(issue);
-                    continue; // don't process locked issues
+                    continue; // Don't process locked issues
                 }
                 // Try to remove the close label when not close/locked issue or PR
                 yield this._removeCloseLabel(issue, closeLabel);

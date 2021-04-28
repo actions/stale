@@ -312,15 +312,17 @@ class IssuesProcessor {
                         return is_labeled_1.isLabeled(issue, label);
                     });
                     if (!hasAllWhitelistedLabels) {
-                        issueLogger.info(`Skipping this $$type because it doesn't have all the required labels`);
+                        issueLogger.info(chalk_1.default.white('└──'), `Skipping this $$type because it doesn't have all the required labels`);
                         continue; // Don't process issues without all of the required labels
                     }
                     else {
-                        issueLogger.info(`All the required labels are present on this $$type. Continuing the process`);
+                        issueLogger.info(chalk_1.default.white('├──'), `All the required labels are present on this $$type`);
+                        issueLogger.info(chalk_1.default.white('└──'), `Continuing the process for this $$type`);
                     }
                 }
                 else {
-                    issueLogger.info(`The option "onlyLabels" was not specified. Continuing the process for this $$type`);
+                    issueLogger.info(`The option "onlyLabels" was not specified`);
+                    issueLogger.info(chalk_1.default.white('└──'), `Continuing the process for this $$type`);
                 }
                 issueLogger.info(`Days before $$type stale: ${daysBeforeStale}`);
                 const shouldMarkAsStale = should_mark_when_stale_1.shouldMarkWhenStale(daysBeforeStale);
@@ -370,11 +372,24 @@ class IssuesProcessor {
                     issueLogger.info(`Skipping $$type because it has an exempt label`);
                     continue; // don't process exempt issues
                 }
-                const anyOfLabels = words_to_list_1.wordsToList(this.options.anyOfLabels);
-                if (anyOfLabels.length &&
-                    !anyOfLabels.some((label) => is_labeled_1.isLabeled(issue, label))) {
-                    issueLogger.info(`Skipping $$type because it does not have any of the required labels`);
-                    continue; // don't process issues without any of the required labels
+                const anyOfLabels = words_to_list_1.wordsToList(this._getAnyOfLabels(issue));
+                if (anyOfLabels.length > 0) {
+                    issueLogger.info(`The option "anyOfLabels" was specified to only processed the issues and pull requests with one of those labels (${anyOfLabels.length})`);
+                    const hasOneOfWhitelistedLabels = anyOfLabels.some((label) => {
+                        return is_labeled_1.isLabeled(issue, label);
+                    });
+                    if (!hasOneOfWhitelistedLabels) {
+                        issueLogger.info(chalk_1.default.white('└──'), `Skipping this $$type because it doesn't have one of the required labels`);
+                        continue; // Don't process issues without any of the required labels
+                    }
+                    else {
+                        issueLogger.info(chalk_1.default.white('├──'), `One of the required labels is present on this $$type`);
+                        issueLogger.info(chalk_1.default.white('└──'), `Continuing the process for this $$type`);
+                    }
+                }
+                else {
+                    issueLogger.info(`The option "anyOfLabels" was not specified`);
+                    issueLogger.info(chalk_1.default.white('└──'), `Continuing the process for this $$type`);
                 }
                 const milestones = new milestones_1.Milestones(this.options, issue);
                 if (milestones.shouldExemptMilestones()) {
@@ -758,6 +773,19 @@ class IssuesProcessor {
             }
         }
         return this.options.onlyLabels;
+    }
+    _getAnyOfLabels(issue) {
+        if (issue.isPullRequest) {
+            if (this.options.anyOfPrLabels !== '') {
+                return this.options.anyOfPrLabels;
+            }
+        }
+        else {
+            if (this.options.anyOfIssueLabels !== '') {
+                return this.options.anyOfIssueLabels;
+            }
+        }
+        return this.options.anyOfLabels;
     }
     _removeStaleLabel(issue, staleLabel) {
         var _a;
@@ -1758,6 +1786,8 @@ function _getAndValidateArgs() {
         onlyIssueLabels: core.getInput('only-issue-labels'),
         onlyPrLabels: core.getInput('only-pr-labels'),
         anyOfLabels: core.getInput('any-of-labels'),
+        anyOfIssueLabels: core.getInput('any-of-issue-labels'),
+        anyOfPrLabels: core.getInput('any-of-pr-labels'),
         operationsPerRun: parseInt(core.getInput('operations-per-run', { required: true })),
         removeStaleWhenUpdated: !(core.getInput('remove-stale-when-updated') === 'false'),
         debugOnly: core.getInput('debug-only') === 'true',

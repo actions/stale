@@ -44,7 +44,7 @@ export class IssuesProcessor {
       issueLogger.info(
         chalk.cyan(consumedOperationsCount),
         `operation${
-          consumedOperationsCount > 1 ? '' : ''
+          consumedOperationsCount > 1 ? 's' : ''
         } consumed for this $$type`
       );
     }

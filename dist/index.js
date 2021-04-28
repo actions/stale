@@ -276,7 +276,7 @@ class IssuesProcessor {
         const consumedOperationsCount = issue.getConsumedOperationsCount();
         if (consumedOperationsCount > 0) {
             const issueLogger = new issue_logger_1.IssueLogger(issue);
-            issueLogger.info(chalk_1.default.cyan(consumedOperationsCount), `operation${consumedOperationsCount > 1 ? '' : ''} consumed for this $$type`);
+            issueLogger.info(chalk_1.default.cyan(consumedOperationsCount), `operation${consumedOperationsCount > 1 ? 's' : ''} consumed for this $$type`);
         }
     }
     processIssues(page = 1) {

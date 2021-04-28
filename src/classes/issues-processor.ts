@@ -147,6 +147,7 @@ export class IssuesProcessor {
 
         if (!hasAllWhitelistedLabels) {
           issueLogger.info(
+            chalk.white('└──'),
             `Skipping this $$type because it doesn't have all the required labels`
           );
 
@@ -154,12 +155,19 @@ export class IssuesProcessor {
           continue; // Don't process issues without all of the required labels
         } else {
           issueLogger.info(
-            `All the required labels are present on this $$type. Continuing the process`
+            chalk.white('├──'),
+            `All the required labels are present on this $$type`
+          );
+          issueLogger.info(
+            chalk.white('└──'),
+            `Continuing the process for this $$type`
           );
         }
       } else {
+        issueLogger.info(`The option "onlyLabels" was not specified`);
         issueLogger.info(
-          `The option "onlyLabels" was not specified. Continuing the process for this $$type`
+          chalk.white('└──'),
+          `Continuing the process for this $$type`
         );
       }
 
@@ -219,7 +227,7 @@ export class IssuesProcessor {
           );
 
           IssuesProcessor._endIssueProcessing(issue);
-          continue; // don't process issues which were created before the start date
+          continue; // Don't process issues which were created before the start date
         }
       }
 
@@ -247,58 +255,81 @@ export class IssuesProcessor {
 
         issueLogger.info(`Skipping $$type because it has an exempt label`);
         IssuesProcessor._endIssueProcessing(issue);
-        continue; // don't process exempt issues
+        continue; // Don't process exempt issues
       }
 
-      const anyOfLabels: string[] = wordsToList(this.options.anyOfLabels);
+      const anyOfLabels: string[] = wordsToList(this._getAnyOfLabels(issue));
 
-      if (
-        anyOfLabels.length &&
-        !anyOfLabels.some((label: Readonly<string>): boolean =>
-          isLabeled(issue, label)
-        )
-      ) {
+      if (anyOfLabels.length > 0) {
         issueLogger.info(
-          `Skipping $$type because it does not have any of the required labels`
+          `The option "anyOfLabels" was specified to only processed the issues and pull requests with one of those labels (${anyOfLabels.length})`
         );
-        IssuesProcessor._endIssueProcessing(issue);
-        continue; // don't process issues without any of the required labels
+
+        const hasOneOfWhitelistedLabels: boolean = anyOfLabels.some(
+          (label: Readonly<string>): boolean => {
+            return isLabeled(issue, label);
+          }
+        );
+
+        if (!hasOneOfWhitelistedLabels) {
+          issueLogger.info(
+            chalk.white('└──'),
+            `Skipping this $$type because it doesn't have one of the required labels`
+          );
+          IssuesProcessor._endIssueProcessing(issue);
+          continue; // Don't process issues without any of the required labels
+        } else {
+          issueLogger.info(
+            chalk.white('├──'),
+            `One of the required labels is present on this $$type`
+          );
+          issueLogger.info(
+            chalk.white('└──'),
+            `Continuing the process for this $$type`
+          );
+        }
+      } else {
+        issueLogger.info(`The option "anyOfLabels" was not specified`);
+        issueLogger.info(
+          chalk.white('└──'),
+          `Continuing the process for this $$type`
+        );
       }
 
       const milestones: Milestones = new Milestones(this.options, issue);
 
       if (milestones.shouldExemptMilestones()) {
         IssuesProcessor._endIssueProcessing(issue);
-        continue; // don't process exempt milestones
+        continue; // Don't process exempt milestones
       }
 
       const assignees: Assignees = new Assignees(this.options, issue);
 
       if (assignees.shouldExemptAssignees()) {
         IssuesProcessor._endIssueProcessing(issue);
-        continue; // don't process exempt assignees
+        continue; // Don't process exempt assignees
       }
 
-      // should this issue be marked stale?
+      // Should this issue be marked stale?
       const shouldBeStale = !IssuesProcessor._updatedSince(
         issue.updated_at,
         daysBeforeStale
       );
 
-      // determine if this issue needs to be marked stale first
+      // Determine if this issue needs to be marked stale first
       if (!issue.isStale && shouldBeStale && shouldMarkAsStale) {
         issueLogger.info(
           `Marking $$type stale because it was last updated on ${issue.updated_at} and it does not have a stale label`
         );
         await this._markStale(issue, staleMessage, staleLabel, skipMessage);
-        issue.isStale = true; // this issue is now considered stale
+        issue.isStale = true; // This issue is now considered stale
       } else if (!issue.isStale) {
         issueLogger.info(
           `Not marking as stale: shouldBeStale=${shouldBeStale}, shouldMarkAsStale=${shouldMarkAsStale}`
         );
       }
 
-      // process the issue if it was marked stale
+      // Process the issue if it was marked stale
       if (issue.isStale) {
         issueLogger.info(`Found a stale $$type`);
         await this._processStaleIssue(
@@ -769,6 +800,20 @@ export class IssuesProcessor {
     }
 
     return this.options.onlyLabels;
+  }
+
+  private _getAnyOfLabels(issue: Issue): string {
+    if (issue.isPullRequest) {
+      if (this.options.anyOfPrLabels !== '') {
+        return this.options.anyOfPrLabels;
+      }
+    } else {
+      if (this.options.anyOfIssueLabels !== '') {
+        return this.options.anyOfIssueLabels;
+      }
+    }
+
+    return this.options.anyOfLabels;
   }
 
   private async _removeStaleLabel(

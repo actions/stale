@@ -92,6 +92,14 @@ inputs:
     description: 'Only issues or pull requests with at least one of these labels are checked if stale. Defaults to `` (disabled) and can be a comma-separated list of labels.'
     default: ''
     required: false
+  any-of-issue-labels:
+    description: 'Only issues with at least one of these labels are checked if stale. Defaults to `` (disabled) and can be a comma-separated list of labels. Override "any-of-labels" option regarding only the issues.'
+    default: ''
+    required: false
+  any-of-pr-labels:
+    description: 'Only pull requests with at least one of these labels are checked if stale. Defaults to `` (disabled) and can be a comma-separated list of labels. Override "any-of-labels" option regarding only the pull requests.'
+    default: ''
+    required: false
   only-issue-labels:
     description: 'Only issues with all of these labels are checked if stale. Defaults to `[]` (disabled) and can be a comma-separated list of labels. Override "only-labels" option regarding only the issues.'
     default: ''

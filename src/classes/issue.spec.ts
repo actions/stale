@@ -31,6 +31,8 @@ describe('Issue', (): void => {
       onlyIssueLabels: '',
       onlyPrLabels: '',
       anyOfLabels: '',
+      anyOfIssueLabels: '',
+      anyOfPrLabels: '',
       operationsPerRun: 0,
       removeStaleWhenUpdated: false,
       removeIssueStaleWhenUpdated: undefined,

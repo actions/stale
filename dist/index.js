@@ -12,7 +12,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.Assignees = void 0;
+const chalk_1 = __importDefault(__nccwpck_require__(8818));
 const lodash_deburr_1 = __importDefault(__nccwpck_require__(1601));
+const option_1 = __nccwpck_require__(5931);
 const words_to_list_1 = __nccwpck_require__(1883);
 const issue_logger_1 = __nccwpck_require__(2984);
 class Assignees {
@@ -31,23 +33,23 @@ class Assignees {
             return false;
         }
         if (this._shouldExemptAllAssignees()) {
-            this._issueLogger.info('Skipping $$type because it has an exempt assignee');
+            this._issueLogger.info(chalk_1.default.white('└──'), 'Skipping $$type because it has an exempt assignee');
             return true;
         }
         const exemptAssignees = this._getExemptAssignees();
         if (exemptAssignees.length === 0) {
-            this._issueLogger.info(`No assignee option was specified to skip the stale process for this $$type`);
+            this._issueLogger.info(chalk_1.default.white('├──'), `No assignee option was specified to skip the stale process for this $$type`);
             this._logSkip();
             return false;
         }
-        this._issueLogger.info(`Found ${exemptAssignees.length} assignee${exemptAssignees.length > 1 ? 's' : ''} that can exempt stale on this $$type`);
+        this._issueLogger.info(chalk_1.default.white('├──'), `Found ${chalk_1.default.cyan(exemptAssignees.length)} assignee${exemptAssignees.length > 1 ? 's' : ''} that can exempt stale on this $$type`);
         const hasExemptAssignee = exemptAssignees.some((exemptAssignee) => this._hasAssignee(exemptAssignee));
         if (!hasExemptAssignee) {
-            this._issueLogger.info('No assignee on this $$type can exempt the stale process');
+            this._issueLogger.info(chalk_1.default.white('├──'), 'No assignee on this $$type can exempt the stale process');
             this._logSkip();
         }
         else {
-            this._issueLogger.info('Skipping this $$type because it has an exempt assignee');
+            this._issueLogger.info(chalk_1.default.white('└──'), 'Skipping this $$type because it has an exempt assignee');
         }
         return hasExemptAssignee;
     }
@@ -58,32 +60,32 @@ class Assignees {
     }
     _getExemptIssueAssignees() {
         if (this._options.exemptIssueAssignees === '') {
-            this._issueLogger.info('The option "exemptIssueAssignees" is disabled. No specific assignee can skip the stale process for this $$type');
+            this._issueLogger.info(chalk_1.default.white('├──'), `The option ${this._issueLogger.createOptionLink(option_1.Option.ExemptIssueAssignees)} is disabled. No specific assignee can skip the stale process for this $$type`);
             if (this._options.exemptAssignees === '') {
-                this._issueLogger.info('The option "exemptAssignees" is disabled. No specific assignee can skip the stale process for this $$type');
+                this._issueLogger.info(chalk_1.default.white('├──'), `The option ${this._issueLogger.createOptionLink(option_1.Option.ExemptAssignees)} is disabled. No specific assignee can skip the stale process for this $$type`);
                 return [];
             }
             const exemptAssignees = words_to_list_1.wordsToList(this._options.exemptAssignees);
-            this._issueLogger.info(`The option "exemptAssignees" is set. ${exemptAssignees.length} assignee${exemptAssignees.length === 1 ? '' : 's'} can skip the stale process for this $$type`);
+            this._issueLogger.info(chalk_1.default.white('├──'), `The option ${this._issueLogger.createOptionLink(option_1.Option.ExemptAssignees)} is set. ${chalk_1.default.cyan(exemptAssignees.length)} assignee${exemptAssignees.length === 1 ? '' : 's'} can skip the stale process for this $$type`);
             return exemptAssignees;
         }
         const exemptAssignees = words_to_list_1.wordsToList(this._options.exemptIssueAssignees);
-        this._issueLogger.info(`The option "exemptIssueAssignees" is set. ${exemptAssignees.length} assignee${exemptAssignees.length === 1 ? '' : 's'} can skip the stale process for this $$type`);
+        this._issueLogger.info(chalk_1.default.white('├──'), `The option ${this._issueLogger.createOptionLink(option_1.Option.ExemptIssueAssignees)} is set. ${chalk_1.default.cyan(exemptAssignees.length)} assignee${exemptAssignees.length === 1 ? '' : 's'} can skip the stale process for this $$type`);
         return exemptAssignees;
     }
     _getExemptPullRequestAssignees() {
         if (this._options.exemptPrAssignees === '') {
-            this._issueLogger.info('The option "exemptPrAssignees" is disabled. No specific assignee can skip the stale process for this $$type');
+            this._issueLogger.info(chalk_1.default.white('├──'), `The option ${this._issueLogger.createOptionLink(option_1.Option.ExemptPrAssignees)} is disabled. No specific assignee can skip the stale process for this $$type`);
             if (this._options.exemptAssignees === '') {
-                this._issueLogger.info('The option "exemptAssignees" is disabled. No specific assignee can skip the stale process for this $$type');
+                this._issueLogger.info(chalk_1.default.white('├──'), `The option ${this._issueLogger.createOptionLink(option_1.Option.ExemptAssignees)} is disabled. No specific assignee can skip the stale process for this $$type`);
                 return [];
             }
             const exemptAssignees = words_to_list_1.wordsToList(this._options.exemptAssignees);
-            this._issueLogger.info(`The option "exemptAssignees" is set. ${exemptAssignees.length} assignee${exemptAssignees.length === 1 ? '' : 's'} can skip the stale process for this $$type`);
+            this._issueLogger.info(chalk_1.default.white('├──'), `The option ${this._issueLogger.createOptionLink(option_1.Option.ExemptAssignees)} is set. ${chalk_1.default.cyan(exemptAssignees.length)} assignee${exemptAssignees.length === 1 ? '' : 's'} can skip the stale process for this $$type`);
             return exemptAssignees;
         }
         const exemptAssignees = words_to_list_1.wordsToList(this._options.exemptPrAssignees);
-        this._issueLogger.info(`The option "exemptPrAssignees" is set. ${exemptAssignees.length} assignee${exemptAssignees.length === 1 ? '' : 's'} can skip the stale process for this $$type`);
+        this._issueLogger.info(chalk_1.default.white('├──'), `The option ${this._issueLogger.createOptionLink(option_1.Option.ExemptPrAssignees)} is set. ${chalk_1.default.cyan(exemptAssignees.length)} assignee${exemptAssignees.length === 1 ? '' : 's'} can skip the stale process for this $$type`);
         return exemptAssignees;
     }
     _hasAssignee(assignee) {
@@ -91,7 +93,7 @@ class Assignees {
         return this._issue.assignees.some((issueAssignee) => {
             const isSameAssignee = cleanAssignee === Assignees._cleanAssignee(issueAssignee.login);
             if (isSameAssignee) {
-                this._issueLogger.info(`@${issueAssignee.login} is assigned on this $$type and is an exempt assignee`);
+                this._issueLogger.info(chalk_1.default.white('├──'), `@${issueAssignee.login} is assigned on this $$type and is an exempt assignee`);
             }
             return isSameAssignee;
         });
@@ -103,11 +105,11 @@ class Assignees {
     }
     _shouldExemptAllIssueAssignees() {
         if (this._options.exemptAllIssueAssignees === true) {
-            this._issueLogger.info('The option "exemptAllIssueAssignees" is enabled. Any assignee on this $$type will skip the stale process');
+            this._issueLogger.info(`The option ${this._issueLogger.createOptionLink(option_1.Option.ExemptAllIssueAssignees)} is enabled. Any assignee on this $$type will skip the stale process`);
             return true;
         }
         else if (this._options.exemptAllIssueAssignees === false) {
-            this._issueLogger.info('The option "exemptAllIssueAssignees" is disabled. Only some specific assignees on this $$type will skip the stale process');
+            this._issueLogger.info(`The option ${this._issueLogger.createOptionLink(option_1.Option.ExemptAllIssueAssignees)} is disabled. Only some specific assignees on this $$type will skip the stale process`);
             return false;
         }
         this._logExemptAllAssigneesOption();
@@ -115,11 +117,11 @@ class Assignees {
     }
     _shouldExemptAllPullRequestAssignees() {
         if (this._options.exemptAllPrAssignees === true) {
-            this._issueLogger.info('The option "exemptAllPrAssignees" is enabled. Any assignee on this $$type will skip the stale process');
+            this._issueLogger.info(`The option ${this._issueLogger.createOptionLink(option_1.Option.ExemptAllPrAssignees)} is enabled. Any assignee on this $$type will skip the stale process`);
             return true;
         }
         else if (this._options.exemptAllPrAssignees === false) {
-            this._issueLogger.info('The option "exemptAllPrAssignees" is disabled. Only some specific assignees on this $$type will skip the stale process');
+            this._issueLogger.info(`The option ${this._issueLogger.createOptionLink(option_1.Option.ExemptAllPrAssignees)} is disabled. Only some specific assignees on this $$type will skip the stale process`);
             return false;
         }
         this._logExemptAllAssigneesOption();
@@ -127,14 +129,14 @@ class Assignees {
     }
     _logExemptAllAssigneesOption() {
         if (this._options.exemptAllAssignees) {
-            this._issueLogger.info('The option "exemptAllAssignees" is enabled. Any assignee on this $$type will skip the stale process');
+            this._issueLogger.info(`The option ${this._issueLogger.createOptionLink(option_1.Option.ExemptAllAssignees)} is enabled. Any assignee on this $$type will skip the stale process`);
         }
         else {
-            this._issueLogger.info('The option "exemptAllAssignees" is disabled. Only some specific assignees on this $$type will skip the stale process');
+            this._issueLogger.info(`The option ${this._issueLogger.createOptionLink(option_1.Option.ExemptAllAssignees)} is disabled. Only some specific assignees on this $$type will skip the stale process`);
         }
     }
     _logSkip() {
-        this._issueLogger.info('Skip the assignees checks');
+        this._issueLogger.info(chalk_1.default.white('└──'), 'Skip the assignees checks');
     }
 }
 exports.Assignees = Assignees;
@@ -284,7 +286,7 @@ class IssuesProcessor {
             }
             for (const issue of issues.values()) {
                 const issueLogger = new issue_logger_1.IssueLogger(issue);
-                (_b = this._statistics) === null || _b === void 0 ? void 0 : _b.incrementProcessedIssuesCount();
+                (_b = this._statistics) === null || _b === void 0 ? void 0 : _b.incrementProcessedItemsCount(issue);
                 issueLogger.info(`Found this $$type last updated ${issue.updated_at}`);
                 // calculate string based messages for this issue
                 const staleMessage = issue.isPullRequest
@@ -312,15 +314,17 @@ class IssuesProcessor {
                         return is_labeled_1.isLabeled(issue, label);
                     });
                     if (!hasAllWhitelistedLabels) {
-                        issueLogger.info(`Skipping this $$type because it doesn't have all the required labels`);
+                        issueLogger.info(chalk_1.default.white('└──'), `Skipping this $$type because it doesn't have all the required labels`);
                         continue; // Don't process issues without all of the required labels
                     }
                     else {
-                        issueLogger.info(`All the required labels are present on this $$type. Continuing the process`);
+                        issueLogger.info(chalk_1.default.white('├──'), `All the required labels are present on this $$type`);
+                        issueLogger.info(chalk_1.default.white('└──'), `Continuing the process for this $$type`);
                     }
                 }
                 else {
-                    issueLogger.info(`The option "onlyLabels" was not specified. Continuing the process for this $$type`);
+                    issueLogger.info(`The option "onlyLabels" was not specified`);
+                    issueLogger.info(chalk_1.default.white('└──'), `Continuing the process for this $$type`);
                 }
                 issueLogger.info(`Days before $$type stale: ${daysBeforeStale}`);
                 const shouldMarkAsStale = should_mark_when_stale_1.shouldMarkWhenStale(daysBeforeStale);
@@ -370,11 +374,24 @@ class IssuesProcessor {
                     issueLogger.info(`Skipping $$type because it has an exempt label`);
                     continue; // don't process exempt issues
                 }
-                const anyOfLabels = words_to_list_1.wordsToList(this.options.anyOfLabels);
-                if (anyOfLabels.length &&
-                    !anyOfLabels.some((label) => is_labeled_1.isLabeled(issue, label))) {
-                    issueLogger.info(`Skipping $$type because it does not have any of the required labels`);
-                    continue; // don't process issues without any of the required labels
+                const anyOfLabels = words_to_list_1.wordsToList(this._getAnyOfLabels(issue));
+                if (anyOfLabels.length > 0) {
+                    issueLogger.info(`The option "anyOfLabels" was specified to only processed the issues and pull requests with one of those labels (${anyOfLabels.length})`);
+                    const hasOneOfWhitelistedLabels = anyOfLabels.some((label) => {
+                        return is_labeled_1.isLabeled(issue, label);
+                    });
+                    if (!hasOneOfWhitelistedLabels) {
+                        issueLogger.info(chalk_1.default.white('└──'), `Skipping this $$type because it doesn't have one of the required labels`);
+                        continue; // Don't process issues without any of the required labels
+                    }
+                    else {
+                        issueLogger.info(chalk_1.default.white('├──'), `One of the required labels is present on this $$type`);
+                        issueLogger.info(chalk_1.default.white('└──'), `Continuing the process for this $$type`);
+                    }
+                }
+                else {
+                    issueLogger.info(`The option "anyOfLabels" was not specified`);
+                    issueLogger.info(chalk_1.default.white('└──'), `Continuing the process for this $$type`);
                 }
                 const milestones = new milestones_1.Milestones(this.options, issue);
                 if (milestones.shouldExemptMilestones()) {
@@ -418,7 +435,7 @@ class IssuesProcessor {
             // find any comments since date on the given issue
             try {
                 this._operations.consumeOperation();
-                (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.incrementFetchedIssuesCommentsCount();
+                (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.incrementFetchedItemsCommentsCount();
                 const comments = yield this.client.issues.listComments({
                     owner: github_1.context.repo.owner,
                     repo: github_1.context.repo.repo,
@@ -463,7 +480,7 @@ class IssuesProcessor {
                     direction: this.options.ascending ? 'asc' : 'desc',
                     page
                 });
-                (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.incrementFetchedIssuesCount(issueResult.data.length);
+                (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.incrementFetchedItemsCount(issueResult.data.length);
                 return issueResult.data.map((issue) => new issue_1.Issue(this.options, issue));
             }
             catch (error) {
@@ -480,7 +497,7 @@ class IssuesProcessor {
             const issueLogger = new issue_logger_1.IssueLogger(issue);
             issueLogger.info(`Checking for label on $$type`);
             this._operations.consumeOperation();
-            (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.incrementFetchedIssuesEventsCount();
+            (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.incrementFetchedItemsEventsCount();
             const options = this.client.issues.listEvents.endpoint.merge({
                 owner: github_1.context.repo.owner,
                 repo: github_1.context.repo.repo,
@@ -568,7 +585,7 @@ class IssuesProcessor {
             if (!skipMessage) {
                 try {
                     this._operations.consumeOperation();
-                    (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.incrementAddedComment();
+                    (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.incrementAddedItemsComment(issue);
                     yield this.client.issues.createComment({
                         owner: github_1.context.repo.owner,
                         repo: github_1.context.repo.repo,
@@ -582,8 +599,8 @@ class IssuesProcessor {
             }
             try {
                 this._operations.consumeOperation();
-                (_b = this._statistics) === null || _b === void 0 ? void 0 : _b.incrementAddedLabel();
-                (_c = this._statistics) === null || _c === void 0 ? void 0 : _c.incrementStaleIssuesCount();
+                (_b = this._statistics) === null || _b === void 0 ? void 0 : _b.incrementAddedItemsLabel(issue);
+                (_c = this._statistics) === null || _c === void 0 ? void 0 : _c.incrementStaleItemsCount(issue);
                 yield this.client.issues.addLabels({
                     owner: github_1.context.repo.owner,
                     repo: github_1.context.repo.repo,
@@ -609,7 +626,7 @@ class IssuesProcessor {
             if (closeMessage) {
                 try {
                     this._operations.consumeOperation();
-                    (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.incrementAddedComment();
+                    (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.incrementAddedItemsComment(issue);
                     yield this.client.issues.createComment({
                         owner: github_1.context.repo.owner,
                         repo: github_1.context.repo.repo,
@@ -624,7 +641,7 @@ class IssuesProcessor {
             if (closeLabel) {
                 try {
                     this._operations.consumeOperation();
-                    (_b = this._statistics) === null || _b === void 0 ? void 0 : _b.incrementAddedLabel();
+                    (_b = this._statistics) === null || _b === void 0 ? void 0 : _b.incrementAddedItemsLabel(issue);
                     yield this.client.issues.addLabels({
                         owner: github_1.context.repo.owner,
                         repo: github_1.context.repo.repo,
@@ -638,7 +655,7 @@ class IssuesProcessor {
             }
             try {
                 this._operations.consumeOperation();
-                (_c = this._statistics) === null || _c === void 0 ? void 0 : _c.incrementClosedIssuesCount();
+                (_c = this._statistics) === null || _c === void 0 ? void 0 : _c.incrementClosedItemsCount(issue);
                 yield this.client.issues.update({
                     owner: github_1.context.repo.owner,
                     repo: github_1.context.repo.repo,
@@ -703,7 +720,7 @@ class IssuesProcessor {
             }
         });
     }
-    // Remove a label from an issue
+    // Remove a label from an issue or a pull request
     _removeLabel(issue, label) {
         var _a;
         return __awaiter(this, void 0, void 0, function* () {
@@ -715,7 +732,7 @@ class IssuesProcessor {
             }
             try {
                 this._operations.consumeOperation();
-                (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.incrementDeletedLabelsCount();
+                (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.incrementDeletedItemsLabelsCount(issue);
                 yield this.client.issues.removeLabel({
                     owner: github_1.context.repo.owner,
                     repo: github_1.context.repo.repo,
@@ -762,6 +779,19 @@ class IssuesProcessor {
         }
         return this.options.onlyLabels;
     }
+    _getAnyOfLabels(issue) {
+        if (issue.isPullRequest) {
+            if (this.options.anyOfPrLabels !== '') {
+                return this.options.anyOfPrLabels;
+            }
+        }
+        else {
+            if (this.options.anyOfIssueLabels !== '') {
+                return this.options.anyOfIssueLabels;
+            }
+        }
+        return this.options.anyOfLabels;
+    }
     _shouldRemoveStaleWhenUpdated(issue) {
         if (issue.isPullRequest) {
             if (this.options.removePrStaleWhenUpdated === true) {
@@ -786,7 +816,7 @@ class IssuesProcessor {
             const issueLogger = new issue_logger_1.IssueLogger(issue);
             issueLogger.info(`The $$type is no longer stale. Removing the stale label...`);
             yield this._removeLabel(issue, staleLabel);
-            (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.incrementUndoStaleIssuesCount();
+            (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.incrementUndoStaleItemsCount(issue);
         });
     }
     _removeCloseLabel(issue, closeLabel) {
@@ -801,7 +831,7 @@ class IssuesProcessor {
             if (is_labeled_1.isLabeled(issue, closeLabel)) {
                 issueLogger.info(`The $$type has a close label "${chalk_1.default.cyan(closeLabel)}". Removing the close label...`);
                 yield this._removeLabel(issue, closeLabel);
-                (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.incrementDeletedCloseLabelsCount();
+                (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.incrementDeletedCloseItemsLabelsCount(issue);
             }
         });
     }
@@ -948,7 +978,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.Milestones = void 0;
+const chalk_1 = __importDefault(__nccwpck_require__(8818));
 const lodash_deburr_1 = __importDefault(__nccwpck_require__(1601));
+const option_1 = __nccwpck_require__(5931);
 const words_to_list_1 = __nccwpck_require__(1883);
 const issue_logger_1 = __nccwpck_require__(2984);
 class Milestones {
@@ -967,23 +999,23 @@ class Milestones {
             return false;
         }
         if (this._shouldExemptAllMilestones()) {
-            this._issueLogger.info('Skipping $$type because it has an exempt milestone');
+            this._issueLogger.info(chalk_1.default.white('└──'), 'Skipping $$type because it has a milestone');
             return true;
         }
         const exemptMilestones = this._getExemptMilestones();
         if (exemptMilestones.length === 0) {
-            this._issueLogger.info(`No milestone option was specified to skip the stale process for this $$type`);
+            this._issueLogger.info(chalk_1.default.white('├──'), `No milestone option was specified to skip the stale process for this $$type`);
             this._logSkip();
             return false;
         }
-        this._issueLogger.info(`Found ${exemptMilestones.length} milestone${exemptMilestones.length > 1 ? 's' : ''} that can exempt stale on this $$type`);
+        this._issueLogger.info(chalk_1.default.white('├──'), `Found ${chalk_1.default.cyan(exemptMilestones.length)} milestone${exemptMilestones.length > 1 ? 's' : ''} that can exempt stale on this $$type`);
         const hasExemptMilestone = exemptMilestones.some((exemptMilestone) => this._hasMilestone(exemptMilestone));
         if (!hasExemptMilestone) {
-            this._issueLogger.info('No milestone on this $$type can exempt the stale process');
+            this._issueLogger.info(chalk_1.default.white('├──'), 'No milestone on this $$type can exempt the stale process');
             this._logSkip();
         }
         else {
-            this._issueLogger.info('Skipping this $$type because it has an exempt milestone');
+            this._issueLogger.info(chalk_1.default.white('└──'), 'Skipping this $$type because it has an exempt milestone');
         }
         return hasExemptMilestone;
     }
@@ -994,32 +1026,32 @@ class Milestones {
     }
     _getExemptIssueMilestones() {
         if (this._options.exemptIssueMilestones === '') {
-            this._issueLogger.info('The option "exemptIssueMilestones" is disabled. No specific milestone can skip the stale process for this $$type');
+            this._issueLogger.info(chalk_1.default.white('├──'), `The option ${this._issueLogger.createOptionLink(option_1.Option.ExemptIssueMilestones)} is disabled. No specific milestone can skip the stale process for this $$type`);
             if (this._options.exemptMilestones === '') {
-                this._issueLogger.info('The option "exemptMilestones" is disabled. No specific milestone can skip the stale process for this $$type');
+                this._issueLogger.info(chalk_1.default.white('├──'), `The option ${this._issueLogger.createOptionLink(option_1.Option.ExemptMilestones)} is disabled. No specific milestone can skip the stale process for this $$type`);
                 return [];
             }
             const exemptMilestones = words_to_list_1.wordsToList(this._options.exemptMilestones);
-            this._issueLogger.info(`The option "exemptMilestones" is set. ${exemptMilestones.length} milestone${exemptMilestones.length === 1 ? '' : 's'} can skip the stale process for this $$type`);
+            this._issueLogger.info(chalk_1.default.white('├──'), `The option ${this._issueLogger.createOptionLink(option_1.Option.ExemptMilestones)} is set. ${chalk_1.default.cyan(exemptMilestones.length)} milestone${exemptMilestones.length === 1 ? '' : 's'} can skip the stale process for this $$type`);
             return exemptMilestones;
         }
         const exemptMilestones = words_to_list_1.wordsToList(this._options.exemptIssueMilestones);
-        this._issueLogger.info(`The option "exemptIssueMilestones" is set. ${exemptMilestones.length} milestone${exemptMilestones.length === 1 ? '' : 's'} can skip the stale process for this $$type`);
+        this._issueLogger.info(chalk_1.default.white('├──'), `The option ${this._issueLogger.createOptionLink(option_1.Option.ExemptIssueMilestones)} is set. ${chalk_1.default.cyan(exemptMilestones.length)} milestone${exemptMilestones.length === 1 ? '' : 's'} can skip the stale process for this $$type`);
         return exemptMilestones;
     }
     _getExemptPullRequestMilestones() {
         if (this._options.exemptPrMilestones === '') {
-            this._issueLogger.info('The option "exemptPrMilestones" is disabled. No specific milestone can skip the stale process for this $$type');
+            this._issueLogger.info(chalk_1.default.white('├──'), `The option ${this._issueLogger.createOptionLink(option_1.Option.ExemptPrMilestones)} is disabled. No specific milestone can skip the stale process for this $$type`);
             if (this._options.exemptMilestones === '') {
-                this._issueLogger.info('The option "exemptMilestones" is disabled. No specific milestone can skip the stale process for this $$type');
+                this._issueLogger.info(chalk_1.default.white('├──'), `The option ${this._issueLogger.createOptionLink(option_1.Option.ExemptMilestones)} is disabled. No specific milestone can skip the stale process for this $$type`);
                 return [];
             }
             const exemptMilestones = words_to_list_1.wordsToList(this._options.exemptMilestones);
-            this._issueLogger.info(`The option "exemptMilestones" is set. ${exemptMilestones.length} milestone${exemptMilestones.length === 1 ? '' : 's'} can skip the stale process for this $$type`);
+            this._issueLogger.info(chalk_1.default.white('├──'), `The option ${this._issueLogger.createOptionLink(option_1.Option.ExemptMilestones)} is set. ${chalk_1.default.cyan(exemptMilestones.length)} milestone${exemptMilestones.length === 1 ? '' : 's'} can skip the stale process for this $$type`);
             return exemptMilestones;
         }
         const exemptMilestones = words_to_list_1.wordsToList(this._options.exemptPrMilestones);
-        this._issueLogger.info(`The option "exemptPrMilestones" is set. ${exemptMilestones.length} milestone${exemptMilestones.length === 1 ? '' : 's'} can skip the stale process for this $$type`);
+        this._issueLogger.info(chalk_1.default.white('├──'), `The option ${this._issueLogger.createOptionLink(option_1.Option.ExemptPrMilestones)} is set. ${chalk_1.default.cyan(exemptMilestones.length)} milestone${exemptMilestones.length === 1 ? '' : 's'} can skip the stale process for this $$type`);
         return exemptMilestones;
     }
     _hasMilestone(milestone) {
@@ -1030,7 +1062,7 @@ class Milestones {
         const isSameMilestone = cleanMilestone ===
             Milestones._cleanMilestone(this._issue.milestone.title);
         if (isSameMilestone) {
-            this._issueLogger.info(`The milestone "${milestone}" is set on this $$type and is an exempt milestone`);
+            this._issueLogger.info(chalk_1.default.white('├──'), `The milestone "${milestone}" is set on this $$type and is an exempt milestone`);
         }
         return isSameMilestone;
     }
@@ -1044,11 +1076,11 @@ class Milestones {
     }
     _shouldExemptAllIssueMilestones() {
         if (this._options.exemptAllIssueMilestones === true) {
-            this._issueLogger.info('The option "exemptAllIssueMilestones" is enabled. Any milestone on this $$type will skip the stale process');
+            this._issueLogger.info(`The option ${this._issueLogger.createOptionLink(option_1.Option.ExemptAllIssueMilestones)} is enabled. Any milestone on this $$type will skip the stale process`);
             return true;
         }
         else if (this._options.exemptAllIssueMilestones === false) {
-            this._issueLogger.info('The option "exemptAllIssueMilestones" is disabled. Only some specific milestones on this $$type will skip the stale process');
+            this._issueLogger.info(`The option ${this._issueLogger.createOptionLink(option_1.Option.ExemptAllIssueMilestones)} is disabled. Only some specific milestones on this $$type will skip the stale process`);
             return false;
         }
         this._logExemptAllMilestonesOption();
@@ -1056,11 +1088,11 @@ class Milestones {
     }
     _shouldExemptAllPullRequestMilestones() {
         if (this._options.exemptAllPrMilestones === true) {
-            this._issueLogger.info('The option "exemptAllPrMilestones" is enabled. Any milestone on this $$type will skip the stale process');
+            this._issueLogger.info(`The option ${this._issueLogger.createOptionLink(option_1.Option.ExemptAllPrMilestones)} is enabled. Any milestone on this $$type will skip the stale process`);
             return true;
         }
         else if (this._options.exemptAllPrMilestones === false) {
-            this._issueLogger.info('The option "exemptAllPrMilestones" is disabled. Only some specific milestones on this $$type will skip the stale process');
+            this._issueLogger.info(`The option ${this._issueLogger.createOptionLink(option_1.Option.ExemptAllPrMilestones)} is disabled. Only some specific milestones on this $$type will skip the stale process`);
             return false;
         }
         this._logExemptAllMilestonesOption();
@@ -1068,14 +1100,14 @@ class Milestones {
     }
     _logExemptAllMilestonesOption() {
         if (this._options.exemptAllMilestones) {
-            this._issueLogger.info('The option "exemptAllMilestones" is enabled. Any milestone on this $$type will skip the stale process');
+            this._issueLogger.info(`The option ${this._issueLogger.createOptionLink(option_1.Option.ExemptAllMilestones)} is enabled. Any milestone on this $$type will skip the stale process`);
         }
         else {
-            this._issueLogger.info('The option "exemptAllMilestones" is disabled. Only some specific milestones on this $$type will skip the stale process');
+            this._issueLogger.info(`The option ${this._issueLogger.createOptionLink(option_1.Option.ExemptAllMilestones)} is disabled. Only some specific milestones on this $$type will skip the stale process`);
         }
     }
     _logSkip() {
-        this._issueLogger.info('Skip the milestones checks');
+        this._issueLogger.info(chalk_1.default.white('└──'), 'Skip the milestones checks');
     }
 }
 exports.Milestones = Milestones;
@@ -1133,70 +1165,94 @@ class Statistics {
     constructor() {
         this._logger = new logger_1.Logger();
         this._processedIssuesCount = 0;
+        this._processedPullRequestsCount = 0;
         this._staleIssuesCount = 0;
+        this._stalePullRequestsCount = 0;
         this._undoStaleIssuesCount = 0;
+        this._undoStalePullRequestsCount = 0;
         this._operationsCount = 0;
         this._closedIssuesCount = 0;
-        this._deletedLabelsCount = 0;
-        this._deletedCloseLabelsCount = 0;
+        this._closedPullRequestsCount = 0;
+        this._deletedIssuesLabelsCount = 0;
+        this._deletedPullRequestsLabelsCount = 0;
+        this._deletedCloseIssuesLabelsCount = 0;
+        this._deletedClosePullRequestsLabelsCount = 0;
         this._deletedBranchesCount = 0;
-        this._addedLabelsCount = 0;
-        this._addedCommentsCount = 0;
-        this._fetchedIssuesCount = 0;
-        this._fetchedIssuesEventsCount = 0;
-        this._fetchedIssuesCommentsCount = 0;
+        this._addedIssuesLabelsCount = 0;
+        this._addedPullRequestsLabelsCount = 0;
+        this._addedIssuesCommentsCount = 0;
+        this._addedPullRequestsCommentsCount = 0;
+        this._fetchedItemsCount = 0;
+        this._fetchedItemsEventsCount = 0;
+        this._fetchedItemsCommentsCount = 0;
         this._fetchedPullRequestsCount = 0;
     }
-    incrementProcessedIssuesCount(increment = 1) {
-        this._processedIssuesCount += increment;
-        return this;
+    incrementProcessedItemsCount(issue, increment = 1) {
+        if (issue.isPullRequest) {
+            return this._incrementProcessedPullRequestsCount(increment);
+        }
+        return this._incrementProcessedIssuesCount(increment);
     }
-    incrementStaleIssuesCount(increment = 1) {
-        this._staleIssuesCount += increment;
-        return this;
+    incrementStaleItemsCount(issue, increment = 1) {
+        if (issue.isPullRequest) {
+            return this._incrementStalePullRequestsCount(increment);
+        }
+        return this._incrementStaleIssuesCount(increment);
     }
-    incrementUndoStaleIssuesCount(increment = 1) {
-        this._undoStaleIssuesCount += increment;
-        return this;
+    incrementUndoStaleItemsCount(issue, increment = 1) {
+        if (issue.isPullRequest) {
+            return this._incrementUndoStalePullRequestsCount(increment);
+        }
+        return this._incrementUndoStaleIssuesCount(increment);
     }
     setOperationsLeft(operationsLeft) {
         this._operationsCount = operationsLeft;
         return this;
     }
-    incrementClosedIssuesCount(increment = 1) {
-        this._closedIssuesCount += increment;
-        return this;
+    incrementClosedItemsCount(issue, increment = 1) {
+        if (issue.isPullRequest) {
+            return this._incrementClosedPullRequestsCount(increment);
+        }
+        return this._incrementClosedIssuesCount(increment);
     }
-    incrementDeletedLabelsCount(increment = 1) {
-        this._deletedLabelsCount += increment;
-        return this;
+    incrementDeletedItemsLabelsCount(issue, increment = 1) {
+        if (issue.isPullRequest) {
+            return this._incrementDeletedPullRequestsLabelsCount(increment);
+        }
+        return this._incrementDeletedIssuesLabelsCount(increment);
     }
-    incrementDeletedCloseLabelsCount(increment = 1) {
-        this._deletedCloseLabelsCount += increment;
-        return this;
+    incrementDeletedCloseItemsLabelsCount(issue, increment = 1) {
+        if (issue.isPullRequest) {
+            return this._incrementDeletedClosePullRequestsLabelsCount(increment);
+        }
+        return this._incrementDeletedCloseIssuesLabelsCount(increment);
     }
     incrementDeletedBranchesCount(increment = 1) {
         this._deletedBranchesCount += increment;
         return this;
     }
-    incrementAddedLabel(increment = 1) {
-        this._addedLabelsCount += increment;
+    incrementAddedItemsLabel(issue, increment = 1) {
+        if (issue.isPullRequest) {
+            return this._incrementAddedPullRequestsLabel(increment);
+        }
+        return this._incrementAddedIssuesLabel(increment);
+    }
+    incrementAddedItemsComment(issue, increment = 1) {
+        if (issue.isPullRequest) {
+            return this._incrementAddedPullRequestsComment(increment);
+        }
+        return this._incrementAddedIssuesComment(increment);
+    }
+    incrementFetchedItemsCount(increment = 1) {
+        this._fetchedItemsCount += increment;
         return this;
     }
-    incrementAddedComment(increment = 1) {
-        this._addedCommentsCount += increment;
+    incrementFetchedItemsEventsCount(increment = 1) {
+        this._fetchedItemsEventsCount += increment;
         return this;
     }
-    incrementFetchedIssuesCount(increment = 1) {
-        this._fetchedIssuesCount += increment;
-        return this;
-    }
-    incrementFetchedIssuesEventsCount(increment = 1) {
-        this._fetchedIssuesEventsCount += increment;
-        return this;
-    }
-    incrementFetchedIssuesCommentsCount(increment = 1) {
-        this._fetchedIssuesCommentsCount += increment;
+    incrementFetchedItemsCommentsCount(increment = 1) {
+        this._fetchedItemsCommentsCount += increment;
         return this;
     }
     incrementFetchedPullRequestsCount(increment = 1) {
@@ -1205,68 +1261,256 @@ class Statistics {
     }
     logStats() {
         this._logger.info(chalk_1.default.yellow.bold('Statistics:'));
-        this._logProcessedIssuesCount();
-        this._logStaleIssuesCount();
-        this._logUndoStaleIssuesCount();
-        this._logOperationsCount();
-        this._logClosedIssuesCount();
-        this._logDeletedLabelsCount();
-        this._logDeletedCloseLabelsCount();
+        this._logProcessedIssuesAndPullRequestsCount();
+        this._logStaleIssuesAndPullRequestsCount();
+        this._logUndoStaleIssuesAndPullRequestsCount();
+        this._logClosedIssuesAndPullRequestsCount();
+        this._logDeletedIssuesAndPullRequestsLabelsCount();
+        this._logDeletedCloseIssuesAndPullRequestsLabelsCount();
         this._logDeletedBranchesCount();
-        this._logAddedLabelsCount();
-        this._logAddedCommentsCount();
-        this._logFetchedIssuesCount();
-        this._logFetchedIssuesEventsCount();
-        this._logFetchedIssuesCommentsCount();
+        this._logAddedIssuesAndPullRequestsLabelsCount();
+        this._logAddedIssuesAndPullRequestsCommentsCount();
+        this._logFetchedItemsCount();
+        this._logFetchedItemsEventsCount();
+        this._logFetchedItemsCommentsCount();
         this._logFetchedPullRequestsCount();
+        this._logOperationsCount();
         return this;
     }
-    _logProcessedIssuesCount() {
-        this._logCount('Processed issues/PRs', this._processedIssuesCount);
+    _incrementProcessedIssuesCount(increment = 1) {
+        this._processedIssuesCount += increment;
+        return this;
     }
-    _logStaleIssuesCount() {
-        this._logCount('New stale issues/PRs', this._staleIssuesCount);
+    _incrementProcessedPullRequestsCount(increment = 1) {
+        this._processedPullRequestsCount += increment;
+        return this;
     }
-    _logUndoStaleIssuesCount() {
-        this._logCount('No longer stale issues/PRs', this._undoStaleIssuesCount);
+    _incrementStaleIssuesCount(increment = 1) {
+        this._staleIssuesCount += increment;
+        return this;
     }
-    _logOperationsCount() {
-        this._logCount('Operations performed', this._operationsCount);
+    _incrementStalePullRequestsCount(increment = 1) {
+        this._stalePullRequestsCount += increment;
+        return this;
     }
-    _logClosedIssuesCount() {
-        this._logCount('Closed issues', this._closedIssuesCount);
+    _incrementUndoStaleIssuesCount(increment = 1) {
+        this._undoStaleIssuesCount += increment;
+        return this;
     }
-    _logDeletedLabelsCount() {
-        this._logCount('Deleted labels', this._deletedLabelsCount);
+    _incrementUndoStalePullRequestsCount(increment = 1) {
+        this._undoStalePullRequestsCount += increment;
+        return this;
     }
-    _logDeletedCloseLabelsCount() {
-        this._logCount('Deleted close labels', this._deletedCloseLabelsCount);
+    _incrementClosedIssuesCount(increment = 1) {
+        this._closedIssuesCount += increment;
+        return this;
+    }
+    _incrementClosedPullRequestsCount(increment = 1) {
+        this._closedPullRequestsCount += increment;
+        return this;
+    }
+    _incrementDeletedIssuesLabelsCount(increment = 1) {
+        this._deletedIssuesLabelsCount += increment;
+        return this;
+    }
+    _incrementDeletedPullRequestsLabelsCount(increment = 1) {
+        this._deletedPullRequestsLabelsCount += increment;
+        return this;
+    }
+    _incrementDeletedCloseIssuesLabelsCount(increment = 1) {
+        this._deletedCloseIssuesLabelsCount += increment;
+        return this;
+    }
+    _incrementDeletedClosePullRequestsLabelsCount(increment = 1) {
+        this._deletedClosePullRequestsLabelsCount += increment;
+        return this;
+    }
+    _incrementAddedIssuesLabel(increment = 1) {
+        this._addedIssuesLabelsCount += increment;
+        return this;
+    }
+    _incrementAddedPullRequestsLabel(increment = 1) {
+        this._addedPullRequestsLabelsCount += increment;
+        return this;
+    }
+    _incrementAddedIssuesComment(increment = 1) {
+        this._addedIssuesCommentsCount += increment;
+        return this;
+    }
+    _incrementAddedPullRequestsComment(increment = 1) {
+        this._addedPullRequestsCommentsCount += increment;
+        return this;
+    }
+    _logProcessedIssuesAndPullRequestsCount() {
+        this._logGroup('Processed items', [
+            {
+                name: 'Processed issues',
+                count: this._processedIssuesCount
+            },
+            {
+                name: 'Processed PRs',
+                count: this._processedPullRequestsCount
+            }
+        ]);
+    }
+    _logStaleIssuesAndPullRequestsCount() {
+        this._logGroup('New stale items', [
+            {
+                name: 'New stale issues',
+                count: this._staleIssuesCount
+            },
+            {
+                name: 'New stale PRs',
+                count: this._stalePullRequestsCount
+            }
+        ]);
+    }
+    _logUndoStaleIssuesAndPullRequestsCount() {
+        this._logGroup('No longer stale items', [
+            {
+                name: 'No longer stale issues',
+                count: this._undoStaleIssuesCount
+            },
+            {
+                name: 'No longer stale PRs',
+                count: this._undoStalePullRequestsCount
+            }
+        ]);
+    }
+    _logClosedIssuesAndPullRequestsCount() {
+        this._logGroup('Closed items', [
+            {
+                name: 'Closed issues',
+                count: this._closedIssuesCount
+            },
+            {
+                name: 'Closed PRs',
+                count: this._closedPullRequestsCount
+            }
+        ]);
+    }
+    _logDeletedIssuesAndPullRequestsLabelsCount() {
+        this._logGroup('Deleted items labels', [
+            {
+                name: 'Deleted issues labels',
+                count: this._deletedIssuesLabelsCount
+            },
+            {
+                name: 'Deleted PRs labels',
+                count: this._deletedPullRequestsLabelsCount
+            }
+        ]);
+    }
+    _logDeletedCloseIssuesAndPullRequestsLabelsCount() {
+        this._logGroup('Deleted close items labels', [
+            {
+                name: 'Deleted close issues labels',
+                count: this._deletedCloseIssuesLabelsCount
+            },
+            {
+                name: 'Deleted close PRs labels',
+                count: this._deletedClosePullRequestsLabelsCount
+            }
+        ]);
     }
     _logDeletedBranchesCount() {
         this._logCount('Deleted branches', this._deletedBranchesCount);
     }
-    _logAddedLabelsCount() {
-        this._logCount('Added labels', this._addedLabelsCount);
+    _logAddedIssuesAndPullRequestsLabelsCount() {
+        this._logGroup('Added items labels', [
+            {
+                name: 'Added issues labels',
+                count: this._addedIssuesLabelsCount
+            },
+            {
+                name: 'Added PRs labels',
+                count: this._addedPullRequestsLabelsCount
+            }
+        ]);
     }
-    _logAddedCommentsCount() {
-        this._logCount('Added comments', this._addedCommentsCount);
+    _logAddedIssuesAndPullRequestsCommentsCount() {
+        this._logGroup('Added items comments', [
+            {
+                name: 'Added issues comments',
+                count: this._addedIssuesCommentsCount
+            },
+            {
+                name: 'Added PRs comments',
+                count: this._addedPullRequestsCommentsCount
+            }
+        ]);
     }
-    _logFetchedIssuesCount() {
-        this._logCount('Fetched issues', this._fetchedIssuesCount);
+    _logFetchedItemsCount() {
+        this._logCount('Fetched items', this._fetchedItemsCount);
     }
-    _logFetchedIssuesEventsCount() {
-        this._logCount('Fetched issues events', this._fetchedIssuesEventsCount);
+    _logFetchedItemsEventsCount() {
+        this._logCount('Fetched items events', this._fetchedItemsEventsCount);
     }
-    _logFetchedIssuesCommentsCount() {
-        this._logCount('Fetched issues comments', this._fetchedIssuesCommentsCount);
+    _logFetchedItemsCommentsCount() {
+        this._logCount('Fetched items comments', this._fetchedItemsCommentsCount);
     }
     _logFetchedPullRequestsCount() {
         this._logCount('Fetched pull requests', this._fetchedPullRequestsCount);
+    }
+    _logOperationsCount() {
+        this._logCount('Operations performed', this._operationsCount);
     }
     _logCount(name, count) {
         if (count > 0) {
             this._logger.info(`${name}:`, chalk_1.default.cyan(count));
         }
+    }
+    _logGroup(groupName, values) {
+        if (this._isGroupValuesPartiallySet(values)) {
+            this._logCount(groupName, this._getGroupValuesTotalCount(values));
+            this._logGroupValues(values);
+        }
+        else {
+            // Only one value will be display
+            for (const value of values) {
+                this._logCount(value.name, value.count);
+            }
+        }
+    }
+    /**
+     * @private
+     * @description
+     * If there is a least two elements with a valid count then it's partially set
+     * Useful to defined if we should display the values as a group or not
+     *
+     * @param {IGroupValue[]} values The list of group values to check
+     */
+    _isGroupValuesPartiallySet(values) {
+        return (values
+            .map((value) => {
+            return value.count > 0;
+        })
+            .filter((isSet) => isSet).length >= 2);
+    }
+    _getGroupValuesTotalCount(values) {
+        return values.reduce((count, value) => {
+            return count + value.count;
+        }, 0);
+    }
+    _getAllGroupValuesSet(values) {
+        return values.filter((value) => {
+            return value.count > 0;
+        });
+    }
+    _logGroupValues(values) {
+        const onlyValuesSet = this._getAllGroupValuesSet(values);
+        const longestValue = this._getLongestGroupValue(onlyValuesSet);
+        for (const [index, value] of onlyValuesSet.entries()) {
+            const prefix = index === onlyValuesSet.length - 1 ? '└──' : '├──';
+            this._logCount(`${chalk_1.default.white(prefix)} ${value.name.padEnd(longestValue, ' ')}`, value.count);
+        }
+    }
+    _getLongestGroupValue(values) {
+        return values.reduce((longestValue, value) => {
+            return value.name.length > longestValue
+                ? value.name.length
+                : longestValue;
+        }, 0);
     }
 }
 exports.Statistics = Statistics;
@@ -1567,6 +1811,8 @@ function _getAndValidateArgs() {
         onlyIssueLabels: core.getInput('only-issue-labels'),
         onlyPrLabels: core.getInput('only-pr-labels'),
         anyOfLabels: core.getInput('any-of-labels'),
+        anyOfIssueLabels: core.getInput('any-of-issue-labels'),
+        anyOfPrLabels: core.getInput('any-of-pr-labels'),
         operationsPerRun: parseInt(core.getInput('operations-per-run', { required: true })),
         removeStaleWhenUpdated: !(core.getInput('remove-stale-when-updated') === 'false'),
         removeIssueStaleWhenUpdated: _toOptionalBoolean(core.getInput('remove-issue-stale-when-updated')),

@@ -233,6 +233,7 @@ const option_1 = __nccwpck_require__(5931);
 const get_humanized_date_1 = __nccwpck_require__(965);
 const is_date_more_recent_than_1 = __nccwpck_require__(1473);
 const is_valid_date_1 = __nccwpck_require__(891);
+const is_boolean_1 = __nccwpck_require__(8236);
 const is_labeled_1 = __nccwpck_require__(6792);
 const should_mark_when_stale_1 = __nccwpck_require__(2461);
 const words_to_list_1 = __nccwpck_require__(1883);
@@ -794,19 +795,13 @@ class IssuesProcessor {
     }
     _shouldRemoveStaleWhenUpdated(issue) {
         if (issue.isPullRequest) {
-            if (this.options.removePrStaleWhenUpdated === true) {
-                return true;
-            }
-            else if (this.options.removePrStaleWhenUpdated === false) {
-                return false;
+            if (is_boolean_1.isBoolean(this.options.removePrStaleWhenUpdated)) {
+                return this.options.removePrStaleWhenUpdated;
             }
             return this.options.removeStaleWhenUpdated;
         }
-        if (this.options.removeIssueStaleWhenUpdated === true) {
-            return true;
-        }
-        else if (this.options.removeIssueStaleWhenUpdated === false) {
-            return false;
+        if (is_boolean_1.isBoolean(this.options.removeIssueStaleWhenUpdated)) {
+            return this.options.removeIssueStaleWhenUpdated;
         }
         return this.options.removeStaleWhenUpdated;
     }
@@ -1638,6 +1633,21 @@ function isValidDate(date) {
     return false;
 }
 exports.isValidDate = isValidDate;
+
+
+/***/ }),
+
+/***/ 8236:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.isBoolean = void 0;
+function isBoolean(value) {
+    return value === true || value === false;
+}
+exports.isBoolean = isBoolean;
 
 
 /***/ }),

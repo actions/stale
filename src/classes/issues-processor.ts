@@ -7,6 +7,7 @@ import {Option} from '../enums/option';
 import {getHumanizedDate} from '../functions/dates/get-humanized-date';
 import {isDateMoreRecentThan} from '../functions/dates/is-date-more-recent-than';
 import {isValidDate} from '../functions/dates/is-valid-date';
+import {isBoolean} from '../functions/is-boolean';
 import {isLabeled} from '../functions/is-labeled';
 import {shouldMarkWhenStale} from '../functions/should-mark-when-stale';
 import {wordsToList} from '../functions/words-to-list';
@@ -798,19 +799,15 @@ export class IssuesProcessor {
 
   private _shouldRemoveStaleWhenUpdated(issue: Issue): boolean {
     if (issue.isPullRequest) {
-      if (this.options.removePrStaleWhenUpdated === true) {
-        return true;
-      } else if (this.options.removePrStaleWhenUpdated === false) {
-        return false;
+      if (isBoolean(this.options.removePrStaleWhenUpdated)) {
+        return this.options.removePrStaleWhenUpdated;
       }
 
       return this.options.removeStaleWhenUpdated;
     }
 
-    if (this.options.removeIssueStaleWhenUpdated === true) {
-      return true;
-    } else if (this.options.removeIssueStaleWhenUpdated === false) {
-      return false;
+    if (isBoolean(this.options.removeIssueStaleWhenUpdated)) {
+      return this.options.removeIssueStaleWhenUpdated;
     }
 
     return this.options.removeStaleWhenUpdated;

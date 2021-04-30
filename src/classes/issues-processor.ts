@@ -37,7 +37,7 @@ export class IssuesProcessor {
   }
 
   private static _endIssueProcessing(issue: Issue): void {
-    const consumedOperationsCount: number = issue.getConsumedOperationsCount();
+    const consumedOperationsCount: number = issue.operations.getConsumedOperationsCount();
 
     if (consumedOperationsCount > 0) {
       const issueLogger: IssueLogger = new IssueLogger(issue);
@@ -448,7 +448,7 @@ export class IssuesProcessor {
     issueLogger.info(`Checking for label on $$type`);
 
     this._operations.consumeOperation();
-    issue.consumeOperation();
+    issue.operations.consumeOperation();
     this._statistics?.incrementFetchedItemsEventsCount();
     const options = this.client.issues.listEvents.endpoint.merge({
       owner: context.repo.owner,
@@ -593,7 +593,7 @@ export class IssuesProcessor {
     if (!skipMessage) {
       try {
         this._operations.consumeOperation();
-        issue.consumeOperation();
+        issue.operations.consumeOperation();
         this._statistics?.incrementAddedItemsComment(issue);
         await this.client.issues.createComment({
           owner: context.repo.owner,
@@ -608,7 +608,7 @@ export class IssuesProcessor {
 
     try {
       this._operations.consumeOperation();
-      issue.consumeOperation();
+      issue.operations.consumeOperation();
       this._statistics?.incrementAddedItemsLabel(issue);
       this._statistics?.incrementStaleItemsCount(issue);
       await this.client.issues.addLabels({
@@ -640,7 +640,7 @@ export class IssuesProcessor {
     if (closeMessage) {
       try {
         this._operations.consumeOperation();
-        issue.consumeOperation();
+        issue.operations.consumeOperation();
         this._statistics?.incrementAddedItemsComment(issue);
         await this.client.issues.createComment({
           owner: context.repo.owner,
@@ -656,7 +656,7 @@ export class IssuesProcessor {
     if (closeLabel) {
       try {
         this._operations.consumeOperation();
-        issue.consumeOperation();
+        issue.operations.consumeOperation();
         this._statistics?.incrementAddedItemsLabel(issue);
         await this.client.issues.addLabels({
           owner: context.repo.owner,
@@ -671,7 +671,7 @@ export class IssuesProcessor {
 
     try {
       this._operations.consumeOperation();
-      issue.consumeOperation();
+      issue.operations.consumeOperation();
       this._statistics?.incrementClosedItemsCount(issue);
       await this.client.issues.update({
         owner: context.repo.owner,
@@ -695,7 +695,7 @@ export class IssuesProcessor {
 
     try {
       this._operations.consumeOperation();
-      issue.consumeOperation();
+      issue.operations.consumeOperation();
       this._statistics?.incrementFetchedPullRequestsCount();
       const pullRequest = await this.client.pulls.get({
         owner: context.repo.owner,
@@ -735,7 +735,7 @@ export class IssuesProcessor {
 
     try {
       this._operations.consumeOperation();
-      issue.consumeOperation();
+      issue.operations.consumeOperation();
       this._statistics?.incrementDeletedBranchesCount();
       await this.client.git.deleteRef({
         owner: context.repo.owner,
@@ -766,7 +766,7 @@ export class IssuesProcessor {
 
     try {
       this._operations.consumeOperation();
-      issue.consumeOperation();
+      issue.operations.consumeOperation();
       this._statistics?.incrementDeletedItemsLabelsCount(issue);
       await this.client.issues.removeLabel({
         owner: context.repo.owner,

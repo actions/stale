@@ -8,7 +8,7 @@ import {IMilestone} from '../interfaces/milestone';
 import {IsoDateString} from '../types/iso-date-string';
 import {Operations} from './operations';
 
-export class Issue extends Operations implements IIssue {
+export class Issue implements IIssue {
   private readonly _options: IIssuesProcessorOptions;
   readonly title: string;
   readonly number: number;
@@ -21,6 +21,7 @@ export class Issue extends Operations implements IIssue {
   readonly milestone: IMilestone | undefined;
   readonly assignees: IAssignee[];
   isStale: boolean;
+  operations = new Operations();
 
   get isPullRequest(): boolean {
     return isPullRequest(this);
@@ -38,7 +39,6 @@ export class Issue extends Operations implements IIssue {
     options: Readonly<IIssuesProcessorOptions>,
     issue: Readonly<IIssue>
   ) {
-    super();
     this._options = options;
     this.title = issue.title;
     this.number = issue.number;

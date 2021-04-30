@@ -2,16 +2,16 @@ import {DefaultProcessorOptions} from '../../__tests__/constants/default-process
 import {IIssuesProcessorOptions} from '../interfaces/issues-processor-options';
 import {StaleOperations} from './stale-operations';
 
-interface IHasOperationsLeftMatrix {
+interface IHasRemainingOperationsMatrix {
   operationsPerRun: number;
   consumeOperations: number;
-  hasOperationsLeft: number;
+  hasRemainingOperations: number;
 }
 
-interface IGetOperationsLeftCountMatrix {
+interface IGetRemainingOperationsCountMatrix {
   operationsPerRun: number;
   consumeOperations: number;
-  getOperationsLeftCount: number;
+  getRemainingOperationsCount: number;
 }
 
 describe('StaleOperations', (): void => {
@@ -66,13 +66,13 @@ describe('StaleOperations', (): void => {
     });
   });
 
-  describe('hasOperationsLeft()', (): void => {
+  describe('hasRemainingOperations()', (): void => {
     beforeEach((): void => {
       operations = new StaleOperations(options);
     });
 
     describe.each`
-      operationsPerRun | consumeOperations | hasOperationsLeft
+      operationsPerRun | consumeOperations | hasRemainingOperations
       ${1}             | ${1}              | ${false}
       ${2}             | ${1}              | ${true}
     `(
@@ -80,32 +80,32 @@ describe('StaleOperations', (): void => {
       ({
         operationsPerRun,
         consumeOperations,
-        hasOperationsLeft
-      }: IHasOperationsLeftMatrix): void => {
+        hasRemainingOperations
+      }: IHasRemainingOperationsMatrix): void => {
         beforeEach((): void => {
           options.operationsPerRun = operationsPerRun;
           operations = new StaleOperations(options);
         });
 
-        it(`should return ${hasOperationsLeft}`, (): void => {
+        it(`should return ${hasRemainingOperations}`, (): void => {
           expect.assertions(1);
           operations.consumeOperations(consumeOperations);
 
-          const result = operations.hasOperationsLeft();
+          const result = operations.hasRemainingOperations();
 
-          expect(result).toStrictEqual(hasOperationsLeft);
+          expect(result).toStrictEqual(hasRemainingOperations);
         });
       }
     );
   });
 
-  describe('getOperationsLeftCount()', (): void => {
+  describe('getRemainingOperationsCount()', (): void => {
     beforeEach((): void => {
       operations = new StaleOperations(options);
     });
 
     describe.each`
-      operationsPerRun | consumeOperations | getOperationsLeftCount
+      operationsPerRun | consumeOperations | getRemainingOperationsCount
       ${1}             | ${1}              | ${0}
       ${2}             | ${1}              | ${1}
     `(
@@ -113,20 +113,20 @@ describe('StaleOperations', (): void => {
       ({
         operationsPerRun,
         consumeOperations,
-        getOperationsLeftCount
-      }: IGetOperationsLeftCountMatrix): void => {
+        getRemainingOperationsCount
+      }: IGetRemainingOperationsCountMatrix): void => {
         beforeEach((): void => {
           options.operationsPerRun = operationsPerRun;
           operations = new StaleOperations(options);
         });
 
-        it(`should return ${getOperationsLeftCount}`, (): void => {
+        it(`should return ${getRemainingOperationsCount}`, (): void => {
           expect.assertions(1);
           operations.consumeOperations(consumeOperations);
 
-          const result = operations.getOperationsLeftCount();
+          const result = operations.getRemainingOperationsCount();
 
-          expect(result).toStrictEqual(getOperationsLeftCount);
+          expect(result).toStrictEqual(getRemainingOperationsCount);
         });
       }
     );

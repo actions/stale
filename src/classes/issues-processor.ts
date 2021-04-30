@@ -92,10 +92,10 @@ export class IssuesProcessor {
         chalk.green('No more issues found to process. Exiting...')
       );
       this._statistics
-        ?.setOperationsLeft(this._operations.getOperationsLeftCount())
+        ?.setOperationsLeft(this._operations.getRemainingOperationsCount())
         .logStats();
 
-      return this._operations.getOperationsLeftCount();
+      return this._operations.getRemainingOperationsCount();
     } else {
       this._logger.info(
         chalk.yellow(
@@ -345,7 +345,7 @@ export class IssuesProcessor {
       IssuesProcessor._endIssueProcessing(issue);
     }
 
-    if (!this._operations.hasOperationsLeft()) {
+    if (!this._operations.hasRemainingOperations()) {
       this._logger.warning(
         chalk.yellowBright('No more operations left! Exiting...')
       );

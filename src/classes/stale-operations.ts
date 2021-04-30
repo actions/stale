@@ -9,11 +9,11 @@ export class StaleOperations extends Operations {
     this._options = options;
   }
 
-  hasOperationsLeft(): boolean {
+  hasRemainingOperations(): boolean {
     return this._operationsConsumed < this._options.operationsPerRun;
   }
 
-  getOperationsLeftCount(): number {
+  getRemainingOperationsCount(): number {
     return this._options.operationsPerRun - this._operationsConsumed;
   }
 }

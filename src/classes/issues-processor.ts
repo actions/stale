@@ -92,7 +92,7 @@ export class IssuesProcessor {
         chalk.green('No more issues found to process. Exiting...')
       );
       this._statistics
-        ?.setOperationsLeft(this._operations.getRemainingOperationsCount())
+        ?.setRemainingOperations(this._operations.getRemainingOperationsCount())
         .logStats();
 
       return this._operations.getRemainingOperationsCount();
@@ -211,8 +211,11 @@ export class IssuesProcessor {
         // But you never know!
         if (!isValidDate(createdAt)) {
           IssuesProcessor._endIssueProcessing(issue);
-          const errorMessage = `Invalid issue field: "created_at". Expected a valid date`;
-          core.setFailed(new Error(errorMessage));
+          core.setFailed(
+            new Error(
+              `Invalid issue field: "created_at". Expected a valid date`
+            )
+          );
         }
 
         issueLogger.info(

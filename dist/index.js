@@ -288,7 +288,7 @@ class IssuesProcessor {
             const actor = yield this.getActor();
             if (issues.length <= 0) {
                 this._logger.info(chalk_1.default.green('No more issues found to process. Exiting...'));
-                (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.setOperationsLeft(this._operations.getRemainingOperationsCount()).logStats();
+                (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.setRemainingOperations(this._operations.getRemainingOperationsCount()).logStats();
                 return this._operations.getRemainingOperationsCount();
             }
             else {
@@ -364,8 +364,7 @@ class IssuesProcessor {
                     // But you never know!
                     if (!is_valid_date_1.isValidDate(createdAt)) {
                         IssuesProcessor._endIssueProcessing(issue);
-                        const errorMessage = `Invalid issue field: "created_at". Expected a valid date`;
-                        core.setFailed(new Error(errorMessage));
+                        core.setFailed(new Error(`Invalid issue field: "created_at". Expected a valid date`));
                     }
                     issueLogger.info(`$$type created the ${get_humanized_date_1.getHumanizedDate(createdAt)} (${issue.created_at})`);
                     if (!is_date_more_recent_than_1.isDateMoreRecentThan(createdAt, startDate)) {
@@ -1248,8 +1247,8 @@ class Statistics {
         }
         return this._incrementUndoStaleIssuesCount(increment);
     }
-    setOperationsLeft(operationsLeft) {
-        this._operationsCount = operationsLeft;
+    setRemainingOperations(remainingOperations) {
+        this._operationsCount = remainingOperations;
         return this;
     }
     incrementClosedItemsCount(issue, increment = 1) {

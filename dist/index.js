@@ -288,8 +288,8 @@ class IssuesProcessor {
             const actor = yield this.getActor();
             if (issues.length <= 0) {
                 this._logger.info(chalk_1.default.green('No more issues found to process. Exiting...'));
-                (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.setOperationsLeft(this._operations.getOperationsLeftCount()).logStats();
-                return this._operations.getOperationsLeftCount();
+                (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.setOperationsLeft(this._operations.getRemainingOperationsCount()).logStats();
+                return this._operations.getRemainingOperationsCount();
             }
             else {
                 this._logger.info(chalk_1.default.yellow(`Processing the batch of issues ${chalk_1.default.cyan(`#${page}`)} containing ${chalk_1.default.cyan(issues.length)} issue${issues.length > 1 ? 's' : ''}...`));
@@ -366,7 +366,6 @@ class IssuesProcessor {
                         IssuesProcessor._endIssueProcessing(issue);
                         const errorMessage = `Invalid issue field: "created_at". Expected a valid date`;
                         core.setFailed(new Error(errorMessage));
-                        throw new Error(errorMessage);
                     }
                     issueLogger.info(`$$type created the ${get_humanized_date_1.getHumanizedDate(createdAt)} (${issue.created_at})`);
                     if (!is_date_more_recent_than_1.isDateMoreRecentThan(createdAt, startDate)) {
@@ -441,21 +440,21 @@ class IssuesProcessor {
                 }
                 IssuesProcessor._endIssueProcessing(issue);
             }
-            if (!this._operations.hasOperationsLeft()) {
+            if (!this._operations.hasRemainingOperations()) {
                 this._logger.warning(chalk_1.default.yellowBright('No more operations left! Exiting...'));
                 this._logger.warning(chalk_1.default.yellowBright(`If you think that not enough issues were processed you could try to increase the quantity related to the ${this._logger.createOptionLink(option_1.Option.OperationsPerRun)} option which is currently set to ${chalk_1.default.cyan(this.options.operationsPerRun)}`));
                 return 0;
             }
             this._logger.info(chalk_1.default.green(`Batch ${chalk_1.default.cyan(`#${page}`)} processed.`));
-            // do the next batch
+            // Do the next batch
             return this.processIssues(page + 1);
         });
     }
-    // grab comments for an issue since a given date
+    // Grab comments for an issue since a given date
     listIssueComments(issueNumber, sinceDate) {
         var _a;
         return __awaiter(this, void 0, void 0, function* () {
-            // find any comments since date on the given issue
+            // Find any comments since date on the given issue
             try {
                 this._operations.consumeOperation();
                 (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.incrementFetchedItemsCommentsCount();
@@ -1181,10 +1180,10 @@ class StaleOperations extends operations_1.Operations {
         super();
         this._options = options;
     }
-    hasOperationsLeft() {
+    hasRemainingOperations() {
         return this._operationsConsumed < this._options.operationsPerRun;
     }
-    getOperationsLeftCount() {
+    getRemainingOperationsCount() {
         return this._options.operationsPerRun - this._operationsConsumed;
     }
 }

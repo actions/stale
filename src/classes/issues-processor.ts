@@ -213,7 +213,6 @@ export class IssuesProcessor {
           IssuesProcessor._endIssueProcessing(issue);
           const errorMessage = `Invalid issue field: "created_at". Expected a valid date`;
           core.setFailed(new Error(errorMessage));
-          throw new Error(errorMessage);
         }
 
         issueLogger.info(
@@ -366,16 +365,16 @@ export class IssuesProcessor {
       chalk.green(`Batch ${chalk.cyan(`#${page}`)} processed.`)
     );
 
-    // do the next batch
+    // Do the next batch
     return this.processIssues(page + 1);
   }
 
-  // grab comments for an issue since a given date
+  // Grab comments for an issue since a given date
   async listIssueComments(
     issueNumber: number,
     sinceDate: string
   ): Promise<IComment[]> {
-    // find any comments since date on the given issue
+    // Find any comments since date on the given issue
     try {
       this._operations.consumeOperation();
       this._statistics?.incrementFetchedItemsCommentsCount();

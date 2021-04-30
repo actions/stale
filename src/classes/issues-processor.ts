@@ -7,6 +7,7 @@ import {Option} from '../enums/option';
 import {getHumanizedDate} from '../functions/dates/get-humanized-date';
 import {isDateMoreRecentThan} from '../functions/dates/is-date-more-recent-than';
 import {isValidDate} from '../functions/dates/is-valid-date';
+import {isBoolean} from '../functions/is-boolean';
 import {isLabeled} from '../functions/is-labeled';
 import {shouldMarkWhenStale} from '../functions/should-mark-when-stale';
 import {wordsToList} from '../functions/words-to-list';
@@ -453,14 +454,16 @@ export class IssuesProcessor {
     const issueLogger: IssueLogger = new IssueLogger(issue);
     const markedStaleOn: string =
       (await this.getLabelCreationDate(issue, staleLabel)) || issue.updated_at;
-    issueLogger.info(`$$type marked stale on: ${markedStaleOn}`);
+    issueLogger.info(`$$type marked stale on: ${chalk.cyan(markedStaleOn)}`);
 
     const issueHasComments: boolean = await this._hasCommentsSince(
       issue,
       markedStaleOn,
       actor
     );
-    issueLogger.info(`$$type has been commented on: ${issueHasComments}`);
+    issueLogger.info(
+      `$$type has been commented on: ${chalk.cyan(issueHasComments)}`
+    );
 
     const daysBeforeClose: number = issue.isPullRequest
       ? this._getDaysBeforePrClose()
@@ -472,11 +475,15 @@ export class IssuesProcessor {
       issue.updated_at,
       daysBeforeClose
     );
-    issueLogger.info(`$$type has been updated: ${issueHasUpdate}`);
+    issueLogger.info(`$$type has been updated: ${chalk.cyan(issueHasUpdate)}`);
 
     // should we un-stale this issue?
-    if (this.options.removeStaleWhenUpdated && issueHasComments) {
+    if (this._shouldRemoveStaleWhenUpdated(issue) && issueHasComments) {
       await this._removeStaleLabel(issue, staleLabel);
+
+      issueLogger.info(`Skipping the process since the $$type is now un-stale`);
+
+      return; // nothing to do because it is no longer stale
     }
 
     // now start closing logic
@@ -565,7 +572,7 @@ export class IssuesProcessor {
           body: staleMessage
         });
       } catch (error) {
-        issueLogger.error(`Error creating a comment: ${error.message}`);
+        issueLogger.error(`Error when creating a comment: ${error.message}`);
       }
     }
 
@@ -580,7 +587,7 @@ export class IssuesProcessor {
         labels: [staleLabel]
       });
     } catch (error) {
-      issueLogger.error(`Error adding a label: ${error.message}`);
+      issueLogger.error(`Error when adding a label: ${error.message}`);
     }
   }
 
@@ -610,7 +617,7 @@ export class IssuesProcessor {
           body: closeMessage
         });
       } catch (error) {
-        issueLogger.error(`Error creating a comment: ${error.message}`);
+        issueLogger.error(`Error when creating a comment: ${error.message}`);
       }
     }
 
@@ -625,7 +632,7 @@ export class IssuesProcessor {
           labels: [closeLabel]
         });
       } catch (error) {
-        issueLogger.error(`Error adding a label: ${error.message}`);
+        issueLogger.error(`Error when adding a label: ${error.message}`);
       }
     }
 
@@ -639,7 +646,7 @@ export class IssuesProcessor {
         state: 'closed'
       });
     } catch (error) {
-      issueLogger.error(`Error updating this $$type: ${error.message}`);
+      issueLogger.error(`Error when updating this $$type: ${error.message}`);
     }
   }
 
@@ -663,7 +670,7 @@ export class IssuesProcessor {
 
       return pullRequest.data;
     } catch (error) {
-      issueLogger.error(`Error getting this $$type: ${error.message}`);
+      issueLogger.error(`Error when getting this $$type: ${error.message}`);
     }
   }
 
@@ -687,7 +694,9 @@ export class IssuesProcessor {
     }
 
     const branch = pullRequest.head.ref;
-    issueLogger.info(`Deleting branch ${branch} from closed $$type`);
+    issueLogger.info(
+      `Deleting the branch "${chalk.cyan(branch)}" from closed $$type`
+    );
 
     try {
       this._operations.consumeOperation();
@@ -699,7 +708,9 @@ export class IssuesProcessor {
       });
     } catch (error) {
       issueLogger.error(
-        `Error deleting branch ${branch} from $$type: ${error.message}`
+        `Error when deleting the branch "${chalk.cyan(branch)}" from $$type: ${
+          error.message
+        }`
       );
     }
   }
@@ -708,7 +719,9 @@ export class IssuesProcessor {
   private async _removeLabel(issue: Issue, label: string): Promise<void> {
     const issueLogger: IssueLogger = new IssueLogger(issue);
 
-    issueLogger.info(`Removing label "${label}" from $$type`);
+    issueLogger.info(
+      `Removing the label "${chalk.cyan(label)}" from the $$type...`
+    );
     this.removedLabelIssues.push(issue);
 
     if (this.options.debugOnly) {
@@ -724,8 +737,11 @@ export class IssuesProcessor {
         issue_number: issue.number,
         name: label
       });
+      issueLogger.info(`The label "${chalk.cyan(label)}" was removed`);
     } catch (error) {
-      issueLogger.error(`Error removing a label: ${error.message}`);
+      issueLogger.error(
+        `Error when removing the label: "${chalk.cyan(error.message)}"`
+      );
     }
   }
 
@@ -781,6 +797,22 @@ export class IssuesProcessor {
     return this.options.anyOfLabels;
   }
 
+  private _shouldRemoveStaleWhenUpdated(issue: Issue): boolean {
+    if (issue.isPullRequest) {
+      if (isBoolean(this.options.removePrStaleWhenUpdated)) {
+        return this.options.removePrStaleWhenUpdated;
+      }
+
+      return this.options.removeStaleWhenUpdated;
+    }
+
+    if (isBoolean(this.options.removeIssueStaleWhenUpdated)) {
+      return this.options.removeIssueStaleWhenUpdated;
+    }
+
+    return this.options.removeStaleWhenUpdated;
+  }
+
   private async _removeStaleLabel(
     issue: Issue,
     staleLabel: Readonly<string>
@@ -813,7 +845,9 @@ export class IssuesProcessor {
 
     if (isLabeled(issue, closeLabel)) {
       issueLogger.info(
-        `The $$type has a close label "${closeLabel}". Removing the close label...`
+        `The $$type has a close label "${chalk.cyan(
+          closeLabel
+        )}". Removing the close label...`
       );
 
       await this._removeLabel(issue, closeLabel);

@@ -233,6 +233,7 @@ const option_1 = __nccwpck_require__(5931);
 const get_humanized_date_1 = __nccwpck_require__(965);
 const is_date_more_recent_than_1 = __nccwpck_require__(1473);
 const is_valid_date_1 = __nccwpck_require__(891);
+const is_boolean_1 = __nccwpck_require__(8236);
 const is_labeled_1 = __nccwpck_require__(6792);
 const should_mark_when_stale_1 = __nccwpck_require__(2461);
 const words_to_list_1 = __nccwpck_require__(1883);
@@ -519,18 +520,20 @@ class IssuesProcessor {
         return __awaiter(this, void 0, void 0, function* () {
             const issueLogger = new issue_logger_1.IssueLogger(issue);
             const markedStaleOn = (yield this.getLabelCreationDate(issue, staleLabel)) || issue.updated_at;
-            issueLogger.info(`$$type marked stale on: ${markedStaleOn}`);
+            issueLogger.info(`$$type marked stale on: ${chalk_1.default.cyan(markedStaleOn)}`);
             const issueHasComments = yield this._hasCommentsSince(issue, markedStaleOn, actor);
-            issueLogger.info(`$$type has been commented on: ${issueHasComments}`);
+            issueLogger.info(`$$type has been commented on: ${chalk_1.default.cyan(issueHasComments)}`);
             const daysBeforeClose = issue.isPullRequest
                 ? this._getDaysBeforePrClose()
                 : this._getDaysBeforeIssueClose();
             issueLogger.info(`Days before $$type close: ${daysBeforeClose}`);
             const issueHasUpdate = IssuesProcessor._updatedSince(issue.updated_at, daysBeforeClose);
-            issueLogger.info(`$$type has been updated: ${issueHasUpdate}`);
+            issueLogger.info(`$$type has been updated: ${chalk_1.default.cyan(issueHasUpdate)}`);
             // should we un-stale this issue?
-            if (this.options.removeStaleWhenUpdated && issueHasComments) {
+            if (this._shouldRemoveStaleWhenUpdated(issue) && issueHasComments) {
                 yield this._removeStaleLabel(issue, staleLabel);
+                issueLogger.info(`Skipping the process since the $$type is now un-stale`);
+                return; // nothing to do because it is no longer stale
             }
             // now start closing logic
             if (daysBeforeClose < 0) {
@@ -592,7 +595,7 @@ class IssuesProcessor {
                     });
                 }
                 catch (error) {
-                    issueLogger.error(`Error creating a comment: ${error.message}`);
+                    issueLogger.error(`Error when creating a comment: ${error.message}`);
                 }
             }
             try {
@@ -607,7 +610,7 @@ class IssuesProcessor {
                 });
             }
             catch (error) {
-                issueLogger.error(`Error adding a label: ${error.message}`);
+                issueLogger.error(`Error when adding a label: ${error.message}`);
             }
         });
     }
@@ -633,7 +636,7 @@ class IssuesProcessor {
                     });
                 }
                 catch (error) {
-                    issueLogger.error(`Error creating a comment: ${error.message}`);
+                    issueLogger.error(`Error when creating a comment: ${error.message}`);
                 }
             }
             if (closeLabel) {
@@ -648,7 +651,7 @@ class IssuesProcessor {
                     });
                 }
                 catch (error) {
-                    issueLogger.error(`Error adding a label: ${error.message}`);
+                    issueLogger.error(`Error when adding a label: ${error.message}`);
                 }
             }
             try {
@@ -662,7 +665,7 @@ class IssuesProcessor {
                 });
             }
             catch (error) {
-                issueLogger.error(`Error updating this $$type: ${error.message}`);
+                issueLogger.error(`Error when updating this $$type: ${error.message}`);
             }
         });
     }
@@ -684,7 +687,7 @@ class IssuesProcessor {
                 return pullRequest.data;
             }
             catch (error) {
-                issueLogger.error(`Error getting this $$type: ${error.message}`);
+                issueLogger.error(`Error when getting this $$type: ${error.message}`);
             }
         });
     }
@@ -703,7 +706,7 @@ class IssuesProcessor {
                 return;
             }
             const branch = pullRequest.head.ref;
-            issueLogger.info(`Deleting branch ${branch} from closed $$type`);
+            issueLogger.info(`Deleting the branch "${chalk_1.default.cyan(branch)}" from closed $$type`);
             try {
                 this._operations.consumeOperation();
                 (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.incrementDeletedBranchesCount();
@@ -714,7 +717,7 @@ class IssuesProcessor {
                 });
             }
             catch (error) {
-                issueLogger.error(`Error deleting branch ${branch} from $$type: ${error.message}`);
+                issueLogger.error(`Error when deleting the branch "${chalk_1.default.cyan(branch)}" from $$type: ${error.message}`);
             }
         });
     }
@@ -723,7 +726,7 @@ class IssuesProcessor {
         var _a;
         return __awaiter(this, void 0, void 0, function* () {
             const issueLogger = new issue_logger_1.IssueLogger(issue);
-            issueLogger.info(`Removing label "${label}" from $$type`);
+            issueLogger.info(`Removing the label "${chalk_1.default.cyan(label)}" from the $$type...`);
             this.removedLabelIssues.push(issue);
             if (this.options.debugOnly) {
                 return;
@@ -737,9 +740,10 @@ class IssuesProcessor {
                     issue_number: issue.number,
                     name: label
                 });
+                issueLogger.info(`The label "${chalk_1.default.cyan(label)}" was removed`);
             }
             catch (error) {
-                issueLogger.error(`Error removing a label: ${error.message}`);
+                issueLogger.error(`Error when removing the label: "${chalk_1.default.cyan(error.message)}"`);
             }
         });
     }
@@ -789,6 +793,18 @@ class IssuesProcessor {
         }
         return this.options.anyOfLabels;
     }
+    _shouldRemoveStaleWhenUpdated(issue) {
+        if (issue.isPullRequest) {
+            if (is_boolean_1.isBoolean(this.options.removePrStaleWhenUpdated)) {
+                return this.options.removePrStaleWhenUpdated;
+            }
+            return this.options.removeStaleWhenUpdated;
+        }
+        if (is_boolean_1.isBoolean(this.options.removeIssueStaleWhenUpdated)) {
+            return this.options.removeIssueStaleWhenUpdated;
+        }
+        return this.options.removeStaleWhenUpdated;
+    }
     _removeStaleLabel(issue, staleLabel) {
         var _a;
         return __awaiter(this, void 0, void 0, function* () {
@@ -808,7 +824,7 @@ class IssuesProcessor {
                 return Promise.resolve();
             }
             if (is_labeled_1.isLabeled(issue, closeLabel)) {
-                issueLogger.info(`The $$type has a close label "${closeLabel}". Removing the close label...`);
+                issueLogger.info(`The $$type has a close label "${chalk_1.default.cyan(closeLabel)}". Removing the close label...`);
                 yield this._removeLabel(issue, closeLabel);
                 (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.incrementDeletedCloseItemsLabelsCount(issue);
             }
@@ -1621,6 +1637,21 @@ exports.isValidDate = isValidDate;
 
 /***/ }),
 
+/***/ 8236:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.isBoolean = void 0;
+function isBoolean(value) {
+    return value === true || value === false;
+}
+exports.isBoolean = isBoolean;
+
+
+/***/ }),
+
 /***/ 6792:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
@@ -1794,6 +1825,8 @@ function _getAndValidateArgs() {
         anyOfPrLabels: core.getInput('any-of-pr-labels'),
         operationsPerRun: parseInt(core.getInput('operations-per-run', { required: true })),
         removeStaleWhenUpdated: !(core.getInput('remove-stale-when-updated') === 'false'),
+        removeIssueStaleWhenUpdated: _toOptionalBoolean(core.getInput('remove-issue-stale-when-updated')),
+        removePrStaleWhenUpdated: _toOptionalBoolean(core.getInput('remove-pr-stale-when-updated')),
         debugOnly: core.getInput('debug-only') === 'true',
         ascending: core.getInput('ascending') === 'true',
         skipStalePrMessage: core.getInput('skip-stale-pr-message') === 'true',

@@ -49,6 +49,12 @@ function _getAndValidateArgs(): IIssuesProcessorOptions {
     removeStaleWhenUpdated: !(
       core.getInput('remove-stale-when-updated') === 'false'
     ),
+    removeIssueStaleWhenUpdated: _toOptionalBoolean(
+      core.getInput('remove-issue-stale-when-updated')
+    ),
+    removePrStaleWhenUpdated: _toOptionalBoolean(
+      core.getInput('remove-pr-stale-when-updated')
+    ),
     debugOnly: core.getInput('debug-only') === 'true',
     ascending: core.getInput('ascending') === 'true',
     skipStalePrMessage: core.getInput('skip-stale-pr-message') === 'true',

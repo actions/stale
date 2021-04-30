@@ -1220,8 +1220,7 @@ test('stale issues should not be closed if days is set to -1', async () => {
 });
 
 test('stale label should be removed if a comment was added to a stale issue', async () => {
-  const opts = {...DefaultProcessorOptions};
-  opts.removeStaleWhenUpdated = true;
+  const opts = {...DefaultProcessorOptions, removeStaleWhenUpdated: true};
   const TestIssueList: Issue[] = [
     generateIssue(
       opts,
@@ -1257,8 +1256,7 @@ test('stale label should be removed if a comment was added to a stale issue', as
 });
 
 test('stale label should not be removed if a comment was added by the bot (and the issue should be closed)', async () => {
-  const opts = {...DefaultProcessorOptions};
-  opts.removeStaleWhenUpdated = true;
+  const opts = {...DefaultProcessorOptions, removeStaleWhenUpdated: true};
   github.context.actor = 'abot';
   const TestIssueList: Issue[] = [
     generateIssue(

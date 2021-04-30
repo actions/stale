@@ -46,74 +46,22 @@ Build, lint, package and test everything.
 $ npm all
 ```
 
-## Changelog update
-
-Update the [CHANGELOG](CHANGELOG.md) and be user-friendly.  
-Only add some content inside the unreleased section at the top of the file.
-
-Based on your PR, you can either add:
-
-- A new feature (### :rocket: New Features)
-- A bugfix (### :bug: Bug Fixes)
-
-**Example before:**
-
-```
-# Actions stale
-
-# Unreleased
-
-# [v3.0.18](https://github.com/actions/stale/compare/v3.0.17...v3.0.18) (2021-03-5)
-...
-```
-
-**Example after:**
-
-```
-# Actions stale
-
-# Unreleased
-
-### :rocket: New Features
-
-- Add 2 new options `any-of-issue-labels` and `any-of-pr-labels` to customize the `any-of-labels` option for issues and PRs
-
-# [v3.0.18](https://github.com/actions/stale/compare/v3.0.17...v3.0.18) (2021-03-5)
-...
-```
-
 # Release
 
-## Changelog update
+Based on [standard-version](https://github.com/conventional-changelog/standard-version).
 
-You need to update the current unreleased changes to associate them with the new release.  
-Simply add a new row containing the tag name, a link to compare the code between this release and the previous one and the release date.  
-You also need to add a link to the commits introducing these changes.
+## Define the new version
 
-**Example before:**
+You can run `npm run release:dry-run` to create a dry-run, or you can directly run `npm run release` to create a new local release.  
+It will run `prerelease` beforehand to build and pack everything.
 
-```
-# Actions stale
+If the `prerelease` succeeded, a bump of version will happen based on the unreleased commits.  
+It will:
 
-# Unreleased
+- Update the _package.json_ version field
+- Update the _package-lock.json_ version field
+- Update the _CHANGELOG.md_ to include the release notes of the new version
+- Create a local tag
+- Create a commit
 
-### :rocket: New Features
-
-- Add 2 new options `any-of-issue-labels` and `any-of-pr-labels` to customize the `any-of-labels` option for issues and PRs
-...
-```
-
-**Example after:**
-
-```
-# Actions stale
-
-# Unreleased
-
-# [v3.0.18](https://github.com/actions/stale/compare/v3.0.17...v3.0.18) (2021-03-5)
-
-### :rocket: New Features
-
-- Add 2 new options `any-of-issue-labels` and `any-of-pr-labels` to customize the `any-of-labels` option for issues and PRs ([c70e174](https://github.com/actions/stale/commit/c70e174d4ae9c9e534150ad4f9ad307ba5a613db))
-...
-```
+If everything generated seems ok for you, you can push your tag by running `git push --follow-tags origin {your-branch-name}`.

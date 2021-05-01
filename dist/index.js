@@ -517,8 +517,7 @@ class IssuesProcessor {
         return __awaiter(this, void 0, void 0, function* () {
             const issueLogger = new issue_logger_1.IssueLogger(issue);
             issueLogger.info(`Checking for label on $$type`);
-            this._operations.consumeOperation();
-            issue.operations.consumeOperation();
+            this._consumeIssueOperation(issue);
             (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.incrementFetchedItemsEventsCount();
             const options = this.client.issues.listEvents.endpoint.merge({
                 owner: github_1.context.repo.owner,
@@ -606,8 +605,7 @@ class IssuesProcessor {
             }
             if (!skipMessage) {
                 try {
-                    this._operations.consumeOperation();
-                    issue.operations.consumeOperation();
+                    this._consumeIssueOperation(issue);
                     (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.incrementAddedItemsComment(issue);
                     yield this.client.issues.createComment({
                         owner: github_1.context.repo.owner,
@@ -621,8 +619,7 @@ class IssuesProcessor {
                 }
             }
             try {
-                this._operations.consumeOperation();
-                issue.operations.consumeOperation();
+                this._consumeIssueOperation(issue);
                 (_b = this._statistics) === null || _b === void 0 ? void 0 : _b.incrementAddedItemsLabel(issue);
                 (_c = this._statistics) === null || _c === void 0 ? void 0 : _c.incrementStaleItemsCount(issue);
                 yield this.client.issues.addLabels({
@@ -649,8 +646,7 @@ class IssuesProcessor {
             }
             if (closeMessage) {
                 try {
-                    this._operations.consumeOperation();
-                    issue.operations.consumeOperation();
+                    this._consumeIssueOperation(issue);
                     (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.incrementAddedItemsComment(issue);
                     yield this.client.issues.createComment({
                         owner: github_1.context.repo.owner,
@@ -665,8 +661,7 @@ class IssuesProcessor {
             }
             if (closeLabel) {
                 try {
-                    this._operations.consumeOperation();
-                    issue.operations.consumeOperation();
+                    this._consumeIssueOperation(issue);
                     (_b = this._statistics) === null || _b === void 0 ? void 0 : _b.incrementAddedItemsLabel(issue);
                     yield this.client.issues.addLabels({
                         owner: github_1.context.repo.owner,
@@ -680,8 +675,7 @@ class IssuesProcessor {
                 }
             }
             try {
-                this._operations.consumeOperation();
-                issue.operations.consumeOperation();
+                this._consumeIssueOperation(issue);
                 (_c = this._statistics) === null || _c === void 0 ? void 0 : _c.incrementClosedItemsCount(issue);
                 yield this.client.issues.update({
                     owner: github_1.context.repo.owner,
@@ -703,8 +697,7 @@ class IssuesProcessor {
                 return;
             }
             try {
-                this._operations.consumeOperation();
-                issue.operations.consumeOperation();
+                this._consumeIssueOperation(issue);
                 (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.incrementFetchedPullRequestsCount();
                 const pullRequest = yield this.client.pulls.get({
                     owner: github_1.context.repo.owner,
@@ -735,8 +728,7 @@ class IssuesProcessor {
             const branch = pullRequest.head.ref;
             issueLogger.info(`Deleting the branch "${chalk_1.default.cyan(branch)}" from closed $$type`);
             try {
-                this._operations.consumeOperation();
-                issue.operations.consumeOperation();
+                this._consumeIssueOperation(issue);
                 (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.incrementDeletedBranchesCount();
                 yield this.client.git.deleteRef({
                     owner: github_1.context.repo.owner,
@@ -760,8 +752,7 @@ class IssuesProcessor {
                 return;
             }
             try {
-                this._operations.consumeOperation();
-                issue.operations.consumeOperation();
+                this._consumeIssueOperation(issue);
                 (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.incrementDeletedItemsLabelsCount(issue);
                 yield this.client.issues.removeLabel({
                     owner: github_1.context.repo.owner,
@@ -858,6 +849,10 @@ class IssuesProcessor {
                 (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.incrementDeletedCloseItemsLabelsCount(issue);
             }
         });
+    }
+    _consumeIssueOperation(issue) {
+        this._operations.consumeOperation();
+        issue.operations.consumeOperation();
     }
 }
 exports.IssuesProcessor = IssuesProcessor;

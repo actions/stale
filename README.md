@@ -10,7 +10,7 @@ Every argument is optional.
 
 | Input                             | Description                                                                                                                                                   |
 | --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `repo-token`                      | PAT(Personal Access Token) for authorizing repository.<br>_Defaults to **${{ github.token }}**_.                                                              |
+| `repo-token`                      | PAT (Personal Access Token) for authorizing the repository.<br>_Defaults to **${{ github.token }}**_.                                                         |
 | `days-before-stale`               | Idle number of days before marking an issue/PR as stale.<br>_Defaults to **60**_.                                                                             |
 | `days-before-issue-stale`         | Idle number of days before marking an issue as stale.<br>_Override `days-before-stale`_.                                                                      |
 | `days-before-pr-stale`            | Idle number of days before marking an PR as stale.<br>_Override `days-before-stale`_.                                                                         |
@@ -37,6 +37,8 @@ Every argument is optional.
 | `remove-stale-when-updated`       | Remove stale label from issue/PR on updates or comments.<br>_Defaults to **true**_.                                                                           |
 | `remove-issue-stale-when-updated` | Remove stale label from issue on updates or comments.<br>_Defaults to **true**_.<br>_Override `remove-stale-when-updated`_.                                   |
 | `remove-pr-stale-when-updated`    | Remove stale label from PR on updates or comments.<br>_Defaults to **true**_.<br>_Override `remove-stale-when-updated`_.                                      |
+| `remove-issue-stale-when-updated` | Remove stale label from issue on updates or comments.<br>_Defaults to **true**_.<br>_Override `remove-stale-when-updated`_.                                   |
+| `remove-pr-stale-when-updated`    | Remove stale label from PR on updates or comments.<br>_Defaults to **true**_.<br>_Override `remove-stale-when-updated`_.                                      |
 | `debug-only`                      | Dry-run on action.<br>_Defaults to **false**_.                                                                                                                |
 | `ascending`                       | Order to get issues/PR.<br>`true` is ascending, `false` is descending.<br>_Defaults to **false**_.                                                            |
 | `skip-stale-issue-message`        | Skip adding stale message on stale issue.<br>_Defaults to **false**_.                                                                                         |
@@ -61,11 +63,22 @@ Every argument is optional.
 
 #### operations-per-run
 
-Used to limit the number of operations made with the GitHub API to avoid reaching the [rate limit](https://docs.github.com/en/rest/overview/resources-in-the-rest-api#rate-limiting).  
+_Context:_  
+This action performs some API calls to GitHub to fetch or close issues and pull requests, set or update labels, add comments, delete branches, etc.  
+These operations are made in a very short period of time - because the action is very fast to run - and can be numerous based on your project action configuration and the quantity of issues and pull requests within it.  
+GitHub has a [rate limit](https://docs.github.com/en/rest/overview/resources-in-the-rest-api#rate-limiting) and if reached will block all of these API calls for one hour (or API calls from other actions using the same user (a.k.a: the github-token from the [repo-token](#repo-token) option)).  
+This option helps you to stay within the GitHub rate limits, as you can use this option to limit the number of operations for a single run.
+
+_Purpose:_  
+This option aims to limit the number of operations made with the GitHub API to avoid reaching the [rate limit](https://docs.github.com/en/rest/overview/resources-in-the-rest-api#rate-limiting).
+
 Based on your project, your GitHub business plan and the date of the cron job you set for this action, you can increase this limit to a higher number.
+If you are not sure which is the right value for you or if the default value is good enough, you could enable the logs and look at the end of the stale action.  
+If you reached the limit, you will see a warning message in the logs, telling you that you should increase the number of operations.
+If you choose not to increase the limit, you might end up with un-processed issues or pull requests after a stale action run.
 
 When [debugging](#Debugging), you can set it to a much higher number like `1000` since there will be fewer operations made with the GitHub API.  
-Only the actor and the batch of issues (100 per batch) will consume the operations.
+Only the [actor](#repo-token) and the batch of issues (100 per batch) will consume the operations.
 
 Default value: `30`
 

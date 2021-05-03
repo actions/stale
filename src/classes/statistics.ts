@@ -65,8 +65,8 @@ export class Statistics {
     return this._incrementUndoStaleIssuesCount(increment);
   }
 
-  setOperationsLeft(operationsLeft: Readonly<number>): Statistics {
-    this._operationsCount = operationsLeft;
+  setRemainingOperations(remainingOperations: Readonly<number>): Statistics {
+    this._operationsCount = remainingOperations;
 
     return this;
   }

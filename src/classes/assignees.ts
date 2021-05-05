@@ -35,7 +35,7 @@ export class Assignees {
     if (this._shouldExemptAllAssignees()) {
       this._issueLogger.info(
         chalk.white('└──'),
-        'Skipping $$type because it has an exempt assignee'
+        'Skipping this $$type because it has an exempt assignee'
       );
 
       return true;

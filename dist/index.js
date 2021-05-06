@@ -324,7 +324,7 @@ class IssuesProcessor {
                     : this._getDaysBeforeIssueStale();
                 const onlyLabels = words_to_list_1.wordsToList(this._getOnlyLabels(issue));
                 if (onlyLabels.length > 0) {
-                    issueLogger.info(`The option ${issueLogger.createOptionLink(option_1.Option.OnlyLabels)} was specified to only processed issues and pull requests with all those labels (${chalk_1.default.cyan(onlyLabels.length)})`);
+                    issueLogger.info(`The option ${issueLogger.createOptionLink(option_1.Option.OnlyLabels)} was specified to only process issues and pull requests with all those labels (${chalk_1.default.cyan(onlyLabels.length)})`);
                     const hasAllWhitelistedLabels = onlyLabels.every((label) => {
                         return is_labeled_1.isLabeled(issue, label);
                     });
@@ -398,7 +398,7 @@ class IssuesProcessor {
                 }
                 const anyOfLabels = words_to_list_1.wordsToList(this._getAnyOfLabels(issue));
                 if (anyOfLabels.length > 0) {
-                    issueLogger.info(`The option ${issueLogger.createOptionLink(option_1.Option.AnyOfLabels)} was specified to only processed the issues and pull requests with one of those labels (${chalk_1.default.cyan(anyOfLabels.length)})`);
+                    issueLogger.info(`The option ${issueLogger.createOptionLink(option_1.Option.AnyOfLabels)} was specified to only process the issues and pull requests with one of those labels (${chalk_1.default.cyan(anyOfLabels.length)})`);
                     const hasOneOfWhitelistedLabels = anyOfLabels.some((label) => {
                         return is_labeled_1.isLabeled(issue, label);
                     });

@@ -149,7 +149,7 @@ export class IssuesProcessor {
         issueLogger.info(
           `The option ${issueLogger.createOptionLink(
             Option.OnlyLabels
-          )} was specified to only processed issues and pull requests with all those labels (${chalk.cyan(
+          )} was specified to only process issues and pull requests with all those labels (${chalk.cyan(
             onlyLabels.length
           )})`
         );
@@ -295,7 +295,7 @@ export class IssuesProcessor {
         issueLogger.info(
           `The option ${issueLogger.createOptionLink(
             Option.AnyOfLabels
-          )} was specified to only processed the issues and pull requests with one of those labels (${chalk.cyan(
+          )} was specified to only process the issues and pull requests with one of those labels (${chalk.cyan(
             anyOfLabels.length
           )})`
         );

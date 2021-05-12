@@ -461,9 +461,9 @@ export class IssuesProcessor {
     //   comment => comment.user.type === 'User' && comment.user.login !== actor
     // );
 
-    issueLogger.info(
-      `Comments not made by actor or another bot: ${filteredComments.length}`
-    );
+    // issueLogger.info(
+    //   `Comments not made by actor or another bot: ${filteredComments.length}`
+    // );
 
     // if there are any user comments returned
     return comments.length > 0;

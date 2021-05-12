@@ -34,7 +34,7 @@ export class Milestones {
     if (this._shouldExemptAllMilestones()) {
       this._issueLogger.info(
         chalk.white('└──'),
-        'Skipping $$type because it has a milestone'
+        'Skipping this $$type because it has a milestone'
       );
 
       return true;

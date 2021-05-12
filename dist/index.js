@@ -33,7 +33,7 @@ class Assignees {
             return false;
         }
         if (this._shouldExemptAllAssignees()) {
-            this._issueLogger.info(chalk_1.default.white('└──'), 'Skipping $$type because it has an exempt assignee');
+            this._issueLogger.info(chalk_1.default.white('└──'), 'Skipping this $$type because it has an exempt assignee');
             return true;
         }
         const exemptAssignees = this._getExemptAssignees();
@@ -280,6 +280,11 @@ class IssuesProcessor {
             issueLogger.info(chalk_1.default.cyan(consumedOperationsCount), `operation${consumedOperationsCount > 1 ? 's' : ''} consumed for this $$type`);
         }
     }
+    static _getStaleMessageUsedOptionName(issue) {
+        return issue.isPullRequest
+            ? option_1.Option.StalePrMessage
+            : option_1.Option.StaleIssueMessage;
+    }
     processIssues(page = 1) {
         var _a, _b;
         return __awaiter(this, void 0, void 0, function* () {
@@ -297,7 +302,7 @@ class IssuesProcessor {
             for (const issue of issues.values()) {
                 const issueLogger = new issue_logger_1.IssueLogger(issue);
                 (_b = this._statistics) === null || _b === void 0 ? void 0 : _b.incrementProcessedItemsCount(issue);
-                issueLogger.info(`Found this $$type last updated ${issue.updated_at}`);
+                issueLogger.info(`Found this $$type last updated at: ${chalk_1.default.cyan(issue.updated_at)}`);
                 // calculate string based messages for this issue
                 const staleMessage = issue.isPullRequest
                     ? this.options.stalePrMessage
@@ -319,7 +324,7 @@ class IssuesProcessor {
                     : this._getDaysBeforeIssueStale();
                 const onlyLabels = words_to_list_1.wordsToList(this._getOnlyLabels(issue));
                 if (onlyLabels.length > 0) {
-                    issueLogger.info(`The option "onlyLabels" was specified to only processed the issues and pull requests with all those labels (${onlyLabels.length})`);
+                    issueLogger.info(`The option ${issueLogger.createOptionLink(option_1.Option.OnlyLabels)} was specified to only process issues and pull requests with all those labels (${chalk_1.default.cyan(onlyLabels.length)})`);
                     const hasAllWhitelistedLabels = onlyLabels.every((label) => {
                         return is_labeled_1.isLabeled(issue, label);
                     });
@@ -334,23 +339,23 @@ class IssuesProcessor {
                     }
                 }
                 else {
-                    issueLogger.info(`The option "onlyLabels" was not specified`);
+                    issueLogger.info(`The option ${issueLogger.createOptionLink(option_1.Option.OnlyLabels)} was not specified`);
                     issueLogger.info(chalk_1.default.white('└──'), `Continuing the process for this $$type`);
                 }
-                issueLogger.info(`Days before $$type stale: ${daysBeforeStale}`);
+                issueLogger.info(`Days before $$type stale: ${chalk_1.default.cyan(daysBeforeStale)}`);
                 const shouldMarkAsStale = should_mark_when_stale_1.shouldMarkWhenStale(daysBeforeStale);
                 if (!staleMessage && shouldMarkAsStale) {
-                    issueLogger.info(`Skipping $$type due to empty stale message`);
+                    issueLogger.info(`Skipping this $$type because it should be marked as stale based on the option ${issueLogger.createOptionLink(this._getDaysBeforeStaleUsedOptionName(issue))} (${chalk_1.default.cyan(daysBeforeStale)}) but the option ${issueLogger.createOptionLink(IssuesProcessor._getStaleMessageUsedOptionName(issue))} is not set`);
                     IssuesProcessor._endIssueProcessing(issue);
                     continue;
                 }
                 if (issue.state === 'closed') {
-                    issueLogger.info(`Skipping $$type because it is closed`);
+                    issueLogger.info(`Skipping this $$type because it is closed`);
                     IssuesProcessor._endIssueProcessing(issue);
                     continue; // Don't process closed issues
                 }
                 if (issue.locked) {
-                    issueLogger.info(`Skipping $$type because it is locked`);
+                    issueLogger.info(`Skipping this $$type because it is locked`);
                     IssuesProcessor._endIssueProcessing(issue);
                     continue; // Don't process locked issues
                 }
@@ -359,16 +364,16 @@ class IssuesProcessor {
                 if (this.options.startDate) {
                     const startDate = new Date(this.options.startDate);
                     const createdAt = new Date(issue.created_at);
-                    issueLogger.info(`A start date was specified for the ${get_humanized_date_1.getHumanizedDate(startDate)} (${this.options.startDate})`);
+                    issueLogger.info(`A start date was specified for the ${get_humanized_date_1.getHumanizedDate(startDate)} (${chalk_1.default.cyan(this.options.startDate)})`);
                     // Expecting that GitHub will always set a creation date on the issues and PRs
                     // But you never know!
                     if (!is_valid_date_1.isValidDate(createdAt)) {
                         IssuesProcessor._endIssueProcessing(issue);
                         core.setFailed(new Error(`Invalid issue field: "created_at". Expected a valid date`));
                     }
-                    issueLogger.info(`$$type created the ${get_humanized_date_1.getHumanizedDate(createdAt)} (${issue.created_at})`);
+                    issueLogger.info(`$$type created the ${get_humanized_date_1.getHumanizedDate(createdAt)} (${chalk_1.default.cyan(issue.created_at)})`);
                     if (!is_date_more_recent_than_1.isDateMoreRecentThan(createdAt, startDate)) {
-                        issueLogger.info(`Skipping $$type because it was created before the specified start date`);
+                        issueLogger.info(`Skipping this $$type because it was created before the specified start date`);
                         IssuesProcessor._endIssueProcessing(issue);
                         continue; // Don't process issues which were created before the start date
                     }
@@ -387,13 +392,13 @@ class IssuesProcessor {
                         issueLogger.info(`An exempt label was added after the stale label.`);
                         yield this._removeStaleLabel(issue, staleLabel);
                     }
-                    issueLogger.info(`Skipping $$type because it has an exempt label`);
+                    issueLogger.info(`Skipping this $$type because it has an exempt label`);
                     IssuesProcessor._endIssueProcessing(issue);
                     continue; // Don't process exempt issues
                 }
                 const anyOfLabels = words_to_list_1.wordsToList(this._getAnyOfLabels(issue));
                 if (anyOfLabels.length > 0) {
-                    issueLogger.info(`The option "anyOfLabels" was specified to only processed the issues and pull requests with one of those labels (${anyOfLabels.length})`);
+                    issueLogger.info(`The option ${issueLogger.createOptionLink(option_1.Option.AnyOfLabels)} was specified to only process the issues and pull requests with one of those labels (${chalk_1.default.cyan(anyOfLabels.length)})`);
                     const hasOneOfWhitelistedLabels = anyOfLabels.some((label) => {
                         return is_labeled_1.isLabeled(issue, label);
                     });
@@ -408,7 +413,7 @@ class IssuesProcessor {
                     }
                 }
                 else {
-                    issueLogger.info(`The option "anyOfLabels" was not specified`);
+                    issueLogger.info(`The option ${issueLogger.createOptionLink(option_1.Option.AnyOfLabels)} was not specified`);
                     issueLogger.info(chalk_1.default.white('└──'), `Continuing the process for this $$type`);
                 }
                 const milestones = new milestones_1.Milestones(this.options, issue);
@@ -424,17 +429,28 @@ class IssuesProcessor {
                 // Should this issue be marked stale?
                 const shouldBeStale = !IssuesProcessor._updatedSince(issue.updated_at, daysBeforeStale);
                 // Determine if this issue needs to be marked stale first
-                if (!issue.isStale && shouldBeStale && shouldMarkAsStale) {
-                    issueLogger.info(`Marking $$type stale because it was last updated on ${issue.updated_at} and it does not have a stale label`);
-                    yield this._markStale(issue, staleMessage, staleLabel, skipMessage);
-                    issue.isStale = true; // This issue is now considered stale
-                }
-                else if (!issue.isStale) {
-                    issueLogger.info(`Not marking as stale: shouldBeStale=${shouldBeStale}, shouldMarkAsStale=${shouldMarkAsStale}`);
+                if (!issue.isStale) {
+                    issueLogger.info(`This $$type is not stale`);
+                    const updatedAtDate = new Date(issue.updated_at);
+                    if (shouldBeStale) {
+                        issueLogger.info(`This $$type should be stale based on the last update date the ${get_humanized_date_1.getHumanizedDate(updatedAtDate)} (${chalk_1.default.cyan(issue.updated_at)})`);
+                        if (shouldMarkAsStale) {
+                            issueLogger.info(`This $$type should be marked as stale based on the option ${issueLogger.createOptionLink(this._getDaysBeforeStaleUsedOptionName(issue))} (${chalk_1.default.cyan(daysBeforeStale)})`);
+                            yield this._markStale(issue, staleMessage, staleLabel, skipMessage);
+                            issue.isStale = true; // This issue is now considered stale
+                            issueLogger.info(`This $$type is now stale`);
+                        }
+                        else {
+                            issueLogger.info(`This $$type should not be marked as stale based on the option ${issueLogger.createOptionLink(this._getDaysBeforeStaleUsedOptionName(issue))} (${chalk_1.default.cyan(daysBeforeStale)})`);
+                        }
+                    }
+                    else {
+                        issueLogger.info(`This $$type should not be stale based on the last update date the ${get_humanized_date_1.getHumanizedDate(updatedAtDate)} (${chalk_1.default.cyan(issue.updated_at)})`);
+                    }
                 }
                 // Process the issue if it was marked stale
                 if (issue.isStale) {
-                    issueLogger.info(`Found a stale $$type`);
+                    issueLogger.info(`This $$type is already stale`);
                     yield this._processStaleIssue(issue, staleLabel, actor, closeMessage, closeLabel);
                 }
                 IssuesProcessor._endIssueProcessing(issue);
@@ -516,7 +532,7 @@ class IssuesProcessor {
         var _a;
         return __awaiter(this, void 0, void 0, function* () {
             const issueLogger = new issue_logger_1.IssueLogger(issue);
-            issueLogger.info(`Checking for label on $$type`);
+            issueLogger.info(`Checking for label on this $$type`);
             this._consumeIssueOperation(issue);
             (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.incrementFetchedItemsEventsCount();
             const options = this.client.issues.listEvents.endpoint.merge({
@@ -546,7 +562,7 @@ class IssuesProcessor {
             const daysBeforeClose = issue.isPullRequest
                 ? this._getDaysBeforePrClose()
                 : this._getDaysBeforeIssueClose();
-            issueLogger.info(`Days before $$type close: ${daysBeforeClose}`);
+            issueLogger.info(`Days before $$type close: ${chalk_1.default.cyan(daysBeforeClose)}`);
             const issueHasUpdate = IssuesProcessor._updatedSince(issue.updated_at, daysBeforeClose);
             issueLogger.info(`$$type has been updated: ${chalk_1.default.cyan(issueHasUpdate)}`);
             // should we un-stale this issue?
@@ -560,10 +576,10 @@ class IssuesProcessor {
                 return; // nothing to do because we aren't closing stale issues
             }
             if (!issueHasComments && !issueHasUpdate) {
-                issueLogger.info(`Closing $$type because it was last updated on ${issue.updated_at}`);
+                issueLogger.info(`Closing $$type because it was last updated on! ${chalk_1.default.cyan(issue.updated_at)}`);
                 yield this._closeIssue(issue, closeMessage, closeLabel);
                 if (this.options.deleteBranch && issue.pull_request) {
-                    issueLogger.info(`Deleting branch for as delete-branch option was specified`);
+                    issueLogger.info(`Deleting the branch the option ${issueLogger.createOptionLink(option_1.Option.DeleteBranch)} was specified`);
                     yield this._deleteBranch(issue);
                     this.deletedBranchIssues.push(issue);
                 }
@@ -577,14 +593,14 @@ class IssuesProcessor {
     _hasCommentsSince(issue, sinceDate, actor) {
         return __awaiter(this, void 0, void 0, function* () {
             const issueLogger = new issue_logger_1.IssueLogger(issue);
-            issueLogger.info(`Checking for comments on $$type since ${sinceDate}`);
+            issueLogger.info(`Checking for comments on $$type since: ${chalk_1.default.cyan(sinceDate)}`);
             if (!sinceDate) {
                 return true;
             }
             // find any comments since the date
             const comments = yield this.listIssueComments(issue.number, sinceDate);
             const filteredComments = comments.filter(comment => comment.user.type === 'User' && comment.user.login !== actor);
-            issueLogger.info(`Comments not made by actor or another bot: ${filteredComments.length}`);
+            issueLogger.info(`Comments not made by actor or another bot: ${chalk_1.default.cyan(filteredComments.length)}`);
             // if there are any user comments returned
             return filteredComments.length > 0;
         });
@@ -594,7 +610,7 @@ class IssuesProcessor {
         var _a, _b, _c;
         return __awaiter(this, void 0, void 0, function* () {
             const issueLogger = new issue_logger_1.IssueLogger(issue);
-            issueLogger.info(`Marking $$type as stale`);
+            issueLogger.info(`Marking this $$type as stale`);
             this.staleIssues.push(issue);
             // if the issue is being marked stale, the updated date should be changed to right now
             // so that close calculations work correctly
@@ -719,7 +735,7 @@ class IssuesProcessor {
             issueLogger.info(`Delete branch from closed $$type - ${issue.title}`);
             const pullRequest = yield this._getPullRequest(issue);
             if (!pullRequest) {
-                issueLogger.info(`Not deleting branch as pull request not found for this $$type`);
+                issueLogger.info(`Not deleting this branch as no pull request was found for this $$type`);
                 return;
             }
             if (this.options.debugOnly) {
@@ -746,7 +762,7 @@ class IssuesProcessor {
         var _a;
         return __awaiter(this, void 0, void 0, function* () {
             const issueLogger = new issue_logger_1.IssueLogger(issue);
-            issueLogger.info(`Removing the label "${chalk_1.default.cyan(label)}" from the $$type...`);
+            issueLogger.info(`Removing the label "${chalk_1.default.cyan(label)}" from this $$type...`);
             this.removedLabelIssues.push(issue);
             if (this.options.debugOnly) {
                 return;
@@ -853,6 +869,21 @@ class IssuesProcessor {
     _consumeIssueOperation(issue) {
         this._operations.consumeOperation();
         issue.operations.consumeOperation();
+    }
+    _getDaysBeforeStaleUsedOptionName(issue) {
+        return issue.isPullRequest
+            ? this._getDaysBeforePrStaleUsedOptionName()
+            : this._getDaysBeforeIssueStaleUsedOptionName();
+    }
+    _getDaysBeforeIssueStaleUsedOptionName() {
+        return isNaN(this.options.daysBeforeIssueStale)
+            ? option_1.Option.DaysBeforeStale
+            : option_1.Option.DaysBeforeIssueStale;
+    }
+    _getDaysBeforePrStaleUsedOptionName() {
+        return isNaN(this.options.daysBeforePrStale)
+            ? option_1.Option.DaysBeforeStale
+            : option_1.Option.DaysBeforePrStale;
     }
 }
 exports.IssuesProcessor = IssuesProcessor;
@@ -1018,7 +1049,7 @@ class Milestones {
             return false;
         }
         if (this._shouldExemptAllMilestones()) {
-            this._issueLogger.info(chalk_1.default.white('└──'), 'Skipping $$type because it has a milestone');
+            this._issueLogger.info(chalk_1.default.white('└──'), 'Skipping this $$type because it has a milestone');
             return true;
         }
         const exemptMilestones = this._getExemptMilestones();

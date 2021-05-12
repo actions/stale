@@ -518,14 +518,10 @@ class IssuesProcessor {
             // find any comments since the date
             const comments = yield this.listIssueComments(issue.number, sinceDate);
             issueLogger.info('Not filtering for debug purposes');
-            // const filteredComments = comments.filter(
-            //   comment => comment.user.type === 'User' && comment.user.login !== actor
-            // );
-            // issueLogger.info(
-            //   `Comments not made by actor or another bot: ${filteredComments.length}`
-            // );
+            const filteredComments = comments.filter(comment => comment.user.type === 'User' && comment.user.login !== actor);
+            issueLogger.info(`Comments not made by actor or another bot: ${filteredComments.length}`);
             // if there are any user comments returned
-            return comments.length > 0;
+            return filteredComments.length > 0;
         });
     }
     // Mark an issue as stale with a comment and a label

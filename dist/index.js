@@ -411,8 +411,10 @@ class IssuesProcessor {
             try {
                 this._operationsLeft -= 1;
                 actor = yield this.client.users.getAuthenticated();
+                this._logger.info('Actor is from client');
             }
             catch (error) {
+                this._logger.info('Actor is from context');
                 return github_1.context.actor;
             }
             return actor.data.login;

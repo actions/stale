@@ -1,6 +1,7 @@
 import {context, getOctokit} from '@actions/github';
 import {GitHub} from '@actions/github/lib/utils';
 import {GetResponseTypeFromEndpointMethod} from '@octokit/types';
+import { coerce } from 'semver';
 import {getHumanizedDate} from '../functions/dates/get-humanized-date';
 import {isDateMoreRecentThan} from '../functions/dates/is-date-more-recent-than';
 import {isValidDate} from '../functions/dates/is-valid-date';
@@ -306,7 +307,9 @@ export class IssuesProcessor {
     try {
       this._operationsLeft -= 1;
       actor = await this.client.users.getAuthenticated();
+      this._logger.info('Actor is from client')
     } catch (error) {
+      this._logger.info('Actor is from context')
       return context.actor;
     }
 

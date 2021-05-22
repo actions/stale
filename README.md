@@ -68,7 +68,15 @@ Default value: `${{ github.token }}`
 
 #### days-before-stale
 
-The idle number of days before marking an issue or a PR as stale.
+The idle number of days before marking an issue or a PR as stale (by adding a label).  
+The issue or the PR will be marked as stale if the last update (based on [GitHub issue](https://docs.github.com/en/rest/reference/issues) field `updated_at`) is older than the idle number of days.
+
+If set to a negative number like `-1`, the issue or the PR will never be marked as stale automatically.  
+In that case, you can still add the stale label manually to mark as stale.
+
+The label used to stale is defined by these two options:
+- [stale-issue-label](#stale-issue-label)
+- [stale-pr-label](#stale-pr-label)
 
 Default value: `60`
 

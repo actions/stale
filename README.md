@@ -80,6 +80,12 @@ The label used to stale is defined by these two options:
 
 Default value: `60`
 
+#### days-before-issue-stale
+
+Useful to override [days-before-stale](#days-before-stale) but only for the idle number of days before marking an issue as stale.
+
+Default value: unset
+
 #### operations-per-run
 
 _Context:_  

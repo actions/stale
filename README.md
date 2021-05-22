@@ -37,8 +37,6 @@ Every argument is optional.
 | `remove-stale-when-updated`       | Remove stale label from issue/PR on updates or comments.<br>_Defaults to **true**_.                                                                           |
 | `remove-issue-stale-when-updated` | Remove stale label from issue on updates or comments.<br>_Defaults to **true**_.<br>_Override `remove-stale-when-updated`_.                                   |
 | `remove-pr-stale-when-updated`    | Remove stale label from PR on updates or comments.<br>_Defaults to **true**_.<br>_Override `remove-stale-when-updated`_.                                      |
-| `remove-issue-stale-when-updated` | Remove stale label from issue on updates or comments.<br>_Defaults to **true**_.<br>_Override `remove-stale-when-updated`_.                                   |
-| `remove-pr-stale-when-updated`    | Remove stale label from PR on updates or comments.<br>_Defaults to **true**_.<br>_Override `remove-stale-when-updated`_.                                      |
 | `debug-only`                      | Dry-run on action.<br>_Defaults to **false**_.                                                                                                                |
 | `ascending`                       | Order to get issues/PR.<br>`true` is ascending, `false` is descending.<br>_Defaults to **false**_.                                                            |
 | `skip-stale-issue-message`        | Skip adding stale message on stale issue.<br>_Defaults to **false**_.                                                                                         |
@@ -61,12 +59,25 @@ Every argument is optional.
 
 ### Detailed options
 
+#### repo-token
+
+PAT (Personal Access Token) to allow the stale workflow to authenticate and perform API calls to GitHub.  
+Under the hook, used by [@actions/github](https://www.npmjs.com/package/@actions/github).
+
+Default value: `${{ github.token }}`
+
+#### days-before-stale
+
+The idle number of days before marking an issue or a PR as stale.
+
+Default value: `60`
+
 #### operations-per-run
 
 _Context:_  
 This action performs some API calls to GitHub to fetch or close issues and pull requests, set or update labels, add comments, delete branches, etc.  
-These operations are made in a very short period of time - because the action is very fast to run - and can be numerous based on your project action configuration and the quantity of issues and pull requests within it.  
-GitHub has a [rate limit](https://docs.github.com/en/rest/overview/resources-in-the-rest-api#rate-limiting) and if reached will block all of these API calls for one hour (or API calls from other actions using the same user (a.k.a: the github-token from the [repo-token](#repo-token) option)).  
+These operations are made in a very short period of time — because the action is very fast to run — and can be numerous based on your project action configuration and the quantity of issues and pull requests within it.  
+GitHub has a [rate limit](https://docs.github.com/en/rest/overview/resources-in-the-rest-api#rate-limiting) and if reached will block these API calls for one hour (or API calls from other actions using the same user (a.k.a.: the github-token from the [repo-token](#repo-token) option)).  
 This option helps you to stay within the GitHub rate limits, as you can use this option to limit the number of operations for a single run.
 
 _Purpose:_  
@@ -75,7 +86,7 @@ This option aims to limit the number of operations made with the GitHub API to a
 Based on your project, your GitHub business plan and the date of the cron job you set for this action, you can increase this limit to a higher number.
 If you are not sure which is the right value for you or if the default value is good enough, you could enable the logs and look at the end of the stale action.  
 If you reached the limit, you will see a warning message in the logs, telling you that you should increase the number of operations.
-If you choose not to increase the limit, you might end up with un-processed issues or pull requests after a stale action run.
+If you choose not to increase the limit, you might end up with unprocessed issues or pull requests after a stale action run.
 
 When [debugging](#Debugging), you can set it to a much higher number like `1000` since there will be fewer operations made with the GitHub API.  
 Only the [actor](#repo-token) and the batch of issues (100 per batch) will consume the operations.
@@ -304,7 +315,7 @@ jobs:
 
 **Logs:**  
 To see the debug output from this action, you must set the secret `ACTIONS_STEP_DEBUG` to `true` in your repository.  
-There is a lot of logs so this can be very helpful!
+There are many logs, so this can be very helpful!
 
 **Statistics:**  
 If the logs are enabled, you can also enable the statistics log which will be visible at the end of the logs once all issues were processed.  
@@ -320,9 +331,9 @@ If the `debug-only` option is enabled, this is very helpful because the workflow
 
 **Job frequency:**  
 You could change the cron job frequency in the stale workflow to run the stale workflow more often.  
-Usually this is not very helpful though.
+Usually, this is not very helpful, though.
 
 ### Contributing
 
-You wish to contribute?  
-Check out the [contributing](CONTRIBUTING.md) file before helping us.
+Do you wish to contribute?  
+Have a look at the [contributing](CONTRIBUTING.md) file before helping us.

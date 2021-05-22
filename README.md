@@ -14,9 +14,9 @@ Every argument is optional.
 | [days-before-stale](#days-before-stale)                             | Idle number of days before marking an issue/PR as stale.                                                                                                      | `60`                  |
 | [days-before-issue-stale](#days-before-issue-stale)                 | Override [days-before-stale](#days-before-stale).                                                                                                             |                       |
 | [days-before-pr-stale](#days-before-pr-stale)                       | Override [days-before-stale](#days-before-stale).                                                                                                             |                       |
-| [days-before-close](#days-before-close)                             | Idle number of days before closing a stale issue/PR.<br>_Defaults to **7**_.                                                                                  |                       |
-| [days-before-issue-close](#days-before-issue-close)                 | Idle number of days before closing a stale issue.<br>_Override `days-before-close`_.                                                                          |                       |
-| [days-before-pr-close](#days-before-pr-close)                       | Idle number of days before closing a stale PR.<br>_Override `days-before-close`_.                                                                             |                       |
+| [days-before-close](#days-before-close)                             | Idle number of days before closing a stale issue/PR.                                                                                                          | `7`                   |
+| [days-before-issue-close](#days-before-issue-close)                 | Override [days-before-close](#days-before-close).                                                                                                             |                       |
+| [days-before-pr-close](#days-before-pr-close)                       | Override [days-before-close](#days-before-close).                                                                                                             |                       |
 | [stale-issue-message](#stale-issue-message)                         | Message to post on the stale issue.                                                                                                                           |                       |
 | [stale-pr-message](#stale-pr-message)                               | Message to post on the stale PR.                                                                                                                              |                       |
 | [close-issue-message](#close-issue-message)                         | Message to post on the stale issue while closing it.                                                                                                          |                       |
@@ -90,6 +90,32 @@ Default value: unset
 #### days-before-pr-stale
 
 Useful to override [days-before-stale](#days-before-stale) but only for the idle number of days before marking a pull request as stale.
+
+Default value: unset
+
+#### days-before-close
+
+The idle number of days before closing a stale issue or a stale pull request (due to the label).  
+The issue or the pull request will be marked as stale if the last update (based on [GitHub issue](https://docs.github.com/en/rest/reference/issues) field `updated_at`) is older than the idle number of days.
+
+If set to a negative number like `-1`, the issue or the pull request will never be closed automatically.
+
+The label used to stale is defined by these two options:
+
+- [stale-issue-label](#stale-issue-label)
+- [stale-pr-label](#stale-pr-label)
+
+Default value: `7`
+
+#### days-before-issue-close
+
+Useful to override [days-before-close](#days-before-close) but only for the idle number of days before closing a stale issue.
+
+Default value: unset
+
+#### days-before-pr-close
+
+Useful to override [days-before-close](#days-before-close) but only for the idle number of days before closing a stale pull request.
 
 Default value: unset
 

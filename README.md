@@ -79,6 +79,24 @@ The label used to stale is defined by these two options:
 - [stale-issue-label](#stale-issue-label)
 - [stale-pr-label](#stale-pr-label)
 
+A comment can also be added to notify about the stale and is defined by these two options:
+
+- [stale-issue-message](#stale-issue-message)
+- [stale-pr-message](#stale-pr-message)
+
+You can fine tune which issues or pull requests should be marked as stale based on the milestones, the assignees, the creation date and the missing/present labels from these options:
+
+- [exempt-issue-labels](#exempt-issue-labels)
+- [exempt-pr-labels](#exempt-pr-labels)
+- [only-labels](#only-labels)
+- [only-labels](#only-labels)
+- [any-of-labels](#any-of-labels)
+- [start-date](#start-date)
+- [exempt-milestones](#exempt-milestones)
+- [exempt-all-milestones](#exempt-all-milestones)
+- [exempt-assignees](#exempt-assignees)
+- [exempt-all-assignees](#exempt-all-assignees)
+
 Default value: `60`
 
 #### days-before-issue-stale

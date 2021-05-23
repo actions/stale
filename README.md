@@ -300,6 +300,45 @@ Override [exempt-all-milestones](#exempt-all-milestones) but only to exempt the 
 
 Default value: unset
 
+#### exempt-assignees
+
+A white-list of assignee(s) to only process the issues or the pull requests that does not contain one of these assignee(s).  
+It can be a comma separated list of assignees (e.g: `marco,polo`).
+
+If unset (or an empty string), this option will not alter the stale workflow.
+
+Default value: unset
+
+#### exempt-issue-assignees
+
+Override [exempt-assignees](#exempt-assignees) but only to process the issues that does not contain one of these assignee(s).
+
+Default value: unset
+
+#### exempt-pr-assignees
+
+Override [exempt-assignees](#exempt-assignees) but only to process the pull requests that does not contain one of these assignee(s).
+
+Default value: unset
+
+#### exempt-all-assignees
+
+If set to `true`, the issues or the pull requests with an assignee will not be marked as stale automatically.
+
+Default value: `false`
+
+#### exempt-all-issue-assignees
+
+Override [exempt-all-assignees](#exempt-all-assignees) but only to exempt the issues with an assignee to be marked as stale automatically.
+
+Default value: unset
+
+#### exempt-all-pr-assignees
+
+Override [exempt-all-assignees](#exempt-all-assignees) but only to exempt the pull requests with an assignee to be marked as stale automatically.
+
+Default value: unset
+
 #### enable-statistics
 
 Display some statistics at the end of the logs regarding the stale workflow.<br>Only when the logs are enabled.<br>

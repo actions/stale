@@ -261,6 +261,27 @@ Only the [actor](#repo-token) and the batch of issues (100 per batch) will consu
 
 Default value: `30`
 
+#### exempt-milestones
+
+A white-list of milestone(s) to only process the issue or the pull request that does not contain one of these milestone(s).  
+It can be a comma separated list of milestones (e.g: `V1,next`).
+
+If unset (or an empty string), this option will not alter the stale workflow.
+
+Default value: unset
+
+#### exempt-issue-milestones
+
+Override [exempt-milestones](#exempt-milestones) but only to process the issue that does not contain one of these milestone(s).
+
+Default value: unset
+
+#### exempt-pr-milestones
+
+Override [exempt-milestones](#exempt-milestones) but only to process the pull request that does not contain one of these milestone(s).
+
+Default value: unset
+
 #### enable-statistics
 
 Display some statistics at the end of the logs regarding the stale workflow.<br>Only when the logs are enabled.<br>

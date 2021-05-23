@@ -293,7 +293,7 @@ Change the order used to fetch the issues and pull requests from GitHub.
 `true` is for ascending.  
 `false` is for descending.
 
-It can be useful if your repository is processing so much issues and pull requests that you reach the [operations-per-run](#operations-per-run) limit.  
+It can be useful if your repository is processing so many issues and pull requests that you reach the [operations-per-run](#operations-per-run) limit.  
 Based on the order, you could prefer to focus on the new content or on the old content of your repository.
 
 Default value: `false`

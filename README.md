@@ -157,7 +157,7 @@ Default value: `Stale`
 
 #### close-issue-label
 
-The label that will be added to the issue when closed automatically.
+The label that will be added to the issue when closed automatically.  
 It will be automatically removed if the issue is no longer closed nor locked.
 
 Default value: unset
@@ -171,8 +171,26 @@ Default value: `Stale`
 
 #### close-pr-label
 
-The label that will be added to the pull request when closed automatically.
+The label that will be added to the pull request when closed automatically.  
 It will be automatically removed if the pull request is no longer closed nor locked.
+
+Default value: unset
+
+#### exempt-issue-labels
+
+The label(s) that can omit to automatically mark as stale the issue.  
+It can be a comma separated list of labels (e.g: `label1,label2`).
+
+If unset (or an empty string), this option will not alter the stale workflow.
+
+Default value: unset
+
+#### exempt-pr-labels
+
+The label(s) that can omit to automatically mark as stale the pull request.  
+It can be a comma separated list of labels (e.g: `label1,label2`).
+
+If unset (or an empty string), this option will not alter the stale workflow.
 
 Default value: unset
 

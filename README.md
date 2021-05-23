@@ -110,13 +110,13 @@ Default value: `7`
 
 #### days-before-issue-close
 
-Useful to override [days-before-close](#days-before-close) but only for the idle number of days before closing a stale issue.
+Override [days-before-close](#days-before-close) but only for the idle number of days before closing a stale issue.
 
 Default value: unset
 
 #### days-before-pr-close
 
-Useful to override [days-before-close](#days-before-close) but only for the idle number of days before closing a stale pull request.
+Override [days-before-close](#days-before-close) but only for the idle number of days before closing a stale pull request.
 
 Default value: unset
 
@@ -179,7 +179,7 @@ Default value: unset
 #### exempt-issue-labels
 
 The label(s) that can omit to automatically mark as stale the issue.  
-It can be a comma separated list of labels (e.g: `label1,label2`).
+It can be a comma separated list of labels (e.g: `question,bug`).
 
 If unset (or an empty string), this option will not alter the stale workflow.
 
@@ -188,9 +188,28 @@ Default value: unset
 #### exempt-pr-labels
 
 The label(s) that can omit to automatically mark as stale the pull request.  
-It can be a comma separated list of labels (e.g: `label1,label2`).
+It can be a comma separated list of labels (e.g: `need-help,WIP`).
 
 If unset (or an empty string), this option will not alter the stale workflow.
+
+Default value: unset
+
+#### only-labels
+
+A white-list of label(s) to only process the issue or the pull request that contain all these label(s).
+It can be a comma separated list of labels (e.g: `answered,needs-rebase`).
+
+Default value: unset
+
+#### only-issue-labels
+
+Override [only-labels](#only-labels) but only to process the issue that contain all these label(s).
+
+Default value: unset
+
+#### only-pr-labels
+
+Override [only-labels](#only-labels) but only to process the pull request that contain all these label(s).
 
 Default value: unset
 

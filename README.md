@@ -413,7 +413,7 @@ Default value: unset
 
 #### enable-statistics
 
-Collect and display some statistics at the end of the stale workflow logs to know what happened during the run.  
+Collects and display statistics at the end of the stale workflow logs to get a summary of what happened during the run.  
 This option is only useful if the debug output secret `ACTIONS_STEP_DEBUG` is set to `true` in your repository to display the logs.
 
 Default value: `true`

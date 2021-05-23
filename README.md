@@ -660,5 +660,5 @@ Usually, this is not very helpful, though.
 
 ### Contributing
 
-Do you wish to contribute?  
-Have a look at the [contributing](CONTRIBUTING.md) file before helping us.
+We welcome contributions!
+Please read the [contributing](CONTRIBUTING.md) file before starting your work.

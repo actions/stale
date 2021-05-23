@@ -24,7 +24,5 @@ jobs:
           stale-issue-message: 'This issue is stale'
           stale-pr-message: 'This PR is stale'
           debug-only: true
-      - name: print outputs1
-        run: echo ${{ join(steps.stale.outputs.*, '\n') }}
-      - name: print outputs2
-        run: echo ${{ steps.stale.outputs.staled-issues }}
+      - name: print outputs
+        run: echo ${{ join(steps.stale.outputs.*, ',') }}

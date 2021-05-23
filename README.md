@@ -68,10 +68,10 @@ Default value: `${{ github.token }}`
 
 #### days-before-stale
 
-The idle number of days before marking an issue or a pull request as stale (by adding a label).  
-The issue or the pull request will be marked as stale if the last update (based on [GitHub issue](https://docs.github.com/en/rest/reference/issues) field `updated_at`) is older than the idle number of days.
+The idle number of days before marking the issues or the pull requests as stale (by adding a label).  
+The issues or the pull requests will be marked as stale if the last update (based on [GitHub issue](https://docs.github.com/en/rest/reference/issues) field `updated_at`) is older than the idle number of days.
 
-If set to a negative number like `-1`, the issue or the pull request will never be marked as stale automatically.  
+If set to a negative number like `-1`, the issues or the pull requests will never be marked as stale automatically.  
 In that case, you can still add the stale label manually to mark as stale.
 
 The label used to stale is defined by these two options:
@@ -83,23 +83,23 @@ Default value: `60`
 
 #### days-before-issue-stale
 
-Useful to override [days-before-stale](#days-before-stale) but only for the idle number of days before marking an issue as stale.
+Useful to override [days-before-stale](#days-before-stale) but only for the idle number of days before marking the issues as stale.
 
 Default value: unset
 
 #### days-before-pr-stale
 
-Useful to override [days-before-stale](#days-before-stale) but only for the idle number of days before marking a pull request as stale.
+Useful to override [days-before-stale](#days-before-stale) but only for the idle number of days before marking the pull requests as stale.
 
 Default value: unset
 
 #### days-before-close
 
-The idle number of days before closing a stale issue or a stale pull request (due to the stale label).  
-The issue or the pull request will be closed if the last update (based on [GitHub issue](https://docs.github.com/en/rest/reference/issues) field `updated_at`) is older than the idle number of days.  
+The idle number of days before closing the stale issues or the stale pull requests (due to the stale label).  
+The issues or the pull requests will be closed if the last update (based on [GitHub issue](https://docs.github.com/en/rest/reference/issues) field `updated_at`) is older than the idle number of days.  
 Since adding the stale label will alter the last update date, we can calculate the number of days from this date.
 
-If set to a negative number like `-1`, the issue or the pull request will never be closed automatically.
+If set to a negative number like `-1`, the issues or the pull requests will never be closed automatically.
 
 The label used to stale is defined by these two options:
 
@@ -110,19 +110,19 @@ Default value: `7`
 
 #### days-before-issue-close
 
-Override [days-before-close](#days-before-close) but only for the idle number of days before closing a stale issue.
+Override [days-before-close](#days-before-close) but only for the idle number of days before closing the stale issues.
 
 Default value: unset
 
 #### days-before-pr-close
 
-Override [days-before-close](#days-before-close) but only for the idle number of days before closing a stale pull request.
+Override [days-before-close](#days-before-close) but only for the idle number of days before closing the stale pull requests.
 
 Default value: unset
 
 #### stale-issue-message
 
-The message that will be added as a comment to the issue when the stale workflow mark it automatically as stale with a label.
+The message that will be added as a comment to the issues when the stale workflow mark it automatically as stale with a label.
 
 You can omit the comment by setting [skip-stale-issue-message](#skip-stale-issue-message) to `true`.
 
@@ -130,7 +130,7 @@ Default value: unset
 
 #### stale-pr-message
 
-The message that will be added as a comment to the pull request when the stale workflow mark it automatically as stale with a label.
+The message that will be added as a comment to the pull requests when the stale workflow mark it automatically as stale with a label.
 
 You can omit the comment by setting [skip-stale-pr-message](#skip-stale-pr-message) to `true`.
 
@@ -138,47 +138,47 @@ Default value: unset
 
 #### close-issue-message
 
-The message that will be added as a comment to the issue when the stale workflow close it automatically after being stale for too long.
+The message that will be added as a comment to the issues when the stale workflow close it automatically after being stale for too long.
 
 Default value: unset
 
 #### close-pr-message
 
-The message that will be added as a comment to the pull request when the stale workflow close it automatically after being stale for too long.
+The message that will be added as a comment to the pull requests when the stale workflow close it automatically after being stale for too long.
 
 Default value: unset
 
 #### stale-issue-label
 
-The label that will be added to the issue when automatically marked as stale.  
-It should also be the one you should use if you wish to manually mark as stale the issue.
+The label that will be added to the issues when automatically marked as stale.  
+It should also be the one you should use if you wish to manually mark as stale the issues.
 
 Default value: `Stale`
 
 #### close-issue-label
 
-The label that will be added to the issue when closed automatically.  
-It will be automatically removed if the issue is no longer closed nor locked.
+The label that will be added to the issues when closed automatically.  
+It will be automatically removed if the issues are no longer closed nor locked.
 
 Default value: unset
 
 #### stale-pr-label
 
-The label that will be added to the pull request when automatically marked as stale.  
-It should also be the one you should use if you wish to manually mark as stale the pull request.
+The label that will be added to the pull requests when automatically marked as stale.  
+It should also be the one you should use if you wish to manually mark as stale the pull requests.
 
 Default value: `Stale`
 
 #### close-pr-label
 
-The label that will be added to the pull request when closed automatically.  
-It will be automatically removed if the pull request is no longer closed nor locked.
+The label that will be added to the pull requests when closed automatically.  
+It will be automatically removed if the pull requests are no longer closed nor locked.
 
 Default value: unset
 
 #### exempt-issue-labels
 
-The label(s) that can omit to automatically mark as stale the issue.  
+The label(s) that can exempt to automatically mark as stale the issues.  
 It can be a comma separated list of labels (e.g: `question,bug`).
 
 If unset (or an empty string), this option will not alter the stale workflow.
@@ -187,7 +187,7 @@ Default value: unset
 
 #### exempt-pr-labels
 
-The label(s) that can omit to automatically mark as stale the pull request.  
+The label(s) that can exempt to automatically mark as stale the pull requests.  
 It can be a comma separated list of labels (e.g: `need-help,WIP`).
 
 If unset (or an empty string), this option will not alter the stale workflow.
@@ -196,47 +196,47 @@ Default value: unset
 
 #### only-labels
 
-A white-list of label(s) to only process the issue or the pull request that contain all these label(s).  
+A white-list of label(s) to only process the issues or the pull requests that contain all these label(s).  
 It can be a comma separated list of labels (e.g: `answered,needs-rebase`).
 
 If unset (or an empty string), this option will not alter the stale workflow.
 
-If you wish to only check that the issue or the pull request contain one of these label(s), use instead [any-of-labels](#any-of-labels).
+If you wish to only check that the issues or the pull requests contain one of these label(s), use instead [any-of-labels](#any-of-labels).
 
 Default value: unset
 
 #### only-issue-labels
 
-Override [only-labels](#only-labels) but only to process the issue that contain all these label(s).
+Override [only-labels](#only-labels) but only to process the issues that contain all these label(s).
 
 Default value: unset
 
 #### only-pr-labels
 
-Override [only-labels](#only-labels) but only to process the pull request that contain all these label(s).
+Override [only-labels](#only-labels) but only to process the pull requests that contain all these label(s).
 
 Default value: unset
 
 #### any-of-labels
 
-A white-list of label(s) to only process the issue or the pull request that contain one of these label(s).  
+A white-list of label(s) to only process the issues or the pull requests that contain one of these label(s).  
 It can be a comma separated list of labels (e.g: `answered,needs-rebase`).
 
 If unset (or an empty string), this option will not alter the stale workflow.
 
-If you wish to only check that the issue or the pull request contain all these label(s), use instead [only-labels](#only-labels).
+If you wish to only check that the issues or the pull requests contain all these label(s), use instead [only-labels](#only-labels).
 
 Default value: unset
 
 #### any-of-issue-labels
 
-Override [any-of-labels](#any-of-labels) but only to process the issue that contain one of these label(s).
+Override [any-of-labels](#any-of-labels) but only to process the issues that contain one of these label(s).
 
 Default value: unset
 
 #### any-of-pr-labels
 
-Override [any-of-labels](#any-of-labels) but only to process the pull request that contain one of these label(s).
+Override [any-of-labels](#any-of-labels) but only to process the pull requests that contain one of these label(s).
 
 Default value: unset
 
@@ -263,7 +263,7 @@ Default value: `30`
 
 #### exempt-milestones
 
-A white-list of milestone(s) to only process the issue or the pull request that does not contain one of these milestone(s).  
+A white-list of milestone(s) to only process the issues or the pull requests that does not contain one of these milestone(s).  
 It can be a comma separated list of milestones (e.g: `V1,next`).
 
 If unset (or an empty string), this option will not alter the stale workflow.
@@ -272,13 +272,31 @@ Default value: unset
 
 #### exempt-issue-milestones
 
-Override [exempt-milestones](#exempt-milestones) but only to process the issue that does not contain one of these milestone(s).
+Override [exempt-milestones](#exempt-milestones) but only to process the issues that does not contain one of these milestone(s).
 
 Default value: unset
 
 #### exempt-pr-milestones
 
-Override [exempt-milestones](#exempt-milestones) but only to process the pull request that does not contain one of these milestone(s).
+Override [exempt-milestones](#exempt-milestones) but only to process the pull requests that does not contain one of these milestone(s).
+
+Default value: unset
+
+#### exempt-all-milestones
+
+If set to `true`, the issues or the pull requests with a milestone will not be marked as stale automatically.
+
+Default value: `false`
+
+#### exempt-all-issue-milestones
+
+Override [exempt-all-milestones](#exempt-all-milestones) but only to exempt the issues with a milestone to be marked as stale automatically.
+
+Default value: unset
+
+#### exempt-all-pr-milestones
+
+Override [exempt-all-milestones](#exempt-all-milestones) but only to exempt the pull requests with a milestone to be marked as stale automatically.
 
 Default value: unset
 

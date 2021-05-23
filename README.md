@@ -323,6 +323,12 @@ If set, the value must be formatted as `ISO 8601` or as `RFC 2822`.
 
 Default value: unset
 
+#### delete-branch
+
+If set to `true`, the stale workflow will automatically delete the GitHub branches related to the pull requests automatically closed by the stale workflow.
+
+Default value: `false`
+
 #### exempt-milestones
 
 A white-list of milestone(s) to only process the issues or the pull requests that does not contain one of these milestone(s).  

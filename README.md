@@ -319,7 +319,7 @@ Default value: `false`
 The start date is used to ignore the issues and pull requests created before the start date.  
 Particularly useful when you wish to add this stale workflow on an existing repository and only wish to stale the new issues and pull requests.
 
-If set, the value must be formatted as `ISO 8601` or as `RFC 2822`.
+If set, the date must be formatted following the `ISO 8601` or `RFC 2822` standard.
 
 Default value: unset
 

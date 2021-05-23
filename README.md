@@ -4,7 +4,7 @@ Warns and then closes issues and PRs that have had no activity for a specified a
 
 ## All options
 
-### List of options
+### List of input options
 
 Every argument is optional.
 
@@ -58,6 +58,14 @@ Every argument is optional.
 | `exempt-all-issue-assignees`      | Exempt all issues with assignees from being marked as stale.<br>_Override `exempt-all-assignees`_.                                                            |
 | `exempt-all-pr-assignees`         | Exempt all PRs with assignees from being marked as stale.<br>_Override `exempt-all-assignees`_.                                                               |
 | `enable-statistics`               | Display some statistics at the end of the logs regarding the stale workflow.<br>Only when the logs are enabled.<br>_Defaults to **true**_.                    |
+
+
+### List of output options
+
+| Output        | Description                |
+|---------------|----------------------------|
+| staled-issues | List of all staled issues. |
+| closed-issues | List of all closed issues. |
 
 ### Detailed options
 

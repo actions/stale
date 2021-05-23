@@ -130,7 +130,7 @@ Default value: unset
 
 #### stale-pr-message
 
-The message that will be added as a comment to the pull requests when the stale workflow mark it automatically as stale with a label.
+The message that will be added as a comment to the pull requests when the stale workflow marks it automatically as stale with a label.
 
 You can omit the comment by setting [skip-stale-pr-message](#skip-stale-pr-message) to `true`.
 

@@ -138,7 +138,7 @@ Default value: unset
 
 #### close-issue-message
 
-The message that will be added as a comment to the issues when the stale workflow close it automatically after being stale for too long.
+The message that will be added as a comment to the issues when the stale workflow closes it automatically after being stale for too long.
 
 Default value: unset
 

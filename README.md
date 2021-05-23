@@ -37,7 +37,7 @@ Every argument is optional.
 | [remove-stale-when-updated](#remove-stale-when-updated)             | Remove stale label from issue/PR on updates or comments.                                           | `true`                |
 | [remove-issue-stale-when-updated](#remove-issue-stale-when-updated) | Remove stale label from issue on updates or comments.                                              |                       |
 | [remove-pr-stale-when-updated](#remove-pr-stale-when-updated)       | Remove stale label from PR on updates or comments.                                                 |                       |
-| [debug-only](#debug-only)                                           | Dry-run on action.<br>_Defaults to **false**_.                                                     |                       |
+| [debug-only](#debug-only)                                           | Dry-run on action.                                                                                 | `false`               |
 | [ascending](#ascending)                                             | Order to get issues/PR.<br>`true` is ascending, `false` is descending.<br>_Defaults to **false**_. |                       |
 | [skip-stale-issue-message](#skip-stale-issue-message)               | Skip adding stale message on stale issue.<br>_Defaults to **false**_.                              |                       |
 | [skip-stale-pr-message](#skip-stale-pr-message)                     | Skip adding stale message on stale PR.<br>_Defaults to **false**_.                                 |                       |
@@ -278,6 +278,14 @@ Default value: unset
 Override [remove-stale-when-updated](#remove-stale-when-updated) but only to automatically remove the stale label when the pull requests are updated (based on [GitHub issue](https://docs.github.com/en/rest/reference/issues) field `updated_at`) or commented.
 
 Default value: unset
+
+#### debug-only
+
+Run the stale workflow as dry-run.  
+No GitHub API calls that can alter your issues and pull requests will happen.  
+Useful to debug or when you want to configure the stale workflow safely.
+
+Default value: `false`
 
 #### exempt-milestones
 

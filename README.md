@@ -21,10 +21,10 @@ Every argument is optional.
 | [stale-pr-message](#stale-pr-message)                               | Message to post on the stale PR.                                                                                                                              |                       |
 | [close-issue-message](#close-issue-message)                         | Message to post on the stale issue while closing it.                                                                                                          |                       |
 | [close-pr-message](#close-pr-message)                               | Message to post on the stale PR while closing it.                                                                                                             |                       |
-| [stale-issue-label](#stale-issue-label)                             | Label to apply on the stale issue.<br>_Defaults to **Stale**_.                                                                                                |                       |
-| [close-issue-label](#close-issue-label)                             | Label to apply on closing issue.<br>Automatically removed if no longer closed nor locked).                                                                    |                       |
-| [stale-pr-label](#stale-pr-label)                                   | Label to apply on the stale PR.<br>_Defaults to **Stale**_.                                                                                                   |                       |
-| [close-pr-label](#close-pr-label)                                   | Label to apply on the closing PR.<br>Automatically removed if no longer closed nor locked).                                                                   |                       |
+| [stale-issue-label](#stale-issue-label)                             | Label to apply on the stale issue.                                                                                                                            | `Stale`               |
+| [close-issue-label](#close-issue-label)                             | Label to apply on closing issue.                                                                                                                              |                       |
+| [stale-pr-label](#stale-pr-label)                                   | Label to apply on the stale PR.                                                                                                                               | `Stale`               |
+| [close-pr-label](#close-pr-label)                                   | Label to apply on the closing PR.                                                                                                                             |                       |
 | [exempt-issue-labels](#exempt-issue-labels)                         | Labels on an issue exempted from being marked as stale.                                                                                                       |                       |
 | [exempt-pr-labels](#exempt-pr-labels)                               | Labels on the PR exempted from being marked as stale.                                                                                                         |                       |
 | [only-labels](#only-labels)                                         | Only issues and PRs with ALL these labels are checked.<br>Separate multiple labels with commas (eg. "question,answered").                                     |                       |
@@ -122,7 +122,7 @@ Default value: unset
 
 #### stale-issue-message
 
-Define the message that will be added as a comment to the issue when the stale workflow mark it automatically as stale with a label.
+The message that will be added as a comment to the issue when the stale workflow mark it automatically as stale with a label.
 
 You can omit the comment by setting [skip-stale-issue-message](#skip-stale-issue-message) to `true`.
 
@@ -130,7 +130,7 @@ Default value: unset
 
 #### stale-pr-message
 
-Define the message that will be added as a comment to the pull request when the stale workflow mark it automatically as stale with a label.
+The message that will be added as a comment to the pull request when the stale workflow mark it automatically as stale with a label.
 
 You can omit the comment by setting [skip-stale-pr-message](#skip-stale-pr-message) to `true`.
 
@@ -138,13 +138,41 @@ Default value: unset
 
 #### close-issue-message
 
-Define the message that will be added as a comment to the issue when the stale workflow close it automatically after being stale for too long.
+The message that will be added as a comment to the issue when the stale workflow close it automatically after being stale for too long.
 
 Default value: unset
 
 #### close-pr-message
 
-Define the message that will be added as a comment to the pull request when the stale workflow close it automatically after being stale for too long.
+The message that will be added as a comment to the pull request when the stale workflow close it automatically after being stale for too long.
+
+Default value: unset
+
+#### stale-issue-label
+
+The label that will be added to the issue when automatically marked as stale.  
+It should also be the one you should use if you wish to manually mark as stale the issue.
+
+Default value: `Stale`
+
+#### close-issue-label
+
+The label that will be added to the issue when closed automatically.
+It will be automatically removed if the issue is no longer closed nor locked.
+
+Default value: unset
+
+#### stale-pr-label
+
+The label that will be added to the pull request when automatically marked as stale.  
+It should also be the one you should use if you wish to manually mark as stale the pull request.
+
+Default value: `Stale`
+
+#### close-pr-label
+
+The label that will be added to the pull request when closed automatically.
+It will be automatically removed if the pull request is no longer closed nor locked.
 
 Default value: unset
 

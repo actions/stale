@@ -116,8 +116,8 @@ async function processOutput(
   staledIssues: Issue[],
   closedIssues: Issue[]
 ): Promise<void> {
-  core.setOutput('staled-issues', staledIssues);
-  core.setOutput('closed-issues', closedIssues);
+  core.setOutput('staled-issues', JSON.stringify(staledIssues));
+  core.setOutput('closed-issues', JSON.stringify(closedIssues));
 }
 
 function _toOptionalBoolean(

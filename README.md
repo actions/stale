@@ -372,7 +372,7 @@ Default value: unset
 
 #### exempt-assignees
 
-A white-list of assignee(s) to only process the issues or the pull requests that does not contain one of these assignee(s).  
+An allow-list of assignee(s) to only process the issues or the pull requests that does not contain one of these assignee(s).  
 It can be a comma separated list of assignees (e.g: `marco,polo`).
 
 If unset (or an empty string), this option will not alter the stale workflow.

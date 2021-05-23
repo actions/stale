@@ -138,8 +138,8 @@ export class IssuesProcessor {
         ? this.options.closePrLabel
         : this.options.closeIssueLabel;
       const skipMessage = issue.isPullRequest
-        ? this.options.skipStalePrMessage
-        : this.options.skipStaleIssueMessage;
+        ? this.options.stalePrMessage.length === 0
+        : this.options.staleIssueMessage.length === 0;
       const daysBeforeStale: number = issue.isPullRequest
         ? this._getDaysBeforePrStale()
         : this._getDaysBeforeIssueStale();
@@ -195,20 +195,6 @@ export class IssuesProcessor {
       );
 
       const shouldMarkAsStale: boolean = shouldMarkWhenStale(daysBeforeStale);
-
-      if (!staleMessage && shouldMarkAsStale) {
-        issueLogger.info(
-          `Skipping this $$type because it should be marked as stale based on the option ${issueLogger.createOptionLink(
-            this._getDaysBeforeStaleUsedOptionName(issue)
-          )} (${chalk.cyan(
-            daysBeforeStale
-          )}) but the option ${issueLogger.createOptionLink(
-            IssuesProcessor._getStaleMessageUsedOptionName(issue)
-          )} is not set`
-        );
-        IssuesProcessor._endIssueProcessing(issue);
-        continue;
-      }
 
       if (issue.state === 'closed') {
         issueLogger.info(`Skipping this $$type because it is closed`);

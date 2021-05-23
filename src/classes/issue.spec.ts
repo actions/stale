@@ -38,8 +38,6 @@ describe('Issue', (): void => {
       removeIssueStaleWhenUpdated: undefined,
       removePrStaleWhenUpdated: undefined,
       repoToken: '',
-      skipStaleIssueMessage: false,
-      skipStalePrMessage: false,
       staleIssueMessage: '',
       stalePrMessage: '',
       startDate: undefined,

@@ -132,7 +132,19 @@ Default value: unset
 
 Define the message that will be added as a comment to the pull request when the stale workflow mark it automatically as stale with a label.
 
-You can omit the comment by setting [skip-stale-issue-message](#skip-stale-pr-message) to `true`.
+You can omit the comment by setting [skip-stale-pr-message](#skip-stale-pr-message) to `true`.
+
+Default value: unset
+
+#### close-issue-message
+
+Define the message that will be added as a comment to the issue when the stale workflow close it automatically after being stale for too long.
+
+Default value: unset
+
+#### close-pr-message
+
+Define the message that will be added as a comment to the pull request when the stale workflow close it automatically after being stale for too long.
 
 Default value: unset
 

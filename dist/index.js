@@ -317,8 +317,8 @@ class IssuesProcessor {
                     ? this.options.closePrLabel
                     : this.options.closeIssueLabel;
                 const skipMessage = issue.isPullRequest
-                    ? this.options.skipStalePrMessage
-                    : this.options.skipStaleIssueMessage;
+                    ? this.options.stalePrMessage.length === 0
+                    : this.options.staleIssueMessage.length === 0;
                 const daysBeforeStale = issue.isPullRequest
                     ? this._getDaysBeforePrStale()
                     : this._getDaysBeforeIssueStale();
@@ -344,11 +344,6 @@ class IssuesProcessor {
                 }
                 issueLogger.info(`Days before $$type stale: ${chalk_1.default.cyan(daysBeforeStale)}`);
                 const shouldMarkAsStale = should_mark_when_stale_1.shouldMarkWhenStale(daysBeforeStale);
-                if (!staleMessage && shouldMarkAsStale) {
-                    issueLogger.info(`Skipping this $$type because it should be marked as stale based on the option ${issueLogger.createOptionLink(this._getDaysBeforeStaleUsedOptionName(issue))} (${chalk_1.default.cyan(daysBeforeStale)}) but the option ${issueLogger.createOptionLink(IssuesProcessor._getStaleMessageUsedOptionName(issue))} is not set`);
-                    IssuesProcessor._endIssueProcessing(issue);
-                    continue;
-                }
                 if (issue.state === 'closed') {
                     issueLogger.info(`Skipping this $$type because it is closed`);
                     IssuesProcessor._endIssueProcessing(issue);
@@ -1620,8 +1615,6 @@ var Option;
     Option["RemoveStaleWhenUpdated"] = "remove-stale-when-updated";
     Option["DebugOnly"] = "debug-only";
     Option["Ascending"] = "ascending";
-    Option["SkipStaleIssueMessage"] = "skip-stale-issue-message";
-    Option["SkipStalePrMessage"] = "skip-stale-pr-message";
     Option["DeleteBranch"] = "delete-branch";
     Option["StartDate"] = "start-date";
     Option["ExemptMilestones"] = "exempt-milestones";
@@ -1902,8 +1895,6 @@ function _getAndValidateArgs() {
         removePrStaleWhenUpdated: _toOptionalBoolean(core.getInput('remove-pr-stale-when-updated')),
         debugOnly: core.getInput('debug-only') === 'true',
         ascending: core.getInput('ascending') === 'true',
-        skipStalePrMessage: core.getInput('skip-stale-pr-message') === 'true',
-        skipStaleIssueMessage: core.getInput('skip-stale-issue-message') === 'true',
         deleteBranch: core.getInput('delete-branch') === 'true',
         startDate: core.getInput('start-date') !== ''
             ? core.getInput('start-date')

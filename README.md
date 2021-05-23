@@ -61,8 +61,8 @@ Every argument is optional.
 
 #### repo-token
 
-PAT (Personal Access Token) to allow the stale workflow to authenticate and perform API calls to GitHub.  
-Under the hook, used by [@actions/github](https://www.npmjs.com/package/@actions/github).
+Personal Access Token (PAT) that allows the stale workflow to authenticate and perform API calls to GitHub.  
+Under the hood, it uses the [@actions/github](https://www.npmjs.com/package/@actions/github) package.
 
 Default value: `${{ github.token }}`
 

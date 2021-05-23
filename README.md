@@ -196,7 +196,7 @@ Default value: unset
 
 #### only-labels
 
-A white-list of label(s) to only process the issue or the pull request that contain all these label(s).
+A white-list of label(s) to only process the issue or the pull request that contain all these label(s).  
 It can be a comma separated list of labels (e.g: `answered,needs-rebase`).
 
 If unset (or an empty string), this option will not alter the stale workflow.
@@ -219,7 +219,7 @@ Default value: unset
 
 #### any-of-labels
 
-A white-list of label(s) to only process the issue or the pull request that contain one of these label(s).
+A white-list of label(s) to only process the issue or the pull request that contain one of these label(s).  
 It can be a comma separated list of labels (e.g: `answered,needs-rebase`).
 
 If unset (or an empty string), this option will not alter the stale workflow.
@@ -260,6 +260,15 @@ When [debugging](#Debugging), you can set it to a much higher number like `1000`
 Only the [actor](#repo-token) and the batch of issues (100 per batch) will consume the operations.
 
 Default value: `30`
+
+#### enable-statistics
+
+Display some statistics at the end of the logs regarding the stale workflow.<br>Only when the logs are enabled.<br>
+
+Collect and display some statistics at the end of the stale workflow logs to know what happened during the run.  
+This option is only useful if the debug output secret `ACTIONS_STEP_DEBUG` is set to `true` in your repository to display the logs.
+
+Default value: `true`
 
 ### Usage
 

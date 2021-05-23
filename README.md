@@ -165,7 +165,7 @@ Default value: unset
 #### stale-pr-label
 
 The label that will be added to the pull requests when automatically marked as stale.  
-It should also be the one you should use if you wish to manually mark as stale the pull requests.
+If you wish to speedup the stale workflow for the pull requests, you can add this label manually to mark as stale.
 
 Default value: `Stale`
 

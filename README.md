@@ -95,8 +95,9 @@ Default value: unset
 
 #### days-before-close
 
-The idle number of days before closing a stale issue or a stale pull request (due to the label).  
-The issue or the pull request will be marked as stale if the last update (based on [GitHub issue](https://docs.github.com/en/rest/reference/issues) field `updated_at`) is older than the idle number of days.
+The idle number of days before closing a stale issue or a stale pull request (due to the stale label).  
+The issue or the pull request will be closed if the last update (based on [GitHub issue](https://docs.github.com/en/rest/reference/issues) field `updated_at`) is older than the idle number of days.  
+Since adding the stale label will alter the last update date, we can calculate the number of days from this date.
 
 If set to a negative number like `-1`, the issue or the pull request will never be closed automatically.
 
@@ -116,6 +117,22 @@ Default value: unset
 #### days-before-pr-close
 
 Useful to override [days-before-close](#days-before-close) but only for the idle number of days before closing a stale pull request.
+
+Default value: unset
+
+#### stale-issue-message
+
+Define the message that will be added as a comment to the issue when the stale workflow mark it automatically as stale with a label.
+
+You can omit the comment by setting [skip-stale-issue-message](#skip-stale-issue-message) to `true`.
+
+Default value: unset
+
+#### stale-pr-message
+
+Define the message that will be added as a comment to the pull request when the stale workflow mark it automatically as stale with a label.
+
+You can omit the comment by setting [skip-stale-issue-message](#skip-stale-pr-message) to `true`.
 
 Default value: unset
 

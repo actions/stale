@@ -656,7 +656,7 @@ If the `debug-only` option is enabled, this is very helpful because the workflow
 
 **Job frequency:**  
 You could change the cron job frequency in the stale workflow to run the stale workflow more often.  
-Usually, this is not very helpful, though.
+Usually, this is not very helpful though.
 
 ### Contributing
 

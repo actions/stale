@@ -199,6 +199,10 @@ Default value: unset
 A white-list of label(s) to only process the issue or the pull request that contain all these label(s).
 It can be a comma separated list of labels (e.g: `answered,needs-rebase`).
 
+If unset (or an empty string), this option will not alter the stale workflow.
+
+If you wish to only check that the issue or the pull request contain one of these label(s), use instead [any-of-labels](#any-of-labels).
+
 Default value: unset
 
 #### only-issue-labels
@@ -210,6 +214,29 @@ Default value: unset
 #### only-pr-labels
 
 Override [only-labels](#only-labels) but only to process the pull request that contain all these label(s).
+
+Default value: unset
+
+#### any-of-labels
+
+A white-list of label(s) to only process the issue or the pull request that contain one of these label(s).
+It can be a comma separated list of labels (e.g: `answered,needs-rebase`).
+
+If unset (or an empty string), this option will not alter the stale workflow.
+
+If you wish to only check that the issue or the pull request contain all these label(s), use instead [only-labels](#only-labels).
+
+Default value: unset
+
+#### any-of-issue-labels
+
+Override [any-of-labels](#any-of-labels) but only to process the issue that contain one of these label(s).
+
+Default value: unset
+
+#### any-of-pr-labels
+
+Override [any-of-labels](#any-of-labels) but only to process the pull request that contain one of these label(s).
 
 Default value: unset
 

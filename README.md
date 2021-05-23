@@ -144,7 +144,7 @@ Default value: unset
 
 #### close-pr-message
 
-The message that will be added as a comment to the pull requests when the stale workflow close it automatically after being stale for too long.
+The message that will be added as a comment to the pull requests when the stale workflow closes it automatically after being stale for too long.
 
 Default value: unset
 

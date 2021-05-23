@@ -219,7 +219,7 @@ Default value: unset
 
 #### any-of-labels
 
-A white-list of label(s) to only process the issues or the pull requests that contain one of these label(s).  
+An allow-list of label(s) to only process the issues or the pull requests that contain one of these label(s).  
 It can be a comma separated list of labels (e.g: `answered,needs-rebase`).
 
 If unset (or an empty string), this option will not alter the stale workflow.

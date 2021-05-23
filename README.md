@@ -39,10 +39,10 @@ Every argument is optional.
 | [remove-pr-stale-when-updated](#remove-pr-stale-when-updated)       | Remove stale label from PR on updates or comments.                                             |                       |
 | [debug-only](#debug-only)                                           | Dry-run on action.                                                                             | `false`               |
 | [ascending](#ascending)                                             | Order to get issues/PR.                                                                        | `false`               |
-| [skip-stale-issue-message](#skip-stale-issue-message)               | Skip adding stale message on stale issue.<br>_Defaults to **false**_.                          |                       |
-| [skip-stale-pr-message](#skip-stale-pr-message)                     | Skip adding stale message on stale PR.<br>_Defaults to **false**_.                             |                       |
+| [skip-stale-issue-message](#skip-stale-issue-message)               | Skip adding stale message on stale issue.                                                      | `false`               |
+| [skip-stale-pr-message](#skip-stale-pr-message)                     | Skip adding stale message on stale PR.                                                         | `false`               |
 | [start-date](#start-date)                                           | The date used to skip the stale action on issue/PR created before it.<br>ISO 8601 or RFC 2822. |                       |
-| [delete-branch](#delete-branch)                                     | Delete the git branch after closing a stale pull request.<br>_Defaults to **false**_.          |                       |
+| [delete-branch](#delete-branch)                                     | Delete the git branch after closing a stale pull request.                                      | `false`               |
 | [exempt-milestones](#exempt-milestones)                             | Milestones on an issue or a PR exempted from being marked as stale.                            |                       |
 | [exempt-issue-milestones](#exempt-issue-milestones)                 | Override [exempt-milestones](#exempt-milestones).                                              |                       |
 | [exempt-pr-milestones](#exempt-pr-milestones)                       | Override [exempt-milestones](#exempt-milestones).                                              |                       |
@@ -295,6 +295,22 @@ Change the order used to fetch the issues and pull requests from GitHub.
 
 It can be useful if your repository is processing so much issues and pull requests that you reach the [operations-per-run](#operations-per-run) limit.  
 Based on the order, you could prefer to focus on the new content or on the old content of your repository.
+
+Default value: `false`
+
+#### skip-stale-issue-message
+
+If set to `true`, no comment will be added to the issues when they are automatically marked as stale.
+
+If set to `false`, you can define the comment with the [stale-issue-message](#stale-issue-message) option.
+
+Default value: `false`
+
+#### skip-stale-pr-message
+
+If set to `true`, no comment will be added to the pull requests when they are automatically marked as stale.
+
+If set to `false`, you can define the comment with the [stale-pr-message](#stale-pr-message) option.
 
 Default value: `false`
 

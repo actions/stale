@@ -13,10 +13,10 @@ Every argument is optional.
 | `repo-token`                      | PAT (Personal Access Token) for authorizing the repository.<br>_Defaults to **${{ github.token }}**_.                                                         |
 | `days-before-stale`               | Idle number of days before marking an issue/PR as stale.<br>_Defaults to **60**_.                                                                             |
 | `days-before-issue-stale`         | Idle number of days before marking an issue as stale.<br>_Override `days-before-stale`_.                                                                      |
-| `days-before-pr-stale`            | Idle number of days before marking a PR as stale.<br>_Override `days-before-stale`_.                                                                         |
-| `days-before-close`               | Idle number of days before closing a stale issue/PR.<br>_Defaults to **7**_.                                                                                 |
-| `days-before-issue-close`         | Idle number of days before closing a stale issue.<br>_Override `days-before-close`_.                                                                         |
-| `days-before-pr-close`            | Idle number of days before closing a stale PR.<br>_Override `days-before-close`_.                                                                            |
+| `days-before-pr-stale`            | Idle number of days before marking a PR as stale.<br>_Override `days-before-stale`_.                                                                          |
+| `days-before-close`               | Idle number of days before closing a stale issue/PR.<br>_Defaults to **7**_.                                                                                  |
+| `days-before-issue-close`         | Idle number of days before closing a stale issue.<br>_Override `days-before-close`_.                                                                          |
+| `days-before-pr-close`            | Idle number of days before closing a stale PR.<br>_Override `days-before-close`_.                                                                             |
 | `stale-issue-message`             | Message to post on the stale issue.                                                                                                                           |
 | `stale-pr-message`                | Message to post on the stale PR.                                                                                                                              |
 | `close-issue-message`             | Message to post on the stale issue while closing it.                                                                                                          |
@@ -59,11 +59,10 @@ Every argument is optional.
 | `exempt-all-pr-assignees`         | Exempt all PRs with assignees from being marked as stale.<br>_Override `exempt-all-assignees`_.                                                               |
 | `enable-statistics`               | Display some statistics at the end of the logs regarding the stale workflow.<br>Only when the logs are enabled.<br>_Defaults to **true**_.                    |
 
-
 ### List of output options
 
 | Output        | Description                |
-|---------------|----------------------------|
+| ------------- | -------------------------- |
 | staled-issues | List of all staled issues. |
 | closed-issues | List of all closed issues. |
 

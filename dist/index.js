@@ -1863,7 +1863,9 @@ function _run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const args = _getAndValidateArgs();
-            yield new issues_processor_1.IssuesProcessor(args).processIssues();
+            const issueProcessor = new issues_processor_1.IssuesProcessor(args);
+            yield issueProcessor.processIssues();
+            yield processOutput(issueProcessor.closedIssues, issueProcessor.staleIssues);
         }
         catch (error) {
             core.error(error);
@@ -1944,6 +1946,12 @@ function _getAndValidateArgs() {
         }
     }
     return args;
+}
+function processOutput(staledIssues, closedIssues) {
+    return __awaiter(this, void 0, void 0, function* () {
+        core.setOutput('staled-issues', JSON.stringify(staledIssues));
+        core.setOutput('closed-issues', JSON.stringify(closedIssues));
+    });
 }
 function _toOptionalBoolean(argumentName) {
     const argument = core.getInput(argumentName);

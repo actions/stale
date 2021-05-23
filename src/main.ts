@@ -118,6 +118,7 @@ async function processOutput(
 ): Promise<void> {
   core.setOutput('staled-issues', JSON.stringify(staledIssues));
   core.setOutput('closed-issues', JSON.stringify(closedIssues));
+  core.setOutput('test', 'test');
 }
 
 function _toOptionalBoolean(

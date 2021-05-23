@@ -71,7 +71,7 @@ Default value: `${{ github.token }}`
 The idle number of days before marking the issues or the pull requests as stale (by adding a label).  
 The issues or the pull requests will be marked as stale if the last update (based on [GitHub issue](https://docs.github.com/en/rest/reference/issues) field `updated_at`) is older than the idle number of days.
 
-If set to a negative number like `-1`, the issues or the pull requests will never be marked as stale automatically.  
+If set to a negative number like `-1`, no issues or pull requests will be marked as stale automatically.  
 In that case, you can still add the stale label manually to mark as stale.
 
 The label used to stale is defined by these two options:

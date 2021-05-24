@@ -1,19 +1,31 @@
 import * as core from '@actions/core';
-import chalk from 'chalk';
+import styles from 'ansi-styles';
 import terminalLink from 'terminal-link';
 import {Option} from '../../enums/option';
 
 export class Logger {
   warning(...message: string[]): void {
-    core.warning(chalk.whiteBright(...message));
+    core.warning(
+      `${styles.whiteBright.open}${message.join(' ')}${
+        styles.whiteBright.close
+      }`
+    );
   }
 
   info(...message: string[]): void {
-    core.info(chalk.whiteBright(...message));
+    core.info(
+      `${styles.whiteBright.open}${message.join(' ')}${
+        styles.whiteBright.close
+      }`
+    );
   }
 
   error(...message: string[]): void {
-    core.error(chalk.whiteBright(...message));
+    core.error(
+      `${styles.whiteBright.open}${message.join(' ')}${
+        styles.whiteBright.close
+      }`
+    );
   }
 
   createLink(name: Readonly<string>, link: Readonly<string>): string {
@@ -21,8 +33,9 @@ export class Logger {
   }
 
   createOptionLink(option: Readonly<Option>): string {
-    return chalk.magenta(
-      this.createLink(option, `https://github.com/actions/stale#${option}`)
-    );
+    return `${styles.magenta.open}${this.createLink(
+      option,
+      `https://github.com/actions/stale#${option}`
+    )}${styles.magenta.close}`;
   }
 }

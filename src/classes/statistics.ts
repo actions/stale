@@ -1,4 +1,4 @@
-import chalk from 'chalk';
+import styles from 'ansi-styles';
 import {Issue} from './issue';
 import {Logger} from './loggers/logger';
 
@@ -163,7 +163,9 @@ export class Statistics {
   }
 
   logStats(): Statistics {
-    this._logger.info(chalk.yellow.bold('Statistics:'));
+    this._logger.info(
+      `${styles.yellow.open}${styles.bold.open}Statistics:${styles.bold.close}${styles.yellow.close}`
+    );
     this._logProcessedIssuesAndPullRequestsCount();
     this._logStaleIssuesAndPullRequestsCount();
     this._logUndoStaleIssuesAndPullRequestsCount();
@@ -440,7 +442,10 @@ export class Statistics {
 
   private _logCount(name: Readonly<string>, count: Readonly<number>): void {
     if (count > 0) {
-      this._logger.info(`${name}:`, chalk.cyan(count));
+      this._logger.info(
+        `${name}:`,
+        `${styles.cyan.open}${count}${styles.cyan.close}`
+      );
     }
   }
 
@@ -498,7 +503,10 @@ export class Statistics {
       const prefix = index === onlyValuesSet.length - 1 ? '└──' : '├──';
 
       this._logCount(
-        `${chalk.white(prefix)} ${value.name.padEnd(longestValue, ' ')}`,
+        `${styles.white.open}${prefix}${styles.white.close} ${value.name.padEnd(
+          longestValue,
+          ' '
+        )}`,
         value.count
       );
     }

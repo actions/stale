@@ -1,4 +1,4 @@
-import chalk from 'chalk';
+import styles from 'ansi-styles';
 import {Issue} from '../issue';
 import {Logger} from './logger';
 
@@ -70,10 +70,12 @@ export class IssueLogger extends Logger {
   }
 
   private _getIssuePrefix(): string {
-    return chalk.red(`[#${this._getIssueNumber()}]`);
+    return `${styles.red.open}[#${this._getIssueNumber()}]${styles.red.close}`;
   }
 
   private _getPullRequestPrefix(): string {
-    return chalk.blue(`[#${this._getIssueNumber()}]`);
+    return `${styles.blue.open}[#${this._getIssueNumber()}]${
+      styles.blue.close
+    }`;
   }
 }

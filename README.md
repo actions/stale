@@ -13,10 +13,10 @@ Every argument is optional.
 | [repo-token](#repo-token)                                           | PAT for GitHub API authentication                                        | `${{ github.token }}` |
 | [days-before-stale](#days-before-stale)                             | Idle number of days before marking issues/PRs stale                      | `60`                  |
 | [days-before-issue-stale](#days-before-issue-stale)                 | Override [days-before-stale](#days-before-stale) for issues only         |                       |
-| [days-before-pr-stale](#days-before-pr-stale)                       | Override [days-before-stale](#days-before-stale) for PRs only            |                       |
-| [days-before-close](#days-before-close)                             | Idle number of days before closing stale issues/PRs                      | `7`                   |
-| [days-before-issue-close](#days-before-issue-close)                 | Override [days-before-close](#days-before-close) for issues only         |                       |
-| [days-before-pr-close](#days-before-pr-close)                       | Override [days-before-close](#days-before-close) for PRs only            |                       |
+| [days-before-pr-stale](#days-before-pr-stale)                       | Override [days-before-stale](#days-before-stale) for PRs only            |                                                                          |
+| [days-before-close](#days-before-close)                             | Idle number of days before closing stale issues/PRs                      | `7`                                                                                  |
+| [days-before-issue-close](#days-before-issue-close)                 | Override [days-before-close](#days-before-close) for issues only         |                                                                          |
+| [days-before-pr-close](#days-before-pr-close)                       | Override [days-before-close](#days-before-close) for PRs only            |                                                                             |
 | [stale-issue-message](#stale-issue-message)                         | Comment on the staled issues                                             |                       |
 | [stale-pr-message](#stale-pr-message)                               | Comment on the staled PRs                                                |                       |
 | [close-issue-message](#close-issue-message)                         | Comment on the staled issues while closed                                |                       |

@@ -8,5 +8,5 @@
     "esModuleInterop": true /* Enables emit interoperability between CommonJS and ES Modules via creation of namespace objects for all imports. Implies 'allowSyntheticDefaultImports'. */
     //"sourceMap": true
   },
-  "include": ["src", "__tests__"]
+  "include": ["src", "__tests__", "jest"]
 }

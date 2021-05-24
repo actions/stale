@@ -653,20 +653,19 @@ export class IssuesProcessor {
     const newUpdatedAtDate: Date = new Date();
     issue.updated_at = newUpdatedAtDate.toString();
 
-    if (this.options.debugOnly) {
-      return;
-    }
-
     if (!skipMessage) {
       try {
         this._consumeIssueOperation(issue);
         this._statistics?.incrementAddedItemsComment(issue);
-        await this.client.issues.createComment({
-          owner: context.repo.owner,
-          repo: context.repo.repo,
-          issue_number: issue.number,
-          body: staleMessage
-        });
+
+        if (!this.options.debugOnly) {
+          await this.client.issues.createComment({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            issue_number: issue.number,
+            body: staleMessage
+          });
+        }
       } catch (error) {
         issueLogger.error(`Error when creating a comment: ${error.message}`);
       }
@@ -698,20 +697,19 @@ export class IssuesProcessor {
     issueLogger.info(`Closing $$type for being stale`);
     this.closedIssues.push(issue);
 
-    if (this.options.debugOnly) {
-      return;
-    }
-
     if (closeMessage) {
       try {
         this._consumeIssueOperation(issue);
         this._statistics?.incrementAddedItemsComment(issue);
-        await this.client.issues.createComment({
-          owner: context.repo.owner,
-          repo: context.repo.repo,
-          issue_number: issue.number,
-          body: closeMessage
-        });
+
+        if (this.options.debugOnly) {
+          await this.client.issues.createComment({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            issue_number: issue.number,
+            body: closeMessage
+          });
+        }
       } catch (error) {
         issueLogger.error(`Error when creating a comment: ${error.message}`);
       }
@@ -751,20 +749,19 @@ export class IssuesProcessor {
   ): Promise<IPullRequest | undefined | void> {
     const issueLogger: IssueLogger = new IssueLogger(issue);
 
-    if (this.options.debugOnly) {
-      return;
-    }
-
     try {
       this._consumeIssueOperation(issue);
       this._statistics?.incrementFetchedPullRequestsCount();
-      const pullRequest = await this.client.pulls.get({
-        owner: context.repo.owner,
-        repo: context.repo.repo,
-        pull_number: issue.number
-      });
 
-      return pullRequest.data;
+      if (this.options.debugOnly) {
+        const pullRequest = await this.client.pulls.get({
+          owner: context.repo.owner,
+          repo: context.repo.repo,
+          pull_number: issue.number
+        });
+
+        return pullRequest.data;
+      }
     } catch (error) {
       issueLogger.error(`Error when getting this $$type: ${error.message}`);
     }
@@ -785,10 +782,6 @@ export class IssuesProcessor {
       return;
     }
 
-    if (this.options.debugOnly) {
-      return;
-    }
-
     const branch = pullRequest.head.ref;
     issueLogger.info(
       `Deleting the branch "${LoggerService.cyan(branch)}" from closed $$type`
@@ -797,11 +790,14 @@ export class IssuesProcessor {
     try {
       this._consumeIssueOperation(issue);
       this._statistics?.incrementDeletedBranchesCount();
-      await this.client.git.deleteRef({
-        owner: context.repo.owner,
-        repo: context.repo.repo,
-        ref: `heads/${branch}`
-      });
+
+      if (this.options.debugOnly) {
+        await this.client.git.deleteRef({
+          owner: context.repo.owner,
+          repo: context.repo.repo,
+          ref: `heads/${branch}`
+        });
+      }
     } catch (error) {
       issueLogger.error(
         `Error when deleting the branch "${LoggerService.cyan(
@@ -826,19 +822,19 @@ export class IssuesProcessor {
     );
     this.removedLabelIssues.push(issue);
 
-    if (this.options.debugOnly) {
-      return;
-    }
-
     try {
       this._consumeIssueOperation(issue);
       this._statistics?.incrementDeletedItemsLabelsCount(issue);
-      await this.client.issues.removeLabel({
-        owner: context.repo.owner,
-        repo: context.repo.repo,
-        issue_number: issue.number,
-        name: label
-      });
+
+      if (!this.options.debugOnly) {
+        await this.client.issues.removeLabel({
+          owner: context.repo.owner,
+          repo: context.repo.repo,
+          issue_number: issue.number,
+          name: label
+        });
+      }
+
       issueLogger.info(
         `${isSubStep ? chalk.white('└── ') : ''}The label "${LoggerService.cyan(
           label

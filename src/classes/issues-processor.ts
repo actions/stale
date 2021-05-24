@@ -812,11 +812,17 @@ export class IssuesProcessor {
   }
 
   // Remove a label from an issue or a pull request
-  private async _removeLabel(issue: Issue, label: string): Promise<void> {
+  private async _removeLabel(
+    issue: Issue,
+    label: string,
+    isSubStep: Readonly<boolean> = false
+  ): Promise<void> {
     const issueLogger: IssueLogger = new IssueLogger(issue);
 
     issueLogger.info(
-      `Removing the label "${LoggerService.cyan(label)}" from this $$type...`
+      `${isSubStep ? chalk.white('├── ') : ''}Removing the label "${LoggerService.cyan(
+        label
+      )}" from this $$type...`
     );
     this.removedLabelIssues.push(issue);
 
@@ -833,10 +839,16 @@ export class IssuesProcessor {
         issue_number: issue.number,
         name: label
       });
-      issueLogger.info(`The label "${LoggerService.cyan(label)}" was removed`);
+      issueLogger.info(
+        `${isSubStep ? chalk.white('└── ') : ''}The label "${LoggerService.cyan(
+          label
+        )}" was removed`
+      );
     } catch (error) {
       issueLogger.error(
-        `Error when removing the label: "${LoggerService.cyan(error.message)}"`
+        `${
+          isSubStep ? chalk.white('└── ') : ''
+        }Error when removing the label: "${LoggerService.cyan(error.message)}"`
       );
     }
   }
@@ -934,20 +946,37 @@ export class IssuesProcessor {
     );
 
     if (!closeLabel) {
-      issueLogger.info(`There is no close label on this $$type. Skip`);
+      issueLogger.info(
+        chalk.white('├──'),
+        `The ${issueLogger.createOptionLink(
+          this._getCloseLabelUsedOptionName(issue)
+        )} option was not set`
+      );
+      issueLogger.info(
+        chalk.white('└──'),
+        `Skipping the removal of the close label`
+      );
 
       return Promise.resolve();
     }
 
     if (isLabeled(issue, closeLabel)) {
       issueLogger.info(
+        chalk.white('├──'),
         `The $$type has a close label "${LoggerService.cyan(
           closeLabel
         )}". Removing the close label...`
       );
 
-      await this._removeLabel(issue, closeLabel);
+      await this._removeLabel(issue, closeLabel, true);
       this._statistics?.incrementDeletedCloseItemsLabelsCount(issue);
+    } else {
+      issueLogger.info(
+        chalk.white('└──'),
+        `There is no close label on this $$type. Skipping`
+      );
+
+      return Promise.resolve();
     }
   }
 
@@ -981,5 +1010,11 @@ export class IssuesProcessor {
     return isNaN(this.options.daysBeforePrStale)
       ? Option.DaysBeforeStale
       : Option.DaysBeforePrStale;
+  }
+
+  private _getCloseLabelUsedOptionName(
+    issue: Readonly<Issue>
+  ): Option.ClosePrLabel | Option.CloseIssueLabel {
+    return issue.isPullRequest ? Option.ClosePrLabel : Option.CloseIssueLabel;
   }
 }

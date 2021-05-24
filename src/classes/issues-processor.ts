@@ -59,6 +59,12 @@ export class IssuesProcessor {
       : Option.StaleIssueMessage;
   }
 
+  private static _getCloseLabelUsedOptionName(
+    issue: Readonly<Issue>
+  ): Option.ClosePrLabel | Option.CloseIssueLabel {
+    return issue.isPullRequest ? Option.ClosePrLabel : Option.CloseIssueLabel;
+  }
+
   private readonly _logger: Logger = new Logger();
   private readonly _operations: StaleOperations;
   private readonly _statistics: Statistics | undefined;
@@ -565,23 +571,44 @@ export class IssuesProcessor {
       `$$type has been updated: ${LoggerService.cyan(issueHasUpdate)}`
     );
 
-    // should we un-stale this issue?
-    if (this._shouldRemoveStaleWhenUpdated(issue) && issueHasComments) {
+    const shouldRemoveStaleWhenUpdated: boolean = this._shouldRemoveStaleWhenUpdated(
+      issue
+    );
+
+    issueLogger.info(
+      `The option ${issueLogger.createOptionLink(
+        this._getRemoveStaleWhenUpdatedUsedOptionName(issue)
+      )} is: ${chalk.cyan(shouldRemoveStaleWhenUpdated)}`
+    );
+
+    if (shouldRemoveStaleWhenUpdated) {
+      issueLogger.info(`The stale label should not be removed`);
+    } else {
+      issueLogger.info(
+        `The stale label should be removed if all conditions met`
+      );
+    }
+
+    // Should we un-stale this issue?
+    if (shouldRemoveStaleWhenUpdated && issueHasComments) {
+      issueLogger.info(
+        `Remove the stale label since the $$type has a comment and the workflow should remove the stale label when updated`
+      );
       await this._removeStaleLabel(issue, staleLabel);
 
       issueLogger.info(`Skipping the process since the $$type is now un-stale`);
 
-      return; // nothing to do because it is no longer stale
+      return; // Nothing to do because it is no longer stale
     }
 
-    // now start closing logic
+    // Now start closing logic
     if (daysBeforeClose < 0) {
-      return; // nothing to do because we aren't closing stale issues
+      return; // Nothing to do because we aren't closing stale issues
     }
 
     if (!issueHasComments && !issueHasUpdate) {
       issueLogger.info(
-        `Closing $$type because it was last updated on! ${LoggerService.cyan(
+        `Closing $$type because it was last updated on: ${LoggerService.cyan(
           issue.updated_at
         )}`
       );
@@ -589,7 +616,7 @@ export class IssuesProcessor {
 
       if (this.options.deleteBranch && issue.pull_request) {
         issueLogger.info(
-          `Deleting the branch the option ${issueLogger.createOptionLink(
+          `Deleting the branch since the option ${issueLogger.createOptionLink(
             Option.DeleteBranch
           )} was specified`
         );
@@ -945,7 +972,7 @@ export class IssuesProcessor {
       issueLogger.info(
         chalk.white('├──'),
         `The ${issueLogger.createOptionLink(
-          this._getCloseLabelUsedOptionName(issue)
+          IssuesProcessor._getCloseLabelUsedOptionName(issue)
         )} option was not set`
       );
       issueLogger.info(
@@ -1008,9 +1035,24 @@ export class IssuesProcessor {
       : Option.DaysBeforePrStale;
   }
 
-  private _getCloseLabelUsedOptionName(
+  private _getRemoveStaleWhenUpdatedUsedOptionName(
     issue: Readonly<Issue>
-  ): Option.ClosePrLabel | Option.CloseIssueLabel {
-    return issue.isPullRequest ? Option.ClosePrLabel : Option.CloseIssueLabel;
+  ):
+    | Option.RemovePrStaleWhenUpdated
+    | Option.RemoveStaleWhenUpdated
+    | Option.RemoveIssueStaleWhenUpdated {
+    if (issue.isPullRequest) {
+      if (isBoolean(this.options.removePrStaleWhenUpdated)) {
+        return Option.RemovePrStaleWhenUpdated;
+      }
+
+      return Option.RemoveStaleWhenUpdated;
+    }
+
+    if (isBoolean(this.options.removeIssueStaleWhenUpdated)) {
+      return Option.RemoveIssueStaleWhenUpdated;
+    }
+
+    return Option.RemoveStaleWhenUpdated;
   }
 }

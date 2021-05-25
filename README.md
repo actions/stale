@@ -89,7 +89,6 @@ You can fine tune which issues or pull requests should be marked as stale based 
 - [exempt-issue-labels](#exempt-issue-labels)
 - [exempt-pr-labels](#exempt-pr-labels)
 - [only-labels](#only-labels)
-- [only-labels](#only-labels)
 - [any-of-labels](#any-of-labels)
 - [start-date](#start-date)
 - [exempt-milestones](#exempt-milestones)

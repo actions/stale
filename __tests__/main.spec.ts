@@ -1422,11 +1422,11 @@ test('stale issues should not be closed until after the closed number of days (l
   expect(processor.staleIssues).toHaveLength(1);
 });
 
-test('skips stale message on issues when skip-stale-issue-message is set', async () => {
+test('skips stale message on issues when stale-issue-message is empty', async () => {
   const opts = {...DefaultProcessorOptions};
   opts.daysBeforeStale = 5; // stale after 5 days
   opts.daysBeforeClose = 20; // closes after 25 days
-  opts.skipStaleIssueMessage = true;
+  opts.staleIssueMessage = '';
   const lastUpdate = new Date();
   lastUpdate.setDate(lastUpdate.getDate() - 10);
   const TestIssueList: Issue[] = [
@@ -1467,11 +1467,56 @@ test('skips stale message on issues when skip-stale-issue-message is set', async
   );
 });
 
-test('skips stale message on prs when skip-stale-pr-message is set', async () => {
+test('send stale message on issues when stale-issue-message is not empty', async () => {
   const opts = {...DefaultProcessorOptions};
   opts.daysBeforeStale = 5; // stale after 5 days
   opts.daysBeforeClose = 20; // closes after 25 days
-  opts.skipStalePrMessage = true;
+  opts.staleIssueMessage = 'dummy issue message';
+  const lastUpdate = new Date();
+  lastUpdate.setDate(lastUpdate.getDate() - 10);
+  const TestIssueList: Issue[] = [
+    generateIssue(
+      opts,
+      1,
+      'An issue that should be marked stale but not closed',
+      lastUpdate.toString(),
+      lastUpdate.toString(),
+      false
+    )
+  ];
+  const processor = new IssuesProcessorMock(
+    opts,
+    async () => 'abot',
+    async p => (p === 1 ? TestIssueList : []),
+    async () => [],
+    async () => new Date().toDateString()
+  );
+
+  // for sake of testing, mocking private function
+  const markSpy = jest.spyOn(processor as any, '_markStale');
+
+  await processor.processIssues(1);
+
+  // issue should be staled
+  expect(processor.closedIssues).toHaveLength(0);
+  expect(processor.removedLabelIssues).toHaveLength(0);
+  expect(processor.staleIssues).toHaveLength(1);
+
+  // comment should not be created
+  expect(markSpy).toHaveBeenCalledWith(
+    TestIssueList[0],
+    opts.staleIssueMessage,
+    opts.staleIssueLabel,
+    // this option is skipMessage
+    false
+  );
+});
+
+test('skips stale message on prs when stale-pr-message is empty', async () => {
+  const opts = {...DefaultProcessorOptions};
+  opts.daysBeforeStale = 5; // stale after 5 days
+  opts.daysBeforeClose = 20; // closes after 25 days
+  opts.stalePrMessage = '';
   const lastUpdate = new Date();
   lastUpdate.setDate(lastUpdate.getDate() - 10);
   const TestIssueList: Issue[] = [
@@ -1512,46 +1557,11 @@ test('skips stale message on prs when skip-stale-pr-message is set', async () =>
   );
 });
 
-test('not providing state takes precedence over skipStaleIssueMessage', async () => {
+test('send stale message on prs when stale-pr-message is not empty', async () => {
   const opts = {...DefaultProcessorOptions};
   opts.daysBeforeStale = 5; // stale after 5 days
   opts.daysBeforeClose = 20; // closes after 25 days
-  opts.skipStalePrMessage = true;
-  opts.staleIssueMessage = '';
-  const lastUpdate = new Date();
-  lastUpdate.setDate(lastUpdate.getDate() - 10);
-  const TestIssueList: Issue[] = [
-    generateIssue(
-      opts,
-      1,
-      'An issue that should be marked stale but not closed',
-      lastUpdate.toString(),
-      lastUpdate.toString(),
-      false
-    )
-  ];
-  const processor = new IssuesProcessorMock(
-    opts,
-    async () => 'abot',
-    async p => (p === 1 ? TestIssueList : []),
-    async () => [],
-    async () => new Date().toDateString()
-  );
-
-  await processor.processIssues(1);
-
-  // issue should be staled
-  expect(processor.closedIssues).toHaveLength(0);
-  expect(processor.removedLabelIssues).toHaveLength(0);
-  expect(processor.staleIssues).toHaveLength(0);
-});
-
-test('not providing stalePrMessage takes precedence over skipStalePrMessage', async () => {
-  const opts = {...DefaultProcessorOptions};
-  opts.daysBeforeStale = 5; // stale after 5 days
-  opts.daysBeforeClose = 20; // closes after 25 days
-  opts.skipStalePrMessage = true;
-  opts.stalePrMessage = '';
+  opts.stalePrMessage = 'dummy pr message';
   const lastUpdate = new Date();
   lastUpdate.setDate(lastUpdate.getDate() - 10);
   const TestIssueList: Issue[] = [
@@ -1572,12 +1582,24 @@ test('not providing stalePrMessage takes precedence over skipStalePrMessage', as
     async () => new Date().toDateString()
   );
 
+  // for sake of testing, mocking private function
+  const markSpy = jest.spyOn(processor as any, '_markStale');
+
   await processor.processIssues(1);
 
   // issue should be staled
   expect(processor.closedIssues).toHaveLength(0);
   expect(processor.removedLabelIssues).toHaveLength(0);
-  expect(processor.staleIssues).toHaveLength(0);
+  expect(processor.staleIssues).toHaveLength(1);
+
+  // comment should not be created
+  expect(markSpy).toHaveBeenCalledWith(
+    TestIssueList[0],
+    opts.stalePrMessage,
+    opts.stalePrLabel,
+    // this option is skipMessage
+    false
+  );
 });
 
 test('git branch is deleted when option is enabled', async () => {

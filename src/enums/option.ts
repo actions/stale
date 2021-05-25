@@ -24,8 +24,6 @@ export enum Option {
   RemoveStaleWhenUpdated = 'remove-stale-when-updated',
   DebugOnly = 'debug-only',
   Ascending = 'ascending',
-  SkipStaleIssueMessage = 'skip-stale-issue-message',
-  SkipStalePrMessage = 'skip-stale-pr-message',
   DeleteBranch = 'delete-branch',
   StartDate = 'start-date',
   ExemptMilestones = 'exempt-milestones',

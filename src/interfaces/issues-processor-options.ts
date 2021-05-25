@@ -30,8 +30,6 @@ export interface IIssuesProcessorOptions {
   removePrStaleWhenUpdated: boolean | undefined;
   debugOnly: boolean;
   ascending: boolean;
-  skipStaleIssueMessage: boolean;
-  skipStalePrMessage: boolean;
   deleteBranch: boolean;
   startDate: IsoOrRfcDateString | undefined; // Should be ISO 8601 or RFC 2822
   exemptMilestones: string;

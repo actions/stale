@@ -39,8 +39,6 @@ Every argument is optional.
 | [remove-pr-stale-when-updated](#remove-pr-stale-when-updated)       | Remove stale label from PRs on updates/comments                          |                       |
 | [debug-only](#debug-only)                                           | Dry-run                                                                  | `false`               |
 | [ascending](#ascending)                                             | Order to get issues/PRs                                                  | `false`               |
-| [skip-stale-issue-message](#skip-stale-issue-message)               | Skip adding stale message on stale issues                                | `false`               |
-| [skip-stale-pr-message](#skip-stale-pr-message)                     | Skip adding stale message on stale PRs                                   | `false`               |
 | [start-date](#start-date)                                           | Skip stale action for issues/PRs created before it                       |                       |
 | [delete-branch](#delete-branch)                                     | Delete branch after closing a stale PR                                   | `false`               |
 | [exempt-milestones](#exempt-milestones)                             | Milestones on issues/PRs exempted from stale                             |                       |
@@ -141,7 +139,7 @@ Default value: unset
 
 The message that will be added as a comment to the issues when the stale workflow marks it automatically as stale with a label.
 
-You can omit the comment by setting [skip-stale-issue-message](#skip-stale-issue-message) to `true`.
+You can skip the comment sending by omitting the option or by passing an empty string.
 
 Default value: unset
 
@@ -149,7 +147,7 @@ Default value: unset
 
 The message that will be added as a comment to the pull requests when the stale workflow marks it automatically as stale with a label.
 
-You can omit the comment by setting [skip-stale-pr-message](#skip-stale-pr-message) to `true`.
+You can skip the comment sending by omitting the option or by passing an empty string.
 
 Default value: unset
 
@@ -313,22 +311,6 @@ Change the order used to fetch the issues and pull requests from GitHub:
 
 It can be useful if your repository is processing so many issues and pull requests that you reach the [operations-per-run](#operations-per-run) limit.  
 Based on the order, you could prefer to focus on the new content or on the old content of your repository.
-
-Default value: `false`
-
-#### skip-stale-issue-message
-
-If set to `true`, no comment will be added to the issues when they are automatically marked as stale.
-
-If set to `false`, you can define the comment with the [stale-issue-message](#stale-issue-message) option.
-
-Default value: `false`
-
-#### skip-stale-pr-message
-
-If set to `true`, no comment will be added to the pull requests when they are automatically marked as stale.
-
-If set to `false`, you can define the comment with the [stale-pr-message](#stale-pr-message) option.
 
 Default value: `false`
 

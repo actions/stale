@@ -25,7 +25,9 @@ describe('Logger', (): void => {
       logger.warning(message);
 
       expect(coreWarningSpy).toHaveBeenCalledTimes(1);
-      expect(coreWarningSpy).toHaveBeenCalledWith('dummy-message');
+      expect(coreWarningSpy).toHaveBeenCalledWith(
+        expect.stringContaining('dummy-message')
+      );
     });
   });
 
@@ -46,7 +48,9 @@ describe('Logger', (): void => {
       logger.info(message);
 
       expect(coreInfoSpy).toHaveBeenCalledTimes(1);
-      expect(coreInfoSpy).toHaveBeenCalledWith('dummy-message');
+      expect(coreInfoSpy).toHaveBeenCalledWith(
+        expect.stringContaining('dummy-message')
+      );
     });
   });
 
@@ -67,7 +71,9 @@ describe('Logger', (): void => {
       logger.error(message);
 
       expect(coreErrorSpy).toHaveBeenCalledTimes(1);
-      expect(coreErrorSpy).toHaveBeenCalledWith('dummy-message');
+      expect(coreErrorSpy).toHaveBeenCalledWith(
+        expect.stringContaining('dummy-message')
+      );
     });
   });
 });

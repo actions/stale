@@ -2,7 +2,6 @@ import * as core from '@actions/core';
 import {context, getOctokit} from '@actions/github';
 import {GitHub} from '@actions/github/lib/utils';
 import {GetResponseTypeFromEndpointMethod} from '@octokit/types';
-import styles from 'ansi-styles';
 import {Option} from '../enums/option';
 import {getHumanizedDate} from '../functions/dates/get-humanized-date';
 import {isDateMoreRecentThan} from '../functions/dates/is-date-more-recent-than';
@@ -23,6 +22,7 @@ import {Logger} from './loggers/logger';
 import {Milestones} from './milestones';
 import {StaleOperations} from './stale-operations';
 import {Statistics} from './statistics';
+import {LoggerService} from '../services/logger.service';
 
 /***
  * Handle processing of issues for staleness/closure.
@@ -43,7 +43,7 @@ export class IssuesProcessor {
       const issueLogger: IssueLogger = new IssueLogger(issue);
 
       issueLogger.info(
-        `${styles.cyan.open}${consumedOperationsCount}${styles.cyan.close}`,
+        LoggerService.cyan(consumedOperationsCount),
         `operation${
           consumedOperationsCount > 1 ? 's' : ''
         } consumed for this $$type`
@@ -75,15 +75,17 @@ export class IssuesProcessor {
     this._operations = new StaleOperations(this.options);
 
     this._logger.info(
-      `${styles.yellow.open}Starting the stale action process...${styles.yellow.close}`
+      LoggerService.yellow(`Starting the stale action process...`)
     );
 
     if (this.options.debugOnly) {
       this._logger.warning(
-        `${styles.yellowBright.open}Executing in debug mode!${styles.yellowBright.close}`
+        LoggerService.yellowBright(`Executing in debug mode!`)
       );
       this._logger.warning(
-        `${styles.yellowBright.open}The debug output will be written but no issues/PRs will be processed.${styles.yellowBright.close}`
+        LoggerService.yellowBright(
+          `The debug output will be written but no issues/PRs will be processed.`
+        )
       );
     }
 
@@ -99,7 +101,7 @@ export class IssuesProcessor {
 
     if (issues.length <= 0) {
       this._logger.info(
-        `${styles.green.open}No more issues found to process. Exiting...${styles.green.close}`
+        LoggerService.green(`No more issues found to process. Exiting...`)
       );
       this._statistics
         ?.setRemainingOperations(this._operations.getRemainingOperationsCount())
@@ -108,13 +110,13 @@ export class IssuesProcessor {
       return this._operations.getRemainingOperationsCount();
     } else {
       this._logger.info(
-        `${styles.yellow.open}Processing the batch of issues ${
-          styles.cyan.open
-        }#${page}${styles.cyan.close} containing ${styles.cyan.open}${
-          issues.length
-        }${styles.cyan.close} issue${issues.length > 1 ? 's' : ''}...${
-          styles.yellow.close
-        }`
+        `${LoggerService.yellow(
+          'Processing the batch of issues'
+        )} ${LoggerService.cyan(`#${page}`)} ${LoggerService.yellow(
+          'containing'
+        )} ${LoggerService.cyan(issues.length)} ${LoggerService.yellow(
+          `issue${issues.length > 1 ? 's' : ''}...`
+        )}`
       );
     }
 
@@ -123,7 +125,9 @@ export class IssuesProcessor {
       this._statistics?.incrementProcessedItemsCount(issue);
 
       issueLogger.info(
-        `Found this $$type last updated at: ${styles.cyan.open}${issue.updated_at}${styles.cyan.close}`
+        `Found this $$type last updated at: ${LoggerService.cyan(
+          issue.updated_at
+        )}`
       );
 
       // calculate string based messages for this issue
@@ -151,9 +155,9 @@ export class IssuesProcessor {
         issueLogger.info(
           `The option ${issueLogger.createOptionLink(
             Option.OnlyLabels
-          )} was specified to only process issues and pull requests with all those labels (${
-            styles.cyan.open
-          }${onlyLabels.length}${styles.cyan.close})`
+          )} was specified to only process issues and pull requests with all those labels (${LoggerService.cyan(
+            onlyLabels.length
+          )})`
         );
 
         const hasAllWhitelistedLabels: boolean = onlyLabels.every(
@@ -164,7 +168,7 @@ export class IssuesProcessor {
 
         if (!hasAllWhitelistedLabels) {
           issueLogger.info(
-            `${styles.white.open}└──${styles.white.close}`,
+            LoggerService.white('└──'),
             `Skipping this $$type because it doesn't have all the required labels`
           );
 
@@ -172,11 +176,11 @@ export class IssuesProcessor {
           continue; // Don't process issues without all of the required labels
         } else {
           issueLogger.info(
-            `${styles.white.open}├──${styles.white.close}`,
+            LoggerService.white('├──'),
             `All the required labels are present on this $$type`
           );
           issueLogger.info(
-            `${styles.white.open}└──${styles.white.close}`,
+            LoggerService.white('└──'),
             `Continuing the process for this $$type`
           );
         }
@@ -187,13 +191,13 @@ export class IssuesProcessor {
           )} was not specified`
         );
         issueLogger.info(
-          `${styles.white.open}└──${styles.white.close}`,
+          LoggerService.white('└──'),
           `Continuing the process for this $$type`
         );
       }
 
       issueLogger.info(
-        `Days before $$type stale: ${styles.cyan.open}${daysBeforeStale}${styles.cyan.close}`
+        `Days before $$type stale: ${LoggerService.cyan(daysBeforeStale)}`
       );
 
       const shouldMarkAsStale: boolean = shouldMarkWhenStale(daysBeforeStale);
@@ -218,9 +222,9 @@ export class IssuesProcessor {
         const createdAt: Date = new Date(issue.created_at);
 
         issueLogger.info(
-          `A start date was specified for the ${getHumanizedDate(startDate)} (${
-            styles.cyan.open
-          }${this.options.startDate}${styles.cyan.close})`
+          `A start date was specified for the ${getHumanizedDate(
+            startDate
+          )} (${LoggerService.cyan(this.options.startDate)})`
         );
 
         // Expecting that GitHub will always set a creation date on the issues and PRs
@@ -235,9 +239,9 @@ export class IssuesProcessor {
         }
 
         issueLogger.info(
-          `$$type created the ${getHumanizedDate(createdAt)} (${
-            styles.cyan.open
-          }${issue.created_at}${styles.cyan.close})`
+          `$$type created the ${getHumanizedDate(
+            createdAt
+          )} (${LoggerService.cyan(issue.created_at)})`
         );
 
         if (!isDateMoreRecentThan(createdAt, startDate)) {
@@ -283,9 +287,9 @@ export class IssuesProcessor {
         issueLogger.info(
           `The option ${issueLogger.createOptionLink(
             Option.AnyOfLabels
-          )} was specified to only process the issues and pull requests with one of those labels (${
-            styles.cyan.open
-          }${anyOfLabels.length}${styles.cyan.close})`
+          )} was specified to only process the issues and pull requests with one of those labels (${LoggerService.cyan(
+            anyOfLabels.length
+          )})`
         );
 
         const hasOneOfWhitelistedLabels: boolean = anyOfLabels.some(
@@ -296,18 +300,18 @@ export class IssuesProcessor {
 
         if (!hasOneOfWhitelistedLabels) {
           issueLogger.info(
-            `${styles.white.open}└──${styles.white.close}`,
+            LoggerService.white('└──'),
             `Skipping this $$type because it doesn't have one of the required labels`
           );
           IssuesProcessor._endIssueProcessing(issue);
           continue; // Don't process issues without any of the required labels
         } else {
           issueLogger.info(
-            `${styles.white.open}├──${styles.white.close}`,
+            LoggerService.white('├──'),
             `One of the required labels is present on this $$type`
           );
           issueLogger.info(
-            `${styles.white.open}└──${styles.white.close}`,
+            LoggerService.white('└──'),
             `Continuing the process for this $$type`
           );
         }
@@ -318,7 +322,7 @@ export class IssuesProcessor {
           )} was not specified`
         );
         issueLogger.info(
-          `${styles.white.open}└──${styles.white.close}`,
+          LoggerService.white('└──'),
           `Continuing the process for this $$type`
         );
       }
@@ -352,14 +356,14 @@ export class IssuesProcessor {
           issueLogger.info(
             `This $$type should be stale based on the last update date the ${getHumanizedDate(
               updatedAtDate
-            )} (${styles.cyan.open}${issue.updated_at}${styles.cyan.close})`
+            )} (${LoggerService.cyan(issue.updated_at)})`
           );
 
           if (shouldMarkAsStale) {
             issueLogger.info(
               `This $$type should be marked as stale based on the option ${issueLogger.createOptionLink(
                 this._getDaysBeforeStaleUsedOptionName(issue)
-              )} (${styles.cyan.open}${daysBeforeStale}${styles.cyan.close})`
+              )} (${LoggerService.cyan(daysBeforeStale)})`
             );
             await this._markStale(issue, staleMessage, staleLabel, skipMessage);
             issue.isStale = true; // This issue is now considered stale
@@ -368,14 +372,14 @@ export class IssuesProcessor {
             issueLogger.info(
               `This $$type should not be marked as stale based on the option ${issueLogger.createOptionLink(
                 this._getDaysBeforeStaleUsedOptionName(issue)
-              )} (${styles.cyan.open}${daysBeforeStale}${styles.cyan.close})`
+              )} (${LoggerService.cyan(daysBeforeStale)})`
             );
           }
         } else {
           issueLogger.info(
             `This $$type should not be stale based on the last update date the ${getHumanizedDate(
               updatedAtDate
-            )} (${styles.cyan.open}${issue.updated_at}${styles.cyan.close})`
+            )} (${LoggerService.cyan(issue.updated_at)})`
           );
         }
       }
@@ -397,23 +401,25 @@ export class IssuesProcessor {
 
     if (!this._operations.hasRemainingOperations()) {
       this._logger.warning(
-        `${styles.yellowBright.open}No more operations left! Exiting...${styles.yellowBright.close}`
+        LoggerService.yellowBright(`No more operations left! Exiting...`)
       );
       this._logger.warning(
-        `${
-          styles.yellowBright.open
-        }If you think that not enough issues were processed you could try to increase the quantity related to the ${this._logger.createOptionLink(
+        `${LoggerService.yellowBright(
+          'If you think that not enough issues were processed you could try to increase the quantity related to the'
+        )} ${this._logger.createOptionLink(
           Option.OperationsPerRun
-        )} option which is currently set to ${styles.cyan.open}${
-          this.options.operationsPerRun
-        }${styles.cyan.close}${styles.yellowBright.close}`
+        )} ${LoggerService.yellowBright(
+          'option which is currently set to'
+        )} ${LoggerService.cyan(this.options.operationsPerRun)}`
       );
 
       return 0;
     }
 
     this._logger.info(
-      `${styles.green.open}Batch ${styles.cyan.open}#${page}${styles.cyan.close} processed.${styles.green.close}`
+      `${LoggerService.green('Batch')} ${LoggerService.cyan(
+        `#${page}`
+      )} ${LoggerService.green('processed.')}`
     );
 
     // Do the next batch
@@ -531,7 +537,7 @@ export class IssuesProcessor {
     const markedStaleOn: string =
       (await this.getLabelCreationDate(issue, staleLabel)) || issue.updated_at;
     issueLogger.info(
-      `$$type marked stale on: ${styles.cyan.open}${markedStaleOn}${styles.cyan.close}`
+      `$$type marked stale on: ${LoggerService.cyan(markedStaleOn)}`
     );
 
     const issueHasComments: boolean = await this._hasCommentsSince(
@@ -540,7 +546,7 @@ export class IssuesProcessor {
       actor
     );
     issueLogger.info(
-      `$$type has been commented on: ${styles.cyan.open}${issueHasComments}${styles.cyan.close}`
+      `$$type has been commented on: ${LoggerService.cyan(issueHasComments)}`
     );
 
     const daysBeforeClose: number = issue.isPullRequest
@@ -548,7 +554,7 @@ export class IssuesProcessor {
       : this._getDaysBeforeIssueClose();
 
     issueLogger.info(
-      `Days before $$type close: ${styles.cyan.open}${daysBeforeClose}${styles.cyan.close}`
+      `Days before $$type close: ${LoggerService.cyan(daysBeforeClose)}`
     );
 
     const issueHasUpdate: boolean = IssuesProcessor._updatedSince(
@@ -556,7 +562,7 @@ export class IssuesProcessor {
       daysBeforeClose
     );
     issueLogger.info(
-      `$$type has been updated: ${styles.cyan.open}${issueHasUpdate}${styles.cyan.close}`
+      `$$type has been updated: ${LoggerService.cyan(issueHasUpdate)}`
     );
 
     // should we un-stale this issue?
@@ -575,7 +581,9 @@ export class IssuesProcessor {
 
     if (!issueHasComments && !issueHasUpdate) {
       issueLogger.info(
-        `Closing $$type because it was last updated on! ${styles.cyan.open}${issue.updated_at}${styles.cyan.close}`
+        `Closing $$type because it was last updated on! ${LoggerService.cyan(
+          issue.updated_at
+        )}`
       );
       await this._closeIssue(issue, closeMessage, closeLabel);
 
@@ -604,7 +612,7 @@ export class IssuesProcessor {
     const issueLogger: IssueLogger = new IssueLogger(issue);
 
     issueLogger.info(
-      `Checking for comments on $$type since: ${styles.cyan.open}${sinceDate}${styles.cyan.close}`
+      `Checking for comments on $$type since: ${LoggerService.cyan(sinceDate)}`
     );
 
     if (!sinceDate) {
@@ -619,7 +627,9 @@ export class IssuesProcessor {
     );
 
     issueLogger.info(
-      `Comments not made by actor or another bot: ${styles.cyan.open}${filteredComments.length}${styles.cyan.close}`
+      `Comments not made by actor or another bot: ${LoggerService.cyan(
+        filteredComments.length
+      )}`
     );
 
     // if there are any user comments returned
@@ -781,7 +791,7 @@ export class IssuesProcessor {
 
     const branch = pullRequest.head.ref;
     issueLogger.info(
-      `Deleting the branch "${styles.cyan.open}${branch}${styles.cyan.close}" from closed $$type`
+      `Deleting the branch "${LoggerService.cyan(branch)}" from closed $$type`
     );
 
     try {
@@ -794,7 +804,9 @@ export class IssuesProcessor {
       });
     } catch (error) {
       issueLogger.error(
-        `Error when deleting the branch "${styles.cyan.open}${branch}${styles.cyan.close}" from $$type: ${error.message}`
+        `Error when deleting the branch "${LoggerService.cyan(
+          branch
+        )}" from $$type: ${error.message}`
       );
     }
   }
@@ -804,7 +816,7 @@ export class IssuesProcessor {
     const issueLogger: IssueLogger = new IssueLogger(issue);
 
     issueLogger.info(
-      `Removing the label "${styles.cyan.open}${label}${styles.cyan.close}" from this $$type...`
+      `Removing the label "${LoggerService.cyan(label)}" from this $$type...`
     );
     this.removedLabelIssues.push(issue);
 
@@ -821,12 +833,10 @@ export class IssuesProcessor {
         issue_number: issue.number,
         name: label
       });
-      issueLogger.info(
-        `The label "${styles.cyan.open}${label}${styles.cyan.close}" was removed`
-      );
+      issueLogger.info(`The label "${LoggerService.cyan(label)}" was removed`);
     } catch (error) {
       issueLogger.error(
-        `Error when removing the label: "${styles.cyan.open}${error.message}${styles.cyan.close}"`
+        `Error when removing the label: "${LoggerService.cyan(error.message)}"`
       );
     }
   }
@@ -931,7 +941,9 @@ export class IssuesProcessor {
 
     if (isLabeled(issue, closeLabel)) {
       issueLogger.info(
-        `The $$type has a close label "${styles.cyan.open}${closeLabel}${styles.cyan.close}". Removing the close label...`
+        `The $$type has a close label "${LoggerService.cyan(
+          closeLabel
+        )}". Removing the close label...`
       );
 
       await this._removeLabel(issue, closeLabel);

@@ -1,6 +1,6 @@
-import styles from 'ansi-styles';
 import {Issue} from './issue';
 import {Logger} from './loggers/logger';
+import {LoggerService} from '../services/logger.service';
 
 interface IGroupValue {
   name: string;
@@ -163,9 +163,7 @@ export class Statistics {
   }
 
   logStats(): Statistics {
-    this._logger.info(
-      `${styles.yellow.open}${styles.bold.open}Statistics:${styles.bold.close}${styles.yellow.close}`
-    );
+    this._logger.info(LoggerService.yellow(LoggerService.bold(`Statistics:`)));
     this._logProcessedIssuesAndPullRequestsCount();
     this._logStaleIssuesAndPullRequestsCount();
     this._logUndoStaleIssuesAndPullRequestsCount();
@@ -442,10 +440,7 @@ export class Statistics {
 
   private _logCount(name: Readonly<string>, count: Readonly<number>): void {
     if (count > 0) {
-      this._logger.info(
-        `${name}:`,
-        `${styles.cyan.open}${count}${styles.cyan.close}`
-      );
+      this._logger.info(`${name}:`, LoggerService.cyan(count));
     }
   }
 
@@ -503,7 +498,7 @@ export class Statistics {
       const prefix = index === onlyValuesSet.length - 1 ? '└──' : '├──';
 
       this._logCount(
-        `${styles.white.open}${prefix}${styles.white.close} ${value.name.padEnd(
+        `${LoggerService.white(prefix)} ${value.name.padEnd(
           longestValue,
           ' '
         )}`,

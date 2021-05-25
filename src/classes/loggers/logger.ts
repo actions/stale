@@ -1,31 +1,19 @@
 import * as core from '@actions/core';
-import styles from 'ansi-styles';
 import terminalLink from 'terminal-link';
 import {Option} from '../../enums/option';
+import {LoggerService} from '../../services/logger.service';
 
 export class Logger {
   warning(...message: string[]): void {
-    core.warning(
-      `${styles.whiteBright.open}${message.join(' ')}${
-        styles.whiteBright.close
-      }`
-    );
+    core.warning(LoggerService.whiteBright(message.join(' ')));
   }
 
   info(...message: string[]): void {
-    core.info(
-      `${styles.whiteBright.open}${message.join(' ')}${
-        styles.whiteBright.close
-      }`
-    );
+    core.info(LoggerService.whiteBright(message.join(' ')));
   }
 
   error(...message: string[]): void {
-    core.error(
-      `${styles.whiteBright.open}${message.join(' ')}${
-        styles.whiteBright.close
-      }`
-    );
+    core.error(LoggerService.whiteBright(message.join(' ')));
   }
 
   createLink(name: Readonly<string>, link: Readonly<string>): string {
@@ -33,9 +21,8 @@ export class Logger {
   }
 
   createOptionLink(option: Readonly<Option>): string {
-    return `${styles.magenta.open}${this.createLink(
-      option,
-      `https://github.com/actions/stale#${option}`
-    )}${styles.magenta.close}`;
+    return LoggerService.magenta(
+      this.createLink(option, `https://github.com/actions/stale#${option}`)
+    );
   }
 }

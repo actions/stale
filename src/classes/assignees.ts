@@ -1,4 +1,3 @@
-import styles from 'ansi-styles';
 import deburr from 'lodash.deburr';
 import {Option} from '../enums/option';
 import {wordsToList} from '../functions/words-to-list';
@@ -6,6 +5,7 @@ import {IAssignee} from '../interfaces/assignee';
 import {IIssuesProcessorOptions} from '../interfaces/issues-processor-options';
 import {Issue} from './issue';
 import {IssueLogger} from './loggers/issue-logger';
+import {LoggerService} from '../services/logger.service';
 
 type CleanAssignee = string;
 
@@ -34,7 +34,7 @@ export class Assignees {
 
     if (this._shouldExemptAllAssignees()) {
       this._issueLogger.info(
-        `${styles.white.open}└──${styles.white.close}`,
+        LoggerService.white('└──'),
         'Skipping this $$type because it has an exempt assignee'
       );
 
@@ -45,7 +45,7 @@ export class Assignees {
 
     if (exemptAssignees.length === 0) {
       this._issueLogger.info(
-        `${styles.white.open}├──${styles.white.close}`,
+        LoggerService.white('├──'),
         `No assignee option was specified to skip the stale process for this $$type`
       );
       this._logSkip();
@@ -54,10 +54,8 @@ export class Assignees {
     }
 
     this._issueLogger.info(
-      `${styles.white.open}├──${styles.white.close}`,
-      `Found ${styles.cyan.open}${exemptAssignees.length}${
-        styles.cyan.close
-      } assignee${
+      LoggerService.white('├──'),
+      `Found ${LoggerService.cyan(exemptAssignees.length)} assignee${
         exemptAssignees.length > 1 ? 's' : ''
       } that can exempt stale on this $$type`
     );
@@ -69,13 +67,13 @@ export class Assignees {
 
     if (!hasExemptAssignee) {
       this._issueLogger.info(
-        `${styles.white.open}├──${styles.white.close}`,
+        LoggerService.white('├──'),
         'No assignee on this $$type can exempt the stale process'
       );
       this._logSkip();
     } else {
       this._issueLogger.info(
-        `${styles.white.open}└──${styles.white.close}`,
+        LoggerService.white('└──'),
         'Skipping this $$type because it has an exempt assignee'
       );
     }
@@ -92,7 +90,7 @@ export class Assignees {
   private _getExemptIssueAssignees(): string[] {
     if (this._options.exemptIssueAssignees === '') {
       this._issueLogger.info(
-        `${styles.white.open}├──${styles.white.close}`,
+        LoggerService.white('├──'),
         `The option ${this._issueLogger.createOptionLink(
           Option.ExemptIssueAssignees
         )} is disabled. No specific assignee can skip the stale process for this $$type`
@@ -100,7 +98,7 @@ export class Assignees {
 
       if (this._options.exemptAssignees === '') {
         this._issueLogger.info(
-          `${styles.white.open}├──${styles.white.close}`,
+          LoggerService.white('├──'),
           `The option ${this._issueLogger.createOptionLink(
             Option.ExemptAssignees
           )} is disabled. No specific assignee can skip the stale process for this $$type`
@@ -114,12 +112,10 @@ export class Assignees {
       );
 
       this._issueLogger.info(
-        `${styles.white.open}├──${styles.white.close}`,
+        LoggerService.white('├──'),
         `The option ${this._issueLogger.createOptionLink(
           Option.ExemptAssignees
-        )} is set. ${styles.cyan.open}${exemptAssignees.length}${
-          styles.cyan.close
-        } assignee${
+        )} is set. ${LoggerService.cyan(exemptAssignees.length)} assignee${
           exemptAssignees.length === 1 ? '' : 's'
         } can skip the stale process for this $$type`
       );
@@ -132,12 +128,10 @@ export class Assignees {
     );
 
     this._issueLogger.info(
-      `${styles.white.open}├──${styles.white.close}`,
+      LoggerService.white('├──'),
       `The option ${this._issueLogger.createOptionLink(
         Option.ExemptIssueAssignees
-      )} is set. ${styles.cyan.open}${exemptAssignees.length}${
-        styles.cyan.close
-      } assignee${
+      )} is set. ${LoggerService.cyan(exemptAssignees.length)} assignee${
         exemptAssignees.length === 1 ? '' : 's'
       } can skip the stale process for this $$type`
     );
@@ -148,7 +142,7 @@ export class Assignees {
   private _getExemptPullRequestAssignees(): string[] {
     if (this._options.exemptPrAssignees === '') {
       this._issueLogger.info(
-        `${styles.white.open}├──${styles.white.close}`,
+        LoggerService.white('├──'),
         `The option ${this._issueLogger.createOptionLink(
           Option.ExemptPrAssignees
         )} is disabled. No specific assignee can skip the stale process for this $$type`
@@ -156,7 +150,7 @@ export class Assignees {
 
       if (this._options.exemptAssignees === '') {
         this._issueLogger.info(
-          `${styles.white.open}├──${styles.white.close}`,
+          LoggerService.white('├──'),
           `The option ${this._issueLogger.createOptionLink(
             Option.ExemptAssignees
           )} is disabled. No specific assignee can skip the stale process for this $$type`
@@ -170,12 +164,10 @@ export class Assignees {
       );
 
       this._issueLogger.info(
-        `${styles.white.open}├──${styles.white.close}`,
+        LoggerService.white('├──'),
         `The option ${this._issueLogger.createOptionLink(
           Option.ExemptAssignees
-        )} is set. ${styles.cyan.open}${exemptAssignees.length}${
-          styles.cyan.close
-        } assignee${
+        )} is set. ${LoggerService.cyan(exemptAssignees.length)} assignee${
           exemptAssignees.length === 1 ? '' : 's'
         } can skip the stale process for this $$type`
       );
@@ -188,12 +180,10 @@ export class Assignees {
     );
 
     this._issueLogger.info(
-      `${styles.white.open}├──${styles.white.close}`,
+      LoggerService.white('├──'),
       `The option ${this._issueLogger.createOptionLink(
         Option.ExemptPrAssignees
-      )} is set. ${styles.cyan.open}${exemptAssignees.length}${
-        styles.cyan.close
-      } assignee${
+      )} is set. ${LoggerService.cyan(exemptAssignees.length)} assignee${
         exemptAssignees.length === 1 ? '' : 's'
       } can skip the stale process for this $$type`
     );
@@ -211,7 +201,7 @@ export class Assignees {
 
         if (isSameAssignee) {
           this._issueLogger.info(
-            `${styles.white.open}├──${styles.white.close}`,
+            LoggerService.white('├──'),
             `@${issueAssignee.login} is assigned on this $$type and is an exempt assignee`
           );
         }
@@ -293,7 +283,7 @@ export class Assignees {
 
   private _logSkip(): void {
     this._issueLogger.info(
-      `${styles.white.open}└──${styles.white.close}`,
+      LoggerService.white('└──'),
       'Skip the assignees checks'
     );
   }

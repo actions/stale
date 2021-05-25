@@ -1,6 +1,6 @@
-import styles from 'ansi-styles';
 import {Issue} from '../issue';
 import {Logger} from './logger';
+import {LoggerService} from '../../services/logger.service';
 
 /**
  * @description
@@ -70,12 +70,10 @@ export class IssueLogger extends Logger {
   }
 
   private _getIssuePrefix(): string {
-    return `${styles.red.open}[#${this._getIssueNumber()}]${styles.red.close}`;
+    return LoggerService.red(`[#${this._getIssueNumber()}]`);
   }
 
   private _getPullRequestPrefix(): string {
-    return `${styles.blue.open}[#${this._getIssueNumber()}]${
-      styles.blue.close
-    }`;
+    return LoggerService.blue(`[#${this._getIssueNumber()}]`);
   }
 }

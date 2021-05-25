@@ -1955,34 +1955,37 @@ exports.LoggerService = void 0;
 const ansi_styles_1 = __importDefault(__nccwpck_require__(2068));
 class LoggerService {
     static whiteBright(message) {
-        return `${ansi_styles_1.default.whiteBright.open}${message}${ansi_styles_1.default.whiteBright.close}`;
+        return this._format(message, 'whiteBright');
     }
     static yellowBright(message) {
-        return `${ansi_styles_1.default.yellowBright.open}${message}${ansi_styles_1.default.yellowBright.close}`;
+        return this._format(message, 'yellowBright');
     }
     static magenta(message) {
-        return `${ansi_styles_1.default.magenta.open}${message}${ansi_styles_1.default.magenta.close}`;
+        return this._format(message, 'magenta');
     }
     static cyan(message) {
-        return `${ansi_styles_1.default.cyan.open}${message}${ansi_styles_1.default.cyan.close}`;
+        return this._format(message, 'cyan');
     }
     static yellow(message) {
-        return `${ansi_styles_1.default.yellow.open}${message}${ansi_styles_1.default.yellow.close}`;
+        return this._format(message, 'yellow');
     }
     static white(message) {
-        return `${ansi_styles_1.default.white.open}${message}${ansi_styles_1.default.white.close}`;
+        return this._format(message, 'white');
     }
     static green(message) {
-        return `${ansi_styles_1.default.green.open}${message}${ansi_styles_1.default.green.close}`;
+        return this._format(message, 'green');
     }
     static red(message) {
-        return `${ansi_styles_1.default.red.open}${message}${ansi_styles_1.default.red.close}`;
+        return this._format(message, 'red');
     }
     static blue(message) {
-        return `${ansi_styles_1.default.blue.open}${message}${ansi_styles_1.default.blue.close}`;
+        return this._format(message, 'blue');
     }
     static bold(message) {
-        return `${ansi_styles_1.default.bold.open}${message}${ansi_styles_1.default.bold.close}`;
+        return this._format(message, 'bold');
+    }
+    static _format(message, style) {
+        return `${ansi_styles_1.default[style].open}${message}${ansi_styles_1.default[style].close}`;
     }
 }
 exports.LoggerService = LoggerService;

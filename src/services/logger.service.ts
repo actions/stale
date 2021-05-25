@@ -1,45 +1,52 @@
-import styles from 'ansi-styles';
+import styles, {Modifier, ForegroundColor} from 'ansi-styles';
 
 type Message = string | number | boolean;
 
 export class LoggerService {
   static whiteBright(message: Readonly<Message>): string {
-    return `${styles.whiteBright.open}${message}${styles.whiteBright.close}`;
+    return this._format(message, 'whiteBright');
   }
 
   static yellowBright(message: Readonly<Message>): string {
-    return `${styles.yellowBright.open}${message}${styles.yellowBright.close}`;
+    return this._format(message, 'yellowBright');
   }
 
   static magenta(message: Readonly<Message>): string {
-    return `${styles.magenta.open}${message}${styles.magenta.close}`;
+    return this._format(message, 'magenta');
   }
 
   static cyan(message: Readonly<Message>): string {
-    return `${styles.cyan.open}${message}${styles.cyan.close}`;
+    return this._format(message, 'cyan');
   }
 
   static yellow(message: Readonly<Message>): string {
-    return `${styles.yellow.open}${message}${styles.yellow.close}`;
+    return this._format(message, 'yellow');
   }
 
   static white(message: Readonly<Message>): string {
-    return `${styles.white.open}${message}${styles.white.close}`;
+    return this._format(message, 'white');
   }
 
   static green(message: Readonly<Message>): string {
-    return `${styles.green.open}${message}${styles.green.close}`;
+    return this._format(message, 'green');
   }
 
   static red(message: Readonly<Message>): string {
-    return `${styles.red.open}${message}${styles.red.close}`;
+    return this._format(message, 'red');
   }
 
   static blue(message: Readonly<Message>): string {
-    return `${styles.blue.open}${message}${styles.blue.close}`;
+    return this._format(message, 'blue');
   }
 
   static bold(message: Readonly<Message>): string {
-    return `${styles.bold.open}${message}${styles.bold.close}`;
+    return this._format(message, 'bold');
+  }
+
+  private static _format(
+    message: Readonly<Message>,
+    style: keyof Modifier | keyof ForegroundColor
+  ): string {
+    return `${styles[style].open}${message}${styles[style].close}`;
   }
 }

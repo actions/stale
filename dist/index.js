@@ -299,6 +299,8 @@ class IssuesProcessor {
             else {
                 this._logger.info(`${logger_service_1.LoggerService.yellow('Processing the batch of issues')} ${logger_service_1.LoggerService.cyan(`#${page}`)} ${logger_service_1.LoggerService.yellow('containing')} ${logger_service_1.LoggerService.cyan(issues.length)} ${logger_service_1.LoggerService.yellow(`issue${issues.length > 1 ? 's' : ''}...`)}`);
             }
+            const addLabelsWhenUpdated = words_to_list_1.wordsToList(this.options.addLabelsWhenUpdatedFromStale);
+            const removeLabelsWhenUpdated = words_to_list_1.wordsToList(this.options.removeLabelsWhenUpdatedFromStale);
             for (const issue of issues.values()) {
                 // Stop the processing if no more operations remains
                 if (!this.operations.hasRemainingOperations()) {
@@ -306,7 +308,7 @@ class IssuesProcessor {
                 }
                 const issueLogger = new issue_logger_1.IssueLogger(issue);
                 yield issueLogger.grouping(`$$type #${issue.number}`, () => __awaiter(this, void 0, void 0, function* () {
-                    yield this.processIssue(issue, actor);
+                    yield this.processIssue(issue, actor, addLabelsWhenUpdated, removeLabelsWhenUpdated);
                 }));
             }
             if (!this.operations.hasRemainingOperations()) {
@@ -320,7 +322,7 @@ class IssuesProcessor {
             return this.processIssues(page + 1);
         });
     }
-    processIssue(issue, actor) {
+    processIssue(issue, actor, addLabelsWhenUpdated, removeLabelsWhenUpdated) {
         var _a;
         return __awaiter(this, void 0, void 0, function* () {
             (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.incrementProcessedItemsCount(issue);
@@ -469,7 +471,7 @@ class IssuesProcessor {
             // Process the issue if it was marked stale
             if (issue.isStale) {
                 issueLogger.info(`This $$type is already stale`);
-                yield this._processStaleIssue(issue, staleLabel, actor, closeMessage, closeLabel);
+                yield this._processStaleIssue(issue, staleLabel, actor, addLabelsWhenUpdated, removeLabelsWhenUpdated, closeMessage, closeLabel);
             }
             IssuesProcessor._endIssueProcessing(issue);
         });
@@ -561,7 +563,7 @@ class IssuesProcessor {
         });
     }
     // handle all of the stale issue logic when we find a stale issue
-    _processStaleIssue(issue, staleLabel, actor, closeMessage, closeLabel) {
+    _processStaleIssue(issue, staleLabel, actor, addLabelsWhenUpdatedFromStale, removeLabelsWhenUpdatedFromStale, closeMessage, closeLabel) {
         return __awaiter(this, void 0, void 0, function* () {
             const issueLogger = new issue_logger_1.IssueLogger(issue);
             const markedStaleOn = (yield this.getLabelCreationDate(issue, staleLabel)) || issue.updated_at;
@@ -586,6 +588,9 @@ class IssuesProcessor {
             if (shouldRemoveStaleWhenUpdated && issueHasComments) {
                 issueLogger.info(`Remove the stale label since the $$type has a comment and the workflow should remove the stale label when updated`);
                 yield this._removeStaleLabel(issue, staleLabel);
+                // Are there labels to remove or add when an issue is no longer stale?
+                yield this._removeLabelsWhenUpdatedFromStale(issue, removeLabelsWhenUpdatedFromStale);
+                yield this._addLabelsWhenUpdatedFromStale(issue, addLabelsWhenUpdatedFromStale);
                 issueLogger.info(`Skipping the process since the $$type is now un-stale`);
                 return; // Nothing to do because it is no longer stale
             }
@@ -853,6 +858,35 @@ class IssuesProcessor {
             return this.options.removeIssueStaleWhenUpdated;
         }
         return this.options.removeStaleWhenUpdated;
+    }
+    _removeLabelsWhenUpdatedFromStale(issue, labels) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (!labels.length) {
+                return;
+            }
+            const issueLogger = new issue_logger_1.IssueLogger(issue);
+            issueLogger.info(`Removing any labels specified via remove-labels-when-updated-from-stale...`);
+            for (const label of labels.values()) {
+                yield this._removeLabel(issue, label);
+            }
+        });
+    }
+    _addLabelsWhenUpdatedFromStale(issue, labelsToAdd) {
+        var _a;
+        return __awaiter(this, void 0, void 0, function* () {
+            if (!labelsToAdd.length) {
+                return;
+            }
+            const issueLogger = new issue_logger_1.IssueLogger(issue);
+            issueLogger.info(`Adding labels marked as add-labels-when-updated-from-stale...`);
+            (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.incrementAddedItemsLabel(issue);
+            yield this.client.issues.addLabels({
+                owner: github_1.context.repo.owner,
+                repo: github_1.context.repo.repo,
+                issue_number: issue.number,
+                labels: labelsToAdd
+            });
+        });
     }
     _removeStaleLabel(issue, staleLabel) {
         var _a;
@@ -1975,7 +2009,9 @@ function _getAndValidateArgs() {
         exemptAllAssignees: core.getInput('exempt-all-assignees') === 'true',
         exemptAllIssueAssignees: _toOptionalBoolean('exempt-all-issue-assignees'),
         exemptAllPrAssignees: _toOptionalBoolean('exempt-all-pr-assignees'),
-        enableStatistics: core.getInput('enable-statistics') === 'true'
+        enableStatistics: core.getInput('enable-statistics') === 'true',
+        removeLabelsWhenUpdatedFromStale: core.getInput('remove-labels-when-updated-from-stale'),
+        addLabelsWhenUpdatedFromStale: core.getInput('add-labels-when-updated-from-stale')
     };
     for (const numberInput of [
         'days-before-stale',

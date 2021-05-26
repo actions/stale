@@ -127,6 +127,13 @@ export class IssuesProcessor {
       );
     }
 
+    const addLabelsWhenUpdated: string[] = wordsToList(
+      this.options.addLabelsWhenUpdatedFromStale
+    );
+    const removeLabelsWhenUpdated: string[] = wordsToList(
+      this.options.removeLabelsWhenUpdatedFromStale
+    );
+
     for (const issue of issues.values()) {
       // Stop the processing if no more operations remains
       if (!this.operations.hasRemainingOperations()) {
@@ -135,7 +142,12 @@ export class IssuesProcessor {
 
       const issueLogger: IssueLogger = new IssueLogger(issue);
       await issueLogger.grouping(`$$type #${issue.number}`, async () => {
-        await this.processIssue(issue, actor);
+        await this.processIssue(
+          issue,
+          actor,
+          addLabelsWhenUpdated,
+          removeLabelsWhenUpdated
+        );
       });
     }
 
@@ -169,7 +181,12 @@ export class IssuesProcessor {
     return this.processIssues(page + 1);
   }
 
-  async processIssue(issue: Issue, actor: string): Promise<void> {
+  async processIssue(
+    issue: Issue,
+    actor: string,
+    addLabelsWhenUpdated: Readonly<string>[],
+    removeLabelsWhenUpdated: Readonly<string>[]
+  ): Promise<void> {
     this._statistics?.incrementProcessedItemsCount(issue);
 
     const issueLogger: IssueLogger = new IssueLogger(issue);
@@ -438,6 +455,8 @@ export class IssuesProcessor {
         issue,
         staleLabel,
         actor,
+        addLabelsWhenUpdated,
+        removeLabelsWhenUpdated,
         closeMessage,
         closeLabel
       );
@@ -549,6 +568,8 @@ export class IssuesProcessor {
     issue: Issue,
     staleLabel: string,
     actor: string,
+    addLabelsWhenUpdatedFromStale: Readonly<string>[],
+    removeLabelsWhenUpdatedFromStale: Readonly<string>[],
     closeMessage?: string,
     closeLabel?: string
   ) {
@@ -607,6 +628,16 @@ export class IssuesProcessor {
         `Remove the stale label since the $$type has a comment and the workflow should remove the stale label when updated`
       );
       await this._removeStaleLabel(issue, staleLabel);
+
+      // Are there labels to remove or add when an issue is no longer stale?
+      await this._removeLabelsWhenUpdatedFromStale(
+        issue,
+        removeLabelsWhenUpdatedFromStale
+      );
+      await this._addLabelsWhenUpdatedFromStale(
+        issue,
+        addLabelsWhenUpdatedFromStale
+      );
 
       issueLogger.info(`Skipping the process since the $$type is now un-stale`);
 
@@ -954,6 +985,48 @@ export class IssuesProcessor {
     }
 
     return this.options.removeStaleWhenUpdated;
+  }
+
+  private async _removeLabelsWhenUpdatedFromStale(
+    issue: Issue,
+    labels: Readonly<string>[]
+  ): Promise<void> {
+    if (!labels.length) {
+      return;
+    }
+
+    const issueLogger: IssueLogger = new IssueLogger(issue);
+
+    issueLogger.info(
+      `Removing any labels specified via remove-labels-when-updated-from-stale...`
+    );
+
+    for (const label of labels.values()) {
+      await this._removeLabel(issue, label);
+    }
+  }
+
+  private async _addLabelsWhenUpdatedFromStale(
+    issue: Issue,
+    labelsToAdd: Readonly<string>[]
+  ): Promise<void> {
+    if (!labelsToAdd.length) {
+      return;
+    }
+
+    const issueLogger: IssueLogger = new IssueLogger(issue);
+
+    issueLogger.info(
+      `Adding labels marked as add-labels-when-updated-from-stale...`
+    );
+
+    this._statistics?.incrementAddedItemsLabel(issue);
+    await this.client.issues.addLabels({
+      owner: context.repo.owner,
+      repo: context.repo.repo,
+      issue_number: issue.number,
+      labels: labelsToAdd
+    });
   }
 
   private async _removeStaleLabel(

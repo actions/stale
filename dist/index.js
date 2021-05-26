@@ -1726,6 +1726,8 @@ var Option;
     Option["ExemptAllIssueAssignees"] = "exempt-all-issue-assignees";
     Option["ExemptAllPrAssignees"] = "exempt-all-pr-assignees";
     Option["EnableStatistics"] = "enable-statistics";
+    Option["RemoveLabelsWhenUpdatedFromStale"] = "remove-labels-when-updated-from-stale";
+    Option["AddLabelsWhenUpdatedFromStale"] = "add-labels-when-updated-from-stale";
 })(Option = exports.Option || (exports.Option = {}));
 
 

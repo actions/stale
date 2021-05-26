@@ -989,9 +989,9 @@ export class IssuesProcessor {
 
   private async _removeLabelsWhenUpdatedFromStale(
     issue: Issue,
-    labels: Readonly<string>[]
+    removeLabels: Readonly<string>[]
   ): Promise<void> {
-    if (!labels.length) {
+    if (!removeLabels.length) {
       return;
     }
 
@@ -1001,7 +1001,7 @@ export class IssuesProcessor {
       `Removing any labels specified via remove-labels-when-updated-from-stale...`
     );
 
-    for (const label of labels.values()) {
+    for (const label of removeLabels.values()) {
       await this._removeLabel(issue, label);
     }
   }

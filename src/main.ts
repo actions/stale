@@ -83,7 +83,15 @@ function _getAndValidateArgs(): IIssuesProcessorOptions {
     exemptAllPrAssignees: _toOptionalBoolean('exempt-all-pr-assignees'),
     enableStatistics: core.getInput('enable-statistics') === 'true',
     labelsToRemoveWhenUnstale: core.getInput('labels-to-remove-when-unstale'),
-    labelsToAddWhenUnstale: core.getInput('labels-to-add-when-unstale')
+    labelsToAddWhenUnstale: core.getInput('labels-to-add-when-unstale'),
+    ignoreAllActivitiesBeforeStale:
+      core.getInput('ignore-all-activities-before-stale') === 'true',
+    ignoreAllIssueActivitiesBeforeStale: _toOptionalBoolean(
+      'ignore-all-issue-activities-before-stale'
+    ),
+    ignoreAllPrActivitiesBeforeStale: _toOptionalBoolean(
+      'ignore-all-pr-activities-before-stale'
+    )
   };
 
   for (const numberInput of [
@@ -120,6 +128,17 @@ async function processOutput(
   core.setOutput('closed-issues-prs', JSON.stringify(closedIssues));
 }
 
+/**
+ * @description
+ * From an argument name, get the value as an optional boolean
+ * This is very useful for all the arguments that override others
+ * It will allow us to easily use the original one when the return value is `undefined`
+ * Which is different from `true` or `false` that consider the argument as set
+ *
+ * @param {Readonly<string>} argumentName The name of the argument to check
+ *
+ * @returns {boolean | undefined} The value matching the given argument name
+ */
 function _toOptionalBoolean(
   argumentName: Readonly<string>
 ): boolean | undefined {

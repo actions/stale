@@ -48,14 +48,14 @@ Every argument is optional.
 | [exempt-issue-labels](#exempt-issue-labels)                         | Labels on issues exempted from stale                                     |                       |
 | [exempt-pr-labels](#exempt-pr-labels)                               | Labels on PRs exempted from stale                                        |                       |
 | [only-labels](#only-labels)                                         | Only issues/PRs with ALL these labels are checked                        |                       |
-| [only-issue-labels](#only-issue-labels)                             | Only issues with ALL these labels are checked                            |                       |
-| [only-pr-labels](#only-pr-labels)                                   | Only PRs with ALL these labels are checked                               |                       |
-| [any-of-labels](#any-of-labels)                                     | Only issues/PRs with ANY of these labels are checked                     |                       |
-| [any-of-issue-labels](#any-of-issue-labels)                         | Only issues with ANY of these labels are checked                         |                       |
-| [any-of-pr-labels](#any-of-pr-labels)                               | Only PRs with ANY of these labels are checked                            |                       |
-| [operations-per-run](#operations-per-run)                           | Max number of operations per run                                         | `30`                  |
-| [remove-stale-when-updated](#remove-stale-when-updated)             | Remove stale label from issues/PRs on updates/comments                   | `true`                |
-| [remove-issue-stale-when-updated](#remove-issue-stale-when-updated) | Remove stale label from issues on updates/comments                       |                       |
+| [only-issue-labels](#only-issue-labels)                             | Override [only-labels](#only-labels) for issues only                            |                       |
+| [only-pr-labels](#only-pr-labels)                                   | Override [only-labels](#only-labels) for PRs only                                             |                       |
+| [any-of-labels](#any-of-labels)                                         | Only issues/PRs with ANY of these labels are checked                                 |                       |
+| [any-of-issue-labels](#any-of-issue-labels)                             | Override [any-of-labels](#any-of-labels) for issues only                         |                       |
+| [any-of-pr-labels](#any-of-pr-labels)                               | Override [any-of-labels](#any-of-labels) for PRs only                                         |                       |
+| [operations-per-run](#operations-per-run)                               | Max number of operations per run                                                     | `30`                  |
+| [remove-stale-when-updated](#remove-stale-when-updated)                 | Remove stale label from issues/PRs on updates/comments                                        | `true`                |
+| [remove-issue-stale-when-updated](#remove-issue-stale-when-updated)     | Remove stale label from issues on updates/comments                       |                       |
 | [remove-pr-stale-when-updated](#remove-pr-stale-when-updated)       | Remove stale label from PRs on updates/comments                          |                       |
 | [labels-to-add-when-unstale](#labels-to-add-when-unstale)           | Add specified labels from issues/PRs when they become unstale            |                       |
 | [labels-to-remove-when-unstale](#labels-to-remove-when-unstale)     | Remove specified labels from issues/PRs when they become unstale         |                       |

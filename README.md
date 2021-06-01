@@ -483,7 +483,7 @@ Default value: `true`
 The option [days-before-stale](#days-before-stale) will define the number of days before considering the issues or the pull requests as stale.  
 In most cases, the purpose of this action is to only stale when necessary so if any update occurs or if a comment is added to them, the counter will restart.  
 Nonetheless, if you don't care about this, and you prefer to stick to this number of days no matter the activity, you can enable this option.  
-Instead of comparing the number of days base on the [GitHub issue](https://docs.github.com/en/rest/reference/issues) field `updated_at`, it will be based on the [GitHub issue](https://docs.github.com/en/rest/reference/issues) field `created_at`.
+Instead of comparing the number of days based on the [GitHub issue](https://docs.github.com/en/rest/reference/issues) field `updated_at`, it will be based on the [GitHub issue](https://docs.github.com/en/rest/reference/issues) field `created_at`.
 
 Default value: `false`
 

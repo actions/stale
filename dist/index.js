@@ -144,6 +144,67 @@ exports.Assignees = Assignees;
 
 /***/ }),
 
+/***/ 3414:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.IgnoreAllActivitiesBeforeStale = void 0;
+const option_1 = __nccwpck_require__(5931);
+const issue_logger_1 = __nccwpck_require__(2984);
+class IgnoreAllActivitiesBeforeStale {
+    constructor(options, issue) {
+        this._options = options;
+        this._issue = issue;
+        this._issueLogger = new issue_logger_1.IssueLogger(issue);
+    }
+    shouldIgnoreAllActivitiesBeforeStale() {
+        return this._shouldIgnoreAllActivitiesBeforeStale();
+    }
+    _shouldIgnoreAllActivitiesBeforeStale() {
+        return this._issue.isPullRequest
+            ? this._shouldIgnoreAllPullRequestActivitiesBeforeStale()
+            : this._shouldIgnoreAllIssueActivitiesBeforeStale();
+    }
+    _shouldIgnoreAllPullRequestActivitiesBeforeStale() {
+        if (this._options.ignoreAllPrActivitiesBeforeStale === true) {
+            this._issueLogger.info(`The option ${this._issueLogger.createOptionLink(option_1.Option.IgnoreAllPrActivitiesBeforeStale)} is enabled. The stale counter will ignore any updates or comments on this $$type and will use the creation date as a reference ignoring any kind of activity`);
+            return true;
+        }
+        else if (this._options.ignoreAllPrActivitiesBeforeStale === false) {
+            this._issueLogger.info(`The option ${this._issueLogger.createOptionLink(option_1.Option.IgnoreAllPrActivitiesBeforeStale)} is disabled. The stale counter will take into account updates and comments on this $$type to avoid to stale when there is some activity`);
+            return false;
+        }
+        this._logIgnoreAllActivitiesBeforeStaleOption();
+        return this._options.ignoreAllActivitiesBeforeStale;
+    }
+    _shouldIgnoreAllIssueActivitiesBeforeStale() {
+        if (this._options.ignoreAllIssueActivitiesBeforeStale === true) {
+            this._issueLogger.info(`The option ${this._issueLogger.createOptionLink(option_1.Option.IgnoreAllIssueActivitiesBeforeStale)} is enabled. The stale counter will ignore any updates or comments on this $$type and will use the creation date as a reference ignoring any kind of activity`);
+            return true;
+        }
+        else if (this._options.ignoreAllIssueActivitiesBeforeStale === false) {
+            this._issueLogger.info(`The option ${this._issueLogger.createOptionLink(option_1.Option.IgnoreAllIssueActivitiesBeforeStale)} is disabled. The stale counter will take into account updates and comments on this $$type to avoid to stale when there is some activity`);
+            return false;
+        }
+        this._logIgnoreAllActivitiesBeforeStaleOption();
+        return this._options.ignoreAllActivitiesBeforeStale;
+    }
+    _logIgnoreAllActivitiesBeforeStaleOption() {
+        if (this._options.ignoreAllActivitiesBeforeStale) {
+            this._issueLogger.info(`The option ${this._issueLogger.createOptionLink(option_1.Option.IgnoreAllActivitiesBeforeStale)} is enabled. The stale counter will ignore any updates or comments on this $$type and will use the creation date as a reference ignoring any kind of activity`);
+        }
+        else {
+            this._issueLogger.info(`The option ${this._issueLogger.createOptionLink(option_1.Option.IgnoreAllActivitiesBeforeStale)} is disabled. The stale counter will take into account updates and comments on this $$type to avoid to stale when there is some activity`);
+        }
+    }
+}
+exports.IgnoreAllActivitiesBeforeStale = IgnoreAllActivitiesBeforeStale;
+
+
+/***/ }),
+
 /***/ 4783:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
@@ -236,6 +297,7 @@ const is_labeled_1 = __nccwpck_require__(6792);
 const should_mark_when_stale_1 = __nccwpck_require__(2461);
 const words_to_list_1 = __nccwpck_require__(1883);
 const assignees_1 = __nccwpck_require__(7236);
+const ignore_all_activities_before_stale_1 = __nccwpck_require__(3414);
 const issue_1 = __nccwpck_require__(4783);
 const issue_logger_1 = __nccwpck_require__(2984);
 const logger_1 = __nccwpck_require__(6212);
@@ -447,26 +509,44 @@ class IssuesProcessor {
                 IssuesProcessor._endIssueProcessing(issue);
                 return; // Don't process exempt assignees
             }
-            // Should this issue be marked stale?
-            const shouldBeStale = !IssuesProcessor._updatedSince(issue.updated_at, daysBeforeStale);
             // Determine if this issue needs to be marked stale first
-            if (!issue.isStale) {
-                issueLogger.info(`This $$type is not stale`);
-                const updatedAtDate = new Date(issue.updated_at);
+                if (!issue.isStale) {
+                    issueLogger.info(`This $$type is not stale`);
+                    const shouldIgnoreAllActivitiesBeforeStale = new ignore_all_activities_before_stale_1.IgnoreAllActivitiesBeforeStale(this.options, issue).shouldIgnoreAllActivitiesBeforeStale();
+                    // Should this issue be marked as stale?
+                    let shouldBeStale = false;
+                    // Ignore the last update and only use the creation date
+                    if (shouldIgnoreAllActivitiesBeforeStale) {
+                        shouldBeStale = !IssuesProcessor._updatedSince(issue.created_at, daysBeforeStale);
+                    }
+                    // Use the last update instead to check if we need to stale
+                    else {
+                        shouldBeStale = !IssuesProcessor._updatedSince(issue.updated_at, daysBeforeStale);
+                    }
                 if (shouldBeStale) {
-                    issueLogger.info(`This $$type should be stale based on the last update date the ${get_humanized_date_1.getHumanizedDate(updatedAtDate)} (${logger_service_1.LoggerService.cyan(issue.updated_at)})`);
-                    if (shouldMarkAsStale) {
-                        issueLogger.info(`This $$type should be marked as stale based on the option ${issueLogger.createOptionLink(this._getDaysBeforeStaleUsedOptionName(issue))} (${logger_service_1.LoggerService.cyan(daysBeforeStale)})`);
-                        yield this._markStale(issue, staleMessage, staleLabel, skipMessage);
-                        issue.isStale = true; // This issue is now considered stale
-                        issueLogger.info(`This $$type is now stale`);
+                    if (shouldIgnoreAllActivitiesBeforeStale) {
+                            issueLogger.info(`This $$type should be stale based on the creation date the ${get_humanized_date_1.getHumanizedDate(new Date(issue.created_at))} (${chalk_1.default.cyan(issue.created_at)})`);
+                        }
+                        else {
+                            issueLogger.info(`This $$type should be stale based on the last update date the ${get_humanized_date_1.getHumanizedDate(new Date(issue.updated_at))} (${logger_service_1.LoggerService.cyan(issue.updated_at)})`);
+                    }
+                        if (shouldMarkAsStale) {
+                            issueLogger.info(`This $$type should be marked as stale based on the option ${issueLogger.createOptionLink(this._getDaysBeforeStaleUsedOptionName(issue))} (${logger_service_1.LoggerService.cyan(daysBeforeStale)})`);
+                            yield this._markStale(issue, staleMessage, staleLabel, skipMessage);
+                            issue.isStale = true; // This issue is now considered stale
+                            issueLogger.info(`This $$type is now stale`);
+                        }
+                        else {
+                            issueLogger.info(`This $$type should not be marked as stale based on the option ${issueLogger.createOptionLink(this._getDaysBeforeStaleUsedOptionName(issue))} (${logger_service_1.LoggerService.cyan(daysBeforeStale)})`);
+                        }
                     }
                     else {
-                        issueLogger.info(`This $$type should not be marked as stale based on the option ${issueLogger.createOptionLink(this._getDaysBeforeStaleUsedOptionName(issue))} (${logger_service_1.LoggerService.cyan(daysBeforeStale)})`);
-                    }
-                }
-                else {
-                    issueLogger.info(`This $$type should not be stale based on the last update date the ${get_humanized_date_1.getHumanizedDate(updatedAtDate)} (${logger_service_1.LoggerService.cyan(issue.updated_at)})`);
+                        if (shouldIgnoreAllActivitiesBeforeStale) {
+                            issueLogger.info(`This $$type should not be stale based on the creation date the ${get_humanized_date_1.getHumanizedDate(new Date(issue.created_at))} (${chalk_1.default.cyan(issue.created_at)})`);
+                        }
+                        else {
+                            issueLogger.info(`This $$type should not be stale based on the last update date the ${get_humanized_date_1.getHumanizedDate(new Date(issue.updated_at))} (${logger_service_1.LoggerService.cyan(issue.updated_at)})`);
+                        }
                 }
             }
             // Process the issue if it was marked stale
@@ -1742,6 +1822,9 @@ var Option;
     Option["EnableStatistics"] = "enable-statistics";
     Option["LabelsToRemoveWhenUnstale"] = "labels-to-remove-when-unstale";
     Option["LabelsToAddWhenUnstale"] = "labels-to-add-when-unstale";
+    Option["IgnoreAllActivitiesBeforeStale"] = "ignore-all-activities-before-stale";
+    Option["IgnoreAllIssueActivitiesBeforeStale"] = "ignore-all-issue-activities-before-stale";
+    Option["IgnoreAllPrActivitiesBeforeStale"] = "ignore-all-pr-activities-before-stale";
 })(Option = exports.Option || (exports.Option = {}));
 
 
@@ -2005,8 +2088,8 @@ function _getAndValidateArgs() {
         anyOfPrLabels: core.getInput('any-of-pr-labels'),
         operationsPerRun: parseInt(core.getInput('operations-per-run', { required: true })),
         removeStaleWhenUpdated: !(core.getInput('remove-stale-when-updated') === 'false'),
-        removeIssueStaleWhenUpdated: _toOptionalBoolean(core.getInput('remove-issue-stale-when-updated')),
-        removePrStaleWhenUpdated: _toOptionalBoolean(core.getInput('remove-pr-stale-when-updated')),
+        removeIssueStaleWhenUpdated: _toOptionalBoolean('remove-issue-stale-when-updated'),
+        removePrStaleWhenUpdated: _toOptionalBoolean('remove-pr-stale-when-updated'),
         debugOnly: core.getInput('debug-only') === 'true',
         ascending: core.getInput('ascending') === 'true',
         deleteBranch: core.getInput('delete-branch') === 'true',
@@ -2027,7 +2110,10 @@ function _getAndValidateArgs() {
         exemptAllPrAssignees: _toOptionalBoolean('exempt-all-pr-assignees'),
         enableStatistics: core.getInput('enable-statistics') === 'true',
         labelsToRemoveWhenUnstale: core.getInput('labels-to-remove-when-unstale'),
-        labelsToAddWhenUnstale: core.getInput('labels-to-add-when-unstale')
+        labelsToAddWhenUnstale: core.getInput('labels-to-add-when-unstale'),
+        ignoreAllActivitiesBeforeStale: core.getInput('ignore-all-activities-before-stale') === 'true',
+        ignoreAllIssueActivitiesBeforeStale: _toOptionalBoolean('ignore-all-issue-activities-before-stale'),
+        ignoreAllPrActivitiesBeforeStale: _toOptionalBoolean('ignore-all-pr-activities-before-stale')
     };
     for (const numberInput of [
         'days-before-stale',
@@ -2058,6 +2144,17 @@ function processOutput(staledIssues, closedIssues) {
         core.setOutput('closed-issues-prs', JSON.stringify(closedIssues));
     });
 }
+/**
+ * @description
+ * From an argument name, get the value as an optional boolean
+ * This is very useful for all the arguments that override others
+ * It will allow us to easily use the original one when the return value is `undefined`
+ * Which is different from `true` or `false` that consider the argument as set
+ *
+ * @param {Readonly<string>} argumentName The name of the argument to check
+ *
+ * @returns {boolean | undefined} The value matching the given argument name
+ */
 function _toOptionalBoolean(argumentName) {
     const argument = core.getInput(argumentName);
     if (argument === 'true') {

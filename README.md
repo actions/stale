@@ -496,6 +496,7 @@ Default value: unset
 #### ignore-all-pr-activities-before-stale
 
 Useful to override [ignore-all-activities-before-stale](#ignore-all-activities-before-stale) but only to ignore the activities for the pull requests.
+
 Default value: unset
 
 ### Usage

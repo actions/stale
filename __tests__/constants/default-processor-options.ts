@@ -46,5 +46,8 @@ export const DefaultProcessorOptions: IIssuesProcessorOptions = Object.freeze({
   exemptAllPrAssignees: undefined,
   enableStatistics: true,
   labelsToRemoveWhenUnstale: '',
-  labelsToAddWhenUnstale: ''
+  labelsToAddWhenUnstale: '',
+  ignoreAllActivitiesBeforeStale: false,
+  ignoreAllIssueActivitiesBeforeStale: undefined,
+  ignoreAllPrActivitiesBeforeStale: undefined
 });

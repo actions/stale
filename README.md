@@ -101,7 +101,7 @@ Default value: `${{ github.token }}`
 The idle number of days before marking the issues or the pull requests as stale (by adding a label).  
 The issues or the pull requests will be marked as stale if the last update (based on [GitHub issue](https://docs.github.com/en/rest/reference/issues) field `updated_at`) is older than the idle number of days.  
 It means that any updates made, or any comments added to the issues or to the pull requests will restart the counter of days before marking as stale.  
-However, if you wish to ignore this behaviour so that the creation date only matters, you can enable the [ignore-all-activities-before-stale](#ignore-all-activities-before-stale) option.
+However, if you wish to ignore this behaviour so that the creation date (based on [GitHub issue](https://docs.github.com/en/rest/reference/issues) field `created_at`) only matters, you can enable the [ignore-all-activities-before-stale](#ignore-all-activities-before-stale) option.
 
 If set to a negative number like `-1`, no issues or pull requests will be marked as stale automatically.  
 In that case, you can still add the stale label manually to mark as stale.
@@ -482,7 +482,8 @@ Default value: `true`
 
 The option [days-before-stale](#days-before-stale) will define the number of days before considering the issues or the pull requests as stale.  
 In most cases, the purpose of this action is to only stale when necessary so if any update occurs or if a comment is added to them, the counter will restart.  
-Nonetheless, if you don't care about this, and you prefer to stick to this number of days no matter the activity, you can enable this option.
+Nonetheless, if you don't care about this, and you prefer to stick to this number of days no matter the activity, you can enable this option.  
+Instead of comparing the number of days base on the [GitHub issue](https://docs.github.com/en/rest/reference/issues) field `updated_at`, it will be based on the [GitHub issue](https://docs.github.com/en/rest/reference/issues) field `created_at`.
 
 Default value: `false`
 

@@ -168,6 +168,18 @@ inputs:
     description: 'Display some statistics at the end regarding the stale workflow (only when the logs are enabled).'
     default: 'true'
     required: false
+  ignore-all-activities-before-stale:
+    description: 'No activity (update/comment) can stop to stale the issues and pull requests.'
+    default: 'false'
+    required: false
+  ignore-all-issue-activities-before-stale:
+    description: 'No activity (update/comment) can stop to stale the issues. Override "ignore-all-activities-before-stale" option regarding only the issues.'
+    default: ''
+    required: false
+  ignore-all-pr-activities-before-stale:
+    description: 'No activity (update/comment) can stop to stale the pull requests. Override "ignore-all-activities-before-stale" option regarding only the pull requests.'
+    default: ''
+    required: false
 outputs:
   closed-issues-prs:
     description: 'List of all closed issues and pull requests.'

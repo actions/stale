@@ -1,6 +1,6 @@
-import chalk from 'chalk';
 import {Issue} from './issue';
 import {Logger} from './loggers/logger';
+import {LoggerService} from '../services/logger.service';
 
 interface IGroupValue {
   name: string;
@@ -163,7 +163,7 @@ export class Statistics {
   }
 
   logStats(): Statistics {
-    this._logger.info(chalk.yellow.bold('Statistics:'));
+    this._logger.info(LoggerService.yellow(LoggerService.bold(`Statistics:`)));
     this._logProcessedIssuesAndPullRequestsCount();
     this._logStaleIssuesAndPullRequestsCount();
     this._logUndoStaleIssuesAndPullRequestsCount();
@@ -440,7 +440,7 @@ export class Statistics {
 
   private _logCount(name: Readonly<string>, count: Readonly<number>): void {
     if (count > 0) {
-      this._logger.info(`${name}:`, chalk.cyan(count));
+      this._logger.info(`${name}:`, LoggerService.cyan(count));
     }
   }
 
@@ -498,7 +498,10 @@ export class Statistics {
       const prefix = index === onlyValuesSet.length - 1 ? '└──' : '├──';
 
       this._logCount(
-        `${chalk.white(prefix)} ${value.name.padEnd(longestValue, ' ')}`,
+        `${LoggerService.white(prefix)} ${value.name.padEnd(
+          longestValue,
+          ' '
+        )}`,
         value.count
       );
     }

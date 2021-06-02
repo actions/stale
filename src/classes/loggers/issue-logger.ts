@@ -1,6 +1,6 @@
-import chalk from 'chalk';
 import {Issue} from '../issue';
 import {Logger} from './logger';
+import {LoggerService} from '../../services/logger.service';
 
 /**
  * @description
@@ -70,10 +70,10 @@ export class IssueLogger extends Logger {
   }
 
   private _getIssuePrefix(): string {
-    return chalk.red(`[#${this._getIssueNumber()}]`);
+    return LoggerService.red(`[#${this._getIssueNumber()}]`);
   }
 
   private _getPullRequestPrefix(): string {
-    return chalk.blue(`[#${this._getIssueNumber()}]`);
+    return LoggerService.blue(`[#${this._getIssueNumber()}]`);
   }
 }

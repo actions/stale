@@ -60,8 +60,8 @@ export class IssuesProcessor {
   }
 
   private readonly _logger: Logger = new Logger();
-  private readonly _operations: StaleOperations;
   private readonly _statistics: Statistics | undefined;
+  readonly operations: StaleOperations;
   readonly client: InstanceType<typeof GitHub>;
   readonly options: IIssuesProcessorOptions;
   readonly staleIssues: Issue[] = [];
@@ -72,7 +72,7 @@ export class IssuesProcessor {
   constructor(options: IIssuesProcessorOptions) {
     this.options = options;
     this.client = getOctokit(this.options.repoToken);
-    this._operations = new StaleOperations(this.options);
+    this.operations = new StaleOperations(this.options);
 
     this._logger.info(
       LoggerService.yellow(`Starting the stale action process...`)
@@ -104,10 +104,10 @@ export class IssuesProcessor {
         LoggerService.green(`No more issues found to process. Exiting...`)
       );
       this._statistics
-        ?.setRemainingOperations(this._operations.getRemainingOperationsCount())
+        ?.setOperationsCount(this.operations.getConsumedOperationsCount())
         .logStats();
 
-      return this._operations.getRemainingOperationsCount();
+      return this.operations.getRemainingOperationsCount();
     } else {
       this._logger.info(
         `${LoggerService.yellow(
@@ -404,7 +404,7 @@ export class IssuesProcessor {
       IssuesProcessor._endIssueProcessing(issue);
     }
 
-    if (!this._operations.hasRemainingOperations()) {
+    if (!this.operations.hasRemainingOperations()) {
       this._logger.warning(
         LoggerService.yellowBright(`No more operations left! Exiting...`)
       );
@@ -441,7 +441,7 @@ export class IssuesProcessor {
   ): Promise<IComment[]> {
     // Find any comments since date on the given issue
     try {
-      this._operations.consumeOperation();
+      this.operations.consumeOperation();
       this._statistics?.incrementFetchedItemsCommentsCount();
       const comments = await this.client.issues.listComments({
         owner: context.repo.owner,
@@ -461,7 +461,7 @@ export class IssuesProcessor {
     let actor;
 
     try {
-      this._operations.consumeOperation();
+      this.operations.consumeOperation();
       actor = await this.client.users.getAuthenticated();
     } catch (error) {
       return context.actor;
@@ -477,7 +477,7 @@ export class IssuesProcessor {
     type OctoKitIssueList = GetResponseTypeFromEndpointMethod<typeof endpoint>;
 
     try {
-      this._operations.consumeOperation();
+      this.operations.consumeOperation();
       const issueResult: OctoKitIssueList = await this.client.issues.listForRepo(
         {
           owner: context.repo.owner,
@@ -960,7 +960,7 @@ export class IssuesProcessor {
   }
 
   private _consumeIssueOperation(issue: Readonly<Issue>): void {
-    this._operations.consumeOperation();
+    this.operations.consumeOperation();
     issue.operations.consumeOperation();
   }
 

@@ -417,6 +417,9 @@ export class IssuesProcessor {
           'option which is currently set to'
         )} ${LoggerService.cyan(this.options.operationsPerRun)}`
       );
+      this._statistics
+        ?.setOperationsCount(this.operations.getConsumedOperationsCount())
+        .logStats();
 
       return 0;
     }

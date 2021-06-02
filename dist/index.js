@@ -865,7 +865,7 @@ class IssuesProcessor {
                 return;
             }
             const issueLogger = new issue_logger_1.IssueLogger(issue);
-            issueLogger.info(`Removing any labels specified via remove-labels-when-updated-from-stale...`);
+            issueLogger.info(`Removing all the labels specified via the ${this._logger.createOptionLink(option_1.Option.RemoveLabelsWhenUpdatedFromStale)}`);
             for (const label of removeLabels.values()) {
                 yield this._removeLabel(issue, label);
             }

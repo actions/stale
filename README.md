@@ -550,7 +550,7 @@ jobs:
     steps:
       - uses: actions/stale@v3
         with:
-          start-date: '2020-18-04T00:00:00Z' // ISO 8601 or RFC 2822
+          start-date: '2020-18-04T00:00:00Z' # ISO 8601 or RFC 2822
 ```
 
 Avoid stale for specific milestones:

@@ -297,6 +297,10 @@ class IssuesProcessor {
                 this._logger.info(`${logger_service_1.LoggerService.yellow('Processing the batch of issues')} ${logger_service_1.LoggerService.cyan(`#${page}`)} ${logger_service_1.LoggerService.yellow('containing')} ${logger_service_1.LoggerService.cyan(issues.length)} ${logger_service_1.LoggerService.yellow(`issue${issues.length > 1 ? 's' : ''}...`)}`);
             }
             for (const issue of issues.values()) {
+                // Stop the processing if no more operations remains
+                if (!this._operations.hasRemainingOperations()) {
+                    break;
+                }
                 const issueLogger = new issue_logger_1.IssueLogger(issue);
                 (_b = this._statistics) === null || _b === void 0 ? void 0 : _b.incrementProcessedItemsCount(issue);
                 issueLogger.info(`Found this $$type last updated at: ${logger_service_1.LoggerService.cyan(issue.updated_at)}`);

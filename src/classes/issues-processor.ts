@@ -121,6 +121,11 @@ export class IssuesProcessor {
     }
 
     for (const issue of issues.values()) {
+      // Stop the processing if no more operations remains
+      if (!this.operations.hasRemainingOperations()) {
+        break;
+      }
+
       const issueLogger: IssueLogger = new IssueLogger(issue);
       this._statistics?.incrementProcessedItemsCount(issue);
 

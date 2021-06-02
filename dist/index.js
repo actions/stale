@@ -859,14 +859,14 @@ class IssuesProcessor {
         }
         return this.options.removeStaleWhenUpdated;
     }
-    _removeLabelsWhenUpdatedFromStale(issue, labels) {
+    _removeLabelsWhenUpdatedFromStale(issue, removeLabels) {
         return __awaiter(this, void 0, void 0, function* () {
-            if (!labels.length) {
+            if (!removeLabels.length) {
                 return;
             }
             const issueLogger = new issue_logger_1.IssueLogger(issue);
             issueLogger.info(`Removing any labels specified via remove-labels-when-updated-from-stale...`);
-            for (const label of labels.values()) {
+            for (const label of removeLabels.values()) {
                 yield this._removeLabel(issue, label);
             }
         });

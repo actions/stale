@@ -65,8 +65,8 @@ Every argument is optional.
 
 | Output        | Description                |
 | ------------- | -------------------------- |
-| staled-issues | List of all staled issues. |
-| closed-issues | List of all closed issues. |
+| staled-issues-prs | List of all staled issues and pull requests. |
+| closed-issues-prs | List of all closed issues and pull requests. |
 
 ### Detailed options
 

@@ -169,10 +169,10 @@ inputs:
     default: 'true'
     required: false
 outputs:
-  closed-issues:
-    description: 'List of all closed issues.'
-  staled-issues:
-    description: 'List of all staled issues.'
+  closed-issues-prs:
+    description: 'List of all closed issues and pull requests.'
+  staled-issues-prs:
+    description: 'List of all staled issues and pull requests.'
 runs:
   using: 'node12'
   main: 'dist/index.js'

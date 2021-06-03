@@ -64,8 +64,6 @@ function _getAndValidateArgs(): IIssuesProcessorOptions {
     ),
     debugOnly: core.getInput('debug-only') === 'true',
     ascending: core.getInput('ascending') === 'true',
-    skipStalePrMessage: core.getInput('skip-stale-pr-message') === 'true',
-    skipStaleIssueMessage: core.getInput('skip-stale-issue-message') === 'true',
     deleteBranch: core.getInput('delete-branch') === 'true',
     startDate:
       core.getInput('start-date') !== ''

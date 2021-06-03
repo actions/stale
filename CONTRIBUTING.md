@@ -1,4 +1,4 @@
-### Building and testing
+# Building and testing
 
 Install the dependencies.
 
@@ -36,10 +36,32 @@ Run the linter and fix (almost) every issue for you :heavy_check_mark:
 $ npm lint:all:fix
 ```
 
-### Before creating a PR
+# Before creating a PR
+
+## Build and quality checks
 
 Build, lint, package and test everything.
 
 ```bash
 $ npm all
 ```
+
+# Release
+
+Based on [standard-version](https://github.com/conventional-changelog/standard-version).
+
+## Define the new version
+
+You can run `npm run release:dry-run` to create a dry-run, or you can directly run `npm run release` to create a new local release.  
+It will run `prerelease` beforehand to build and pack everything.
+
+If the `prerelease` succeeded, a bump of version will happen based on the unreleased commits.  
+It will:
+
+- Update the _package.json_ version field
+- Update the _package-lock.json_ version field
+- Update the _CHANGELOG.md_ to include the release notes of the new version
+- Create a local tag
+- Create a commit
+
+If everything generated seems ok for you, you can push your tag by running `git push --follow-tags origin {your-branch-name}`.

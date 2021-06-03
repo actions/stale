@@ -26,12 +26,17 @@ describe('IssueLogger', (): void => {
     });
 
     it('should log a warning with the given message and with the issue number as prefix', (): void => {
-      expect.assertions(2);
+      expect.assertions(3);
 
       issueLogger.warning(message);
 
       expect(coreWarningSpy).toHaveBeenCalledTimes(1);
-      expect(coreWarningSpy).toHaveBeenCalledWith('[#8] dummy-message');
+      expect(coreWarningSpy).toHaveBeenCalledWith(
+        expect.stringContaining('[#8]')
+      );
+      expect(coreWarningSpy).toHaveBeenCalledWith(
+        expect.stringContaining('dummy-message')
+      );
     });
   });
 
@@ -52,12 +57,15 @@ describe('IssueLogger', (): void => {
     });
 
     it('should log an information with the given message and with the issue number as prefix', (): void => {
-      expect.assertions(2);
+      expect.assertions(3);
 
       issueLogger.info(message);
 
       expect(coreInfoSpy).toHaveBeenCalledTimes(1);
-      expect(coreInfoSpy).toHaveBeenCalledWith('[#8] dummy-message');
+      expect(coreInfoSpy).toHaveBeenCalledWith(expect.stringContaining('[#8]'));
+      expect(coreInfoSpy).toHaveBeenCalledWith(
+        expect.stringContaining('dummy-message')
+      );
     });
   });
 
@@ -78,17 +86,22 @@ describe('IssueLogger', (): void => {
     });
 
     it('should log an error with the given message and with the issue number as prefix', (): void => {
-      expect.assertions(2);
+      expect.assertions(3);
 
       issueLogger.error(message);
 
       expect(coreErrorSpy).toHaveBeenCalledTimes(1);
-      expect(coreErrorSpy).toHaveBeenCalledWith('[#8] dummy-message');
+      expect(coreErrorSpy).toHaveBeenCalledWith(
+        expect.stringContaining('[#8]')
+      );
+      expect(coreErrorSpy).toHaveBeenCalledWith(
+        expect.stringContaining('dummy-message')
+      );
     });
   });
 
   it('should prefix the message with the issue number', (): void => {
-    expect.assertions(2);
+    expect.assertions(3);
     message = 'dummy-message';
     issue = new Issue(
       DefaultProcessorOptions,
@@ -102,7 +115,12 @@ describe('IssueLogger', (): void => {
     issueLogger.warning(message);
 
     expect(coreWarningSpy).toHaveBeenCalledTimes(1);
-    expect(coreWarningSpy).toHaveBeenCalledWith('[#123] dummy-message');
+    expect(coreWarningSpy).toHaveBeenCalledWith(
+      expect.stringContaining('[#123]')
+    );
+    expect(coreWarningSpy).toHaveBeenCalledWith(
+      expect.stringContaining('dummy-message')
+    );
   });
 
   it.each`
@@ -114,7 +132,7 @@ describe('IssueLogger', (): void => {
   `(
     'should replace the special tokens "$$type" with the corresponding type',
     ({pull_request, replacement}): void => {
-      expect.assertions(2);
+      expect.assertions(3);
       message = 'The $$type will stale! $$type will soon be closed!';
       issue = new Issue(
         DefaultProcessorOptions,
@@ -130,7 +148,12 @@ describe('IssueLogger', (): void => {
 
       expect(coreWarningSpy).toHaveBeenCalledTimes(1);
       expect(coreWarningSpy).toHaveBeenCalledWith(
-        `[#8] The ${replacement} will stale! ${replacement} will soon be closed!`
+        expect.stringContaining(`[#8]`)
+      );
+      expect(coreWarningSpy).toHaveBeenCalledWith(
+        expect.stringContaining(
+          `The ${replacement} will stale! ${replacement} will soon be closed!`
+        )
       );
     }
   );
@@ -144,7 +167,7 @@ describe('IssueLogger', (): void => {
   `(
     'should replace the special token "$$type" with the corresponding type with first letter as uppercase',
     ({pull_request, replacement}): void => {
-      expect.assertions(2);
+      expect.assertions(3);
       message = '$$type will stale';
       issue = new Issue(
         DefaultProcessorOptions,
@@ -160,7 +183,10 @@ describe('IssueLogger', (): void => {
 
       expect(coreWarningSpy).toHaveBeenCalledTimes(1);
       expect(coreWarningSpy).toHaveBeenCalledWith(
-        `[#8] ${replacement} will stale`
+        expect.stringContaining(`[#8]`)
+      );
+      expect(coreWarningSpy).toHaveBeenCalledWith(
+        expect.stringContaining(`${replacement} will stale`)
       );
     }
   );

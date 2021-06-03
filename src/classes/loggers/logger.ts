@@ -1,19 +1,19 @@
 import * as core from '@actions/core';
-import chalk from 'chalk';
 import terminalLink from 'terminal-link';
 import {Option} from '../../enums/option';
+import {LoggerService} from '../../services/logger.service';
 
 export class Logger {
   warning(...message: string[]): void {
-    core.warning(chalk.whiteBright(...message));
+    core.warning(LoggerService.whiteBright(message.join(' ')));
   }
 
   info(...message: string[]): void {
-    core.info(chalk.whiteBright(...message));
+    core.info(LoggerService.whiteBright(message.join(' ')));
   }
 
   error(...message: string[]): void {
-    core.error(chalk.whiteBright(...message));
+    core.error(LoggerService.whiteBright(message.join(' ')));
   }
 
   createLink(name: Readonly<string>, link: Readonly<string>): string {
@@ -21,7 +21,7 @@ export class Logger {
   }
 
   createOptionLink(option: Readonly<Option>): string {
-    return chalk.magenta(
+    return LoggerService.magenta(
       this.createLink(option, `https://github.com/actions/stale#${option}`)
     );
   }

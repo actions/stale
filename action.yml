@@ -118,11 +118,11 @@ inputs:
     required: false
   remove-issue-stale-when-updated:
     description: 'Remove stale labels from issues when they are updated or commented on. Override "remove-stale-when-updated" option regarding only the issues.'
-    default: 'true'
+    default: ''
     required: false
   remove-pr-stale-when-updated:
     description: 'Remove stale labels from pull requests when they are updated or commented on. Override "remove-stale-when-updated" option regarding only the pull requests.'
-    default: 'true'
+    default: ''
     required: false
   debug-only:
     description: 'Run the processor in debug mode without actually performing any operations on live issues.'
@@ -130,14 +130,6 @@ inputs:
     required: false
   ascending:
     description: 'The order to get issues or pull requests. Defaults to false, which is descending.'
-    default: 'false'
-    required: false
-  skip-stale-pr-message:
-    description: 'Skip adding stale message when marking a pull request as stale.'
-    default: 'false'
-    required: false
-  skip-stale-issue-message:
-    description: 'Skip adding stale message when marking an issue as stale.'
     default: 'false'
     required: false
   delete-branch:

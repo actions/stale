@@ -16,7 +16,10 @@
     "test": "jest",
     "test:only-errors": "jest --reporters jest-silent-reporter --silent",
     "test:watch": "jest --watch --notify --expand",
-    "all": "npm run build && npm run format && npm run lint && npm run pack && npm test"
+    "all": "npm run build && npm run format && npm run lint && npm run pack && npm test",
+    "prerelease": "npm run build && npm run pack",
+    "release": "standard-version",
+    "release:dry-run": "standard-version --dry-run"
   },
   "repository": {
     "type": "git",
@@ -43,7 +46,7 @@
     "@typescript-eslint/eslint-plugin": "^4.16.1",
     "@typescript-eslint/parser": "^4.22.1",
     "@vercel/ncc": "^0.27.0",
-    "chalk": "^4.1.0",
+    "ansi-styles": "5.2.0",
     "eslint": "^7.21.0",
     "eslint-plugin-github": "^4.1.2",
     "eslint-plugin-jest": "^24.3.6",
@@ -52,6 +55,7 @@
     "jest-silent-reporter": "^0.4.0",
     "js-yaml": "^4.0.0",
     "prettier": "^2.2.1",
+    "standard-version": "^9.2.0",
     "terminal-link": "^2.1.1",
     "ts-jest": "^26.5.3",
     "typescript": "^4.2.4"

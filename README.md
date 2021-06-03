@@ -2,62 +2,64 @@
 
 Warns and then closes issues and PRs that have had no activity for a specified amount of time.
 
+The default configuration will:
+
+- Add a label "Stale" on issues and pull requests after 60 days of inactivity
+- Close the stale issues and pull requests after 7 days of inactivity
+- If an update/comment occur on stale issues or pull requests, the stale label will be removed and the timer will restart
+
 ## All options
 
 ### List of input options
 
 Every argument is optional.
 
-| Input                             | Description                                                                                                                                                   |
-| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `repo-token`                      | PAT (Personal Access Token) for authorizing the repository.<br>_Defaults to **${{ github.token }}**_.                                                         |
-| `days-before-stale`               | Idle number of days before marking an issue/PR as stale.<br>_Defaults to **60**_.                                                                             |
-| `days-before-issue-stale`         | Idle number of days before marking an issue as stale.<br>_Override `days-before-stale`_.                                                                      |
-| `days-before-pr-stale`            | Idle number of days before marking a PR as stale.<br>_Override `days-before-stale`_.                                                                          |
-| `days-before-close`               | Idle number of days before closing a stale issue/PR.<br>_Defaults to **7**_.                                                                                  |
-| `days-before-issue-close`         | Idle number of days before closing a stale issue.<br>_Override `days-before-close`_.                                                                          |
-| `days-before-pr-close`            | Idle number of days before closing a stale PR.<br>_Override `days-before-close`_.                                                                             |
-| `stale-issue-message`             | Message to post on the stale issue.                                                                                                                           |
-| `stale-pr-message`                | Message to post on the stale PR.                                                                                                                              |
-| `close-issue-message`             | Message to post on the stale issue while closing it.                                                                                                          |
-| `close-pr-message`                | Message to post on the stale PR while closing it.                                                                                                             |
-| `stale-issue-label`               | Label to apply on the stale issue.<br>_Defaults to **Stale**_.                                                                                                |
-| `close-issue-label`               | Label to apply on closing issue.<br>Automatically removed if no longer closed nor locked).                                                                    |
-| `stale-pr-label`                  | Label to apply on the stale PR.<br>_Defaults to **Stale**_.                                                                                                   |
-| `close-pr-label`                  | Label to apply on the closing PR.<br>Automatically removed if no longer closed nor locked).                                                                   |
-| `exempt-issue-labels`             | Labels on an issue exempted from being marked as stale.                                                                                                       |
-| `exempt-pr-labels`                | Labels on the PR exempted from being marked as stale.                                                                                                         |
-| `only-labels`                     | Only issues and PRs with ALL these labels are checked.<br>Separate multiple labels with commas (eg. "question,answered").                                     |
-| `only-issue-labels`               | Only issues with ALL these labels are checked.<br>Separate multiple labels with commas (eg. "question,answered").<br>_Override `only-labels`_.                |
-| `only-pr-labels`                  | Only PRs with ALL these labels are checked.<br>Separate multiple labels with commas (eg. "question,answered").<br>_Override `only-labels`_.                   |
-| `any-of-labels`                   | Only issues and PRs with ANY of these labels are checked.<br>Separate multiple labels with commas (eg. "incomplete,waiting-feedback").                        |
-| `any-of-issue-labels`             | Only issues with ANY of these labels are checked.<br>Separate multiple labels with commas (eg. "incomplete,waiting-feedback").<br>_Override `any-of-labels`_. |
-| `any-of-pr-labels`                | Only PRs with ANY of these labels are checked.<br>Separate multiple labels with commas (eg. "incomplete,waiting-feedback").<br>_Override `any-of-labels`_.    |
-| `operations-per-run`              | Maximum number of operations per run.<br>GitHub API CRUD related.<br>_Defaults to **30**_.                                                                    |
-| `remove-stale-when-updated`       | Remove stale label from issue/PR on updates or comments.<br>_Defaults to **true**_.                                                                           |
-| `remove-issue-stale-when-updated` | Remove stale label from issue on updates or comments.<br>_Defaults to **true**_.<br>_Override `remove-stale-when-updated`_.                                   |
-| `remove-pr-stale-when-updated`    | Remove stale label from PR on updates or comments.<br>_Defaults to **true**_.<br>_Override `remove-stale-when-updated`_.                                      |
-| `remove-issue-stale-when-updated` | Remove stale label from issue on updates or comments.<br>_Defaults to **true**_.<br>_Override `remove-stale-when-updated`_.                                   |
-| `remove-pr-stale-when-updated`    | Remove stale label from PR on updates or comments.<br>_Defaults to **true**_.<br>_Override `remove-stale-when-updated`_.                                      |
-| `debug-only`                      | Dry-run on action.<br>_Defaults to **false**_.                                                                                                                |
-| `ascending`                       | Order to get issues/PR.<br>`true` is ascending, `false` is descending.<br>_Defaults to **false**_.                                                            |
-| `skip-stale-issue-message`        | Skip adding stale message on stale issue.<br>_Defaults to **false**_.                                                                                         |
-| `skip-stale-pr-message`           | Skip adding stale message on stale PR.<br>_Defaults to **false**_.                                                                                            |
-| `start-date`                      | The date used to skip the stale action on issue/PR created before it.<br>ISO 8601 or RFC 2822.                                                                |
-| `delete-branch`                   | Delete the git branch after closing a stale pull request.<br>_Defaults to **false**_.                                                                         |
-| `exempt-milestones`               | Milestones on an issue or a PR exempted from being marked as stale.                                                                                           |
-| `exempt-issue-milestones`         | Milestones on an issue exempted from being marked as stale.<br>_Override `exempt-milestones`_.                                                                |
-| `exempt-pr-milestones`            | Milestones on the PR exempted from being marked as stale.<br>_Override `exempt-milestones`_.                                                                  |
-| `exempt-all-milestones`           | Exempt all issues and PRs with milestones from being marked as stale.<br>_Priority over `exempt-milestones` rules_.                                           |
-| `exempt-all-issue-milestones`     | Exempt all issues with milestones from being marked as stale.<br>_Override `exempt-all-milestones`_.                                                          |
-| `exempt-all-pr-milestones`        | Exempt all PRs with milestones from being marked as stale.<br>_Override `exempt-all-milestones`_.                                                             |
-| `exempt-assignees`                | Assignees on an issue or a PR exempted from being marked as stale.                                                                                            |
-| `exempt-issue-assignees`          | Assignees on an issue exempted from being marked as stale.<br>_Override `exempt-assignees`_.                                                                  |
-| `exempt-pr-assignees`             | Assignees on the PR exempted from being marked as stale.<br>_Override `exempt-assignees`_.                                                                    |
-| `exempt-all-assignees`            | Exempt all issues and PRs with assignees from being marked as stale.<br>_Priority over `exempt-assignees` rules_.                                             |
-| `exempt-all-issue-assignees`      | Exempt all issues with assignees from being marked as stale.<br>_Override `exempt-all-assignees`_.                                                            |
-| `exempt-all-pr-assignees`         | Exempt all PRs with assignees from being marked as stale.<br>_Override `exempt-all-assignees`_.                                                               |
-| `enable-statistics`               | Display some statistics at the end of the logs regarding the stale workflow.<br>Only when the logs are enabled.<br>_Defaults to **true**_.                    |
+| Input                                                               | Description                                                              | Default               |
+| ------------------------------------------------------------------- | ------------------------------------------------------------------------ | --------------------- |
+| [repo-token](#repo-token)                                           | PAT for GitHub API authentication                                        | `${{ github.token }}` |
+| [days-before-stale](#days-before-stale)                             | Idle number of days before marking issues/PRs stale                      | `60`                  |
+| [days-before-issue-stale](#days-before-issue-stale)                 | Override [days-before-stale](#days-before-stale) for issues only         |                       |
+| [days-before-pr-stale](#days-before-pr-stale)                       | Override [days-before-stale](#days-before-stale) for PRs only            |                       |
+| [days-before-close](#days-before-close)                             | Idle number of days before closing stale issues/PRs                      | `7`                   |
+| [days-before-issue-close](#days-before-issue-close)                 | Override [days-before-close](#days-before-close) for issues only         |                       |
+| [days-before-pr-close](#days-before-pr-close)                       | Override [days-before-close](#days-before-close) for PRs only            |                       |
+| [stale-issue-message](#stale-issue-message)                         | Comment on the staled issues                                             |                       |
+| [stale-pr-message](#stale-pr-message)                               | Comment on the staled PRs                                                |                       |
+| [close-issue-message](#close-issue-message)                         | Comment on the staled issues while closed                                |                       |
+| [close-pr-message](#close-pr-message)                               | Comment on the staled PRs while closed                                   |                       |
+| [stale-issue-label](#stale-issue-label)                             | Label to apply on staled issues                                          | `Stale`               |
+| [close-issue-label](#close-issue-label)                             | Label to apply on closed issues                                          |                       |
+| [stale-pr-label](#stale-pr-label)                                   | Label to apply on staled PRs                                             | `Stale`               |
+| [close-pr-label](#close-pr-label)                                   | Label to apply on closed PRs                                             |                       |
+| [exempt-issue-labels](#exempt-issue-labels)                         | Labels on issues exempted from stale                                     |                       |
+| [exempt-pr-labels](#exempt-pr-labels)                               | Labels on PRs exempted from stale                                        |                       |
+| [only-labels](#only-labels)                                         | Only issues/PRs with ALL these labels are checked                        |                       |
+| [only-issue-labels](#only-issue-labels)                             | Only issues with ALL these labels are checked                            |                       |
+| [only-pr-labels](#only-pr-labels)                                   | Only PRs with ALL these labels are checked                               |                       |
+| [any-of-labels](#any-of-labels)                                     | Only issues/PRs with ANY of these labels are checked                     |                       |
+| [any-of-issue-labels](#any-of-issue-labels)                         | Only issues with ANY of these labels are checked                         |                       |
+| [any-of-pr-labels](#any-of-pr-labels)                               | Only PRs with ANY of these labels are checked                            |                       |
+| [operations-per-run](#operations-per-run)                           | Max number of operations per run                                         | `30`                  |
+| [remove-stale-when-updated](#remove-stale-when-updated)             | Remove stale label from issues/PRs on updates/comments                   | `true`                |
+| [remove-issue-stale-when-updated](#remove-issue-stale-when-updated) | Remove stale label from issues on updates/comments                       |                       |
+| [remove-pr-stale-when-updated](#remove-pr-stale-when-updated)       | Remove stale label from PRs on updates/comments                          |                       |
+| [debug-only](#debug-only)                                           | Dry-run                                                                  | `false`               |
+| [ascending](#ascending)                                             | Order to get issues/PRs                                                  | `false`               |
+| [start-date](#start-date)                                           | Skip stale action for issues/PRs created before it                       |                       |
+| [delete-branch](#delete-branch)                                     | Delete branch after closing a stale PR                                   | `false`               |
+| [exempt-milestones](#exempt-milestones)                             | Milestones on issues/PRs exempted from stale                             |                       |
+| [exempt-issue-milestones](#exempt-issue-milestones)                 | Override [exempt-milestones](#exempt-milestones) for issues only         |                       |
+| [exempt-pr-milestones](#exempt-pr-milestones)                       | Override [exempt-milestones](#exempt-milestones) for PRs only            |                       |
+| [exempt-all-milestones](#exempt-all-milestones)                     | Exempt all issues/PRs with milestones from stale                         |                       |
+| [exempt-all-issue-milestones](#exempt-all-issue-milestones)         | Override [exempt-all-milestones](#exempt-all-milestones) for issues only |                       |
+| [exempt-all-pr-milestones](#exempt-all-pr-milestones)               | Override [exempt-all-milestones](#exempt-all-milestones) for PRs only    |                       |
+| [exempt-assignees](#exempt-assignees)                               | Assignees on issues/PRs exempted from stale                              |                       |
+| [exempt-issue-assignees](#exempt-issue-assignees)                   | Override [exempt-assignees](#exempt-assignees) for issues only           |                       |
+| [exempt-pr-assignees](#exempt-pr-assignees)                         | Override [exempt-assignees](#exempt-assignees) for PRs only              |                       |
+| [exempt-all-assignees](#exempt-all-assignees)                       | Exempt all issues/PRs with assignees from stale                          |                       |
+| [exempt-all-issue-assignees](#exempt-all-issue-assignees)           | Override [exempt-all-assignees](#exempt-all-assignees) for issues only   |                       |
+| [exempt-all-pr-assignees](#exempt-all-pr-assignees)                 | Override [exempt-all-assignees](#exempt-all-assignees) for PRs only      |                       |
+| [enable-statistics](#enable-statistics)                             | Display statistics in the logs                                           | `true`                |
 
 ### List of output options
 
@@ -68,12 +70,210 @@ Every argument is optional.
 
 ### Detailed options
 
+#### repo-token
+
+Personal Access Token (PAT) that allows the stale workflow to authenticate and perform API calls to GitHub.  
+Under the hood, it uses the [@actions/github](https://www.npmjs.com/package/@actions/github) package.
+
+Default value: `${{ github.token }}`
+
+#### days-before-stale
+
+The idle number of days before marking the issues or the pull requests as stale (by adding a label).  
+The issues or the pull requests will be marked as stale if the last update (based on [GitHub issue](https://docs.github.com/en/rest/reference/issues) field `updated_at`) is older than the idle number of days.
+
+If set to a negative number like `-1`, no issues or pull requests will be marked as stale automatically.  
+In that case, you can still add the stale label manually to mark as stale.
+
+The label used to stale is defined by these two options:
+
+- [stale-issue-label](#stale-issue-label)
+- [stale-pr-label](#stale-pr-label)
+
+A comment can also be added to notify about the stale and is defined by these two options:
+
+- [stale-issue-message](#stale-issue-message)
+- [stale-pr-message](#stale-pr-message)
+
+You can fine tune which issues or pull requests should be marked as stale based on the milestones, the assignees, the creation date and the missing/present labels from these options:
+
+- [exempt-issue-labels](#exempt-issue-labels)
+- [exempt-pr-labels](#exempt-pr-labels)
+- [only-labels](#only-labels)
+- [any-of-labels](#any-of-labels)
+- [start-date](#start-date)
+- [exempt-milestones](#exempt-milestones)
+- [exempt-all-milestones](#exempt-all-milestones)
+- [exempt-assignees](#exempt-assignees)
+- [exempt-all-assignees](#exempt-all-assignees)
+
+Default value: `60`
+
+#### days-before-issue-stale
+
+Useful to override [days-before-stale](#days-before-stale) but only for the idle number of days before marking the issues as stale.
+
+Default value: unset
+
+#### days-before-pr-stale
+
+Useful to override [days-before-stale](#days-before-stale) but only for the idle number of days before marking the pull requests as stale.
+
+Default value: unset
+
+#### days-before-close
+
+The idle number of days before closing the stale issues or the stale pull requests (due to the stale label).  
+The issues or the pull requests will be closed if the last update (based on [GitHub issue](https://docs.github.com/en/rest/reference/issues) field `updated_at`) is older than the idle number of days.  
+Since adding the stale label will alter the last update date, we can calculate the number of days from this date.
+
+If set to a negative number like `-1`, the issues or the pull requests will never be closed automatically.
+
+The label used to stale is defined by these two options:
+
+- [stale-issue-label](#stale-issue-label)
+- [stale-pr-label](#stale-pr-label)
+
+Default value: `7`
+
+#### days-before-issue-close
+
+Override [days-before-close](#days-before-close) but only for the idle number of days before closing the stale issues.
+
+Default value: unset
+
+#### days-before-pr-close
+
+Override [days-before-close](#days-before-close) but only for the idle number of days before closing the stale pull requests.
+
+Default value: unset
+
+#### stale-issue-message
+
+The message that will be added as a comment to the issues when the stale workflow marks it automatically as stale with a label.
+
+You can skip the comment sending by omitting the option or by passing an empty string.
+
+Default value: unset
+
+#### stale-pr-message
+
+The message that will be added as a comment to the pull requests when the stale workflow marks it automatically as stale with a label.
+
+You can skip the comment sending by omitting the option or by passing an empty string.
+
+Default value: unset
+
+#### close-issue-message
+
+The message that will be added as a comment to the issues when the stale workflow closes it automatically after being stale for too long.
+
+Default value: unset
+
+#### close-pr-message
+
+The message that will be added as a comment to the pull requests when the stale workflow closes it automatically after being stale for too long.
+
+Default value: unset
+
+#### stale-issue-label
+
+The label that will be added to the issues when automatically marked as stale.  
+If you wish to speedup the stale workflow for the issues, you can add this label manually to mark as stale.
+
+Default value: `Stale`
+
+#### close-issue-label
+
+The label that will be added to the issues when closed automatically.  
+It will be automatically removed if the issues are no longer closed nor locked.
+
+Default value: unset
+
+#### stale-pr-label
+
+The label that will be added to the pull requests when automatically marked as stale.  
+If you wish to speedup the stale workflow for the pull requests, you can add this label manually to mark as stale.
+
+Default value: `Stale`
+
+#### close-pr-label
+
+The label that will be added to the pull requests when closed automatically.  
+It will be automatically removed if the pull requests are no longer closed nor locked.
+
+Default value: unset
+
+#### exempt-issue-labels
+
+The label(s) that can exempt to automatically mark as stale the issues.  
+It can be a comma separated list of labels (e.g: `question,bug`).
+
+If unset (or an empty string), this option will not alter the stale workflow.
+
+Default value: unset
+
+#### exempt-pr-labels
+
+The label(s) that can exempt to automatically mark as stale the pull requests.  
+It can be a comma separated list of labels (e.g: `need-help,WIP`).
+
+If unset (or an empty string), this option will not alter the stale workflow.
+
+Default value: unset
+
+#### only-labels
+
+An allow-list of label(s) to only process the issues or the pull requests that contain all these label(s).  
+It can be a comma separated list of labels (e.g: `answered,needs-rebase`).
+
+If unset (or an empty string), this option will not alter the stale workflow.
+
+If you wish to only check that the issues or the pull requests contain one of these label(s), use instead [any-of-labels](#any-of-labels).
+
+Default value: unset
+
+#### only-issue-labels
+
+Override [only-labels](#only-labels) but only to process the issues that contain all these label(s).
+
+Default value: unset
+
+#### only-pr-labels
+
+Override [only-labels](#only-labels) but only to process the pull requests that contain all these label(s).
+
+Default value: unset
+
+#### any-of-labels
+
+An allow-list of label(s) to only process the issues or the pull requests that contain one of these label(s).  
+It can be a comma separated list of labels (e.g: `answered,needs-rebase`).
+
+If unset (or an empty string), this option will not alter the stale workflow.
+
+If you wish to only check that the issues or the pull requests contain all these label(s), use instead [only-labels](#only-labels).
+
+Default value: unset
+
+#### any-of-issue-labels
+
+Override [any-of-labels](#any-of-labels) but only to process the issues that contain one of these label(s).
+
+Default value: unset
+
+#### any-of-pr-labels
+
+Override [any-of-labels](#any-of-labels) but only to process the pull requests that contain one of these label(s).
+
+Default value: unset
+
 #### operations-per-run
 
 _Context:_  
 This action performs some API calls to GitHub to fetch or close issues and pull requests, set or update labels, add comments, delete branches, etc.  
-These operations are made in a very short period of time - because the action is very fast to run - and can be numerous based on your project action configuration and the quantity of issues and pull requests within it.  
-GitHub has a [rate limit](https://docs.github.com/en/rest/overview/resources-in-the-rest-api#rate-limiting) and if reached will block all of these API calls for one hour (or API calls from other actions using the same user (a.k.a: the github-token from the [repo-token](#repo-token) option)).  
+These operations are made in a very short period of time — because the action is very fast to run — and can be numerous based on your project action configuration and the quantity of issues and pull requests within it.  
+GitHub has a [rate limit](https://docs.github.com/en/rest/overview/resources-in-the-rest-api#rate-limiting) and if reached will block these API calls for one hour (or API calls from other actions using the same user (a.k.a.: the github-token from the [repo-token](#repo-token) option)).  
 This option helps you to stay within the GitHub rate limits, as you can use this option to limit the number of operations for a single run.
 
 _Purpose:_  
@@ -82,12 +282,154 @@ This option aims to limit the number of operations made with the GitHub API to a
 Based on your project, your GitHub business plan and the date of the cron job you set for this action, you can increase this limit to a higher number.
 If you are not sure which is the right value for you or if the default value is good enough, you could enable the logs and look at the end of the stale action.  
 If you reached the limit, you will see a warning message in the logs, telling you that you should increase the number of operations.
-If you choose not to increase the limit, you might end up with un-processed issues or pull requests after a stale action run.
+If you choose not to increase the limit, you might end up with unprocessed issues or pull requests after a stale action run.
 
 When [debugging](#Debugging), you can set it to a much higher number like `1000` since there will be fewer operations made with the GitHub API.  
 Only the [actor](#repo-token) and the batch of issues (100 per batch) will consume the operations.
 
 Default value: `30`
+
+#### remove-stale-when-updated
+
+Automatically remove the stale label when the issues or the pull requests are updated (based on [GitHub issue](https://docs.github.com/en/rest/reference/issues) field `updated_at`) or commented.
+
+Default value: `true`
+
+#### remove-issue-stale-when-updated
+
+Override [remove-stale-when-updated](#remove-stale-when-updated) but only to automatically remove the stale label when the issues are updated (based on [GitHub issue](https://docs.github.com/en/rest/reference/issues) field `updated_at`) or commented.
+
+Default value: unset
+
+#### remove-pr-stale-when-updated
+
+Override [remove-stale-when-updated](#remove-stale-when-updated) but only to automatically remove the stale label when the pull requests are updated (based on [GitHub issue](https://docs.github.com/en/rest/reference/issues) field `updated_at`) or commented.
+
+Default value: unset
+
+#### debug-only
+
+Run the stale workflow as dry-run.  
+No GitHub API calls that can alter your issues and pull requests will happen.  
+Useful to debug or when you want to configure the stale workflow safely.
+
+Default value: `false`
+
+#### ascending
+
+Change the order used to fetch the issues and pull requests from GitHub:
+
+- `true` is for ascending.
+- `false` is for descending.
+
+It can be useful if your repository is processing so many issues and pull requests that you reach the [operations-per-run](#operations-per-run) limit.  
+Based on the order, you could prefer to focus on the new content or on the old content of your repository.
+
+Default value: `false`
+
+#### start-date
+
+The start date is used to ignore the issues and pull requests created before the start date.  
+Particularly useful when you wish to add this stale workflow on an existing repository and only wish to stale the new issues and pull requests.
+
+If set, the date must be formatted following the `ISO 8601` or `RFC 2822` standard.
+
+Default value: unset
+
+#### delete-branch
+
+If set to `true`, the stale workflow will automatically delete the GitHub branches related to the pull requests automatically closed by the stale workflow.
+
+Default value: `false`
+
+#### exempt-milestones
+
+A white-list of milestone(s) to only process the issues or the pull requests that does not contain one of these milestone(s).  
+It can be a comma separated list of milestones (e.g: `V1,next`).
+
+If unset (or an empty string), this option will not alter the stale workflow.
+
+Default value: unset
+
+#### exempt-issue-milestones
+
+Override [exempt-milestones](#exempt-milestones) but only to process the issues that does not contain one of these milestone(s).
+
+Default value: unset
+
+#### exempt-pr-milestones
+
+Override [exempt-milestones](#exempt-milestones) but only to process the pull requests that does not contain one of these milestone(s).
+
+Default value: unset
+
+#### exempt-all-milestones
+
+If set to `true`, the issues or the pull requests with a milestone will not be marked as stale automatically.
+
+Priority over [exempt-milestones](#exempt-milestones).
+
+Default value: `false`
+
+#### exempt-all-issue-milestones
+
+Override [exempt-all-milestones](#exempt-all-milestones) but only to exempt the issues with a milestone to be marked as stale automatically.
+
+Default value: unset
+
+#### exempt-all-pr-milestones
+
+Override [exempt-all-milestones](#exempt-all-milestones) but only to exempt the pull requests with a milestone to be marked as stale automatically.
+
+Default value: unset
+
+#### exempt-assignees
+
+An allow-list of assignee(s) to only process the issues or the pull requests that does not contain one of these assignee(s).  
+It can be a comma separated list of assignees (e.g: `marco,polo`).
+
+If unset (or an empty string), this option will not alter the stale workflow.
+
+Default value: unset
+
+#### exempt-issue-assignees
+
+Override [exempt-assignees](#exempt-assignees) but only to process the issues that does not contain one of these assignee(s).
+
+Default value: unset
+
+#### exempt-pr-assignees
+
+Override [exempt-assignees](#exempt-assignees) but only to process the pull requests that does not contain one of these assignee(s).
+
+Default value: unset
+
+#### exempt-all-assignees
+
+If set to `true`, the issues or the pull requests with an assignee will not be marked as stale automatically.
+
+Priority over [exempt-assignees](#exempt-assignees).
+
+Default value: `false`
+
+#### exempt-all-issue-assignees
+
+Override [exempt-all-assignees](#exempt-all-assignees) but only to exempt the issues with an assignee to be marked as stale automatically.
+
+Default value: unset
+
+#### exempt-all-pr-assignees
+
+Override [exempt-all-assignees](#exempt-all-assignees) but only to exempt the pull requests with an assignee to be marked as stale automatically.
+
+Default value: unset
+
+#### enable-statistics
+
+Collects and display statistics at the end of the stale workflow logs to get a summary of what happened during the run.  
+This option is only useful if the debug output secret `ACTIONS_STEP_DEBUG` is set to `true` in your repository to display the logs.
+
+Default value: `true`
 
 ### Usage
 
@@ -215,7 +557,7 @@ jobs:
     steps:
       - uses: actions/stale@v3
         with:
-          start-date: '2020-18-04T00:00:00Z' // ISO 8601 or RFC 2822
+          start-date: '2020-18-04T00:00:00Z' # ISO 8601 or RFC 2822
 ```
 
 Avoid stale for specific milestones:
@@ -311,7 +653,7 @@ jobs:
 
 **Logs:**  
 To see the debug output from this action, you must set the secret `ACTIONS_STEP_DEBUG` to `true` in your repository.  
-There is a lot of logs so this can be very helpful!
+There are many logs, so this can be very helpful!
 
 **Statistics:**  
 If the logs are enabled, you can also enable the statistics log which will be visible at the end of the logs once all issues were processed.  
@@ -327,9 +669,9 @@ If the `debug-only` option is enabled, this is very helpful because the workflow
 
 **Job frequency:**  
 You could change the cron job frequency in the stale workflow to run the stale workflow more often.  
-Usually this is not very helpful though.
+Usually, this is not very helpful though.
 
 ### Contributing
 
-You wish to contribute?  
-Check out the [contributing](CONTRIBUTING.md) file before helping us.
+We welcome contributions!
+Please read the [contributing](CONTRIBUTING.md) file before starting your work.

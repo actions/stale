@@ -1018,6 +1018,10 @@ export class IssuesProcessor {
       )}`
     );
 
+    if (this.options.debugOnly) {
+      return;
+    }
+
     try {
       this.operations.consumeOperation();
       this._statistics?.incrementAddedItemsLabel(issue);

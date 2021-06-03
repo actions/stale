@@ -578,7 +578,7 @@ export class IssuesProcessor {
     issueLogger.info(
       `The option ${issueLogger.createOptionLink(
         this._getRemoveStaleWhenUpdatedUsedOptionName(issue)
-      )} is: ${chalk.cyan(shouldRemoveStaleWhenUpdated)}`
+      )} is: ${LoggerService.cyan(shouldRemoveStaleWhenUpdated)}`
     );
 
     if (shouldRemoveStaleWhenUpdated) {
@@ -729,7 +729,7 @@ export class IssuesProcessor {
         this._consumeIssueOperation(issue);
         this._statistics?.incrementAddedItemsComment(issue);
 
-        if (this.options.debugOnly) {
+        if (!this.options.debugOnly) {
           await this.client.issues.createComment({
             owner: context.repo.owner,
             repo: context.repo.repo,
@@ -780,7 +780,7 @@ export class IssuesProcessor {
       this._consumeIssueOperation(issue);
       this._statistics?.incrementFetchedPullRequestsCount();
 
-      if (this.options.debugOnly) {
+      if (!this.options.debugOnly) {
         const pullRequest = await this.client.pulls.get({
           owner: context.repo.owner,
           repo: context.repo.repo,
@@ -818,7 +818,7 @@ export class IssuesProcessor {
       this._consumeIssueOperation(issue);
       this._statistics?.incrementDeletedBranchesCount();
 
-      if (this.options.debugOnly) {
+      if (!this.options.debugOnly) {
         await this.client.git.deleteRef({
           owner: context.repo.owner,
           repo: context.repo.repo,
@@ -843,9 +843,9 @@ export class IssuesProcessor {
     const issueLogger: IssueLogger = new IssueLogger(issue);
 
     issueLogger.info(
-      `${isSubStep ? chalk.white('├── ') : ''}Removing the label "${LoggerService.cyan(
-        label
-      )}" from this $$type...`
+      `${
+        isSubStep ? LoggerService.white('├── ') : ''
+      }Removing the label "${LoggerService.cyan(label)}" from this $$type...`
     );
     this.removedLabelIssues.push(issue);
 
@@ -863,14 +863,14 @@ export class IssuesProcessor {
       }
 
       issueLogger.info(
-        `${isSubStep ? chalk.white('└── ') : ''}The label "${LoggerService.cyan(
-          label
-        )}" was removed`
+        `${
+          isSubStep ? LoggerService.white('└── ') : ''
+        }The label "${LoggerService.cyan(label)}" was removed`
       );
     } catch (error) {
       issueLogger.error(
         `${
-          isSubStep ? chalk.white('└── ') : ''
+          isSubStep ? LoggerService.white('└── ') : ''
         }Error when removing the label: "${LoggerService.cyan(error.message)}"`
       );
     }
@@ -970,13 +970,13 @@ export class IssuesProcessor {
 
     if (!closeLabel) {
       issueLogger.info(
-        chalk.white('├──'),
+        LoggerService.white('├──'),
         `The ${issueLogger.createOptionLink(
           IssuesProcessor._getCloseLabelUsedOptionName(issue)
         )} option was not set`
       );
       issueLogger.info(
-        chalk.white('└──'),
+        LoggerService.white('└──'),
         `Skipping the removal of the close label`
       );
 
@@ -985,7 +985,7 @@ export class IssuesProcessor {
 
     if (isLabeled(issue, closeLabel)) {
       issueLogger.info(
-        chalk.white('├──'),
+        LoggerService.white('├──'),
         `The $$type has a close label "${LoggerService.cyan(
           closeLabel
         )}". Removing the close label...`
@@ -995,7 +995,7 @@ export class IssuesProcessor {
       this._statistics?.incrementDeletedCloseItemsLabelsCount(issue);
     } else {
       issueLogger.info(
-        chalk.white('└──'),
+        LoggerService.white('└──'),
         `There is no close label on this $$type. Skipping`
       );
 

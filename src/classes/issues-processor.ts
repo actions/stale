@@ -995,7 +995,7 @@ export class IssuesProcessor {
     issueLogger.info(
       `Removing all the labels specified via the ${this._logger.createOptionLink(
         Option.RemoveLabelsWhenUnstale
-      )}`
+      )} option.`
     );
 
     for (const label of removeLabels.values()) {
@@ -1016,7 +1016,7 @@ export class IssuesProcessor {
     issueLogger.info(
       `Removing all the labels specified via the ${this._logger.createOptionLink(
         Option.AddLabelsWhenUnstale
-      )}`
+      )} option.`
     );
 
     this.addedLabelIssues.push(issue);
@@ -1036,7 +1036,7 @@ export class IssuesProcessor {
       });
     } catch (error) {
       this._logger.error(
-        `Add labels when updated from stale error: ${error.message}`
+        `Error when adding labels after updated from stale: ${error.message}`
       );
     }
   }

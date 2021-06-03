@@ -12,16 +12,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.Assignees = void 0;
-
-const chalk_1 = __importDefault(__nccwpck_require__(8818));
-
 const lodash_deburr_1 = __importDefault(__nccwpck_require__(1601));
 const option_1 = __nccwpck_require__(5931);
 const words_to_list_1 = __nccwpck_require__(1883);
 const issue_logger_1 = __nccwpck_require__(2984);
-
 const logger_service_1 = __nccwpck_require__(1973);
-
 class Assignees {
     constructor(options, issue) {
         this._options = options;
@@ -38,23 +33,23 @@ class Assignees {
             return false;
         }
         if (this._shouldExemptAllAssignees()) {
-            this._issueLogger.info(chalk_1.default.white('└──'), 'Skipping this $$type because it has an exempt assignee');
+            this._issueLogger.info(logger_service_1.LoggerService.white('└──'), 'Skipping this $$type because it has an exempt assignee');
             return true;
         }
         const exemptAssignees = this._getExemptAssignees();
         if (exemptAssignees.length === 0) {
-            this._issueLogger.info(chalk_1.default.white('├──'), `No assignee option was specified to skip the stale process for this $$type`);
+            this._issueLogger.info(logger_service_1.LoggerService.white('├──'), `No assignee option was specified to skip the stale process for this $$type`);
             this._logSkip();
             return false;
         }
-        this._issueLogger.info(chalk_1.default.white('├──'), `Found ${chalk_1.default.cyan(exemptAssignees.length)} assignee${exemptAssignees.length > 1 ? 's' : ''} that can exempt stale on this $$type`);
+        this._issueLogger.info(logger_service_1.LoggerService.white('├──'), `Found ${logger_service_1.LoggerService.cyan(exemptAssignees.length)} assignee${exemptAssignees.length > 1 ? 's' : ''} that can exempt stale on this $$type`);
         const hasExemptAssignee = exemptAssignees.some((exemptAssignee) => this._hasAssignee(exemptAssignee));
         if (!hasExemptAssignee) {
-            this._issueLogger.info(chalk_1.default.white('├──'), 'No assignee on this $$type can exempt the stale process');
+            this._issueLogger.info(logger_service_1.LoggerService.white('├──'), 'No assignee on this $$type can exempt the stale process');
             this._logSkip();
         }
         else {
-            this._issueLogger.info(chalk_1.default.white('└──'), 'Skipping this $$type because it has an exempt assignee');
+            this._issueLogger.info(logger_service_1.LoggerService.white('└──'), 'Skipping this $$type because it has an exempt assignee');
         }
         return hasExemptAssignee;
     }
@@ -65,33 +60,32 @@ class Assignees {
     }
     _getExemptIssueAssignees() {
         if (this._options.exemptIssueAssignees === '') {
-            this._issueLogger.info(chalk_1.default.white('├──'), `The option ${this._issueLogger.createOptionLink(option_1.Option.ExemptIssueAssignees)} is disabled. No specific assignee can skip the stale process for this $$type`);
+            this._issueLogger.info(logger_service_1.LoggerService.white('├──'), `The option ${this._issueLogger.createOptionLink(option_1.Option.ExemptIssueAssignees)} is disabled. No specific assignee can skip the stale process for this $$type`);
             if (this._options.exemptAssignees === '') {
-                this._issueLogger.info(chalk_1.default.white('├──'), `The option ${this._issueLogger.createOptionLink(option_1.Option.ExemptAssignees)} is disabled. No specific assignee can skip the stale process for this $$type`);
+                this._issueLogger.info(logger_service_1.LoggerService.white('├──'), `The option ${this._issueLogger.createOptionLink(option_1.Option.ExemptAssignees)} is disabled. No specific assignee can skip the stale process for this $$type`);
                 return [];
             }
             const exemptAssignees = words_to_list_1.wordsToList(this._options.exemptAssignees);
-            this._issueLogger.info(chalk_1.default.white('├──'), `The option ${this._issueLogger.createOptionLink(option_1.Option.ExemptAssignees)} is set. ${chalk_1.default.cyan(exemptAssignees.length)} assignee${exemptAssignees.length === 1 ? '' : 's'} can skip the stale process for this $$type`);
+            this._issueLogger.info(logger_service_1.LoggerService.white('├──'), `The option ${this._issueLogger.createOptionLink(option_1.Option.ExemptAssignees)} is set. ${logger_service_1.LoggerService.cyan(exemptAssignees.length)} assignee${exemptAssignees.length === 1 ? '' : 's'} can skip the stale process for this $$type`);
             return exemptAssignees;
         }
         const exemptAssignees = words_to_list_1.wordsToList(this._options.exemptIssueAssignees);
-        this._issueLogger.info(chalk_1.default.white('├──'), `The option ${this._issueLogger.createOptionLink(option_1.Option.ExemptIssueAssignees)} is set. ${chalk_1.default.cyan(exemptAssignees.length)} assignee${exemptAssignees.length === 1 ? '' : 's'} can skip the stale process for this $$type`);
+        this._issueLogger.info(logger_service_1.LoggerService.white('├──'), `The option ${this._issueLogger.createOptionLink(option_1.Option.ExemptIssueAssignees)} is set. ${logger_service_1.LoggerService.cyan(exemptAssignees.length)} assignee${exemptAssignees.length === 1 ? '' : 's'} can skip the stale process for this $$type`);
         return exemptAssignees;
     }
     _getExemptPullRequestAssignees() {
         if (this._options.exemptPrAssignees === '') {
-            this._issueLogger.info(chalk_1.default.white('├──'), `The option ${this._issueLogger.createOptionLink(option_1.Option.ExemptPrAssignees)} is disabled. No specific assignee can skip the stale process for this $$type`);
+            this._issueLogger.info(logger_service_1.LoggerService.white('├──'), `The option ${this._issueLogger.createOptionLink(option_1.Option.ExemptPrAssignees)} is disabled. No specific assignee can skip the stale process for this $$type`);
             if (this._options.exemptAssignees === '') {
-                this._issueLogger.info(chalk_1.default.white('├──'), `The option ${this._issueLogger.createOptionLink(option_1.Option.ExemptAssignees)} is disabled. No specific assignee can skip the stale process for this $$type`);
+                this._issueLogger.info(logger_service_1.LoggerService.white('├──'), `The option ${this._issueLogger.createOptionLink(option_1.Option.ExemptAssignees)} is disabled. No specific assignee can skip the stale process for this $$type`);
                 return [];
             }
             const exemptAssignees = words_to_list_1.wordsToList(this._options.exemptAssignees);
-            this._issueLogger.info(chalk_1.default.white('├──'), `The option ${this._issueLogger.createOptionLink(option_1.Option.ExemptAssignees)} is set. ${chalk_1.default.cyan(exemptAssignees.length)} assignee${exemptAssignees.length === 1 ? '' : 's'} can skip the stale process for this $$type`);
+            this._issueLogger.info(logger_service_1.LoggerService.white('├──'), `The option ${this._issueLogger.createOptionLink(option_1.Option.ExemptAssignees)} is set. ${logger_service_1.LoggerService.cyan(exemptAssignees.length)} assignee${exemptAssignees.length === 1 ? '' : 's'} can skip the stale process for this $$type`);
             return exemptAssignees;
         }
         const exemptAssignees = words_to_list_1.wordsToList(this._options.exemptPrAssignees);
-        this._issueLogger.info(chalk_1.default.white('├──'), `The option ${this._issueLogger.createOptionLink(option_1.Option.ExemptPrAssignees)} is set. ${chalk_1.default.cyan(exemptAssignees.length)} assignee${exemptAssignees.length === 1 ? '' : 's'} can skip the stale process for this $$type`);
-
+        this._issueLogger.info(logger_service_1.LoggerService.white('├──'), `The option ${this._issueLogger.createOptionLink(option_1.Option.ExemptPrAssignees)} is set. ${logger_service_1.LoggerService.cyan(exemptAssignees.length)} assignee${exemptAssignees.length === 1 ? '' : 's'} can skip the stale process for this $$type`);
         return exemptAssignees;
     }
     _hasAssignee(assignee) {
@@ -99,7 +93,7 @@ class Assignees {
         return this._issue.assignees.some((issueAssignee) => {
             const isSameAssignee = cleanAssignee === Assignees._cleanAssignee(issueAssignee.login);
             if (isSameAssignee) {
-                this._issueLogger.info(chalk_1.default.white('├──'), `@${issueAssignee.login} is assigned on this $$type and is an exempt assignee`);
+                this._issueLogger.info(logger_service_1.LoggerService.white('├──'), `@${issueAssignee.login} is assigned on this $$type and is an exempt assignee`);
             }
             return isSameAssignee;
         });
@@ -142,7 +136,7 @@ class Assignees {
         }
     }
     _logSkip() {
-        this._issueLogger.info(chalk_1.default.white('└──'), 'Skip the assignees checks');
+        this._issueLogger.info(logger_service_1.LoggerService.white('└──'), 'Skip the assignees checks');
     }
 }
 exports.Assignees = Assignees;
@@ -229,17 +223,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.IssuesProcessor = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const github_1 = __nccwpck_require__(5438);
-
-const chalk_1 = __importDefault(__nccwpck_require__(8818));
-
 const option_1 = __nccwpck_require__(5931);
 const get_humanized_date_1 = __nccwpck_require__(965);
 const is_date_more_recent_than_1 = __nccwpck_require__(1473);
@@ -255,9 +242,7 @@ const logger_1 = __nccwpck_require__(6212);
 const milestones_1 = __nccwpck_require__(4601);
 const stale_operations_1 = __nccwpck_require__(5080);
 const statistics_1 = __nccwpck_require__(3334);
-  
 const logger_service_1 = __nccwpck_require__(1973);
-
 /***
  * Handle processing of issues for staleness/closure.
  */
@@ -271,12 +256,10 @@ class IssuesProcessor {
         this.options = options;
         this.client = github_1.getOctokit(this.options.repoToken);
         this._operations = new stale_operations_1.StaleOperations(this.options);
-
-        this._logger.info(chalk_1.default.yellow('Starting the stale action process...'));
+        this._logger.info(logger_service_1.LoggerService.yellow(`Starting the stale action process...`));
         if (this.options.debugOnly) {
-            this._logger.warning(chalk_1.default.yellowBright('Executing in debug mode!'));
-            this._logger.warning(chalk_1.default.yellowBright('The debug output will be written but no issues/PRs will be processed.'));
-
+            this._logger.warning(logger_service_1.LoggerService.yellowBright(`Executing in debug mode!`));
+            this._logger.warning(logger_service_1.LoggerService.yellowBright(`The debug output will be written but no issues/PRs will be processed.`));
         }
         if (this.options.enableStatistics) {
             this._statistics = new statistics_1.Statistics();
@@ -291,9 +274,7 @@ class IssuesProcessor {
         const consumedOperationsCount = issue.operations.getConsumedOperationsCount();
         if (consumedOperationsCount > 0) {
             const issueLogger = new issue_logger_1.IssueLogger(issue);
-
-            issueLogger.info(chalk_1.default.cyan(consumedOperationsCount), `operation${consumedOperationsCount > 1 ? 's' : ''} consumed for this $$type`);
-
+            issueLogger.info(logger_service_1.LoggerService.cyan(consumedOperationsCount), `operation${consumedOperationsCount > 1 ? 's' : ''} consumed for this $$type`);
         }
     }
     static _getStaleMessageUsedOptionName(issue) {
@@ -308,23 +289,17 @@ class IssuesProcessor {
             const issues = yield this.getIssues(page);
             const actor = yield this.getActor();
             if (issues.length <= 0) {
-
-                this._logger.info(chalk_1.default.green('No more issues found to process. Exiting...'));
-
+                this._logger.info(logger_service_1.LoggerService.green(`No more issues found to process. Exiting...`));
                 (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.setRemainingOperations(this._operations.getRemainingOperationsCount()).logStats();
                 return this._operations.getRemainingOperationsCount();
             }
             else {
-
-                this._logger.info(chalk_1.default.yellow(`Processing the batch of issues ${chalk_1.default.cyan(`#${page}`)} containing ${chalk_1.default.cyan(issues.length)} issue${issues.length > 1 ? 's' : ''}...`));
-
+                this._logger.info(`${logger_service_1.LoggerService.yellow('Processing the batch of issues')} ${logger_service_1.LoggerService.cyan(`#${page}`)} ${logger_service_1.LoggerService.yellow('containing')} ${logger_service_1.LoggerService.cyan(issues.length)} ${logger_service_1.LoggerService.yellow(`issue${issues.length > 1 ? 's' : ''}...`)}`);
             }
             for (const issue of issues.values()) {
                 const issueLogger = new issue_logger_1.IssueLogger(issue);
                 (_b = this._statistics) === null || _b === void 0 ? void 0 : _b.incrementProcessedItemsCount(issue);
-
-                issueLogger.info(`Found this $$type last updated at: ${chalk_1.default.cyan(issue.updated_at)}`);
-
+                issueLogger.info(`Found this $$type last updated at: ${logger_service_1.LoggerService.cyan(issue.updated_at)}`);
                 // calculate string based messages for this issue
                 const staleMessage = issue.isPullRequest
                     ? this.options.stalePrMessage
@@ -339,47 +314,33 @@ class IssuesProcessor {
                     ? this.options.closePrLabel
                     : this.options.closeIssueLabel;
                 const skipMessage = issue.isPullRequest
-
-                    ? this.options.skipStalePrMessage
-                    : this.options.skipStaleIssueMessage;
-
+                    ? this.options.stalePrMessage.length === 0
+                    : this.options.staleIssueMessage.length === 0;
                 const daysBeforeStale = issue.isPullRequest
                     ? this._getDaysBeforePrStale()
                     : this._getDaysBeforeIssueStale();
                 const onlyLabels = words_to_list_1.wordsToList(this._getOnlyLabels(issue));
                 if (onlyLabels.length > 0) {
-
-                    issueLogger.info(`The option ${issueLogger.createOptionLink(option_1.Option.OnlyLabels)} was specified to only process issues and pull requests with all those labels (${chalk_1.default.cyan(onlyLabels.length)})`);
-
+                    issueLogger.info(`The option ${issueLogger.createOptionLink(option_1.Option.OnlyLabels)} was specified to only process issues and pull requests with all those labels (${logger_service_1.LoggerService.cyan(onlyLabels.length)})`);
                     const hasAllWhitelistedLabels = onlyLabels.every((label) => {
                         return is_labeled_1.isLabeled(issue, label);
                     });
                     if (!hasAllWhitelistedLabels) {
-
-                        issueLogger.info(chalk_1.default.white('└──'), `Skipping this $$type because it doesn't have all the required labels`);
+                        issueLogger.info(logger_service_1.LoggerService.white('└──'), `Skipping this $$type because it doesn't have all the required labels`);
                         IssuesProcessor._endIssueProcessing(issue);
                         continue; // Don't process issues without all of the required labels
                     }
                     else {
-
-                        issueLogger.info(chalk_1.default.white('├──'), `All the required labels are present on this $$type`);
-                        issueLogger.info(chalk_1.default.white('└──'), `Continuing the process for this $$type`);
-
+                        issueLogger.info(logger_service_1.LoggerService.white('├──'), `All the required labels are present on this $$type`);
+                        issueLogger.info(logger_service_1.LoggerService.white('└──'), `Continuing the process for this $$type`);
                     }
                 }
                 else {
                     issueLogger.info(`The option ${issueLogger.createOptionLink(option_1.Option.OnlyLabels)} was not specified`);
-
-                    issueLogger.info(chalk_1.default.white('└──'), `Continuing the process for this $$type`);
+                    issueLogger.info(logger_service_1.LoggerService.white('└──'), `Continuing the process for this $$type`);
                 }
-                issueLogger.info(`Days before $$type stale: ${chalk_1.default.cyan(daysBeforeStale)}`);
+                issueLogger.info(`Days before $$type stale: ${logger_service_1.LoggerService.cyan(daysBeforeStale)}`);
                 const shouldMarkAsStale = should_mark_when_stale_1.shouldMarkWhenStale(daysBeforeStale);
-                if (!staleMessage && shouldMarkAsStale) {
-                    issueLogger.info(`Skipping this $$type because it should be marked as stale based on the option ${issueLogger.createOptionLink(this._getDaysBeforeStaleUsedOptionName(issue))} (${chalk_1.default.cyan(daysBeforeStale)}) but the option ${issueLogger.createOptionLink(IssuesProcessor._getStaleMessageUsedOptionName(issue))} is not set`);
-                    IssuesProcessor._endIssueProcessing(issue);
-                    continue;
-                }
-
                 if (issue.state === 'closed') {
                     issueLogger.info(`Skipping this $$type because it is closed`);
                     IssuesProcessor._endIssueProcessing(issue);
@@ -395,18 +356,14 @@ class IssuesProcessor {
                 if (this.options.startDate) {
                     const startDate = new Date(this.options.startDate);
                     const createdAt = new Date(issue.created_at);
-
-                    issueLogger.info(`A start date was specified for the ${get_humanized_date_1.getHumanizedDate(startDate)} (${chalk_1.default.cyan(this.options.startDate)})`);
-
+                    issueLogger.info(`A start date was specified for the ${get_humanized_date_1.getHumanizedDate(startDate)} (${logger_service_1.LoggerService.cyan(this.options.startDate)})`);
                     // Expecting that GitHub will always set a creation date on the issues and PRs
                     // But you never know!
                     if (!is_valid_date_1.isValidDate(createdAt)) {
                         IssuesProcessor._endIssueProcessing(issue);
                         core.setFailed(new Error(`Invalid issue field: "created_at". Expected a valid date`));
                     }
-
-                    issueLogger.info(`$$type created the ${get_humanized_date_1.getHumanizedDate(createdAt)} (${chalk_1.default.cyan(issue.created_at)})`);
-
+                    issueLogger.info(`$$type created the ${get_humanized_date_1.getHumanizedDate(createdAt)} (${logger_service_1.LoggerService.cyan(issue.created_at)})`);
                     if (!is_date_more_recent_than_1.isDateMoreRecentThan(createdAt, startDate)) {
                         issueLogger.info(`Skipping this $$type because it was created before the specified start date`);
                         IssuesProcessor._endIssueProcessing(issue);
@@ -433,30 +390,23 @@ class IssuesProcessor {
                 }
                 const anyOfLabels = words_to_list_1.wordsToList(this._getAnyOfLabels(issue));
                 if (anyOfLabels.length > 0) {
-
-                    issueLogger.info(`The option ${issueLogger.createOptionLink(option_1.Option.AnyOfLabels)} was specified to only process the issues and pull requests with one of those labels (${chalk_1.default.cyan(anyOfLabels.length)})`);
-
+                    issueLogger.info(`The option ${issueLogger.createOptionLink(option_1.Option.AnyOfLabels)} was specified to only process the issues and pull requests with one of those labels (${logger_service_1.LoggerService.cyan(anyOfLabels.length)})`);
                     const hasOneOfWhitelistedLabels = anyOfLabels.some((label) => {
                         return is_labeled_1.isLabeled(issue, label);
                     });
                     if (!hasOneOfWhitelistedLabels) {
-
-                        issueLogger.info(chalk_1.default.white('└──'), `Skipping this $$type because it doesn't have one of the required labels`);
+                        issueLogger.info(logger_service_1.LoggerService.white('└──'), `Skipping this $$type because it doesn't have one of the required labels`);
                         IssuesProcessor._endIssueProcessing(issue);
                         continue; // Don't process issues without any of the required labels
                     }
                     else {
-
-                        issueLogger.info(chalk_1.default.white('├──'), `One of the required labels is present on this $$type`);
-                        issueLogger.info(chalk_1.default.white('└──'), `Continuing the process for this $$type`);
-
+                        issueLogger.info(logger_service_1.LoggerService.white('├──'), `One of the required labels is present on this $$type`);
+                        issueLogger.info(logger_service_1.LoggerService.white('└──'), `Continuing the process for this $$type`);
                     }
                 }
                 else {
                     issueLogger.info(`The option ${issueLogger.createOptionLink(option_1.Option.AnyOfLabels)} was not specified`);
-
-                    issueLogger.info(chalk_1.default.white('└──'), `Continuing the process for this $$type`);
-
+                    issueLogger.info(logger_service_1.LoggerService.white('└──'), `Continuing the process for this $$type`);
                 }
                 const milestones = new milestones_1.Milestones(this.options, issue);
                 if (milestones.shouldExemptMilestones()) {
@@ -475,23 +425,19 @@ class IssuesProcessor {
                     issueLogger.info(`This $$type is not stale`);
                     const updatedAtDate = new Date(issue.updated_at);
                     if (shouldBeStale) {
-
-                        issueLogger.info(`This $$type should be stale based on the last update date the ${get_humanized_date_1.getHumanizedDate(updatedAtDate)} (${chalk_1.default.cyan(issue.updated_at)})`);
+                        issueLogger.info(`This $$type should be stale based on the last update date the ${get_humanized_date_1.getHumanizedDate(updatedAtDate)} (${logger_service_1.LoggerService.cyan(issue.updated_at)})`);
                         if (shouldMarkAsStale) {
-                            issueLogger.info(`This $$type should be marked as stale based on the option ${issueLogger.createOptionLink(this._getDaysBeforeStaleUsedOptionName(issue))} (${chalk_1.default.cyan(daysBeforeStale)})`);
-
+                            issueLogger.info(`This $$type should be marked as stale based on the option ${issueLogger.createOptionLink(this._getDaysBeforeStaleUsedOptionName(issue))} (${logger_service_1.LoggerService.cyan(daysBeforeStale)})`);
                             yield this._markStale(issue, staleMessage, staleLabel, skipMessage);
                             issue.isStale = true; // This issue is now considered stale
                             issueLogger.info(`This $$type is now stale`);
                         }
                         else {
-
-                            issueLogger.info(`This $$type should not be marked as stale based on the option ${issueLogger.createOptionLink(this._getDaysBeforeStaleUsedOptionName(issue))} (${chalk_1.default.cyan(daysBeforeStale)})`);
+                            issueLogger.info(`This $$type should not be marked as stale based on the option ${issueLogger.createOptionLink(this._getDaysBeforeStaleUsedOptionName(issue))} (${logger_service_1.LoggerService.cyan(daysBeforeStale)})`);
                         }
                     }
                     else {
-                        issueLogger.info(`This $$type should not be stale based on the last update date the ${get_humanized_date_1.getHumanizedDate(updatedAtDate)} (${chalk_1.default.cyan(issue.updated_at)})`);
-
+                        issueLogger.info(`This $$type should not be stale based on the last update date the ${get_humanized_date_1.getHumanizedDate(updatedAtDate)} (${logger_service_1.LoggerService.cyan(issue.updated_at)})`);
                     }
                 }
                 // Process the issue if it was marked stale
@@ -502,13 +448,11 @@ class IssuesProcessor {
                 IssuesProcessor._endIssueProcessing(issue);
             }
             if (!this._operations.hasRemainingOperations()) {
-
-                this._logger.warning(chalk_1.default.yellowBright('No more operations left! Exiting...'));
-                this._logger.warning(chalk_1.default.yellowBright(`If you think that not enough issues were processed you could try to increase the quantity related to the ${this._logger.createOptionLink(option_1.Option.OperationsPerRun)} option which is currently set to ${chalk_1.default.cyan(this.options.operationsPerRun)}`));
+                this._logger.warning(logger_service_1.LoggerService.yellowBright(`No more operations left! Exiting...`));
+                this._logger.warning(`${logger_service_1.LoggerService.yellowBright('If you think that not enough issues were processed you could try to increase the quantity related to the')} ${this._logger.createOptionLink(option_1.Option.OperationsPerRun)} ${logger_service_1.LoggerService.yellowBright('option which is currently set to')} ${logger_service_1.LoggerService.cyan(this.options.operationsPerRun)}`);
                 return 0;
             }
-            this._logger.info(chalk_1.default.green(`Batch ${chalk_1.default.cyan(`#${page}`)} processed.`));
-
+            this._logger.info(`${logger_service_1.LoggerService.green('Batch')} ${logger_service_1.LoggerService.cyan(`#${page}`)} ${logger_service_1.LoggerService.green('processed.')}`);
             // Do the next batch
             return this.processIssues(page + 1);
         });
@@ -604,17 +548,15 @@ class IssuesProcessor {
         return __awaiter(this, void 0, void 0, function* () {
             const issueLogger = new issue_logger_1.IssueLogger(issue);
             const markedStaleOn = (yield this.getLabelCreationDate(issue, staleLabel)) || issue.updated_at;
-
-            issueLogger.info(`$$type marked stale on: ${chalk_1.default.cyan(markedStaleOn)}`);
+            issueLogger.info(`$$type marked stale on: ${logger_service_1.LoggerService.cyan(markedStaleOn)}`);
             const issueHasComments = yield this._hasCommentsSince(issue, markedStaleOn, actor);
-            issueLogger.info(`$$type has been commented on: ${chalk_1.default.cyan(issueHasComments)}`);
+            issueLogger.info(`$$type has been commented on: ${logger_service_1.LoggerService.cyan(issueHasComments)}`);
             const daysBeforeClose = issue.isPullRequest
                 ? this._getDaysBeforePrClose()
                 : this._getDaysBeforeIssueClose();
-            issueLogger.info(`Days before $$type close: ${chalk_1.default.cyan(daysBeforeClose)}`);
+            issueLogger.info(`Days before $$type close: ${logger_service_1.LoggerService.cyan(daysBeforeClose)}`);
             const issueHasUpdate = IssuesProcessor._updatedSince(issue.updated_at, daysBeforeClose);
-            issueLogger.info(`$$type has been updated: ${chalk_1.default.cyan(issueHasUpdate)}`);
-
+            issueLogger.info(`$$type has been updated: ${logger_service_1.LoggerService.cyan(issueHasUpdate)}`);
             // should we un-stale this issue?
             if (this._shouldRemoveStaleWhenUpdated(issue) && issueHasComments) {
                 yield this._removeStaleLabel(issue, staleLabel);
@@ -626,9 +568,7 @@ class IssuesProcessor {
                 return; // nothing to do because we aren't closing stale issues
             }
             if (!issueHasComments && !issueHasUpdate) {
-
-                issueLogger.info(`Closing $$type because it was last updated on! ${chalk_1.default.cyan(issue.updated_at)}`);
-
+                issueLogger.info(`Closing $$type because it was last updated on! ${logger_service_1.LoggerService.cyan(issue.updated_at)}`);
                 yield this._closeIssue(issue, closeMessage, closeLabel);
                 if (this.options.deleteBranch && issue.pull_request) {
                     issueLogger.info(`Deleting the branch the option ${issueLogger.createOptionLink(option_1.Option.DeleteBranch)} was specified`);
@@ -645,18 +585,14 @@ class IssuesProcessor {
     _hasCommentsSince(issue, sinceDate, actor) {
         return __awaiter(this, void 0, void 0, function* () {
             const issueLogger = new issue_logger_1.IssueLogger(issue);
-
-            issueLogger.info(`Checking for comments on $$type since: ${chalk_1.default.cyan(sinceDate)}`);
-
+            issueLogger.info(`Checking for comments on $$type since: ${logger_service_1.LoggerService.cyan(sinceDate)}`);
             if (!sinceDate) {
                 return true;
             }
             // find any comments since the date
             const comments = yield this.listIssueComments(issue.number, sinceDate);
             const filteredComments = comments.filter(comment => comment.user.type === 'User' && comment.user.login !== actor);
-
-            issueLogger.info(`Comments not made by actor or another bot: ${chalk_1.default.cyan(filteredComments.length)}`);
-
+            issueLogger.info(`Comments not made by actor or another bot: ${logger_service_1.LoggerService.cyan(filteredComments.length)}`);
             // if there are any user comments returned
             return filteredComments.length > 0;
         });
@@ -798,9 +734,7 @@ class IssuesProcessor {
                 return;
             }
             const branch = pullRequest.head.ref;
-
-            issueLogger.info(`Deleting the branch "${chalk_1.default.cyan(branch)}" from closed $$type`);
-
+            issueLogger.info(`Deleting the branch "${logger_service_1.LoggerService.cyan(branch)}" from closed $$type`);
             try {
                 this._consumeIssueOperation(issue);
                 (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.incrementDeletedBranchesCount();
@@ -811,9 +745,7 @@ class IssuesProcessor {
                 });
             }
             catch (error) {
-
-                issueLogger.error(`Error when deleting the branch "${chalk_1.default.cyan(branch)}" from $$type: ${error.message}`);
-
+                issueLogger.error(`Error when deleting the branch "${logger_service_1.LoggerService.cyan(branch)}" from $$type: ${error.message}`);
             }
         });
     }
@@ -822,9 +754,7 @@ class IssuesProcessor {
         var _a;
         return __awaiter(this, void 0, void 0, function* () {
             const issueLogger = new issue_logger_1.IssueLogger(issue);
-
-            issueLogger.info(`Removing the label "${chalk_1.default.cyan(label)}" from this $$type...`);
-
+            issueLogger.info(`Removing the label "${logger_service_1.LoggerService.cyan(label)}" from this $$type...`);
             this.removedLabelIssues.push(issue);
             if (this.options.debugOnly) {
                 return;
@@ -838,12 +768,10 @@ class IssuesProcessor {
                     issue_number: issue.number,
                     name: label
                 });
-
-                issueLogger.info(`The label "${chalk_1.default.cyan(label)}" was removed`);
+                issueLogger.info(`The label "${logger_service_1.LoggerService.cyan(label)}" was removed`);
             }
             catch (error) {
-                issueLogger.error(`Error when removing the label: "${chalk_1.default.cyan(error.message)}"`);
-
+                issueLogger.error(`Error when removing the label: "${logger_service_1.LoggerService.cyan(error.message)}"`);
             }
         });
     }
@@ -924,9 +852,7 @@ class IssuesProcessor {
                 return Promise.resolve();
             }
             if (is_labeled_1.isLabeled(issue, closeLabel)) {
-
-                issueLogger.info(`The $$type has a close label "${chalk_1.default.cyan(closeLabel)}". Removing the close label...`);
-
+                issueLogger.info(`The $$type has a close label "${logger_service_1.LoggerService.cyan(closeLabel)}". Removing the close label...`);
                 yield this._removeLabel(issue, closeLabel);
                 (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.incrementDeletedCloseItemsLabelsCount(issue);
             }
@@ -962,15 +888,10 @@ exports.IssuesProcessor = IssuesProcessor;
 
 "use strict";
 
-
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.IssueLogger = void 0;
-const chalk_1 = __importDefault(__nccwpck_require__(8818));
 const logger_1 = __nccwpck_require__(6212);
-
+const logger_service_1 = __nccwpck_require__(1973);
 /**
  * @description
  * Each log will prefix the message with the issue number
@@ -1021,12 +942,10 @@ class IssueLogger extends logger_1.Logger {
             : this._getIssuePrefix();
     }
     _getIssuePrefix() {
-
-        return chalk_1.default.red(`[#${this._getIssueNumber()}]`);
+        return logger_service_1.LoggerService.red(`[#${this._getIssueNumber()}]`);
     }
     _getPullRequestPrefix() {
-        return chalk_1.default.blue(`[#${this._getIssueNumber()}]`);
-
+        return logger_service_1.LoggerService.blue(`[#${this._getIssueNumber()}]`);
     }
 }
 exports.IssueLogger = IssueLogger;
@@ -1064,27 +983,23 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.Logger = void 0;
 const core = __importStar(__nccwpck_require__(2186));
-
-const chalk_1 = __importDefault(__nccwpck_require__(8818));
 const terminal_link_1 = __importDefault(__nccwpck_require__(1898));
+const logger_service_1 = __nccwpck_require__(1973);
 class Logger {
     warning(...message) {
-        core.warning(chalk_1.default.whiteBright(...message));
+        core.warning(logger_service_1.LoggerService.whiteBright(message.join(' ')));
     }
     info(...message) {
-        core.info(chalk_1.default.whiteBright(...message));
+        core.info(logger_service_1.LoggerService.whiteBright(message.join(' ')));
     }
     error(...message) {
-        core.error(chalk_1.default.whiteBright(...message));
-
+        core.error(logger_service_1.LoggerService.whiteBright(message.join(' ')));
     }
     createLink(name, link) {
         return terminal_link_1.default(name, link);
     }
     createOptionLink(option) {
-
-        return chalk_1.default.magenta(this.createLink(option, `https://github.com/actions/stale#${option}`));
-
+        return logger_service_1.LoggerService.magenta(this.createLink(option, `https://github.com/actions/stale#${option}`));
     }
 }
 exports.Logger = Logger;
@@ -1102,16 +1017,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.Milestones = void 0;
-
-const chalk_1 = __importDefault(__nccwpck_require__(8818));
-
 const lodash_deburr_1 = __importDefault(__nccwpck_require__(1601));
 const option_1 = __nccwpck_require__(5931);
 const words_to_list_1 = __nccwpck_require__(1883);
 const issue_logger_1 = __nccwpck_require__(2984);
-
 const logger_service_1 = __nccwpck_require__(1973);
-
 class Milestones {
     constructor(options, issue) {
         this._options = options;
@@ -1128,26 +1038,23 @@ class Milestones {
             return false;
         }
         if (this._shouldExemptAllMilestones()) {
-
-            this._issueLogger.info(chalk_1.default.white('└──'), 'Skipping this $$type because it has a milestone');
-
+            this._issueLogger.info(logger_service_1.LoggerService.white('└──'), 'Skipping this $$type because it has a milestone');
             return true;
         }
         const exemptMilestones = this._getExemptMilestones();
         if (exemptMilestones.length === 0) {
-
-            this._issueLogger.info(chalk_1.default.white('├──'), `No milestone option was specified to skip the stale process for this $$type`);
+            this._issueLogger.info(logger_service_1.LoggerService.white('├──'), `No milestone option was specified to skip the stale process for this $$type`);
             this._logSkip();
             return false;
         }
-        this._issueLogger.info(chalk_1.default.white('├──'), `Found ${chalk_1.default.cyan(exemptMilestones.length)} milestone${exemptMilestones.length > 1 ? 's' : ''} that can exempt stale on this $$type`);
+        this._issueLogger.info(logger_service_1.LoggerService.white('├──'), `Found ${logger_service_1.LoggerService.cyan(exemptMilestones.length)} milestone${exemptMilestones.length > 1 ? 's' : ''} that can exempt stale on this $$type`);
         const hasExemptMilestone = exemptMilestones.some((exemptMilestone) => this._hasMilestone(exemptMilestone));
         if (!hasExemptMilestone) {
-            this._issueLogger.info(chalk_1.default.white('├──'), 'No milestone on this $$type can exempt the stale process');
+            this._issueLogger.info(logger_service_1.LoggerService.white('├──'), 'No milestone on this $$type can exempt the stale process');
             this._logSkip();
         }
         else {
-            this._issueLogger.info(chalk_1.default.white('└──'), 'Skipping this $$type because it has an exempt milestone');
+            this._issueLogger.info(logger_service_1.LoggerService.white('└──'), 'Skipping this $$type because it has an exempt milestone');
         }
         return hasExemptMilestone;
     }
@@ -1158,36 +1065,32 @@ class Milestones {
     }
     _getExemptIssueMilestones() {
         if (this._options.exemptIssueMilestones === '') {
-
-            this._issueLogger.info(chalk_1.default.white('├──'), `The option ${this._issueLogger.createOptionLink(option_1.Option.ExemptIssueMilestones)} is disabled. No specific milestone can skip the stale process for this $$type`);
+            this._issueLogger.info(logger_service_1.LoggerService.white('├──'), `The option ${this._issueLogger.createOptionLink(option_1.Option.ExemptIssueMilestones)} is disabled. No specific milestone can skip the stale process for this $$type`);
             if (this._options.exemptMilestones === '') {
-                this._issueLogger.info(chalk_1.default.white('├──'), `The option ${this._issueLogger.createOptionLink(option_1.Option.ExemptMilestones)} is disabled. No specific milestone can skip the stale process for this $$type`);
+                this._issueLogger.info(logger_service_1.LoggerService.white('├──'), `The option ${this._issueLogger.createOptionLink(option_1.Option.ExemptMilestones)} is disabled. No specific milestone can skip the stale process for this $$type`);
                 return [];
             }
             const exemptMilestones = words_to_list_1.wordsToList(this._options.exemptMilestones);
-            this._issueLogger.info(chalk_1.default.white('├──'), `The option ${this._issueLogger.createOptionLink(option_1.Option.ExemptMilestones)} is set. ${chalk_1.default.cyan(exemptMilestones.length)} milestone${exemptMilestones.length === 1 ? '' : 's'} can skip the stale process for this $$type`);
+            this._issueLogger.info(logger_service_1.LoggerService.white('├──'), `The option ${this._issueLogger.createOptionLink(option_1.Option.ExemptMilestones)} is set. ${logger_service_1.LoggerService.cyan(exemptMilestones.length)} milestone${exemptMilestones.length === 1 ? '' : 's'} can skip the stale process for this $$type`);
             return exemptMilestones;
         }
         const exemptMilestones = words_to_list_1.wordsToList(this._options.exemptIssueMilestones);
-        this._issueLogger.info(chalk_1.default.white('├──'), `The option ${this._issueLogger.createOptionLink(option_1.Option.ExemptIssueMilestones)} is set. ${chalk_1.default.cyan(exemptMilestones.length)} milestone${exemptMilestones.length === 1 ? '' : 's'} can skip the stale process for this $$type`);
-
+        this._issueLogger.info(logger_service_1.LoggerService.white('├──'), `The option ${this._issueLogger.createOptionLink(option_1.Option.ExemptIssueMilestones)} is set. ${logger_service_1.LoggerService.cyan(exemptMilestones.length)} milestone${exemptMilestones.length === 1 ? '' : 's'} can skip the stale process for this $$type`);
         return exemptMilestones;
     }
     _getExemptPullRequestMilestones() {
         if (this._options.exemptPrMilestones === '') {
-
-            this._issueLogger.info(chalk_1.default.white('├──'), `The option ${this._issueLogger.createOptionLink(option_1.Option.ExemptPrMilestones)} is disabled. No specific milestone can skip the stale process for this $$type`);
+            this._issueLogger.info(logger_service_1.LoggerService.white('├──'), `The option ${this._issueLogger.createOptionLink(option_1.Option.ExemptPrMilestones)} is disabled. No specific milestone can skip the stale process for this $$type`);
             if (this._options.exemptMilestones === '') {
-                this._issueLogger.info(chalk_1.default.white('├──'), `The option ${this._issueLogger.createOptionLink(option_1.Option.ExemptMilestones)} is disabled. No specific milestone can skip the stale process for this $$type`);
+                this._issueLogger.info(logger_service_1.LoggerService.white('├──'), `The option ${this._issueLogger.createOptionLink(option_1.Option.ExemptMilestones)} is disabled. No specific milestone can skip the stale process for this $$type`);
                 return [];
             }
             const exemptMilestones = words_to_list_1.wordsToList(this._options.exemptMilestones);
-            this._issueLogger.info(chalk_1.default.white('├──'), `The option ${this._issueLogger.createOptionLink(option_1.Option.ExemptMilestones)} is set. ${chalk_1.default.cyan(exemptMilestones.length)} milestone${exemptMilestones.length === 1 ? '' : 's'} can skip the stale process for this $$type`);
+            this._issueLogger.info(logger_service_1.LoggerService.white('├──'), `The option ${this._issueLogger.createOptionLink(option_1.Option.ExemptMilestones)} is set. ${logger_service_1.LoggerService.cyan(exemptMilestones.length)} milestone${exemptMilestones.length === 1 ? '' : 's'} can skip the stale process for this $$type`);
             return exemptMilestones;
         }
         const exemptMilestones = words_to_list_1.wordsToList(this._options.exemptPrMilestones);
-        this._issueLogger.info(chalk_1.default.white('├──'), `The option ${this._issueLogger.createOptionLink(option_1.Option.ExemptPrMilestones)} is set. ${chalk_1.default.cyan(exemptMilestones.length)} milestone${exemptMilestones.length === 1 ? '' : 's'} can skip the stale process for this $$type`);
-
+        this._issueLogger.info(logger_service_1.LoggerService.white('├──'), `The option ${this._issueLogger.createOptionLink(option_1.Option.ExemptPrMilestones)} is set. ${logger_service_1.LoggerService.cyan(exemptMilestones.length)} milestone${exemptMilestones.length === 1 ? '' : 's'} can skip the stale process for this $$type`);
         return exemptMilestones;
     }
     _hasMilestone(milestone) {
@@ -1198,9 +1101,7 @@ class Milestones {
         const isSameMilestone = cleanMilestone ===
             Milestones._cleanMilestone(this._issue.milestone.title);
         if (isSameMilestone) {
-
-            this._issueLogger.info(chalk_1.default.white('├──'), `The milestone "${milestone}" is set on this $$type and is an exempt milestone`);
-
+            this._issueLogger.info(logger_service_1.LoggerService.white('├──'), `The milestone "${logger_service_1.LoggerService.cyan(milestone)}" is set on this $$type and is an exempt milestone`);
         }
         return isSameMilestone;
     }
@@ -1245,9 +1146,7 @@ class Milestones {
         }
     }
     _logSkip() {
-
-        this._issueLogger.info(chalk_1.default.white('└──'), 'Skip the milestones checks');
-
+        this._issueLogger.info(logger_service_1.LoggerService.white('└──'), 'Skip the milestones checks');
     }
 }
 exports.Milestones = Milestones;
@@ -1312,15 +1211,10 @@ exports.StaleOperations = StaleOperations;
 
 "use strict";
 
-
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.Statistics = void 0;
-const chalk_1 = __importDefault(__nccwpck_require__(8818));
 const logger_1 = __nccwpck_require__(6212);
-
+const logger_service_1 = __nccwpck_require__(1973);
 class Statistics {
     constructor() {
         this._logger = new logger_1.Logger();
@@ -1420,9 +1314,7 @@ class Statistics {
         return this;
     }
     logStats() {
-
-        this._logger.info(chalk_1.default.yellow.bold('Statistics:'));
-
+        this._logger.info(logger_service_1.LoggerService.yellow(logger_service_1.LoggerService.bold(`Statistics:`)));
         this._logProcessedIssuesAndPullRequestsCount();
         this._logStaleIssuesAndPullRequestsCount();
         this._logUndoStaleIssuesAndPullRequestsCount();
@@ -1619,8 +1511,7 @@ class Statistics {
     }
     _logCount(name, count) {
         if (count > 0) {
-
-            this._logger.info(`${name}:`, chalk_1.default.cyan(count));
+            this._logger.info(`${name}:`, logger_service_1.LoggerService.cyan(count));
         }
     }
     _logGroup(groupName, values) {
@@ -1665,9 +1556,7 @@ class Statistics {
         const longestValue = this._getLongestGroupValue(onlyValuesSet);
         for (const [index, value] of onlyValuesSet.entries()) {
             const prefix = index === onlyValuesSet.length - 1 ? '└──' : '├──';
-
-            this._logCount(`${chalk_1.default.white(prefix)} ${value.name.padEnd(longestValue, ' ')}`, value.count);
-
+            this._logCount(`${logger_service_1.LoggerService.white(prefix)} ${value.name.padEnd(longestValue, ' ')}`, value.count);
         }
     }
     _getLongestGroupValue(values) {
@@ -1717,10 +1606,6 @@ var Option;
     Option["RemoveStaleWhenUpdated"] = "remove-stale-when-updated";
     Option["DebugOnly"] = "debug-only";
     Option["Ascending"] = "ascending";
-
-    Option["SkipStaleIssueMessage"] = "skip-stale-issue-message";
-    Option["SkipStalePrMessage"] = "skip-stale-pr-message";
-
     Option["DeleteBranch"] = "delete-branch";
     Option["StartDate"] = "start-date";
     Option["ExemptMilestones"] = "exempt-milestones";
@@ -1962,11 +1847,9 @@ function _run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const args = _getAndValidateArgs();
-
             const issueProcessor = new issues_processor_1.IssuesProcessor(args);
             yield issueProcessor.processIssues();
             yield processOutput(issueProcessor.closedIssues, issueProcessor.staleIssues);
-
         }
         catch (error) {
             core.error(error);
@@ -2005,10 +1888,6 @@ function _getAndValidateArgs() {
         removePrStaleWhenUpdated: _toOptionalBoolean(core.getInput('remove-pr-stale-when-updated')),
         debugOnly: core.getInput('debug-only') === 'true',
         ascending: core.getInput('ascending') === 'true',
-
-        skipStalePrMessage: core.getInput('skip-stale-pr-message') === 'true',
-        skipStaleIssueMessage: core.getInput('skip-stale-issue-message') === 'true',
-
         deleteBranch: core.getInput('delete-branch') === 'true',
         startDate: core.getInput('start-date') !== ''
             ? core.getInput('start-date')
@@ -2050,14 +1929,12 @@ function _getAndValidateArgs() {
     }
     return args;
 }
-
 function processOutput(staledIssues, closedIssues) {
     return __awaiter(this, void 0, void 0, function* () {
-        core.setOutput('staled-issues', JSON.stringify(staledIssues));
-        core.setOutput('closed-issues', JSON.stringify(closedIssues));
+        core.setOutput('staled-issues-prs', JSON.stringify(staledIssues));
+        core.setOutput('closed-issues-prs', JSON.stringify(closedIssues));
     });
 }
-
 function _toOptionalBoolean(argumentName) {
     const argument = core.getInput(argumentName);
     if (argument === 'true') {
@@ -2069,7 +1946,6 @@ function _toOptionalBoolean(argumentName) {
     return undefined;
 }
 void _run();
-
 
 
 /***/ }),
@@ -2121,7 +1997,6 @@ class LoggerService {
     }
 }
 exports.LoggerService = LoggerService;
-
 
 
 /***/ }),
@@ -5794,16 +5669,13 @@ ansiEscapes.iTerm = {
 /***/ }),
 
 /***/ 2068:
-/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __nccwpck_require__) => {
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 "use strict";
-__nccwpck_require__.r(__webpack_exports__);
-/* harmony export */ __nccwpck_require__.d(__webpack_exports__, {
-/* harmony export */   "default": () => __WEBPACK_DEFAULT_EXPORT__
-/* harmony export */ });
-const ANSI_BACKGROUND_OFFSET = 10;
+/* module decorator */ module = __nccwpck_require__.nmd(module);
 
-const wrapAnsi16 = (offset = 0) => code => `\u001B[${code + offset}m`;
+
+const ANSI_BACKGROUND_OFFSET = 10;
 
 const wrapAnsi256 = (offset = 0) => code => `\u001B[${38 + offset};5;${code}m`;
 
@@ -5898,10 +5770,8 @@ function assembleStyles() {
 	styles.color.close = '\u001B[39m';
 	styles.bgColor.close = '\u001B[49m';
 
-	styles.color.ansi = wrapAnsi16();
 	styles.color.ansi256 = wrapAnsi256();
 	styles.color.ansi16m = wrapAnsi16m();
-	styles.bgColor.ansi = wrapAnsi16(ANSI_BACKGROUND_OFFSET);
 	styles.bgColor.ansi256 = wrapAnsi256(ANSI_BACKGROUND_OFFSET);
 	styles.bgColor.ansi16m = wrapAnsi16m(ANSI_BACKGROUND_OFFSET);
 
@@ -5956,67 +5826,17 @@ function assembleStyles() {
 		hexToAnsi256: {
 			value: hex => styles.rgbToAnsi256(...styles.hexToRgb(hex)),
 			enumerable: false
-		},
-		ansi256ToAnsi: {
-			value: code => {
-				if (code < 8) {
-					return 30 + code;
-				}
-
-				if (code < 16) {
-					return 90 + (code - 8);
-				}
-
-				let red;
-				let green;
-				let blue;
-
-				if (code >= 232) {
-					red = (((code - 232) * 10) + 8) / 255;
-					green = red;
-					blue = red;
-				} else {
-					code -= 16;
-
-					const remainder = code % 36;
-
-					red = Math.floor(code / 36) / 5;
-					green = Math.floor(remainder / 6) / 5;
-					blue = (remainder % 6) / 5;
-				}
-
-				const value = Math.max(red, green, blue) * 2;
-
-				if (value === 0) {
-					return 30;
-				}
-
-				let result = 30 + ((Math.round(blue) << 2) | (Math.round(green) << 1) | Math.round(red));
-
-				if (value === 2) {
-					result += 60;
-				}
-
-				return result;
-			},
-			enumerable: false
-		},
-		rgbToAnsi: {
-			value: (red, green, blue) => styles.ansi256ToAnsi(styles.rgbToAnsi256(red, green, blue)),
-			enumerable: false
-		},
-		hexToAnsi: {
-			value: hex => styles.ansi256ToAnsi(styles.hexToAnsi256(hex)),
-			enumerable: false
 		}
 	});
 
 	return styles;
 }
 
-const ansiStyles = assembleStyles();
-
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (ansiStyles);
+// Make the export immutable
+Object.defineProperty(module, 'exports', {
+	enumerable: true,
+	get: assembleStyles
+});
 
 
 /***/ }),
@@ -9007,8 +8827,8 @@ module.exports = require("zlib");;
 /******/ 		}
 /******/ 		// Create a new module (and put it into the cache)
 /******/ 		var module = __webpack_module_cache__[moduleId] = {
-/******/ 			// no module.id needed
-/******/ 			// no module.loaded needed
+/******/ 			id: moduleId,
+/******/ 			loaded: false,
 /******/ 			exports: {}
 /******/ 		};
 /******/ 	
@@ -9021,36 +8841,20 @@ module.exports = require("zlib");;
 /******/ 			if(threw) delete __webpack_module_cache__[moduleId];
 /******/ 		}
 /******/ 	
+/******/ 		// Flag the module as loaded
+/******/ 		module.loaded = true;
+/******/ 	
 /******/ 		// Return the exports of the module
 /******/ 		return module.exports;
 /******/ 	}
 /******/ 	
 /************************************************************************/
-/******/ 	/* webpack/runtime/define property getters */
+/******/ 	/* webpack/runtime/node module decorator */
 /******/ 	(() => {
-/******/ 		// define getter functions for harmony exports
-/******/ 		__nccwpck_require__.d = (exports, definition) => {
-/******/ 			for(var key in definition) {
-/******/ 				if(__nccwpck_require__.o(definition, key) && !__nccwpck_require__.o(exports, key)) {
-/******/ 					Object.defineProperty(exports, key, { enumerable: true, get: definition[key] });
-/******/ 				}
-/******/ 			}
-/******/ 		};
-/******/ 	})();
-/******/ 	
-/******/ 	/* webpack/runtime/hasOwnProperty shorthand */
-/******/ 	(() => {
-/******/ 		__nccwpck_require__.o = (obj, prop) => Object.prototype.hasOwnProperty.call(obj, prop)
-/******/ 	})();
-/******/ 	
-/******/ 	/* webpack/runtime/make namespace object */
-/******/ 	(() => {
-/******/ 		// define __esModule on exports
-/******/ 		__nccwpck_require__.r = (exports) => {
-/******/ 			if(typeof Symbol !== 'undefined' && Symbol.toStringTag) {
-/******/ 				Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
-/******/ 			}
-/******/ 			Object.defineProperty(exports, '__esModule', { value: true });
+/******/ 		__nccwpck_require__.nmd = (module) => {
+/******/ 			module.paths = [];
+/******/ 			if (!module.children) module.children = [];
+/******/ 			return module;
 /******/ 		};
 /******/ 	})();
 /******/ 	

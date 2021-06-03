@@ -63,8 +63,8 @@ Every argument is optional.
 
 ### List of output options
 
-| Output        | Description                |
-| ------------- | -------------------------- |
+| Output            | Description                                  |
+| ----------------- | -------------------------------------------- |
 | staled-issues-prs | List of all staled issues and pull requests. |
 | closed-issues-prs | List of all closed issues and pull requests. |
 

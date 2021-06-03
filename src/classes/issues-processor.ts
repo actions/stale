@@ -1019,16 +1019,25 @@ export class IssuesProcessor {
     const issueLogger: IssueLogger = new IssueLogger(issue);
 
     issueLogger.info(
-      `Adding labels marked as add-labels-when-updated-from-stale...`
+      `Removing all the labels specified via the ${this._logger.createOptionLink(
+        Option.AddLabelsWhenUpdatedFromStale
+      )}`
     );
 
-    this._statistics?.incrementAddedItemsLabel(issue);
-    await this.client.issues.addLabels({
-      owner: context.repo.owner,
-      repo: context.repo.repo,
-      issue_number: issue.number,
-      labels: labelsToAdd
-    });
+    try {
+      this.operations.consumeOperation();
+      this._statistics?.incrementAddedItemsLabel(issue);
+      await this.client.issues.addLabels({
+        owner: context.repo.owner,
+        repo: context.repo.repo,
+        issue_number: issue.number,
+        labels: labelsToAdd
+      });
+    } catch (error) {
+      this._logger.error(
+        `Add labels when updated from stale error: ${error.message}`
+      );
+    }
   }
 
   private async _removeStaleLabel(

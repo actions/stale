@@ -878,14 +878,20 @@ class IssuesProcessor {
                 return;
             }
             const issueLogger = new issue_logger_1.IssueLogger(issue);
-            issueLogger.info(`Adding labels marked as add-labels-when-updated-from-stale...`);
-            (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.incrementAddedItemsLabel(issue);
-            yield this.client.issues.addLabels({
-                owner: github_1.context.repo.owner,
-                repo: github_1.context.repo.repo,
-                issue_number: issue.number,
-                labels: labelsToAdd
-            });
+            issueLogger.info(`Removing all the labels specified via the ${this._logger.createOptionLink(option_1.Option.AddLabelsWhenUpdatedFromStale)}`);
+            try {
+                this._operations.consumeOperation();
+                (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.incrementAddedItemsLabel(issue);
+                yield this.client.issues.addLabels({
+                    owner: github_1.context.repo.owner,
+                    repo: github_1.context.repo.repo,
+                    issue_number: issue.number,
+                  labels: labelsToAdd
+                });
+            }
+            catch (error) {
+                this._logger.error(`Add labels when updated from stale error: ${error.message}`);
+            }
         });
     }
     _removeStaleLabel(issue, staleLabel) {

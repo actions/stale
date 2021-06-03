@@ -529,7 +529,7 @@ class IssuesProcessor {
                     }
                 if (shouldBeStale) {
                     if (shouldIgnoreAllActivitiesBeforeStale) {
-                            issueLogger.info(`This $$type should be stale based on the creation date the ${get_humanized_date_1.getHumanizedDate(new Date(issue.created_at))} (${chalk_1.default.cyan(issue.created_at)})`);
+                            issueLogger.info(`This $$type should be stale based on the creation date the ${get_humanized_date_1.getHumanizedDate(new Date(issue.created_at))} (${logger_service_1.LoggerService.cyan(issue.created_at)})`);
                         }
                         else {
                             issueLogger.info(`This $$type should be stale based on the last update date the ${get_humanized_date_1.getHumanizedDate(new Date(issue.updated_at))} (${logger_service_1.LoggerService.cyan(issue.updated_at)})`);
@@ -546,7 +546,7 @@ class IssuesProcessor {
                     }
                     else {
                         if (shouldIgnoreAllActivitiesBeforeStale) {
-                            issueLogger.info(`This $$type should not be stale based on the creation date the ${get_humanized_date_1.getHumanizedDate(new Date(issue.created_at))} (${chalk_1.default.cyan(issue.created_at)})`);
+                            issueLogger.info(`This $$type should not be stale based on the creation date the ${get_humanized_date_1.getHumanizedDate(new Date(issue.created_at))} (${logger_service_1.LoggerService.cyan(issue.created_at)})`);
                         }
                         else {
                             issueLogger.info(`This $$type should not be stale based on the last update date the ${get_humanized_date_1.getHumanizedDate(new Date(issue.updated_at))} (${logger_service_1.LoggerService.cyan(issue.updated_at)})`);

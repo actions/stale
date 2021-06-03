@@ -2,12 +2,19 @@ import * as core from '@actions/core';
 import {IssuesProcessor} from './classes/issues-processor';
 import {isValidDate} from './functions/dates/is-valid-date';
 import {IIssuesProcessorOptions} from './interfaces/issues-processor-options';
+import {Issue} from './classes/issue';
 
 async function _run(): Promise<void> {
   try {
     const args = _getAndValidateArgs();
 
-    await new IssuesProcessor(args).processIssues();
+    const issueProcessor: IssuesProcessor = new IssuesProcessor(args);
+    await issueProcessor.processIssues();
+
+    await processOutput(
+      issueProcessor.closedIssues,
+      issueProcessor.staleIssues
+    );
   } catch (error) {
     core.error(error);
     core.setFailed(error.message);
@@ -101,6 +108,14 @@ function _getAndValidateArgs(): IIssuesProcessorOptions {
   }
 
   return args;
+}
+
+async function processOutput(
+  staledIssues: Issue[],
+  closedIssues: Issue[]
+): Promise<void> {
+  core.setOutput('staled-issues-prs', JSON.stringify(staledIssues));
+  core.setOutput('closed-issues-prs', JSON.stringify(closedIssues));
 }
 
 function _toOptionalBoolean(

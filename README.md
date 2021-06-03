@@ -10,7 +10,7 @@ The default configuration will:
 
 ## All options
 
-### List of options
+### List of input options
 
 Every argument is optional.
 
@@ -60,6 +60,13 @@ Every argument is optional.
 | [exempt-all-issue-assignees](#exempt-all-issue-assignees)           | Override [exempt-all-assignees](#exempt-all-assignees) for issues only   |                       |
 | [exempt-all-pr-assignees](#exempt-all-pr-assignees)                 | Override [exempt-all-assignees](#exempt-all-assignees) for PRs only      |                       |
 | [enable-statistics](#enable-statistics)                             | Display statistics in the logs                                           | `true`                |
+
+### List of output options
+
+| Output            | Description                                  |
+| ----------------- | -------------------------------------------- |
+| staled-issues-prs | List of all staled issues and pull requests. |
+| closed-issues-prs | List of all closed issues and pull requests. |
 
 ### Detailed options
 

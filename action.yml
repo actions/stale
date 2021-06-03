@@ -168,6 +168,11 @@ inputs:
     description: 'Display some statistics at the end regarding the stale workflow (only when the logs are enabled).'
     default: 'true'
     required: false
+outputs:
+  closed-issues-prs:
+    description: 'List of all closed issues and pull requests.'
+  staled-issues-prs:
+    description: 'List of all staled issues and pull requests.'
 runs:
   using: 'node12'
   main: 'dist/index.js'

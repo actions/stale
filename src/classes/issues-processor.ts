@@ -75,6 +75,7 @@ export class IssuesProcessor {
   readonly closedIssues: Issue[] = [];
   readonly deletedBranchIssues: Issue[] = [];
   readonly removedLabelIssues: Issue[] = [];
+  readonly addedLabelIssues: Issue[] = [];
 
   constructor(options: IIssuesProcessorOptions) {
     this.options = options;
@@ -1017,6 +1018,8 @@ export class IssuesProcessor {
         Option.AddLabelsWhenUnstale
       )}`
     );
+
+    this.addedLabelIssues.push(issue);
 
     if (this.options.debugOnly) {
       return;

@@ -1255,6 +1255,49 @@ test('stale label should be removed if a comment was added to a stale issue', as
   expect(processor.removedLabelIssues).toHaveLength(1);
 });
 
+test('if specified, labels should be added when unstale', async () => {
+  const opts = {
+    ...DefaultProcessorOptions,
+    removeStaleWhenUpdated: true,
+    addLabelsWhenUnstale: 'test'
+  };
+  const TestIssueList: Issue[] = [
+    generateIssue(
+      opts,
+      1,
+      'An issue that should have labels added to it when unstale',
+      '2020-01-01T17:00:00Z',
+      '2020-01-01T17:00:00Z',
+      false,
+      ['Stale']
+    )
+  ];
+  const processor = new IssuesProcessorMock(
+    opts,
+    async () => 'abot',
+    async p => (p === 1 ? TestIssueList : []),
+    async () => [
+      {
+        user: {
+          login: 'notme',
+          type: 'User'
+        }
+      }
+    ], // return a fake comment to indicate there was an update
+    async () => new Date().toDateString()
+  );
+
+  // process our fake issue list
+  await processor.processIssues(1);
+
+  expect(processor.closedIssues).toHaveLength(0);
+  expect(processor.staleIssues).toHaveLength(0);
+  // Stale should have been removed
+  expect(processor.removedLabelIssues).toHaveLength(1);
+  // Some label should have been added
+  expect(processor.addedLabelIssues).toHaveLength(1);
+});
+
 test('stale label should not be removed if a comment was added by the bot (and the issue should be closed)', async () => {
   const opts = {...DefaultProcessorOptions, removeStaleWhenUpdated: true};
   github.context.actor = 'abot';

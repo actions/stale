@@ -127,11 +127,11 @@ export class IssuesProcessor {
       );
     }
 
-    const addLabelsWhenUpdated: string[] = wordsToList(
-      this.options.addLabelsWhenUpdatedFromStale
+    const addLabelsWhenUnstale: string[] = wordsToList(
+      this.options.addLabelsWhenUnstale
     );
-    const removeLabelsWhenUpdated: string[] = wordsToList(
-      this.options.removeLabelsWhenUpdatedFromStale
+    const removeLabelsWhenUnstale: string[] = wordsToList(
+      this.options.removeLabelsWhenUnstale
     );
 
     for (const issue of issues.values()) {
@@ -145,8 +145,8 @@ export class IssuesProcessor {
         await this.processIssue(
           issue,
           actor,
-          addLabelsWhenUpdated,
-          removeLabelsWhenUpdated
+          addLabelsWhenUnstale,
+          removeLabelsWhenUnstale
         );
       });
     }
@@ -184,8 +184,8 @@ export class IssuesProcessor {
   async processIssue(
     issue: Issue,
     actor: string,
-    addLabelsWhenUpdated: Readonly<string>[],
-    removeLabelsWhenUpdated: Readonly<string>[]
+    addLabelsWhenUnstale: Readonly<string>[],
+    removeLabelsWhenUnstale: Readonly<string>[]
   ): Promise<void> {
     this._statistics?.incrementProcessedItemsCount(issue);
 
@@ -455,8 +455,8 @@ export class IssuesProcessor {
         issue,
         staleLabel,
         actor,
-        addLabelsWhenUpdated,
-        removeLabelsWhenUpdated,
+        addLabelsWhenUnstale,
+        removeLabelsWhenUnstale,
         closeMessage,
         closeLabel
       );
@@ -568,8 +568,8 @@ export class IssuesProcessor {
     issue: Issue,
     staleLabel: string,
     actor: string,
-    addLabelsWhenUpdatedFromStale: Readonly<string>[],
-    removeLabelsWhenUpdatedFromStale: Readonly<string>[],
+    addLabelsWhenUnstale: Readonly<string>[],
+    removeLabelsWhenUnstale: Readonly<string>[],
     closeMessage?: string,
     closeLabel?: string
   ) {
@@ -630,14 +630,8 @@ export class IssuesProcessor {
       await this._removeStaleLabel(issue, staleLabel);
 
       // Are there labels to remove or add when an issue is no longer stale?
-      await this._removeLabelsWhenUpdatedFromStale(
-        issue,
-        removeLabelsWhenUpdatedFromStale
-      );
-      await this._addLabelsWhenUpdatedFromStale(
-        issue,
-        addLabelsWhenUpdatedFromStale
-      );
+      await this._removeLabelsWhenUnstale(issue, removeLabelsWhenUnstale);
+      await this._addLabelsWhenUnstale(issue, addLabelsWhenUnstale);
 
       issueLogger.info(`Skipping the process since the $$type is now un-stale`);
 
@@ -987,7 +981,7 @@ export class IssuesProcessor {
     return this.options.removeStaleWhenUpdated;
   }
 
-  private async _removeLabelsWhenUpdatedFromStale(
+  private async _removeLabelsWhenUnstale(
     issue: Issue,
     removeLabels: Readonly<string>[]
   ): Promise<void> {
@@ -999,7 +993,7 @@ export class IssuesProcessor {
 
     issueLogger.info(
       `Removing all the labels specified via the ${this._logger.createOptionLink(
-        Option.RemoveLabelsWhenUpdatedFromStale
+        Option.RemoveLabelsWhenUnstale
       )}`
     );
 
@@ -1008,7 +1002,7 @@ export class IssuesProcessor {
     }
   }
 
-  private async _addLabelsWhenUpdatedFromStale(
+  private async _addLabelsWhenUnstale(
     issue: Issue,
     labelsToAdd: Readonly<string>[]
   ): Promise<void> {
@@ -1020,7 +1014,7 @@ export class IssuesProcessor {
 
     issueLogger.info(
       `Removing all the labels specified via the ${this._logger.createOptionLink(
-        Option.AddLabelsWhenUpdatedFromStale
+        Option.AddLabelsWhenUnstale
       )}`
     );
 

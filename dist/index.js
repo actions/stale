@@ -299,8 +299,8 @@ class IssuesProcessor {
             else {
                 this._logger.info(`${logger_service_1.LoggerService.yellow('Processing the batch of issues')} ${logger_service_1.LoggerService.cyan(`#${page}`)} ${logger_service_1.LoggerService.yellow('containing')} ${logger_service_1.LoggerService.cyan(issues.length)} ${logger_service_1.LoggerService.yellow(`issue${issues.length > 1 ? 's' : ''}...`)}`);
             }
-            const addLabelsWhenUpdated = words_to_list_1.wordsToList(this.options.addLabelsWhenUpdatedFromStale);
-            const removeLabelsWhenUpdated = words_to_list_1.wordsToList(this.options.removeLabelsWhenUpdatedFromStale);
+            const addLabelsWhenUnstale = words_to_list_1.wordsToList(this.options.addLabelsWhenUnstale);
+            const removeLabelsWhenUnstale = words_to_list_1.wordsToList(this.options.removeLabelsWhenUnstale);
             for (const issue of issues.values()) {
                 // Stop the processing if no more operations remains
                 if (!this.operations.hasRemainingOperations()) {
@@ -308,7 +308,7 @@ class IssuesProcessor {
                 }
                 const issueLogger = new issue_logger_1.IssueLogger(issue);
                 yield issueLogger.grouping(`$$type #${issue.number}`, () => __awaiter(this, void 0, void 0, function* () {
-                    yield this.processIssue(issue, actor, addLabelsWhenUpdated, removeLabelsWhenUpdated);
+                    yield this.processIssue(issue, actor, addLabelsWhenUnstale, removeLabelsWhenUnstale);
                 }));
             }
             if (!this.operations.hasRemainingOperations()) {
@@ -563,7 +563,7 @@ class IssuesProcessor {
         });
     }
     // handle all of the stale issue logic when we find a stale issue
-    _processStaleIssue(issue, staleLabel, actor, addLabelsWhenUpdatedFromStale, removeLabelsWhenUpdatedFromStale, closeMessage, closeLabel) {
+    _processStaleIssue(issue, staleLabel, actor, addLabelsWhenUnstale, removeLabelsWhenUnstale, closeMessage, closeLabel) {
         return __awaiter(this, void 0, void 0, function* () {
             const issueLogger = new issue_logger_1.IssueLogger(issue);
             const markedStaleOn = (yield this.getLabelCreationDate(issue, staleLabel)) || issue.updated_at;
@@ -589,8 +589,8 @@ class IssuesProcessor {
                 issueLogger.info(`Remove the stale label since the $$type has a comment and the workflow should remove the stale label when updated`);
                 yield this._removeStaleLabel(issue, staleLabel);
                 // Are there labels to remove or add when an issue is no longer stale?
-                yield this._removeLabelsWhenUpdatedFromStale(issue, removeLabelsWhenUpdatedFromStale);
-                yield this._addLabelsWhenUpdatedFromStale(issue, addLabelsWhenUpdatedFromStale);
+                yield this._removeLabelsWhenUnstale(issue, removeLabelsWhenUnstale);
+                yield this._addLabelsWhenUnstale(issue, addLabelsWhenUnstale);
                 issueLogger.info(`Skipping the process since the $$type is now un-stale`);
                 return; // Nothing to do because it is no longer stale
             }
@@ -859,34 +859,34 @@ class IssuesProcessor {
         }
         return this.options.removeStaleWhenUpdated;
     }
-    _removeLabelsWhenUpdatedFromStale(issue, removeLabels) {
+    _removeLabelsWhenUnstale(issue, removeLabels) {
         return __awaiter(this, void 0, void 0, function* () {
             if (!removeLabels.length) {
                 return;
             }
             const issueLogger = new issue_logger_1.IssueLogger(issue);
-            issueLogger.info(`Removing all the labels specified via the ${this._logger.createOptionLink(option_1.Option.RemoveLabelsWhenUpdatedFromStale)}`);
+            issueLogger.info(`Removing all the labels specified via the ${this._logger.createOptionLink(option_1.Option.RemoveLabelsWhenUnstale)}`);
             for (const label of removeLabels.values()) {
                 yield this._removeLabel(issue, label);
             }
         });
     }
-    _addLabelsWhenUpdatedFromStale(issue, labelsToAdd) {
+    _addLabelsWhenUnstale(issue, labelsToAdd) {
         var _a;
         return __awaiter(this, void 0, void 0, function* () {
             if (!labelsToAdd.length) {
                 return;
             }
             const issueLogger = new issue_logger_1.IssueLogger(issue);
-            issueLogger.info(`Removing all the labels specified via the ${this._logger.createOptionLink(option_1.Option.AddLabelsWhenUpdatedFromStale)}`);
+            issueLogger.info(`Removing all the labels specified via the ${this._logger.createOptionLink(option_1.Option.AddLabelsWhenUnstale)}`);
             try {
-                this._operations.consumeOperation();
+                this.operations.consumeOperation();
                 (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.incrementAddedItemsLabel(issue);
                 yield this.client.issues.addLabels({
                     owner: github_1.context.repo.owner,
                     repo: github_1.context.repo.repo,
                     issue_number: issue.number,
-                  labels: labelsToAdd
+                    labels: labelsToAdd
                 });
             }
             catch (error) {
@@ -1732,8 +1732,8 @@ var Option;
     Option["ExemptAllIssueAssignees"] = "exempt-all-issue-assignees";
     Option["ExemptAllPrAssignees"] = "exempt-all-pr-assignees";
     Option["EnableStatistics"] = "enable-statistics";
-    Option["RemoveLabelsWhenUpdatedFromStale"] = "remove-labels-when-updated-from-stale";
-    Option["AddLabelsWhenUpdatedFromStale"] = "add-labels-when-updated-from-stale";
+    Option["RemoveLabelsWhenUnstale"] = "remove-labels-when-unstale";
+    Option["AddLabelsWhenUnstale"] = "add-labels-when-unstale";
 })(Option = exports.Option || (exports.Option = {}));
 
 
@@ -2018,8 +2018,8 @@ function _getAndValidateArgs() {
         exemptAllIssueAssignees: _toOptionalBoolean('exempt-all-issue-assignees'),
         exemptAllPrAssignees: _toOptionalBoolean('exempt-all-pr-assignees'),
         enableStatistics: core.getInput('enable-statistics') === 'true',
-        removeLabelsWhenUpdatedFromStale: core.getInput('remove-labels-when-updated-from-stale'),
-        addLabelsWhenUpdatedFromStale: core.getInput('add-labels-when-updated-from-stale')
+        removeLabelsWhenUnstale: core.getInput('remove-labels-when-unstale'),
+        addLabelsWhenUnstale: core.getInput('add-labels-when-unstale')
     };
     for (const numberInput of [
         'days-before-stale',

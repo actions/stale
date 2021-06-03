@@ -438,7 +438,7 @@ export class IssuesProcessor {
             issueLogger.info(
               `This $$type should be stale based on the creation date the ${getHumanizedDate(
                 new Date(issue.created_at)
-              )} (${chalk.cyan(issue.created_at)})`
+              )} (${LoggerService.cyan(issue.created_at)})`
             );
           } else {
             issueLogger.info(
@@ -469,7 +469,7 @@ export class IssuesProcessor {
             issueLogger.info(
               `This $$type should not be stale based on the creation date the ${getHumanizedDate(
                 new Date(issue.created_at)
-              )} (${chalk.cyan(issue.created_at)})`
+              )} (${LoggerService.cyan(issue.created_at)})`
             );
           } else {
             issueLogger.info(

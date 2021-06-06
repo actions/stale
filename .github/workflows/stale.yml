@@ -14,3 +14,5 @@ jobs:
           days-before-stale: 30
           days-before-close: 5
           exempt-issue-labels: 'blocked,must,should,keep'
+      - name: print outputs
+        run: echo ${{ join(steps.stale.outputs.*, ',') }}

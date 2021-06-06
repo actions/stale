@@ -123,8 +123,6 @@ export class IssuesProcessor {
     }
 
     for (const issue of issues.values()) {
-      core.info("test")
-
       const startMessage = issue.isPullRequest
           ? `pull request #${issue.number}`
           : `issue #${issue.number}`;

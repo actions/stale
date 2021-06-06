@@ -23,7 +23,6 @@ import {Milestones} from './milestones';
 import {StaleOperations} from './stale-operations';
 import {Statistics} from './statistics';
 import {LoggerService} from '../services/logger.service';
-import {start} from "repl";
 
 /***
  * Handle processing of issues for staleness/closure.
@@ -124,6 +123,8 @@ export class IssuesProcessor {
     }
 
     for (const issue of issues.values()) {
+      core.info("test")
+
       const startMessage = issue.isPullRequest
           ? `pull request #${issue.number}`
           : `issue #${issue.number}`;

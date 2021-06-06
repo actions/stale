@@ -23,6 +23,7 @@ import {Milestones} from './milestones';
 import {StaleOperations} from './stale-operations';
 import {Statistics} from './statistics';
 import {LoggerService} from '../services/logger.service';
+import {start} from "repl";
 
 /***
  * Handle processing of issues for staleness/closure.
@@ -49,6 +50,8 @@ export class IssuesProcessor {
         } consumed for this $$type`
       );
     }
+
+    core.endGroup()
   }
 
   private static _getStaleMessageUsedOptionName(
@@ -121,6 +124,11 @@ export class IssuesProcessor {
     }
 
     for (const issue of issues.values()) {
+      const startMessage = issue.isPullRequest
+          ? `pull request #${issue.number}`
+          : `issue #${issue.number}`;
+      core.startGroup(startMessage);
+
       const issueLogger: IssueLogger = new IssueLogger(issue);
       this._statistics?.incrementProcessedItemsCount(issue);
 

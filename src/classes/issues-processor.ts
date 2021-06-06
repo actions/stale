@@ -50,7 +50,7 @@ export class IssuesProcessor {
       );
     }
 
-    core.endGroup()
+    core.endGroup();
   }
 
   private static _getStaleMessageUsedOptionName(
@@ -124,8 +124,8 @@ export class IssuesProcessor {
 
     for (const issue of issues.values()) {
       const startMessage = issue.isPullRequest
-          ? `pull request #${issue.number}`
-          : `issue #${issue.number}`;
+        ? `pull request #${issue.number}`
+        : `issue #${issue.number}`;
       core.startGroup(startMessage);
 
       const issueLogger: IssueLogger = new IssueLogger(issue);

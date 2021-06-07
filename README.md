@@ -8,6 +8,16 @@ The default configuration will:
 - Close the stale issues and pull requests after 7 days of inactivity
 - If an update/comment occur on stale issues or pull requests, the stale label will be removed and the timer will restart
 
+## Required Permissions
+
+For the execution of the action, it must be able to read all issues and pull requests. In addition, the action must have the permission to write to issues and pull requests. This can be achieved with the following [configuration in the action](https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions#permissions) if the permissions are restricted:
+
+```yml
+permissions:
+  issues: write
+  pull-requests: write
+```
+
 ## All options
 
 ### List of input options

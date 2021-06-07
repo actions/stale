@@ -1021,19 +1021,17 @@ export class IssuesProcessor {
 
     this.addedLabelIssues.push(issue);
 
-    if (this.options.debugOnly) {
-      return;
-    }
-
     try {
       this.operations.consumeOperation();
       this._statistics?.incrementAddedItemsLabel(issue);
-      await this.client.issues.addLabels({
-        owner: context.repo.owner,
-        repo: context.repo.repo,
-        issue_number: issue.number,
-        labels: labelsToAdd
-      });
+      if (!this.options.debugOnly) {
+        await this.client.issues.addLabels({
+          owner: context.repo.owner,
+          repo: context.repo.repo,
+          issue_number: issue.number,
+          labels: labelsToAdd
+        });
+      }
     } catch (error) {
       this._logger.error(
         `Error when adding labels after updated from stale: ${error.message}`

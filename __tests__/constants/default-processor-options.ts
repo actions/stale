@@ -25,7 +25,7 @@ export const DefaultProcessorOptions: IIssuesProcessorOptions = Object.freeze({
   anyOfIssueLabels: '',
   anyOfPrLabels: '',
   operationsPerRun: 100,
-  debugOnly: true,
+  debugOnly: false,
   removeStaleWhenUpdated: false,
   removeIssueStaleWhenUpdated: undefined,
   removePrStaleWhenUpdated: undefined,

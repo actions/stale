@@ -60,9 +60,15 @@ export class IssuesProcessor {
       : Option.StaleIssueMessage;
   }
 
+  private static _getCloseLabelUsedOptionName(
+    issue: Readonly<Issue>
+  ): Option.ClosePrLabel | Option.CloseIssueLabel {
+    return issue.isPullRequest ? Option.ClosePrLabel : Option.CloseIssueLabel;
+  }
+
   private readonly _logger: Logger = new Logger();
-  private readonly _operations: StaleOperations;
   private readonly _statistics: Statistics | undefined;
+  readonly operations: StaleOperations;
   readonly client: InstanceType<typeof GitHub>;
   readonly options: IIssuesProcessorOptions;
   readonly staleIssues: Issue[] = [];
@@ -73,7 +79,7 @@ export class IssuesProcessor {
   constructor(options: IIssuesProcessorOptions) {
     this.options = options;
     this.client = getOctokit(this.options.repoToken);
-    this._operations = new StaleOperations(this.options);
+    this.operations = new StaleOperations(this.options);
 
     this._logger.info(
       LoggerService.yellow(`Starting the stale action process...`)
@@ -105,10 +111,10 @@ export class IssuesProcessor {
         LoggerService.green(`No more issues found to process. Exiting...`)
       );
       this._statistics
-        ?.setRemainingOperations(this._operations.getRemainingOperationsCount())
+        ?.setOperationsCount(this.operations.getConsumedOperationsCount())
         .logStats();
 
-      return this._operations.getRemainingOperationsCount();
+      return this.operations.getRemainingOperationsCount();
     } else {
       this._logger.info(
         `${LoggerService.yellow(
@@ -122,6 +128,11 @@ export class IssuesProcessor {
     }
 
     for (const issue of issues.values()) {
+      // Stop the processing if no more operations remains
+      if (!this.operations.hasRemainingOperations()) {
+        break;
+      }
+
       const issueLogger: IssueLogger = new IssueLogger(issue);
       await issueLogger.grouping(`$$type #${issue.number}`, async () => {
         await this.processIssue(issue, actor);
@@ -439,7 +450,7 @@ export class IssuesProcessor {
   ): Promise<IComment[]> {
     // Find any comments since date on the given issue
     try {
-      this._operations.consumeOperation();
+      this.operations.consumeOperation();
       this._statistics?.incrementFetchedItemsCommentsCount();
       const comments = await this.client.issues.listComments({
         owner: context.repo.owner,
@@ -459,7 +470,7 @@ export class IssuesProcessor {
     let actor;
 
     try {
-      this._operations.consumeOperation();
+      this.operations.consumeOperation();
       actor = await this.client.users.getAuthenticated();
     } catch (error) {
       return context.actor;
@@ -570,23 +581,44 @@ export class IssuesProcessor {
       `$$type has been updated: ${LoggerService.cyan(issueHasUpdate)}`
     );
 
-    // should we un-stale this issue?
-    if (this._shouldRemoveStaleWhenUpdated(issue) && issueHasComments) {
+    const shouldRemoveStaleWhenUpdated: boolean = this._shouldRemoveStaleWhenUpdated(
+      issue
+    );
+
+    issueLogger.info(
+      `The option ${issueLogger.createOptionLink(
+        this._getRemoveStaleWhenUpdatedUsedOptionName(issue)
+      )} is: ${LoggerService.cyan(shouldRemoveStaleWhenUpdated)}`
+    );
+
+    if (shouldRemoveStaleWhenUpdated) {
+      issueLogger.info(`The stale label should not be removed`);
+    } else {
+      issueLogger.info(
+        `The stale label should be removed if all conditions met`
+      );
+    }
+
+    // Should we un-stale this issue?
+    if (shouldRemoveStaleWhenUpdated && issueHasComments) {
+      issueLogger.info(
+        `Remove the stale label since the $$type has a comment and the workflow should remove the stale label when updated`
+      );
       await this._removeStaleLabel(issue, staleLabel);
 
       issueLogger.info(`Skipping the process since the $$type is now un-stale`);
 
-      return; // nothing to do because it is no longer stale
+      return; // Nothing to do because it is no longer stale
     }
 
-    // now start closing logic
+    // Now start closing logic
     if (daysBeforeClose < 0) {
-      return; // nothing to do because we aren't closing stale issues
+      return; // Nothing to do because we aren't closing stale issues
     }
 
     if (!issueHasComments && !issueHasUpdate) {
       issueLogger.info(
-        `Closing $$type because it was last updated on! ${LoggerService.cyan(
+        `Closing $$type because it was last updated on: ${LoggerService.cyan(
           issue.updated_at
         )}`
       );
@@ -594,7 +626,7 @@ export class IssuesProcessor {
 
       if (this.options.deleteBranch && issue.pull_request) {
         issueLogger.info(
-          `Deleting the branch the option ${issueLogger.createOptionLink(
+          `Deleting the branch since the option ${issueLogger.createOptionLink(
             Option.DeleteBranch
           )} was specified`
         );
@@ -658,20 +690,19 @@ export class IssuesProcessor {
     const newUpdatedAtDate: Date = new Date();
     issue.updated_at = newUpdatedAtDate.toString();
 
-    if (this.options.debugOnly) {
-      return;
-    }
-
     if (!skipMessage) {
       try {
         this._consumeIssueOperation(issue);
         this._statistics?.incrementAddedItemsComment(issue);
-        await this.client.issues.createComment({
-          owner: context.repo.owner,
-          repo: context.repo.repo,
-          issue_number: issue.number,
-          body: staleMessage
-        });
+
+        if (!this.options.debugOnly) {
+          await this.client.issues.createComment({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            issue_number: issue.number,
+            body: staleMessage
+          });
+        }
       } catch (error) {
         issueLogger.error(`Error when creating a comment: ${error.message}`);
       }
@@ -703,20 +734,19 @@ export class IssuesProcessor {
     issueLogger.info(`Closing $$type for being stale`);
     this.closedIssues.push(issue);
 
-    if (this.options.debugOnly) {
-      return;
-    }
-
     if (closeMessage) {
       try {
         this._consumeIssueOperation(issue);
         this._statistics?.incrementAddedItemsComment(issue);
-        await this.client.issues.createComment({
-          owner: context.repo.owner,
-          repo: context.repo.repo,
-          issue_number: issue.number,
-          body: closeMessage
-        });
+
+        if (!this.options.debugOnly) {
+          await this.client.issues.createComment({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            issue_number: issue.number,
+            body: closeMessage
+          });
+        }
       } catch (error) {
         issueLogger.error(`Error when creating a comment: ${error.message}`);
       }
@@ -756,20 +786,19 @@ export class IssuesProcessor {
   ): Promise<IPullRequest | undefined | void> {
     const issueLogger: IssueLogger = new IssueLogger(issue);
 
-    if (this.options.debugOnly) {
-      return;
-    }
-
     try {
       this._consumeIssueOperation(issue);
       this._statistics?.incrementFetchedPullRequestsCount();
-      const pullRequest = await this.client.pulls.get({
-        owner: context.repo.owner,
-        repo: context.repo.repo,
-        pull_number: issue.number
-      });
 
-      return pullRequest.data;
+      if (!this.options.debugOnly) {
+        const pullRequest = await this.client.pulls.get({
+          owner: context.repo.owner,
+          repo: context.repo.repo,
+          pull_number: issue.number
+        });
+
+        return pullRequest.data;
+      }
     } catch (error) {
       issueLogger.error(`Error when getting this $$type: ${error.message}`);
     }
@@ -790,10 +819,6 @@ export class IssuesProcessor {
       return;
     }
 
-    if (this.options.debugOnly) {
-      return;
-    }
-
     const branch = pullRequest.head.ref;
     issueLogger.info(
       `Deleting the branch "${LoggerService.cyan(branch)}" from closed $$type`
@@ -802,11 +827,14 @@ export class IssuesProcessor {
     try {
       this._consumeIssueOperation(issue);
       this._statistics?.incrementDeletedBranchesCount();
-      await this.client.git.deleteRef({
-        owner: context.repo.owner,
-        repo: context.repo.repo,
-        ref: `heads/${branch}`
-      });
+
+      if (!this.options.debugOnly) {
+        await this.client.git.deleteRef({
+          owner: context.repo.owner,
+          repo: context.repo.repo,
+          ref: `heads/${branch}`
+        });
+      }
     } catch (error) {
       issueLogger.error(
         `Error when deleting the branch "${LoggerService.cyan(
@@ -817,31 +845,43 @@ export class IssuesProcessor {
   }
 
   // Remove a label from an issue or a pull request
-  private async _removeLabel(issue: Issue, label: string): Promise<void> {
+  private async _removeLabel(
+    issue: Issue,
+    label: string,
+    isSubStep: Readonly<boolean> = false
+  ): Promise<void> {
     const issueLogger: IssueLogger = new IssueLogger(issue);
 
     issueLogger.info(
-      `Removing the label "${LoggerService.cyan(label)}" from this $$type...`
+      `${
+        isSubStep ? LoggerService.white('├── ') : ''
+      }Removing the label "${LoggerService.cyan(label)}" from this $$type...`
     );
     this.removedLabelIssues.push(issue);
-
-    if (this.options.debugOnly) {
-      return;
-    }
 
     try {
       this._consumeIssueOperation(issue);
       this._statistics?.incrementDeletedItemsLabelsCount(issue);
-      await this.client.issues.removeLabel({
-        owner: context.repo.owner,
-        repo: context.repo.repo,
-        issue_number: issue.number,
-        name: label
-      });
-      issueLogger.info(`The label "${LoggerService.cyan(label)}" was removed`);
+
+      if (!this.options.debugOnly) {
+        await this.client.issues.removeLabel({
+          owner: context.repo.owner,
+          repo: context.repo.repo,
+          issue_number: issue.number,
+          name: label
+        });
+      }
+
+      issueLogger.info(
+        `${
+          isSubStep ? LoggerService.white('└── ') : ''
+        }The label "${LoggerService.cyan(label)}" was removed`
+      );
     } catch (error) {
       issueLogger.error(
-        `Error when removing the label: "${LoggerService.cyan(error.message)}"`
+        `${
+          isSubStep ? LoggerService.white('└── ') : ''
+        }Error when removing the label: "${LoggerService.cyan(error.message)}"`
       );
     }
   }
@@ -939,25 +979,42 @@ export class IssuesProcessor {
     );
 
     if (!closeLabel) {
-      issueLogger.info(`There is no close label on this $$type. Skip`);
+      issueLogger.info(
+        LoggerService.white('├──'),
+        `The ${issueLogger.createOptionLink(
+          IssuesProcessor._getCloseLabelUsedOptionName(issue)
+        )} option was not set`
+      );
+      issueLogger.info(
+        LoggerService.white('└──'),
+        `Skipping the removal of the close label`
+      );
 
       return Promise.resolve();
     }
 
     if (isLabeled(issue, closeLabel)) {
       issueLogger.info(
+        LoggerService.white('├──'),
         `The $$type has a close label "${LoggerService.cyan(
           closeLabel
         )}". Removing the close label...`
       );
 
-      await this._removeLabel(issue, closeLabel);
+      await this._removeLabel(issue, closeLabel, true);
       this._statistics?.incrementDeletedCloseItemsLabelsCount(issue);
+    } else {
+      issueLogger.info(
+        LoggerService.white('└──'),
+        `There is no close label on this $$type. Skipping`
+      );
+
+      return Promise.resolve();
     }
   }
 
   private _consumeIssueOperation(issue: Readonly<Issue>): void {
-    this._operations.consumeOperation();
+    this.operations.consumeOperation();
     issue.operations.consumeOperation();
   }
 
@@ -986,5 +1043,26 @@ export class IssuesProcessor {
     return isNaN(this.options.daysBeforePrStale)
       ? Option.DaysBeforeStale
       : Option.DaysBeforePrStale;
+  }
+
+  private _getRemoveStaleWhenUpdatedUsedOptionName(
+    issue: Readonly<Issue>
+  ):
+    | Option.RemovePrStaleWhenUpdated
+    | Option.RemoveStaleWhenUpdated
+    | Option.RemoveIssueStaleWhenUpdated {
+    if (issue.isPullRequest) {
+      if (isBoolean(this.options.removePrStaleWhenUpdated)) {
+        return Option.RemovePrStaleWhenUpdated;
+      }
+
+      return Option.RemoveStaleWhenUpdated;
+    }
+
+    if (isBoolean(this.options.removeIssueStaleWhenUpdated)) {
+      return Option.RemoveIssueStaleWhenUpdated;
+    }
+
+    return Option.RemoveStaleWhenUpdated;
   }
 }

@@ -12,8 +12,8 @@ async function _run(): Promise<void> {
     await issueProcessor.processIssues();
 
     await processOutput(
-      issueProcessor.closedIssues,
-      issueProcessor.staleIssues
+      issueProcessor.staleIssues,
+      issueProcessor.closedIssues
     );
   } catch (error) {
     core.error(error);

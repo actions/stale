@@ -1255,7 +1255,7 @@ test('stale label should be removed if a comment was added to a stale issue', as
   expect(processor.removedLabelIssues).toHaveLength(1);
 });
 
-test('if specified, labels should be added when unstale', async () => {
+test('when the option "labelsToAddWhenUnstale" is set, the labels should be added when unstale', async () => {
   const opts = {
     ...DefaultProcessorOptions,
     removeStaleWhenUpdated: true,

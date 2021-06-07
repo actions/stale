@@ -1014,7 +1014,7 @@ export class IssuesProcessor {
     const issueLogger: IssueLogger = new IssueLogger(issue);
 
     issueLogger.info(
-      `Removing all the labels specified via the ${this._logger.createOptionLink(
+      `Adding all the labels specified via the ${this._logger.createOptionLink(
         Option.LabelsToAddWhenUnstale
       )} option.`
     );

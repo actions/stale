@@ -188,18 +188,16 @@ class SUT {
   }
 
   private _setTestIssueList(): SUT {
-    this._testIssueList = this._sutIssues.map(
-      (sutIssue: SUTIssue): Issue => {
-        return generateIssue(
-          this._opts,
-          1,
-          'My first issue',
-          sutIssue.updatedAt,
-          sutIssue.updatedAt,
-          false
-        );
-      }
-    );
+    this._testIssueList = this._sutIssues.map((sutIssue: SUTIssue): Issue => {
+      return generateIssue(
+        this._opts,
+        1,
+        'My first issue',
+        sutIssue.updatedAt,
+        sutIssue.updatedAt,
+        false
+      );
+    });
 
     return this;
   }

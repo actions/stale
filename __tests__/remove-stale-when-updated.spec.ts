@@ -464,14 +464,12 @@ class IssuesProcessorBuilder {
 
   issues(issues: Partial<IIssue>[]): IssuesProcessorBuilder {
     this.issuesOrPrs(
-      issues.map(
-        (issue: Readonly<Partial<IIssue>>): Partial<IIssue> => {
-          return {
-            ...issue,
-            pull_request: null
-          };
-        }
-      )
+      issues.map((issue: Readonly<Partial<IIssue>>): Partial<IIssue> => {
+        return {
+          ...issue,
+          pull_request: null
+        };
+      })
     );
 
     return this;
@@ -479,27 +477,23 @@ class IssuesProcessorBuilder {
 
   staleIssues(issues: Partial<IIssue>[]): IssuesProcessorBuilder {
     this.issues(
-      issues.map(
-        (issue: Readonly<Partial<IIssue>>): Partial<IIssue> => {
-          return {
-            ...issue,
-            updated_at: '2020-01-01T17:00:00Z',
-            created_at: '2020-01-01T17:00:00Z',
-            labels: issue.labels?.map(
-              (label: Readonly<ILabel>): ILabel => {
-                return {
-                  ...label,
-                  name: 'Stale'
-                };
-              }
-            ) ?? [
-              {
-                name: 'Stale'
-              }
-            ]
-          };
-        }
-      )
+      issues.map((issue: Readonly<Partial<IIssue>>): Partial<IIssue> => {
+        return {
+          ...issue,
+          updated_at: '2020-01-01T17:00:00Z',
+          created_at: '2020-01-01T17:00:00Z',
+          labels: issue.labels?.map((label: Readonly<ILabel>): ILabel => {
+            return {
+              ...label,
+              name: 'Stale'
+            };
+          }) ?? [
+            {
+              name: 'Stale'
+            }
+          ]
+        };
+      })
     );
 
     return this;
@@ -507,14 +501,12 @@ class IssuesProcessorBuilder {
 
   prs(issues: Partial<IIssue>[]): IssuesProcessorBuilder {
     this.issuesOrPrs(
-      issues.map(
-        (issue: Readonly<Partial<IIssue>>): Partial<IIssue> => {
-          return {
-            ...issue,
-            pull_request: {key: 'value'}
-          };
-        }
-      )
+      issues.map((issue: Readonly<Partial<IIssue>>): Partial<IIssue> => {
+        return {
+          ...issue,
+          pull_request: {key: 'value'}
+        };
+      })
     );
 
     return this;
@@ -522,27 +514,23 @@ class IssuesProcessorBuilder {
 
   stalePrs(issues: Partial<IIssue>[]): IssuesProcessorBuilder {
     this.prs(
-      issues.map(
-        (issue: Readonly<Partial<IIssue>>): Partial<IIssue> => {
-          return {
-            ...issue,
-            updated_at: '2020-01-01T17:00:00Z',
-            created_at: '2020-01-01T17:00:00Z',
-            labels: issue.labels?.map(
-              (label: Readonly<ILabel>): ILabel => {
-                return {
-                  ...label,
-                  name: 'Stale'
-                };
-              }
-            ) ?? [
-              {
-                name: 'Stale'
-              }
-            ]
-          };
-        }
-      )
+      issues.map((issue: Readonly<Partial<IIssue>>): Partial<IIssue> => {
+        return {
+          ...issue,
+          updated_at: '2020-01-01T17:00:00Z',
+          created_at: '2020-01-01T17:00:00Z',
+          labels: issue.labels?.map((label: Readonly<ILabel>): ILabel => {
+            return {
+              ...label,
+              name: 'Stale'
+            };
+          }) ?? [
+            {
+              name: 'Stale'
+            }
+          ]
+        };
+      })
     );
 
     return this;

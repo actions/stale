@@ -8,12 +8,12 @@ The default configuration will:
 - Close the stale issues and pull requests after 7 days of inactivity
 - If an update/comment occur on stale issues or pull requests, the stale label will be removed and the timer will restart
 
-## Recommended Permissions
+## Recommended permissions
 
 For the execution of this action, it must be able to fetch all issues and pull requests from your repository.  
 This can be achieved with the following [configuration in the action](https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions#permissions) if the permissions are restricted:
 
-```yml
+```yaml
 permissions:
   issues: write
   pull-requests: write
@@ -168,8 +168,7 @@ The message that will be added as a comment to the issues when the stale workflo
 
 You can skip the comment sending by omitting the option or by passing an empty string.
 
-Default value: unset
-
+Default value: unset  
 Required Permission: `issues: write`
 
 #### stale-pr-message
@@ -178,24 +177,21 @@ The message that will be added as a comment to the pull requests when the stale 
 
 You can skip the comment sending by omitting the option or by passing an empty string.
 
-Default value: unset
-
+Default value: unset  
 Required Permission: `pull-requests: write`
 
 #### close-issue-message
 
 The message that will be added as a comment to the issues when the stale workflow closes it automatically after being stale for too long.
 
-Default value: unset
-
+Default value: unset  
 Required Permission: `issues: write`
 
 #### close-pr-message
 
 The message that will be added as a comment to the pull requests when the stale workflow closes it automatically after being stale for too long.
 
-Default value: unset
-
+Default value: unset  
 Required Permission: `pull-requests: write`
 
 #### stale-issue-label
@@ -203,8 +199,7 @@ Required Permission: `pull-requests: write`
 The label that will be added to the issues when automatically marked as stale.  
 If you wish to speedup the stale workflow for the issues, you can add this label manually to mark as stale.
 
-Default value: `Stale`
-
+Default value: `Stale`  
 Required Permission: `issues: write`
 
 #### close-issue-label
@@ -212,8 +207,7 @@ Required Permission: `issues: write`
 The label that will be added to the issues when closed automatically.  
 It will be automatically removed if the issues are no longer closed nor locked.
 
-Default value: unset
-
+Default value: unset  
 Required Permission: `issues: write`
 
 #### stale-pr-label
@@ -221,8 +215,7 @@ Required Permission: `issues: write`
 The label that will be added to the pull requests when automatically marked as stale.  
 If you wish to speedup the stale workflow for the pull requests, you can add this label manually to mark as stale.
 
-Default value: `Stale`
-
+Default value: `Stale`  
 Required Permission: `pull-requests: write`
 
 #### close-pr-label
@@ -230,8 +223,7 @@ Required Permission: `pull-requests: write`
 The label that will be added to the pull requests when closed automatically.  
 It will be automatically removed if the pull requests are no longer closed nor locked.
 
-Default value: unset
-
+Default value: unset  
 Required Permission: `pull-requests: write`
 
 #### exempt-issue-labels
@@ -323,24 +315,21 @@ Default value: `30`
 
 Automatically remove the stale label when the issues or the pull requests are updated (based on [GitHub issue](https://docs.github.com/en/rest/reference/issues) field `updated_at`) or commented.
 
-Default value: `true`
-
+Default value: `true`  
 Required Permission: `issues: write` and `pull-requests: write`
 
 #### remove-issue-stale-when-updated
 
 Override [remove-stale-when-updated](#remove-stale-when-updated) but only to automatically remove the stale label when the issues are updated (based on [GitHub issue](https://docs.github.com/en/rest/reference/issues) field `updated_at`) or commented.
 
-Default value: unset
-
+Default value: unset  
 Required Permission: `issues: write`
 
 #### remove-pr-stale-when-updated
 
 Override [remove-stale-when-updated](#remove-stale-when-updated) but only to automatically remove the stale label when the pull requests are updated (based on [GitHub issue](https://docs.github.com/en/rest/reference/issues) field `updated_at`) or commented.
 
-Default value: unset
-
+Default value: unset  
 Required Permission: `pull-requests: write`
 
 #### debug-only
@@ -376,8 +365,7 @@ Default value: unset
 
 If set to `true`, the stale workflow will automatically delete the GitHub branches related to the pull requests automatically closed by the stale workflow.
 
-Default value: `false`
-
+Default value: `false`  
 Required Permission: `pull-requests: write`
 
 #### exempt-milestones

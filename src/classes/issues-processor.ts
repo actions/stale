@@ -37,7 +37,8 @@ export class IssuesProcessor {
   }
 
   private static _endIssueProcessing(issue: Issue): void {
-    const consumedOperationsCount: number = issue.operations.getConsumedOperationsCount();
+    const consumedOperationsCount: number =
+      issue.operations.getConsumedOperationsCount();
 
     if (consumedOperationsCount > 0) {
       const issueLogger: IssueLogger = new IssueLogger(issue);
@@ -477,16 +478,15 @@ export class IssuesProcessor {
 
     try {
       this._operations.consumeOperation();
-      const issueResult: OctoKitIssueList = await this.client.issues.listForRepo(
-        {
+      const issueResult: OctoKitIssueList =
+        await this.client.issues.listForRepo({
           owner: context.repo.owner,
           repo: context.repo.repo,
           state: 'open',
           per_page: 100,
           direction: this.options.ascending ? 'asc' : 'desc',
           page
-        }
-      );
+        });
       this._statistics?.incrementFetchedItemsCount(issueResult.data.length);
 
       return issueResult.data.map(

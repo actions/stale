@@ -7,9 +7,9 @@ describe('isLabeled()', (): void => {
 
   describe('when the given issue contains no label', (): void => {
     beforeEach((): void => {
-      issue = ({
+      issue = {
         labels: []
-      } as unknown) as Issue;
+      } as unknown as Issue;
     });
 
     describe('when the given label is a simple label', (): void => {

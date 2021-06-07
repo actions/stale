@@ -195,9 +195,8 @@ export class Milestones {
       return false;
     }
 
-    const cleanMilestone: CleanMilestone = Milestones._cleanMilestone(
-      milestone
-    );
+    const cleanMilestone: CleanMilestone =
+      Milestones._cleanMilestone(milestone);
 
     const isSameMilestone: boolean =
       cleanMilestone ===

@@ -32,12 +32,10 @@ export function generateIssue(
           title: milestone
         }
       : undefined,
-    assignees: assignees.map(
-      (assignee: Readonly<string>): IAssignee => {
-        return {
-          login: assignee
-        };
-      }
-    )
+    assignees: assignees.map((assignee: Readonly<string>): IAssignee => {
+      return {
+        login: assignee
+      };
+    })
   });
 }

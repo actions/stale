@@ -1112,14 +1112,12 @@ class IssuesProcessorBuilder {
 
   issues(issues: Partial<IIssue>[]): IssuesProcessorBuilder {
     this.issuesOrPrs(
-      issues.map(
-        (issue: Readonly<Partial<IIssue>>): Partial<IIssue> => {
-          return {
-            ...issue,
-            pull_request: null
-          };
-        }
-      )
+      issues.map((issue: Readonly<Partial<IIssue>>): Partial<IIssue> => {
+        return {
+          ...issue,
+          pull_request: null
+        };
+      })
     );
 
     return this;
@@ -1127,14 +1125,12 @@ class IssuesProcessorBuilder {
 
   prs(issues: Partial<IIssue>[]): IssuesProcessorBuilder {
     this.issuesOrPrs(
-      issues.map(
-        (issue: Readonly<Partial<IIssue>>): Partial<IIssue> => {
-          return {
-            ...issue,
-            pull_request: {key: 'value'}
-          };
-        }
-      )
+      issues.map((issue: Readonly<Partial<IIssue>>): Partial<IIssue> => {
+        return {
+          ...issue,
+          pull_request: {key: 'value'}
+        };
+      })
     );
 
     return this;

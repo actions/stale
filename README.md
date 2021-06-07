@@ -178,7 +178,7 @@ You can skip the comment sending by omitting the option or by passing an empty s
 
 Default value: unset
 
-Required Permission:`pull-requests: write`
+Required Permission: `pull-requests: write`
 
 #### close-issue-message
 

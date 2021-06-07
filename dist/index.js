@@ -282,6 +282,9 @@ class IssuesProcessor {
             ? option_1.Option.StalePrMessage
             : option_1.Option.StaleIssueMessage;
     }
+    static _getCloseLabelUsedOptionName(issue) {
+        return issue.isPullRequest ? option_1.Option.ClosePrLabel : option_1.Option.CloseIssueLabel;
+    }
     processIssues(page = 1) {
         var _a, _b;
         return __awaiter(this, void 0, void 0, function* () {
@@ -557,21 +560,30 @@ class IssuesProcessor {
             issueLogger.info(`Days before $$type close: ${logger_service_1.LoggerService.cyan(daysBeforeClose)}`);
             const issueHasUpdate = IssuesProcessor._updatedSince(issue.updated_at, daysBeforeClose);
             issueLogger.info(`$$type has been updated: ${logger_service_1.LoggerService.cyan(issueHasUpdate)}`);
-            // should we un-stale this issue?
-            if (this._shouldRemoveStaleWhenUpdated(issue) && issueHasComments) {
+            const shouldRemoveStaleWhenUpdated = this._shouldRemoveStaleWhenUpdated(issue);
+            issueLogger.info(`The option ${issueLogger.createOptionLink(this._getRemoveStaleWhenUpdatedUsedOptionName(issue))} is: ${logger_service_1.LoggerService.cyan(shouldRemoveStaleWhenUpdated)}`);
+            if (shouldRemoveStaleWhenUpdated) {
+                issueLogger.info(`The stale label should not be removed`);
+            }
+            else {
+                issueLogger.info(`The stale label should be removed if all conditions met`);
+            }
+            // Should we un-stale this issue?
+            if (shouldRemoveStaleWhenUpdated && issueHasComments) {
+                issueLogger.info(`Remove the stale label since the $$type has a comment and the workflow should remove the stale label when updated`);
                 yield this._removeStaleLabel(issue, staleLabel);
                 issueLogger.info(`Skipping the process since the $$type is now un-stale`);
-                return; // nothing to do because it is no longer stale
+                return; // Nothing to do because it is no longer stale
             }
-            // now start closing logic
+            // Now start closing logic
             if (daysBeforeClose < 0) {
-                return; // nothing to do because we aren't closing stale issues
+                return; // Nothing to do because we aren't closing stale issues
             }
             if (!issueHasComments && !issueHasUpdate) {
-                issueLogger.info(`Closing $$type because it was last updated on! ${logger_service_1.LoggerService.cyan(issue.updated_at)}`);
+                issueLogger.info(`Closing $$type because it was last updated on: ${logger_service_1.LoggerService.cyan(issue.updated_at)}`);
                 yield this._closeIssue(issue, closeMessage, closeLabel);
                 if (this.options.deleteBranch && issue.pull_request) {
-                    issueLogger.info(`Deleting the branch the option ${issueLogger.createOptionLink(option_1.Option.DeleteBranch)} was specified`);
+                    issueLogger.info(`Deleting the branch since the option ${issueLogger.createOptionLink(option_1.Option.DeleteBranch)} was specified`);
                     yield this._deleteBranch(issue);
                     this.deletedBranchIssues.push(issue);
                 }
@@ -608,19 +620,18 @@ class IssuesProcessor {
             // so that close calculations work correctly
             const newUpdatedAtDate = new Date();
             issue.updated_at = newUpdatedAtDate.toString();
-            if (this.options.debugOnly) {
-                return;
-            }
             if (!skipMessage) {
                 try {
                     this._consumeIssueOperation(issue);
                     (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.incrementAddedItemsComment(issue);
-                    yield this.client.issues.createComment({
-                        owner: github_1.context.repo.owner,
-                        repo: github_1.context.repo.repo,
-                        issue_number: issue.number,
-                        body: staleMessage
-                    });
+                    if (!this.options.debugOnly) {
+                        yield this.client.issues.createComment({
+                            owner: github_1.context.repo.owner,
+                            repo: github_1.context.repo.repo,
+                            issue_number: issue.number,
+                            body: staleMessage
+                        });
+                    }
                 }
                 catch (error) {
                     issueLogger.error(`Error when creating a comment: ${error.message}`);
@@ -649,19 +660,18 @@ class IssuesProcessor {
             const issueLogger = new issue_logger_1.IssueLogger(issue);
             issueLogger.info(`Closing $$type for being stale`);
             this.closedIssues.push(issue);
-            if (this.options.debugOnly) {
-                return;
-            }
             if (closeMessage) {
                 try {
                     this._consumeIssueOperation(issue);
                     (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.incrementAddedItemsComment(issue);
-                    yield this.client.issues.createComment({
-                        owner: github_1.context.repo.owner,
-                        repo: github_1.context.repo.repo,
-                        issue_number: issue.number,
-                        body: closeMessage
-                    });
+                    if (!this.options.debugOnly) {
+                        yield this.client.issues.createComment({
+                            owner: github_1.context.repo.owner,
+                            repo: github_1.context.repo.repo,
+                            issue_number: issue.number,
+                            body: closeMessage
+                        });
+                    }
                 }
                 catch (error) {
                     issueLogger.error(`Error when creating a comment: ${error.message}`);
@@ -701,18 +711,17 @@ class IssuesProcessor {
         var _a;
         return __awaiter(this, void 0, void 0, function* () {
             const issueLogger = new issue_logger_1.IssueLogger(issue);
-            if (this.options.debugOnly) {
-                return;
-            }
             try {
                 this._consumeIssueOperation(issue);
                 (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.incrementFetchedPullRequestsCount();
-                const pullRequest = yield this.client.pulls.get({
-                    owner: github_1.context.repo.owner,
-                    repo: github_1.context.repo.repo,
-                    pull_number: issue.number
-                });
-                return pullRequest.data;
+                if (!this.options.debugOnly) {
+                    const pullRequest = yield this.client.pulls.get({
+                        owner: github_1.context.repo.owner,
+                        repo: github_1.context.repo.repo,
+                        pull_number: issue.number
+                    });
+                    return pullRequest.data;
+                }
             }
             catch (error) {
                 issueLogger.error(`Error when getting this $$type: ${error.message}`);
@@ -730,19 +739,18 @@ class IssuesProcessor {
                 issueLogger.info(`Not deleting this branch as no pull request was found for this $$type`);
                 return;
             }
-            if (this.options.debugOnly) {
-                return;
-            }
             const branch = pullRequest.head.ref;
             issueLogger.info(`Deleting the branch "${logger_service_1.LoggerService.cyan(branch)}" from closed $$type`);
             try {
                 this._consumeIssueOperation(issue);
                 (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.incrementDeletedBranchesCount();
-                yield this.client.git.deleteRef({
-                    owner: github_1.context.repo.owner,
-                    repo: github_1.context.repo.repo,
-                    ref: `heads/${branch}`
-                });
+                if (!this.options.debugOnly) {
+                    yield this.client.git.deleteRef({
+                        owner: github_1.context.repo.owner,
+                        repo: github_1.context.repo.repo,
+                        ref: `heads/${branch}`
+                    });
+                }
             }
             catch (error) {
                 issueLogger.error(`Error when deleting the branch "${logger_service_1.LoggerService.cyan(branch)}" from $$type: ${error.message}`);
@@ -750,28 +758,27 @@ class IssuesProcessor {
         });
     }
     // Remove a label from an issue or a pull request
-    _removeLabel(issue, label) {
+    _removeLabel(issue, label, isSubStep = false) {
         var _a;
         return __awaiter(this, void 0, void 0, function* () {
             const issueLogger = new issue_logger_1.IssueLogger(issue);
-            issueLogger.info(`Removing the label "${logger_service_1.LoggerService.cyan(label)}" from this $$type...`);
+            issueLogger.info(`${isSubStep ? logger_service_1.LoggerService.white('├── ') : ''}Removing the label "${logger_service_1.LoggerService.cyan(label)}" from this $$type...`);
             this.removedLabelIssues.push(issue);
-            if (this.options.debugOnly) {
-                return;
-            }
             try {
                 this._consumeIssueOperation(issue);
                 (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.incrementDeletedItemsLabelsCount(issue);
-                yield this.client.issues.removeLabel({
-                    owner: github_1.context.repo.owner,
-                    repo: github_1.context.repo.repo,
-                    issue_number: issue.number,
-                    name: label
-                });
-                issueLogger.info(`The label "${logger_service_1.LoggerService.cyan(label)}" was removed`);
+                if (!this.options.debugOnly) {
+                    yield this.client.issues.removeLabel({
+                        owner: github_1.context.repo.owner,
+                        repo: github_1.context.repo.repo,
+                        issue_number: issue.number,
+                        name: label
+                    });
+                }
+                issueLogger.info(`${isSubStep ? logger_service_1.LoggerService.white('└── ') : ''}The label "${logger_service_1.LoggerService.cyan(label)}" was removed`);
             }
             catch (error) {
-                issueLogger.error(`Error when removing the label: "${logger_service_1.LoggerService.cyan(error.message)}"`);
+                issueLogger.error(`${isSubStep ? logger_service_1.LoggerService.white('└── ') : ''}Error when removing the label: "${logger_service_1.LoggerService.cyan(error.message)}"`);
             }
         });
     }
@@ -848,13 +855,18 @@ class IssuesProcessor {
             const issueLogger = new issue_logger_1.IssueLogger(issue);
             issueLogger.info(`The $$type is not closed nor locked. Trying to remove the close label...`);
             if (!closeLabel) {
-                issueLogger.info(`There is no close label on this $$type. Skip`);
+                issueLogger.info(logger_service_1.LoggerService.white('├──'), `The ${issueLogger.createOptionLink(IssuesProcessor._getCloseLabelUsedOptionName(issue))} option was not set`);
+                issueLogger.info(logger_service_1.LoggerService.white('└──'), `Skipping the removal of the close label`);
                 return Promise.resolve();
             }
             if (is_labeled_1.isLabeled(issue, closeLabel)) {
-                issueLogger.info(`The $$type has a close label "${logger_service_1.LoggerService.cyan(closeLabel)}". Removing the close label...`);
-                yield this._removeLabel(issue, closeLabel);
+                issueLogger.info(logger_service_1.LoggerService.white('├──'), `The $$type has a close label "${logger_service_1.LoggerService.cyan(closeLabel)}". Removing the close label...`);
+                yield this._removeLabel(issue, closeLabel, true);
                 (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.incrementDeletedCloseItemsLabelsCount(issue);
+            }
+            else {
+                issueLogger.info(logger_service_1.LoggerService.white('└──'), `There is no close label on this $$type. Skipping`);
+                return Promise.resolve();
             }
         });
     }
@@ -876,6 +888,18 @@ class IssuesProcessor {
         return isNaN(this.options.daysBeforePrStale)
             ? option_1.Option.DaysBeforeStale
             : option_1.Option.DaysBeforePrStale;
+    }
+    _getRemoveStaleWhenUpdatedUsedOptionName(issue) {
+        if (issue.isPullRequest) {
+            if (is_boolean_1.isBoolean(this.options.removePrStaleWhenUpdated)) {
+                return option_1.Option.RemovePrStaleWhenUpdated;
+            }
+            return option_1.Option.RemoveStaleWhenUpdated;
+        }
+        if (is_boolean_1.isBoolean(this.options.removeIssueStaleWhenUpdated)) {
+            return option_1.Option.RemoveIssueStaleWhenUpdated;
+        }
+        return option_1.Option.RemoveStaleWhenUpdated;
     }
 }
 exports.IssuesProcessor = IssuesProcessor;
@@ -1604,6 +1628,8 @@ var Option;
     Option["AnyOfLabels"] = "any-of-labels";
     Option["OperationsPerRun"] = "operations-per-run";
     Option["RemoveStaleWhenUpdated"] = "remove-stale-when-updated";
+    Option["RemoveIssueStaleWhenUpdated"] = "remove-issue-stale-when-updated";
+    Option["RemovePrStaleWhenUpdated"] = "remove-pr-stale-when-updated";
     Option["DebugOnly"] = "debug-only";
     Option["Ascending"] = "ascending";
     Option["DeleteBranch"] = "delete-branch";

@@ -30,6 +30,10 @@
     "node",
     "stale"
   ],
+  "engines": {
+    "node": "~12",
+    "npm": "~6"
+  },
   "author": "GitHub",
   "license": "MIT",
   "dependencies": {

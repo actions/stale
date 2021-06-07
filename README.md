@@ -10,7 +10,7 @@ The default configuration will:
 
 ## Required Permissions
 
-For the execution of the action, it must be able to read all issues and pull requests. In addition, the action must have the permission to write to issues and pull requests. This can be achieved with the following [configuration in the action](https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions#permissions) if the permissions are restricted:
+For the execution of the action, it must be able to read all issues and pull requests. In addition, the action must have the permission to write to issues and/or pull requests. This can be achieved with the following [configuration in the action](https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions#permissions) if the permissions are restricted:
 
 ```yml
 permissions:

@@ -1849,7 +1849,7 @@ function _run() {
             const args = _getAndValidateArgs();
             const issueProcessor = new issues_processor_1.IssuesProcessor(args);
             yield issueProcessor.processIssues();
-            yield processOutput(issueProcessor.closedIssues, issueProcessor.staleIssues);
+            yield processOutput(issueProcessor.staleIssues, issueProcessor.closedIssues);
         }
         catch (error) {
             core.error(error);

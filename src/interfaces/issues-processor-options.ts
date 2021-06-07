@@ -45,6 +45,6 @@ export interface IIssuesProcessorOptions {
   exemptAllIssueAssignees: boolean | undefined;
   exemptAllPrAssignees: boolean | undefined;
   enableStatistics: boolean;
-  removeLabelsWhenUnstale: string;
-  addLabelsWhenUnstale: string;
+  labelsToRemoveWhenUnstale: string;
+  labelsToAddWhenUnstale: string;
 }

@@ -1259,7 +1259,7 @@ test('if specified, labels should be added when unstale', async () => {
   const opts = {
     ...DefaultProcessorOptions,
     removeStaleWhenUpdated: true,
-    addLabelsWhenUnstale: 'test'
+    labelsToAddWhenUnstale: 'test'
   };
   const TestIssueList: Issue[] = [
     generateIssue(

@@ -128,11 +128,11 @@ export class IssuesProcessor {
       );
     }
 
-    const addLabelsWhenUnstale: string[] = wordsToList(
-      this.options.addLabelsWhenUnstale
+    const labelsToAddWhenUnstale: string[] = wordsToList(
+      this.options.labelsToAddWhenUnstale
     );
-    const removeLabelsWhenUnstale: string[] = wordsToList(
-      this.options.removeLabelsWhenUnstale
+    const labelsToRemoveWhenUnstale: string[] = wordsToList(
+      this.options.labelsToRemoveWhenUnstale
     );
 
     for (const issue of issues.values()) {
@@ -146,8 +146,8 @@ export class IssuesProcessor {
         await this.processIssue(
           issue,
           actor,
-          addLabelsWhenUnstale,
-          removeLabelsWhenUnstale
+          labelsToAddWhenUnstale,
+          labelsToRemoveWhenUnstale
         );
       });
     }
@@ -185,8 +185,8 @@ export class IssuesProcessor {
   async processIssue(
     issue: Issue,
     actor: string,
-    addLabelsWhenUnstale: Readonly<string>[],
-    removeLabelsWhenUnstale: Readonly<string>[]
+    labelsToAddWhenUnstale: Readonly<string>[],
+    labelsToRemoveWhenUnstale: Readonly<string>[]
   ): Promise<void> {
     this._statistics?.incrementProcessedItemsCount(issue);
 
@@ -456,8 +456,8 @@ export class IssuesProcessor {
         issue,
         staleLabel,
         actor,
-        addLabelsWhenUnstale,
-        removeLabelsWhenUnstale,
+        labelsToAddWhenUnstale,
+        labelsToRemoveWhenUnstale,
         closeMessage,
         closeLabel
       );
@@ -569,8 +569,8 @@ export class IssuesProcessor {
     issue: Issue,
     staleLabel: string,
     actor: string,
-    addLabelsWhenUnstale: Readonly<string>[],
-    removeLabelsWhenUnstale: Readonly<string>[],
+    labelsToAddWhenUnstale: Readonly<string>[],
+    labelsToRemoveWhenUnstale: Readonly<string>[],
     closeMessage?: string,
     closeLabel?: string
   ) {
@@ -631,8 +631,8 @@ export class IssuesProcessor {
       await this._removeStaleLabel(issue, staleLabel);
 
       // Are there labels to remove or add when an issue is no longer stale?
-      await this._removeLabelsWhenUnstale(issue, removeLabelsWhenUnstale);
-      await this._addLabelsWhenUnstale(issue, addLabelsWhenUnstale);
+      await this._removeLabelsWhenUnstale(issue, labelsToRemoveWhenUnstale);
+      await this._addLabelsWhenUnstale(issue, labelsToAddWhenUnstale);
 
       issueLogger.info(`Skipping the process since the $$type is now un-stale`);
 
@@ -994,7 +994,7 @@ export class IssuesProcessor {
 
     issueLogger.info(
       `Removing all the labels specified via the ${this._logger.createOptionLink(
-        Option.RemoveLabelsWhenUnstale
+        Option.LabelsToRemoveWhenUnstale
       )} option.`
     );
 
@@ -1015,7 +1015,7 @@ export class IssuesProcessor {
 
     issueLogger.info(
       `Removing all the labels specified via the ${this._logger.createOptionLink(
-        Option.AddLabelsWhenUnstale
+        Option.LabelsToAddWhenUnstale
       )} option.`
     );
 

@@ -56,8 +56,8 @@ describe('Issue', (): void => {
       exemptAllIssueAssignees: undefined,
       exemptAllPrAssignees: undefined,
       enableStatistics: false,
-      removeLabelsWhenUnstale: '',
-      addLabelsWhenUnstale: ''
+      labelsToRemoveWhenUnstale: '',
+      labelsToAddWhenUnstale: ''
     };
     issueInterface = {
       title: 'dummy-title',

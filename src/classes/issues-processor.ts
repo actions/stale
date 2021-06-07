@@ -50,8 +50,6 @@ export class IssuesProcessor {
         } consumed for this $$type`
       );
     }
-
-    core.endGroup();
   }
 
   private static _getStaleMessageUsedOptionName(
@@ -124,7 +122,10 @@ export class IssuesProcessor {
     }
 
     for (const issue of issues.values()) {
-      await this.processIssue(issue, actor);
+      const issueLogger: IssueLogger = new IssueLogger(issue);
+      await issueLogger.grouping(`$$type #${issue.number}`, async () => {
+        await this.processIssue(issue, actor);
+      });
     }
 
     if (!this._operations.hasRemainingOperations()) {
@@ -155,16 +156,9 @@ export class IssuesProcessor {
   }
 
   async processIssue(issue: Issue, actor: string): Promise<void> {
-    const startMessage = LoggerService.white(
-        issue.isPullRequest
-            ? `pull request #${issue.number}`
-            : `issue #${issue.number}`
-    );
-    core.startGroup(startMessage);
-
-    const issueLogger: IssueLogger = new IssueLogger(issue);
     this._statistics?.incrementProcessedItemsCount(issue);
 
+    const issueLogger: IssueLogger = new IssueLogger(issue);
     issueLogger.info(
         `Found this $$type last updated at: ${LoggerService.cyan(
             issue.updated_at

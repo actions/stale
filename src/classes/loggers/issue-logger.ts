@@ -35,6 +35,10 @@ export class IssueLogger extends Logger {
     super.error(this._format(...message));
   }
 
+  async grouping(message: string, fn: () => Promise<void>): Promise<void> {
+    return super.grouping(this._format(message), fn);
+  }
+
   private _replaceTokens(message: Readonly<string>): string {
     return this._replaceTypeToken(message);
   }

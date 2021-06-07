@@ -16,6 +16,10 @@ export class Logger {
     core.error(LoggerService.whiteBright(message.join(' ')));
   }
 
+  async grouping(message: string, fn: () => Promise<void>): Promise<void> {
+    return core.group(LoggerService.whiteBright(message), fn);
+  }
+
   createLink(name: Readonly<string>, link: Readonly<string>): string {
     return terminalLink(name, link);
   }

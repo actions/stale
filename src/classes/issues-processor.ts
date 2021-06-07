@@ -139,7 +139,7 @@ export class IssuesProcessor {
       });
     }
 
-    if (!this._operations.hasRemainingOperations()) {
+    if (!this.operations.hasRemainingOperations()) {
       this._logger.warning(
         LoggerService.yellowBright(`No more operations left! Exiting...`)
       );
@@ -152,6 +152,9 @@ export class IssuesProcessor {
           'option which is currently set to'
         )} ${LoggerService.cyan(this.options.operationsPerRun)}`
       );
+      this._statistics
+        ?.setOperationsCount(this.operations.getConsumedOperationsCount())
+        .logStats();
 
       return 0;
     }
@@ -486,7 +489,7 @@ export class IssuesProcessor {
     type OctoKitIssueList = GetResponseTypeFromEndpointMethod<typeof endpoint>;
 
     try {
-      this._operations.consumeOperation();
+      this.operations.consumeOperation();
       const issueResult: OctoKitIssueList =
         await this.client.issues.listForRepo({
           owner: context.repo.owner,
@@ -581,9 +584,8 @@ export class IssuesProcessor {
       `$$type has been updated: ${LoggerService.cyan(issueHasUpdate)}`
     );
 
-    const shouldRemoveStaleWhenUpdated: boolean = this._shouldRemoveStaleWhenUpdated(
-      issue
-    );
+    const shouldRemoveStaleWhenUpdated: boolean =
+      this._shouldRemoveStaleWhenUpdated(issue);
 
     issueLogger.info(
       `The option ${issueLogger.createOptionLink(

@@ -286,8 +286,7 @@ class IssuesProcessor {
         return issue.isPullRequest ? option_1.Option.ClosePrLabel : option_1.Option.CloseIssueLabel;
     }
     processIssues(page = 1) {
-        var _a, _b, _c;
-
+        var _a, _b;
         return __awaiter(this, void 0, void 0, function* () {
             // get the next batch of issues
             const issues = yield this.getIssues(page);
@@ -310,9 +309,10 @@ class IssuesProcessor {
                     yield this.processIssue(issue, actor);
                 }));
             }
-            if (!this._operations.hasRemainingOperations()) {
+            if (!this.operations.hasRemainingOperations()) {
                 this._logger.warning(logger_service_1.LoggerService.yellowBright(`No more operations left! Exiting...`));
                 this._logger.warning(`${logger_service_1.LoggerService.yellowBright('If you think that not enough issues were processed you could try to increase the quantity related to the')} ${this._logger.createOptionLink(option_1.Option.OperationsPerRun)} ${logger_service_1.LoggerService.yellowBright('option which is currently set to')} ${logger_service_1.LoggerService.cyan(this.options.operationsPerRun)}`);
+                (_b = this._statistics) === null || _b === void 0 ? void 0 : _b.setOperationsCount(this.operations.getConsumedOperationsCount()).logStats();
                 return 0;
             }
             this._logger.info(`${logger_service_1.LoggerService.green('Batch')} ${logger_service_1.LoggerService.cyan(`#${page}`)} ${logger_service_1.LoggerService.green('processed.')}`);
@@ -466,12 +466,10 @@ class IssuesProcessor {
                     issueLogger.info(`This $$type should not be stale based on the last update date the ${get_humanized_date_1.getHumanizedDate(updatedAtDate)} (${logger_service_1.LoggerService.cyan(issue.updated_at)})`);
                 }
             }
-
             // Process the issue if it was marked stale
             if (issue.isStale) {
                 issueLogger.info(`This $$type is already stale`);
                 yield this._processStaleIssue(issue, staleLabel, actor, closeMessage, closeLabel);
-
             }
             IssuesProcessor._endIssueProcessing(issue);
         });

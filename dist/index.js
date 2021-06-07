@@ -566,14 +566,28 @@ class IssuesProcessor {
             const shouldRemoveStaleWhenUpdated = this._shouldRemoveStaleWhenUpdated(issue);
             issueLogger.info(`The option ${issueLogger.createOptionLink(this._getRemoveStaleWhenUpdatedUsedOptionName(issue))} is: ${logger_service_1.LoggerService.cyan(shouldRemoveStaleWhenUpdated)}`);
             if (shouldRemoveStaleWhenUpdated) {
-                issueLogger.info(`The stale label should not be removed`);
+                issueLogger.info(`The stale label should not be removed due to an update`);
+            }
+            else {
+                issueLogger.info(`The stale label should be removed if all conditions met`);
+            }
+            const shouldRemoveStaleWhenCommented = this._shouldRemoveStaleWhenCommented(issue);
+            issueLogger.info(`The option ${issueLogger.createOptionLink(this._getRemoveStaleWhenCommentedUsedOptionName(issue))} is: ${logger_service_1.LoggerService.cyan(shouldRemoveStaleWhenCommented)}`);
+            if (shouldRemoveStaleWhenCommented) {
+                issueLogger.info(`The stale label should not be removed due to a comment`);
             }
             else {
                 issueLogger.info(`The stale label should be removed if all conditions met`);
             }
             // Should we un-stale this issue?
-            if (shouldRemoveStaleWhenUpdated && issueHasComments) {
-                issueLogger.info(`Remove the stale label since the $$type has a comment and the workflow should remove the stale label when updated`);
+            if (shouldRemoveStaleWhenUpdated && issueHasUpdate) {
+                issueLogger.info(`Remove the stale label since the $$type has an update and the workflow should remove the stale label when updated`);
+                yield this._removeStaleLabel(issue, staleLabel);
+                issueLogger.info(`Skipping the process since the $$type is now un-stale`);
+                return; // Nothing to do because it is no longer stale
+            }
+            else if (shouldRemoveStaleWhenCommented && issueHasComments) {
+                issueLogger.info(`Remove the stale label since the $$type has a comment and the workflow should remove the stale label when commented`);
                 yield this._removeStaleLabel(issue, staleLabel);
                 // Are there labels to remove or add when an issue is no longer stale?
                 yield this._removeLabelsWhenUnstale(issue, labelsToRemoveWhenUnstale);
@@ -889,6 +903,18 @@ class IssuesProcessor {
             }
         });
     }
+    _shouldRemoveStaleWhenCommented(issue) {
+        if (issue.isPullRequest) {
+            if (is_boolean_1.isBoolean(this.options.removePrStaleWhenCommented)) {
+                return this.options.removePrStaleWhenCommented;
+            }
+            return this.options.removeStaleWhenCommented;
+        }
+        if (is_boolean_1.isBoolean(this.options.removeIssueStaleWhenCommented)) {
+            return this.options.removeIssueStaleWhenCommented;
+        }
+        return this.options.removeStaleWhenCommented;
+    }
     _removeStaleLabel(issue, staleLabel) {
         var _a;
         return __awaiter(this, void 0, void 0, function* () {
@@ -949,6 +975,18 @@ class IssuesProcessor {
             return option_1.Option.RemoveIssueStaleWhenUpdated;
         }
         return option_1.Option.RemoveStaleWhenUpdated;
+    }
+    _getRemoveStaleWhenCommentedUsedOptionName(issue) {
+        if (issue.isPullRequest) {
+            if (is_boolean_1.isBoolean(this.options.removePrStaleWhenCommented)) {
+                return option_1.Option.RemovePrStaleWhenCommented;
+            }
+            return option_1.Option.RemoveStaleWhenCommented;
+        }
+        if (is_boolean_1.isBoolean(this.options.removeIssueStaleWhenCommented)) {
+            return option_1.Option.RemoveIssueStaleWhenCommented;
+        }
+        return option_1.Option.RemoveStaleWhenCommented;
     }
 }
 exports.IssuesProcessor = IssuesProcessor;
@@ -1710,6 +1748,9 @@ var Option;
     Option["RemoveStaleWhenUpdated"] = "remove-stale-when-updated";
     Option["RemoveIssueStaleWhenUpdated"] = "remove-issue-stale-when-updated";
     Option["RemovePrStaleWhenUpdated"] = "remove-pr-stale-when-updated";
+    Option["RemoveStaleWhenCommented"] = "remove-stale-when-commented";
+    Option["RemoveIssueStaleWhenCommented"] = "remove-issue-stale-when-commented";
+    Option["RemovePrStaleWhenCommented"] = "remove-pr-stale-when-commented";
     Option["DebugOnly"] = "debug-only";
     Option["Ascending"] = "ascending";
     Option["DeleteBranch"] = "delete-branch";
@@ -2015,6 +2056,9 @@ function _getAndValidateArgs() {
         removeStaleWhenUpdated: !(core.getInput('remove-stale-when-updated') === 'false'),
         removeIssueStaleWhenUpdated: _toOptionalBoolean(core.getInput('remove-issue-stale-when-updated')),
         removePrStaleWhenUpdated: _toOptionalBoolean(core.getInput('remove-pr-stale-when-updated')),
+        removeStaleWhenCommented: !(core.getInput('remove-stale-when-commented') === 'false'),
+        removeIssueStaleWhenCommented: _toOptionalBoolean(core.getInput('remove-issue-stale-when-commented')),
+        removePrStaleWhenCommented: _toOptionalBoolean(core.getInput('remove-pr-stale-when-commented')),
         debugOnly: core.getInput('debug-only') === 'true',
         ascending: core.getInput('ascending') === 'true',
         deleteBranch: core.getInput('delete-branch') === 'true',

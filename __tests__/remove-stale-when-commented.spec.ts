@@ -11,16 +11,16 @@ let issuesProcessor: IssuesProcessorMock;
 
 /**
  * @description
- * Assuming there is an update on the issue
+ * Assuming there is a comment on the issue
  */
-describe('remove-stale-when-updated option', (): void => {
+describe('remove-stale-when-commented option', (): void => {
   beforeEach((): void => {
     issuesProcessorBuilder = new IssuesProcessorBuilder();
   });
 
-  describe('when the option "remove-stale-when-updated" is disabled', (): void => {
+  describe('when the option "remove-stale-when-commented" is disabled', (): void => {
     beforeEach((): void => {
-      issuesProcessorBuilder.keepStaleWhenUpdated();
+      issuesProcessorBuilder.keepStaleWhenCommented();
     });
 
     test('should not remove the stale label on the issue', async (): Promise<void> => {
@@ -42,9 +42,9 @@ describe('remove-stale-when-updated option', (): void => {
     });
   });
 
-  describe('when the option "remove-stale-when-updated" is enabled', (): void => {
+  describe('when the option "remove-stale-when-commented" is enabled', (): void => {
     beforeEach((): void => {
-      issuesProcessorBuilder.removeStaleWhenUpdated();
+      issuesProcessorBuilder.removeStaleWhenCommented();
     });
 
     test('should remove the stale label on the issue', async (): Promise<void> => {
@@ -67,19 +67,19 @@ describe('remove-stale-when-updated option', (): void => {
   });
 });
 
-describe('remove-issue-stale-when-updated option', (): void => {
+describe('remove-issue-stale-when-commented option', (): void => {
   beforeEach((): void => {
     issuesProcessorBuilder = new IssuesProcessorBuilder();
   });
 
-  describe('when the option "remove-stale-when-updated" is disabled', (): void => {
+  describe('when the option "remove-stale-when-commented" is disabled', (): void => {
     beforeEach((): void => {
-      issuesProcessorBuilder.keepStaleWhenUpdated();
+      issuesProcessorBuilder.keepStaleWhenCommented();
     });
 
-    describe('when the option "remove-issue-stale-when-updated" is unset', (): void => {
+    describe('when the option "remove-issue-stale-when-commented" is unset', (): void => {
       beforeEach((): void => {
-        issuesProcessorBuilder.unsetIssueStaleWhenUpdated();
+        issuesProcessorBuilder.unsetIssueStaleWhenCommented();
       });
 
       test('should not remove the stale label on the issue', async (): Promise<void> => {
@@ -101,9 +101,9 @@ describe('remove-issue-stale-when-updated option', (): void => {
       });
     });
 
-    describe('when the option "remove-issue-stale-when-updated" is disabled', (): void => {
+    describe('when the option "remove-issue-stale-when-commented" is disabled', (): void => {
       beforeEach((): void => {
-        issuesProcessorBuilder.keepIssueStaleWhenUpdated();
+        issuesProcessorBuilder.keepIssueStaleWhenCommented();
       });
 
       test('should not remove the stale label on the issue', async (): Promise<void> => {
@@ -125,9 +125,9 @@ describe('remove-issue-stale-when-updated option', (): void => {
       });
     });
 
-    describe('when the option "remove-issue-stale-when-updated" is enabled', (): void => {
+    describe('when the option "remove-issue-stale-when-commented" is enabled', (): void => {
       beforeEach((): void => {
-        issuesProcessorBuilder.removeIssueStaleWhenUpdated();
+        issuesProcessorBuilder.removeIssueStaleWhenCommented();
       });
 
       test('should remove the stale label on the issue', async (): Promise<void> => {
@@ -150,14 +150,14 @@ describe('remove-issue-stale-when-updated option', (): void => {
     });
   });
 
-  describe('when the option "remove-stale-when-updated" is enabled', (): void => {
+  describe('when the option "remove-stale-when-commented" is enabled', (): void => {
     beforeEach((): void => {
-      issuesProcessorBuilder.removeStaleWhenUpdated();
+      issuesProcessorBuilder.removeStaleWhenCommented();
     });
 
-    describe('when the option "remove-issue-stale-when-updated" is unset', (): void => {
+    describe('when the option "remove-issue-stale-when-commented" is unset', (): void => {
       beforeEach((): void => {
-        issuesProcessorBuilder.unsetIssueStaleWhenUpdated();
+        issuesProcessorBuilder.unsetIssueStaleWhenCommented();
       });
 
       test('should remove the stale label on the issue', async (): Promise<void> => {
@@ -179,9 +179,9 @@ describe('remove-issue-stale-when-updated option', (): void => {
       });
     });
 
-    describe('when the option "remove-issue-stale-when-updated" is disabled', (): void => {
+    describe('when the option "remove-issue-stale-when-commented" is disabled', (): void => {
       beforeEach((): void => {
-        issuesProcessorBuilder.keepIssueStaleWhenUpdated();
+        issuesProcessorBuilder.keepIssueStaleWhenCommented();
       });
 
       test('should not remove the stale label on the issue', async (): Promise<void> => {
@@ -203,9 +203,9 @@ describe('remove-issue-stale-when-updated option', (): void => {
       });
     });
 
-    describe('when the option "remove-issue-stale-when-updated" is enabled', (): void => {
+    describe('when the option "remove-issue-stale-when-commented" is enabled', (): void => {
       beforeEach((): void => {
-        issuesProcessorBuilder.removeIssueStaleWhenUpdated();
+        issuesProcessorBuilder.removeIssueStaleWhenCommented();
       });
 
       test('should remove the stale label on the issue', async (): Promise<void> => {
@@ -229,19 +229,19 @@ describe('remove-issue-stale-when-updated option', (): void => {
   });
 });
 
-describe('remove-pr-stale-when-updated option', (): void => {
+describe('remove-pr-stale-when-commented option', (): void => {
   beforeEach((): void => {
     issuesProcessorBuilder = new IssuesProcessorBuilder();
   });
 
-  describe('when the option "remove-stale-when-updated" is disabled', (): void => {
+  describe('when the option "remove-stale-when-commented" is disabled', (): void => {
     beforeEach((): void => {
-      issuesProcessorBuilder.keepStaleWhenUpdated();
+      issuesProcessorBuilder.keepStaleWhenCommented();
     });
 
-    describe('when the option "remove-pr-stale-when-updated" is unset', (): void => {
+    describe('when the option "remove-pr-stale-when-commented" is unset', (): void => {
       beforeEach((): void => {
-        issuesProcessorBuilder.unsetPrStaleWhenUpdated();
+        issuesProcessorBuilder.unsetPrStaleWhenCommented();
       });
 
       test('should not remove the stale label on the issue', async (): Promise<void> => {
@@ -263,9 +263,9 @@ describe('remove-pr-stale-when-updated option', (): void => {
       });
     });
 
-    describe('when the option "remove-pr-stale-when-updated" is disabled', (): void => {
+    describe('when the option "remove-pr-stale-when-commented" is disabled', (): void => {
       beforeEach((): void => {
-        issuesProcessorBuilder.keepPrStaleWhenUpdated();
+        issuesProcessorBuilder.keepPrStaleWhenCommented();
       });
 
       test('should not remove the stale label on the issue', async (): Promise<void> => {
@@ -287,9 +287,9 @@ describe('remove-pr-stale-when-updated option', (): void => {
       });
     });
 
-    describe('when the option "remove-pr-stale-when-updated" is enabled', (): void => {
+    describe('when the option "remove-pr-stale-when-commented" is enabled', (): void => {
       beforeEach((): void => {
-        issuesProcessorBuilder.removePrStaleWhenUpdated();
+        issuesProcessorBuilder.removePrStaleWhenCommented();
       });
 
       test('should not remove the stale label on the issue', async (): Promise<void> => {
@@ -312,14 +312,14 @@ describe('remove-pr-stale-when-updated option', (): void => {
     });
   });
 
-  describe('when the option "remove-stale-when-updated" is enabled', (): void => {
+  describe('when the option "remove-stale-when-commented" is enabled', (): void => {
     beforeEach((): void => {
-      issuesProcessorBuilder.removeStaleWhenUpdated();
+      issuesProcessorBuilder.removeStaleWhenCommented();
     });
 
-    describe('when the option "remove-pr-stale-when-updated" is unset', (): void => {
+    describe('when the option "remove-pr-stale-when-commented" is unset', (): void => {
       beforeEach((): void => {
-        issuesProcessorBuilder.unsetPrStaleWhenUpdated();
+        issuesProcessorBuilder.unsetPrStaleWhenCommented();
       });
 
       test('should remove the stale label on the issue', async (): Promise<void> => {
@@ -341,9 +341,9 @@ describe('remove-pr-stale-when-updated option', (): void => {
       });
     });
 
-    describe('when the option "remove-pr-stale-when-updated" is disabled', (): void => {
+    describe('when the option "remove-pr-stale-when-commented" is disabled', (): void => {
       beforeEach((): void => {
-        issuesProcessorBuilder.keepPrStaleWhenUpdated();
+        issuesProcessorBuilder.keepPrStaleWhenCommented();
       });
 
       test('should remove the stale label on the issue', async (): Promise<void> => {
@@ -365,9 +365,9 @@ describe('remove-pr-stale-when-updated option', (): void => {
       });
     });
 
-    describe('when the option "remove-pr-stale-when-updated" is enabled', (): void => {
+    describe('when the option "remove-pr-stale-when-commented" is enabled', (): void => {
       beforeEach((): void => {
-        issuesProcessorBuilder.removePrStaleWhenUpdated();
+        issuesProcessorBuilder.removePrStaleWhenCommented();
       });
 
       test('should remove the stale label on the issue', async (): Promise<void> => {
@@ -397,50 +397,50 @@ class IssuesProcessorBuilder {
   };
   private _issues: Issue[] = [];
 
-  keepStaleWhenUpdated(): IssuesProcessorBuilder {
-    this._options.removeStaleWhenUpdated = false;
+  keepStaleWhenCommented(): IssuesProcessorBuilder {
+    this._options.removeStaleWhenCommented = false;
 
     return this;
   }
 
-  removeStaleWhenUpdated(): IssuesProcessorBuilder {
-    this._options.removeStaleWhenUpdated = true;
+  removeStaleWhenCommented(): IssuesProcessorBuilder {
+    this._options.removeStaleWhenCommented = true;
 
     return this;
   }
 
-  unsetIssueStaleWhenUpdated(): IssuesProcessorBuilder {
-    delete this._options.removeIssueStaleWhenUpdated;
+  unsetIssueStaleWhenCommented(): IssuesProcessorBuilder {
+    delete this._options.removeIssueStaleWhenCommented;
 
     return this;
   }
 
-  keepIssueStaleWhenUpdated(): IssuesProcessorBuilder {
-    this._options.removeIssueStaleWhenUpdated = false;
+  keepIssueStaleWhenCommented(): IssuesProcessorBuilder {
+    this._options.removeIssueStaleWhenCommented = false;
 
     return this;
   }
 
-  removeIssueStaleWhenUpdated(): IssuesProcessorBuilder {
-    this._options.removeIssueStaleWhenUpdated = true;
+  removeIssueStaleWhenCommented(): IssuesProcessorBuilder {
+    this._options.removeIssueStaleWhenCommented = true;
 
     return this;
   }
 
-  unsetPrStaleWhenUpdated(): IssuesProcessorBuilder {
-    delete this._options.removePrStaleWhenUpdated;
+  unsetPrStaleWhenCommented(): IssuesProcessorBuilder {
+    delete this._options.removePrStaleWhenCommented;
 
     return this;
   }
 
-  keepPrStaleWhenUpdated(): IssuesProcessorBuilder {
-    this._options.removePrStaleWhenUpdated = false;
+  keepPrStaleWhenCommented(): IssuesProcessorBuilder {
+    this._options.removePrStaleWhenCommented = false;
 
     return this;
   }
 
-  removePrStaleWhenUpdated(): IssuesProcessorBuilder {
-    this._options.removePrStaleWhenUpdated = true;
+  removePrStaleWhenCommented(): IssuesProcessorBuilder {
+    this._options.removePrStaleWhenCommented = true;
 
     return this;
   }
@@ -480,9 +480,8 @@ class IssuesProcessorBuilder {
       issues.map((issue: Readonly<Partial<IIssue>>): Partial<IIssue> => {
         return {
           ...issue,
-          // Note this update
-          updated_at: new Date().toDateString(),
-          created_at: new Date().toDateString(),
+          updated_at: '2020-01-01T17:00:00Z',
+          created_at: '2020-01-01T17:00:00Z',
           labels: issue.labels?.map((label: Readonly<ILabel>): ILabel => {
             return {
               ...label,
@@ -518,9 +517,8 @@ class IssuesProcessorBuilder {
       issues.map((issue: Readonly<Partial<IIssue>>): Partial<IIssue> => {
         return {
           ...issue,
-          // Note this update
-          updated_at: new Date().toDateString(),
-          created_at: new Date().toDateString(),
+          updated_at: '2020-01-01T17:00:00Z',
+          created_at: '2020-01-01T17:00:00Z',
           labels: issue.labels?.map((label: Readonly<ILabel>): ILabel => {
             return {
               ...label,
@@ -541,8 +539,17 @@ class IssuesProcessorBuilder {
   build(): IssuesProcessorMock {
     return new IssuesProcessorMock(
       this._options,
+      async () => 'abot',
       async p => (p === 1 ? this._issues : []),
-      async () => [],
+      async () => [
+        {
+          // Note this comment
+          user: {
+            login: 'notme',
+            type: 'User'
+          }
+        }
+      ],
       async () => new Date().toDateString()
     );
   }

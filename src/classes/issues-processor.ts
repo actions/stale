@@ -600,7 +600,28 @@ export class IssuesProcessor {
     );
 
     if (shouldRemoveStaleWhenUpdated) {
-      issueLogger.info(`The stale label should not be removed`);
+      issueLogger.info(
+        `The stale label should not be removed due to an update`
+      );
+    } else {
+      issueLogger.info(
+        `The stale label should be removed if all conditions met`
+      );
+    }
+
+    const shouldRemoveStaleWhenCommented: boolean =
+      this._shouldRemoveStaleWhenCommented(issue);
+
+    issueLogger.info(
+      `The option ${issueLogger.createOptionLink(
+        this._getRemoveStaleWhenCommentedUsedOptionName(issue)
+      )} is: ${LoggerService.cyan(shouldRemoveStaleWhenCommented)}`
+    );
+
+    if (shouldRemoveStaleWhenCommented) {
+      issueLogger.info(
+        `The stale label should not be removed due to a comment`
+      );
     } else {
       issueLogger.info(
         `The stale label should be removed if all conditions met`
@@ -608,9 +629,18 @@ export class IssuesProcessor {
     }
 
     // Should we un-stale this issue?
-    if (shouldRemoveStaleWhenUpdated && issueHasComments) {
+    if (shouldRemoveStaleWhenUpdated && issueHasUpdate) {
       issueLogger.info(
-        `Remove the stale label since the $$type has a comment and the workflow should remove the stale label when updated`
+        `Remove the stale label since the $$type has an update and the workflow should remove the stale label when updated`
+      );
+      await this._removeStaleLabel(issue, staleLabel);
+
+      issueLogger.info(`Skipping the process since the $$type is now un-stale`);
+
+      return; // Nothing to do because it is no longer stale
+    } else if (shouldRemoveStaleWhenCommented && issueHasComments) {
+      issueLogger.info(
+        `Remove the stale label since the $$type has a comment and the workflow should remove the stale label when commented`
       );
       await this._removeStaleLabel(issue, staleLabel);
 
@@ -1032,6 +1062,22 @@ export class IssuesProcessor {
     }
   }
 
+  private _shouldRemoveStaleWhenCommented(issue: Issue): boolean {
+    if (issue.isPullRequest) {
+      if (isBoolean(this.options.removePrStaleWhenCommented)) {
+        return this.options.removePrStaleWhenCommented;
+      }
+
+      return this.options.removeStaleWhenCommented;
+    }
+
+    if (isBoolean(this.options.removeIssueStaleWhenCommented)) {
+      return this.options.removeIssueStaleWhenCommented;
+    }
+
+    return this.options.removeStaleWhenCommented;
+  }
+
   private async _removeStaleLabel(
     issue: Issue,
     staleLabel: Readonly<string>
@@ -1142,5 +1188,26 @@ export class IssuesProcessor {
     }
 
     return Option.RemoveStaleWhenUpdated;
+  }
+
+  private _getRemoveStaleWhenCommentedUsedOptionName(
+    issue: Readonly<Issue>
+  ):
+    | Option.RemovePrStaleWhenCommented
+    | Option.RemoveStaleWhenCommented
+    | Option.RemoveIssueStaleWhenCommented {
+    if (issue.isPullRequest) {
+      if (isBoolean(this.options.removePrStaleWhenCommented)) {
+        return Option.RemovePrStaleWhenCommented;
+      }
+
+      return Option.RemoveStaleWhenCommented;
+    }
+
+    if (isBoolean(this.options.removeIssueStaleWhenCommented)) {
+      return Option.RemoveIssueStaleWhenCommented;
+    }
+
+    return Option.RemoveStaleWhenCommented;
   }
 }

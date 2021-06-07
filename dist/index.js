@@ -255,7 +255,7 @@ class IssuesProcessor {
         this.removedLabelIssues = [];
         this.options = options;
         this.client = github_1.getOctokit(this.options.repoToken);
-        this._operations = new stale_operations_1.StaleOperations(this.options);
+        this.operations = new stale_operations_1.StaleOperations(this.options);
         this._logger.info(logger_service_1.LoggerService.yellow(`Starting the stale action process...`));
         if (this.options.debugOnly) {
             this._logger.warning(logger_service_1.LoggerService.yellowBright(`Executing in debug mode!`));
@@ -286,20 +286,24 @@ class IssuesProcessor {
         return issue.isPullRequest ? option_1.Option.ClosePrLabel : option_1.Option.CloseIssueLabel;
     }
     processIssues(page = 1) {
-        var _a, _b;
+        var _a, _b, _c;
         return __awaiter(this, void 0, void 0, function* () {
             // get the next batch of issues
             const issues = yield this.getIssues(page);
             const actor = yield this.getActor();
             if (issues.length <= 0) {
                 this._logger.info(logger_service_1.LoggerService.green(`No more issues found to process. Exiting...`));
-                (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.setRemainingOperations(this._operations.getRemainingOperationsCount()).logStats();
-                return this._operations.getRemainingOperationsCount();
+                (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.setOperationsCount(this.operations.getConsumedOperationsCount()).logStats();
+                return this.operations.getRemainingOperationsCount();
             }
             else {
                 this._logger.info(`${logger_service_1.LoggerService.yellow('Processing the batch of issues')} ${logger_service_1.LoggerService.cyan(`#${page}`)} ${logger_service_1.LoggerService.yellow('containing')} ${logger_service_1.LoggerService.cyan(issues.length)} ${logger_service_1.LoggerService.yellow(`issue${issues.length > 1 ? 's' : ''}...`)}`);
             }
             for (const issue of issues.values()) {
+                // Stop the processing if no more operations remains
+                if (!this.operations.hasRemainingOperations()) {
+                    break;
+                }
                 const issueLogger = new issue_logger_1.IssueLogger(issue);
                 (_b = this._statistics) === null || _b === void 0 ? void 0 : _b.incrementProcessedItemsCount(issue);
                 issueLogger.info(`Found this $$type last updated at: ${logger_service_1.LoggerService.cyan(issue.updated_at)}`);
@@ -450,9 +454,10 @@ class IssuesProcessor {
                 }
                 IssuesProcessor._endIssueProcessing(issue);
             }
-            if (!this._operations.hasRemainingOperations()) {
+            if (!this.operations.hasRemainingOperations()) {
                 this._logger.warning(logger_service_1.LoggerService.yellowBright(`No more operations left! Exiting...`));
                 this._logger.warning(`${logger_service_1.LoggerService.yellowBright('If you think that not enough issues were processed you could try to increase the quantity related to the')} ${this._logger.createOptionLink(option_1.Option.OperationsPerRun)} ${logger_service_1.LoggerService.yellowBright('option which is currently set to')} ${logger_service_1.LoggerService.cyan(this.options.operationsPerRun)}`);
+                (_c = this._statistics) === null || _c === void 0 ? void 0 : _c.setOperationsCount(this.operations.getConsumedOperationsCount()).logStats();
                 return 0;
             }
             this._logger.info(`${logger_service_1.LoggerService.green('Batch')} ${logger_service_1.LoggerService.cyan(`#${page}`)} ${logger_service_1.LoggerService.green('processed.')}`);
@@ -466,7 +471,7 @@ class IssuesProcessor {
         return __awaiter(this, void 0, void 0, function* () {
             // Find any comments since date on the given issue
             try {
-                this._operations.consumeOperation();
+                this.operations.consumeOperation();
                 (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.incrementFetchedItemsCommentsCount();
                 const comments = yield this.client.issues.listComments({
                     owner: github_1.context.repo.owner,
@@ -487,7 +492,7 @@ class IssuesProcessor {
         return __awaiter(this, void 0, void 0, function* () {
             let actor;
             try {
-                this._operations.consumeOperation();
+                this.operations.consumeOperation();
                 actor = yield this.client.users.getAuthenticated();
             }
             catch (error) {
@@ -503,7 +508,7 @@ class IssuesProcessor {
             // generate type for response
             const endpoint = this.client.issues.listForRepo;
             try {
-                this._operations.consumeOperation();
+                this.operations.consumeOperation();
                 const issueResult = yield this.client.issues.listForRepo({
                     owner: github_1.context.repo.owner,
                     repo: github_1.context.repo.repo,
@@ -871,7 +876,7 @@ class IssuesProcessor {
         });
     }
     _consumeIssueOperation(issue) {
-        this._operations.consumeOperation();
+        this.operations.consumeOperation();
         issue.operations.consumeOperation();
     }
     _getDaysBeforeStaleUsedOptionName(issue) {
@@ -1283,8 +1288,8 @@ class Statistics {
         }
         return this._incrementUndoStaleIssuesCount(increment);
     }
-    setRemainingOperations(remainingOperations) {
-        this._operationsCount = remainingOperations;
+    setOperationsCount(operationsCount) {
+        this._operationsCount = operationsCount;
         return this;
     }
     incrementClosedItemsCount(issue, increment = 1) {

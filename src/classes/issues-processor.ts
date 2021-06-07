@@ -160,79 +160,79 @@ export class IssuesProcessor {
 
     const issueLogger: IssueLogger = new IssueLogger(issue);
     issueLogger.info(
-        `Found this $$type last updated at: ${LoggerService.cyan(
-            issue.updated_at
-        )}`
+      `Found this $$type last updated at: ${LoggerService.cyan(
+        issue.updated_at
+      )}`
     );
 
     // calculate string based messages for this issue
     const staleMessage: string = issue.isPullRequest
-        ? this.options.stalePrMessage
-        : this.options.staleIssueMessage;
+      ? this.options.stalePrMessage
+      : this.options.staleIssueMessage;
     const closeMessage: string = issue.isPullRequest
-        ? this.options.closePrMessage
-        : this.options.closeIssueMessage;
+      ? this.options.closePrMessage
+      : this.options.closeIssueMessage;
     const staleLabel: string = issue.isPullRequest
-        ? this.options.stalePrLabel
-        : this.options.staleIssueLabel;
+      ? this.options.stalePrLabel
+      : this.options.staleIssueLabel;
     const closeLabel: string = issue.isPullRequest
-        ? this.options.closePrLabel
-        : this.options.closeIssueLabel;
+      ? this.options.closePrLabel
+      : this.options.closeIssueLabel;
     const skipMessage = issue.isPullRequest
-        ? this.options.stalePrMessage.length === 0
-        : this.options.staleIssueMessage.length === 0;
+      ? this.options.stalePrMessage.length === 0
+      : this.options.staleIssueMessage.length === 0;
     const daysBeforeStale: number = issue.isPullRequest
-        ? this._getDaysBeforePrStale()
-        : this._getDaysBeforeIssueStale();
+      ? this._getDaysBeforePrStale()
+      : this._getDaysBeforeIssueStale();
     const onlyLabels: string[] = wordsToList(this._getOnlyLabels(issue));
 
     if (onlyLabels.length > 0) {
       issueLogger.info(
-          `The option ${issueLogger.createOptionLink(
-              Option.OnlyLabels
-          )} was specified to only process issues and pull requests with all those labels (${LoggerService.cyan(
-              onlyLabels.length
-          )})`
+        `The option ${issueLogger.createOptionLink(
+          Option.OnlyLabels
+        )} was specified to only process issues and pull requests with all those labels (${LoggerService.cyan(
+          onlyLabels.length
+        )})`
       );
 
       const hasAllWhitelistedLabels: boolean = onlyLabels.every(
-          (label: Readonly<string>): boolean => {
-            return isLabeled(issue, label);
-          }
+        (label: Readonly<string>): boolean => {
+          return isLabeled(issue, label);
+        }
       );
 
       if (!hasAllWhitelistedLabels) {
         issueLogger.info(
-            LoggerService.white('└──'),
-            `Skipping this $$type because it doesn't have all the required labels`
+          LoggerService.white('└──'),
+          `Skipping this $$type because it doesn't have all the required labels`
         );
 
         IssuesProcessor._endIssueProcessing(issue);
         return; // Don't process issues without all of the required labels
       } else {
         issueLogger.info(
-            LoggerService.white('├──'),
-            `All the required labels are present on this $$type`
+          LoggerService.white('├──'),
+          `All the required labels are present on this $$type`
         );
         issueLogger.info(
-            LoggerService.white('└──'),
-            `Continuing the process for this $$type`
+          LoggerService.white('└──'),
+          `Continuing the process for this $$type`
         );
       }
     } else {
       issueLogger.info(
-          `The option ${issueLogger.createOptionLink(
-              Option.OnlyLabels
-          )} was not specified`
+        `The option ${issueLogger.createOptionLink(
+          Option.OnlyLabels
+        )} was not specified`
       );
       issueLogger.info(
-          LoggerService.white('└──'),
-          `Continuing the process for this $$type`
+        LoggerService.white('└──'),
+        `Continuing the process for this $$type`
       );
     }
 
     issueLogger.info(
-        `Days before $$type stale: ${LoggerService.cyan(daysBeforeStale)}`
+      `Days before $$type stale: ${LoggerService.cyan(daysBeforeStale)}`
     );
 
     const shouldMarkAsStale: boolean = shouldMarkWhenStale(daysBeforeStale);
@@ -257,9 +257,9 @@ export class IssuesProcessor {
       const createdAt: Date = new Date(issue.created_at);
 
       issueLogger.info(
-          `A start date was specified for the ${getHumanizedDate(
-              startDate
-          )} (${LoggerService.cyan(this.options.startDate)})`
+        `A start date was specified for the ${getHumanizedDate(
+          startDate
+        )} (${LoggerService.cyan(this.options.startDate)})`
       );
 
       // Expecting that GitHub will always set a creation date on the issues and PRs
@@ -267,21 +267,19 @@ export class IssuesProcessor {
       if (!isValidDate(createdAt)) {
         IssuesProcessor._endIssueProcessing(issue);
         core.setFailed(
-            new Error(
-                `Invalid issue field: "created_at". Expected a valid date`
-            )
+          new Error(`Invalid issue field: "created_at". Expected a valid date`)
         );
       }
 
       issueLogger.info(
-          `$$type created the ${getHumanizedDate(
-              createdAt
-          )} (${LoggerService.cyan(issue.created_at)})`
+        `$$type created the ${getHumanizedDate(
+          createdAt
+        )} (${LoggerService.cyan(issue.created_at)})`
       );
 
       if (!isDateMoreRecentThan(createdAt, startDate)) {
         issueLogger.info(
-            `Skipping this $$type because it was created before the specified start date`
+          `Skipping this $$type because it was created before the specified start date`
         );
 
         IssuesProcessor._endIssueProcessing(issue);
@@ -296,15 +294,15 @@ export class IssuesProcessor {
     }
 
     const exemptLabels: string[] = wordsToList(
-        issue.isPullRequest
-            ? this.options.exemptPrLabels
-            : this.options.exemptIssueLabels
+      issue.isPullRequest
+        ? this.options.exemptPrLabels
+        : this.options.exemptIssueLabels
     );
 
     if (
-        exemptLabels.some((exemptLabel: Readonly<string>): boolean =>
-            isLabeled(issue, exemptLabel)
-        )
+      exemptLabels.some((exemptLabel: Readonly<string>): boolean =>
+        isLabeled(issue, exemptLabel)
+      )
     ) {
       if (issue.isStale) {
         issueLogger.info(`An exempt label was added after the stale label.`);
@@ -320,45 +318,45 @@ export class IssuesProcessor {
 
     if (anyOfLabels.length > 0) {
       issueLogger.info(
-          `The option ${issueLogger.createOptionLink(
-              Option.AnyOfLabels
-          )} was specified to only process the issues and pull requests with one of those labels (${LoggerService.cyan(
-              anyOfLabels.length
-          )})`
+        `The option ${issueLogger.createOptionLink(
+          Option.AnyOfLabels
+        )} was specified to only process the issues and pull requests with one of those labels (${LoggerService.cyan(
+          anyOfLabels.length
+        )})`
       );
 
       const hasOneOfWhitelistedLabels: boolean = anyOfLabels.some(
-          (label: Readonly<string>): boolean => {
-            return isLabeled(issue, label);
-          }
+        (label: Readonly<string>): boolean => {
+          return isLabeled(issue, label);
+        }
       );
 
       if (!hasOneOfWhitelistedLabels) {
         issueLogger.info(
-            LoggerService.white('└──'),
-            `Skipping this $$type because it doesn't have one of the required labels`
+          LoggerService.white('└──'),
+          `Skipping this $$type because it doesn't have one of the required labels`
         );
         IssuesProcessor._endIssueProcessing(issue);
         return; // Don't process issues without any of the required labels
       } else {
         issueLogger.info(
-            LoggerService.white('├──'),
-            `One of the required labels is present on this $$type`
+          LoggerService.white('├──'),
+          `One of the required labels is present on this $$type`
         );
         issueLogger.info(
-            LoggerService.white('└──'),
-            `Continuing the process for this $$type`
+          LoggerService.white('└──'),
+          `Continuing the process for this $$type`
         );
       }
     } else {
       issueLogger.info(
-          `The option ${issueLogger.createOptionLink(
-              Option.AnyOfLabels
-          )} was not specified`
+        `The option ${issueLogger.createOptionLink(
+          Option.AnyOfLabels
+        )} was not specified`
       );
       issueLogger.info(
-          LoggerService.white('└──'),
-          `Continuing the process for this $$type`
+        LoggerService.white('└──'),
+        `Continuing the process for this $$type`
       );
     }
 
@@ -378,8 +376,8 @@ export class IssuesProcessor {
 
     // Should this issue be marked stale?
     const shouldBeStale = !IssuesProcessor._updatedSince(
-        issue.updated_at,
-        daysBeforeStale
+      issue.updated_at,
+      daysBeforeStale
     );
 
     // Determine if this issue needs to be marked stale first
@@ -389,32 +387,32 @@ export class IssuesProcessor {
 
       if (shouldBeStale) {
         issueLogger.info(
-            `This $$type should be stale based on the last update date the ${getHumanizedDate(
-                updatedAtDate
-            )} (${LoggerService.cyan(issue.updated_at)})`
+          `This $$type should be stale based on the last update date the ${getHumanizedDate(
+            updatedAtDate
+          )} (${LoggerService.cyan(issue.updated_at)})`
         );
 
         if (shouldMarkAsStale) {
           issueLogger.info(
-              `This $$type should be marked as stale based on the option ${issueLogger.createOptionLink(
-                  this._getDaysBeforeStaleUsedOptionName(issue)
-              )} (${LoggerService.cyan(daysBeforeStale)})`
+            `This $$type should be marked as stale based on the option ${issueLogger.createOptionLink(
+              this._getDaysBeforeStaleUsedOptionName(issue)
+            )} (${LoggerService.cyan(daysBeforeStale)})`
           );
           await this._markStale(issue, staleMessage, staleLabel, skipMessage);
           issue.isStale = true; // This issue is now considered stale
           issueLogger.info(`This $$type is now stale`);
         } else {
           issueLogger.info(
-              `This $$type should not be marked as stale based on the option ${issueLogger.createOptionLink(
-                  this._getDaysBeforeStaleUsedOptionName(issue)
-              )} (${LoggerService.cyan(daysBeforeStale)})`
+            `This $$type should not be marked as stale based on the option ${issueLogger.createOptionLink(
+              this._getDaysBeforeStaleUsedOptionName(issue)
+            )} (${LoggerService.cyan(daysBeforeStale)})`
           );
         }
       } else {
         issueLogger.info(
-            `This $$type should not be stale based on the last update date the ${getHumanizedDate(
-                updatedAtDate
-            )} (${LoggerService.cyan(issue.updated_at)})`
+          `This $$type should not be stale based on the last update date the ${getHumanizedDate(
+            updatedAtDate
+          )} (${LoggerService.cyan(issue.updated_at)})`
         );
       }
     }
@@ -423,11 +421,11 @@ export class IssuesProcessor {
     if (issue.isStale) {
       issueLogger.info(`This $$type is already stale`);
       await this._processStaleIssue(
-          issue,
-          staleLabel,
-          actor,
-          closeMessage,
-          closeLabel
+        issue,
+        staleLabel,
+        actor,
+        closeMessage,
+        closeLabel
       );
     }
 

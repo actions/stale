@@ -17,9 +17,9 @@ describe('operations-per-run option', (): void => {
       sut.staleIn(10).newIssue().updated(20);
     });
 
-    describe('when the operations per run option is set to 1', (): void => {
+    describe('when the mutation operations per run option is set to 1', (): void => {
       beforeEach((): void => {
-        sut.operationsPerRun(1);
+        sut.mutationOperationsPerRun(1);
       });
 
       it('should consume 1 operation (stale label)', async () => {
@@ -29,7 +29,7 @@ describe('operations-per-run option', (): void => {
 
         expect(sut.processor.staleIssues).toHaveLength(1);
         expect(
-          sut.processor.operations.getConsumedOperationsCount()
+          sut.processor.operations.getConsumedMutationOperationsCount()
         ).toStrictEqual(1);
       });
     });
@@ -40,9 +40,9 @@ describe('operations-per-run option', (): void => {
       sut.staleIn(10).commentOnStale().newIssue().updated(20);
     });
 
-    describe('when the operations per run option is set to 2', (): void => {
+    describe('when the mutation operations per run option is set to 2', (): void => {
       beforeEach((): void => {
-        sut.operationsPerRun(2);
+        sut.mutationOperationsPerRun(2);
       });
 
       it('should consume 2 operations (stale label, comment)', async () => {
@@ -52,15 +52,15 @@ describe('operations-per-run option', (): void => {
 
         expect(sut.processor.staleIssues).toHaveLength(1);
         expect(
-          sut.processor.operations.getConsumedOperationsCount()
+          sut.processor.operations.getConsumedMutationOperationsCount()
         ).toStrictEqual(2);
       });
     });
 
     // Special case were we continue the issue processing even if the operations per run is reached
-    describe('when the operations per run option is set to 1', (): void => {
+    describe('when the mutation operations per run option is set to 1', (): void => {
       beforeEach((): void => {
-        sut.operationsPerRun(1);
+        sut.mutationOperationsPerRun(1);
       });
 
       it('should consume 2 operations (stale label, comment)', async () => {
@@ -70,7 +70,7 @@ describe('operations-per-run option', (): void => {
 
         expect(sut.processor.staleIssues).toHaveLength(1);
         expect(
-          sut.processor.operations.getConsumedOperationsCount()
+          sut.processor.operations.getConsumedMutationOperationsCount()
         ).toStrictEqual(2);
       });
     });
@@ -83,9 +83,9 @@ describe('operations-per-run option', (): void => {
       sut.newIssue().updated(20);
     });
 
-    describe('when the operations per run option is set to 3', (): void => {
+    describe('when the mutation perations per run option is set to 3', (): void => {
       beforeEach((): void => {
-        sut.operationsPerRun(3);
+        sut.mutationOperationsPerRun(3);
       });
 
       it('should consume 4 operations (stale label, comment)', async () => {
@@ -95,14 +95,14 @@ describe('operations-per-run option', (): void => {
 
         expect(sut.processor.staleIssues).toHaveLength(2);
         expect(
-          sut.processor.operations.getConsumedOperationsCount()
+          sut.processor.operations.getConsumedMutationOperationsCount()
         ).toStrictEqual(4);
       });
     });
 
-    describe('when the operations per run option is set to 2', (): void => {
+    describe('when the mutation operations per run option is set to 2', (): void => {
       beforeEach((): void => {
-        sut.operationsPerRun(2);
+        sut.mutationOperationsPerRun(2);
       });
 
       it('should consume 2 operations (stale label, comment) and stop', async () => {
@@ -112,15 +112,15 @@ describe('operations-per-run option', (): void => {
 
         expect(sut.processor.staleIssues).toHaveLength(1);
         expect(
-          sut.processor.operations.getConsumedOperationsCount()
+          sut.processor.operations.getConsumedMutationOperationsCount()
         ).toStrictEqual(2);
       });
     });
 
     // Special case were we continue the issue processing even if the operations per run is reached
-    describe('when the operations per run option is set to 1', (): void => {
+    describe('when the mutation operations per run option is set to 1', (): void => {
       beforeEach((): void => {
-        sut.operationsPerRun(1);
+        sut.mutationOperationsPerRun(1);
       });
 
       it('should consume 2 operations (stale label, comment) and stop', async () => {
@@ -130,7 +130,7 @@ describe('operations-per-run option', (): void => {
 
         expect(sut.processor.staleIssues).toHaveLength(1);
         expect(
-          sut.processor.operations.getConsumedOperationsCount()
+          sut.processor.operations.getConsumedMutationOperationsCount()
         ).toStrictEqual(2);
       });
     });
@@ -169,15 +169,15 @@ class SUT {
     return this;
   }
 
-  operationsPerRun(count: number): SUT {
+  mutationOperationsPerRun(count: number): SUT {
     this._updateOptions({
-      operationsPerRun: count
+      mutationOperationsPerRun: count
     });
 
     return this;
   }
 
-  async test(): Promise<number> {
+  async test(): Promise<void> {
     return this._setTestIssueList()._setProcessor();
   }
 
@@ -202,7 +202,7 @@ class SUT {
     return this;
   }
 
-  private async _setProcessor(): Promise<number> {
+  private async _setProcessor(): Promise<void> {
     this.processor = new IssuesProcessorMock(
       this._opts,
       async p => (p === 1 ? this._testIssueList : []),

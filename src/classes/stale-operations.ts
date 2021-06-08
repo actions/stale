@@ -9,11 +9,23 @@ export class StaleOperations extends Operations {
     this._options = options;
   }
 
-  hasRemainingOperations(): boolean {
-    return this._operationsConsumed < this._options.operationsPerRun;
+  hasRemainingQueryOperations(): boolean {
+    return this._queryOperationsConsumed < this._options.queryOperationsPerRun;
   }
 
-  getRemainingOperationsCount(): number {
-    return this._options.operationsPerRun - this._operationsConsumed;
+  hasRemainingMutationOperations(): boolean {
+    return (
+      this._mutationOperationsConsumed < this._options.mutationOperationsPerRun
+    );
+  }
+
+  getRemainingQueryOperationsCount(): number {
+    return this._options.queryOperationsPerRun - this._queryOperationsConsumed;
+  }
+
+  getRemainingMutationOperationsCount(): number {
+    return (
+      this._options.mutationOperationsPerRun - this._mutationOperationsConsumed
+    );
   }
 }

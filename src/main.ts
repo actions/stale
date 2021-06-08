@@ -50,8 +50,11 @@ function _getAndValidateArgs(): IIssuesProcessorOptions {
     anyOfLabels: core.getInput('any-of-labels'),
     anyOfIssueLabels: core.getInput('any-of-issue-labels'),
     anyOfPrLabels: core.getInput('any-of-pr-labels'),
-    operationsPerRun: parseInt(
-      core.getInput('operations-per-run', {required: true})
+    queryOperationsPerRun: parseInt(
+      core.getInput('query-operations-per-run', {required: true})
+    ),
+    mutationOperationsPerRun: parseInt(
+      core.getInput('mutation-operations-per-run', {required: true})
     ),
     removeStaleWhenUpdated: !(
       core.getInput('remove-stale-when-updated') === 'false'
@@ -93,7 +96,8 @@ function _getAndValidateArgs(): IIssuesProcessorOptions {
   for (const numberInput of [
     'days-before-stale',
     'days-before-close',
-    'operations-per-run'
+    'query-operations-per-run',
+    'mutation-operations-per-run'
   ]) {
     if (isNaN(parseInt(core.getInput(numberInput)))) {
       const errorMessage = `Option "${numberInput}" did not parse to a valid integer`;

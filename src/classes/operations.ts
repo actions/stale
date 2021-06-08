@@ -1,17 +1,32 @@
 export class Operations {
-  protected _operationsConsumed = 0;
+  protected _queryOperationsConsumed = 0;
+  protected _mutationOperationsConsumed = 0;
 
-  consumeOperation(): Operations {
-    return this.consumeOperations(1);
+  consumeQueryOperation(): Operations {
+    return this.consumeQueryOperations(1);
   }
 
-  consumeOperations(quantity: Readonly<number>): Operations {
-    this._operationsConsumed += quantity;
+  consumeMutationOperation(): Operations {
+    return this.consumeMutationOperations(1);
+  }
+
+  consumeQueryOperations(quantity: Readonly<number>): Operations {
+    this._queryOperationsConsumed += quantity;
 
     return this;
   }
 
-  getConsumedOperationsCount(): number {
-    return this._operationsConsumed;
+  consumeMutationOperations(quantity: Readonly<number>): Operations {
+    this._mutationOperationsConsumed += quantity;
+
+    return this;
+  }
+
+  getConsumedQueryOperationsCount(): number {
+    return this._queryOperationsConsumed;
+  }
+
+  getConsumedMutationOperationsCount(): number {
+    return this._mutationOperationsConsumed;
   }
 }

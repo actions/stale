@@ -15,7 +15,8 @@ export class Statistics {
   stalePullRequestsCount = 0;
   undoStaleIssuesCount = 0;
   undoStalePullRequestsCount = 0;
-  operationsCount = 0;
+  queryOperationsCount = 0;
+  mutationOperationsCount = 0;
   closedIssuesCount = 0;
   closedPullRequestsCount = 0;
   deletedIssuesLabelsCount = 0;
@@ -65,8 +66,14 @@ export class Statistics {
     return this._incrementUndoStaleIssuesCount(increment);
   }
 
-  setOperationsCount(operationsCount: Readonly<number>): Statistics {
-    this.operationsCount = operationsCount;
+  setQueryOperationsCount(count: Readonly<number>): Statistics {
+    this.queryOperationsCount = count;
+
+    return this;
+  }
+
+  setMutationOperationsCount(count: Readonly<number>): Statistics {
+    this.mutationOperationsCount = count;
 
     return this;
   }
@@ -435,7 +442,16 @@ export class Statistics {
   }
 
   private _logOperationsCount(): void {
-    this._logCount('Operations performed', this.operationsCount);
+    this._logGroup('Operations performed', [
+      {
+        name: 'Query operations performed',
+        count: this.queryOperationsCount
+      },
+      {
+        name: 'Mutation operations performed',
+        count: this.mutationOperationsCount
+      }
+    ]);
   }
 
   private _logCount(name: Readonly<string>, count: Readonly<number>): void {

@@ -53,7 +53,8 @@ Every argument is optional.
 | [any-of-labels](#any-of-labels)                                     | Only issues/PRs with ANY of these labels are checked                        |                       |
 | [any-of-issue-labels](#any-of-issue-labels)                         | Override [any-of-labels](#any-of-labels) for issues only                    |                       |
 | [any-of-pr-labels](#any-of-pr-labels)                               | Override [any-of-labels](#any-of-labels) for PRs only                       |                       |
-| [operations-per-run](#operations-per-run)                           | Max number of operations per run                                            | `30`                  |
+| [query-operations-per-run](#query-operations-per-run)               | Max number of query operations per run (GitHub read)                     | `30`                  |
+| [mutation-operations-per-run](#mutation-operations-per-run)         | Max number of mutation operations per run (GitHub write)                 | `200`                 |
 | [remove-stale-when-updated](#remove-stale-when-updated)             | Remove stale label from issues/PRs on updates                               | `true`                |
 | [remove-issue-stale-when-updated](#remove-issue-stale-when-updated) | Remove stale label from issues on updates/comments                          |                       |
 | [remove-pr-stale-when-updated](#remove-pr-stale-when-updated)       | Remove stale label from PRs on updates/comments                             |                       |
@@ -299,7 +300,7 @@ Override [any-of-labels](#any-of-labels) but only to process the pull requests t
 
 Default value: unset
 
-#### operations-per-run
+#### query-operations-per-run
 
 _Context:_  
 This action performs some API calls to GitHub to fetch or close issues and pull requests, set or update labels, add comments, delete branches, etc.  
@@ -308,17 +309,22 @@ GitHub has a [rate limit](https://docs.github.com/en/rest/overview/resources-in-
 This option helps you to stay within the GitHub rate limits, as you can use this option to limit the number of operations for a single run.
 
 _Purpose:_  
-This option aims to limit the number of operations made with the GitHub API to avoid reaching the [rate limit](https://docs.github.com/en/rest/overview/resources-in-the-rest-api#rate-limiting).
+This option limit the amount of API calls made to GitHub in order to fetch the issues and pull requests as well as comments.
 
 Based on your project, your GitHub business plan and the date of the cron job you set for this action, you can increase this limit to a higher number.
 If you are not sure which is the right value for you or if the default value is good enough, you could enable the logs and look at the end of the stale action.  
 If you reached the limit, you will see a warning message in the logs, telling you that you should increase the number of operations.
 If you choose not to increase the limit, you might end up with unprocessed issues or pull requests after a stale action run.
 
-When [debugging](#Debugging), you can set it to a much higher number like `1000` since there will be fewer operations made with the GitHub API.  
-Only the [actor](#repo-token) and the batch of issues (100 per batch) will consume the operations.
-
 Default value: `30`
+
+#### mutation-operations-per-run
+
+Same as [query-operations-per-run](#query-operations-per-run) except that the purpose of this option is to limit the API calls to GitHub to add or remove labels, add comments, delete branches, etc.
+
+When [debugging](#Debugging), you can set it to a much higher number like `5000` since the operations count will still works but no mutations will happen.
+
+Default value: `200`
 
 #### remove-stale-when-updated
 
@@ -350,7 +356,7 @@ Default value: unset
 
 A comma delimited list of labels to remove when a stale issue or pull request receives activity and has the [stale-issue-label](#stale-issue-label) or [stale-pr-label](#stale-pr-label) removed from it.
 
-Warning: each label results in a unique API call which can drastically consume the limit of [operations-per-run](#operations-per-run).
+Warning: each label results in a unique API call which can drastically consume the limit of [mutation-operations-per-run](#mutation-operations-per-run).
 
 Default value: unset  
 Required Permission: `pull-requests: write`
@@ -370,7 +376,7 @@ Change the order used to fetch the issues and pull requests from GitHub:
 - `true` is for ascending.
 - `false` is for descending.
 
-It can be useful if your repository is processing so many issues and pull requests that you reach the [operations-per-run](#operations-per-run) limit.  
+It can be useful if your repository is processing so many issues and pull requests that you reach the [query-operations-per-run](#query-operations-per-run) limit.  
 Based on the order, you could prefer to focus on the new content or on the old content of your repository.
 
 Default value: `false`
@@ -734,14 +740,14 @@ There are many logs, so this can be very helpful!
 **Statistics:**  
 If the logs are enabled, you can also enable the statistics log which will be visible at the end of the logs once all issues were processed.  
 This is very helpful to have a quick understanding of the whole stale workflow.  
-Set `enable-statistics` to `true` in your workflow configuration file.
+Set [enable-statistics](#enable-statistics) to `true` in your workflow configuration file.
 
 **Dry-run:**  
-You can run this action in debug only mode (no actions will be taken on your issues and pull requests) by passing `debug-only` to `true` as an argument to the action.
+You can run this action in debug only mode (no actions will be taken on your issues and pull requests) by passing [debug-only](#debug-only) to `true` as an argument to the action.
 
 **More operations:**  
-You can increase the maximum number of operations per run by passing `operations-per-run` to `1000` for example which will help you to handle more operations in a single stale workflow run.  
-If the `debug-only` option is enabled, this is very helpful because the workflow will (almost) never reach the GitHub API rate, and you will be able to deep-dive into the logs.
+You can increase the maximum number of operations per run by passing [query-operations-per-run](#query-operations-per-run) and [mutation-operations-per-run](#mutation-operations-per-run) to `1000` for example which will help you to handle more operations in a single stale workflow run.  
+If the [debug-only](#debug-only) option is enabled, this is very helpful because the workflow will still count and limit the number of operations per run to avoid to reach the GitHub API rate, but will not perform the calls.
 
 **Job frequency:**  
 You could change the cron job frequency in the stale workflow to run the stale workflow more often.  

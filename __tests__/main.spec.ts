@@ -1218,7 +1218,7 @@ test('when the option "labelsToAddWhenUnstale" is set, the labels should be adde
   expect.assertions(4);
   const opts = {
     ...DefaultProcessorOptions,
-    removeStaleWhenUpdated: true,
+    removeStaleWhenCommented: true,
     labelsToAddWhenUnstale: 'test'
   };
   const TestIssueList: Issue[] = [

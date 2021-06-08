@@ -25,12 +25,12 @@ describe('UpdatesResetStale', (): void => {
         issueInterface.pull_request = undefined;
       });
 
-      describe('when the given options are configured to updates reset stale', (): void => {
+      describe('when the given options are configured to reset the stale on updates', (): void => {
         beforeEach((): void => {
           optionsInterface.updatesResetStale = true;
         });
 
-        describe('when the given options are not configured to issue updates reset stale', (): void => {
+        describe('when the given options are not configured to reset the issue stale on updates', (): void => {
           beforeEach((): void => {
             delete optionsInterface.issueUpdatesResetStale;
           });
@@ -46,7 +46,7 @@ describe('UpdatesResetStale', (): void => {
           });
         });
 
-        describe('when the given options are configured to issue updates reset stale', (): void => {
+        describe('when the given options are configured to reset the issue stale on updates', (): void => {
           beforeEach((): void => {
             optionsInterface.issueUpdatesResetStale = true;
           });
@@ -62,7 +62,7 @@ describe('UpdatesResetStale', (): void => {
           });
         });
 
-        describe('when the given options are configured to not issue updates reset stale', (): void => {
+        describe('when the given options are configured to not reset the issue stale on updates', (): void => {
           beforeEach((): void => {
             optionsInterface.issueUpdatesResetStale = false;
           });
@@ -79,12 +79,12 @@ describe('UpdatesResetStale', (): void => {
         });
       });
 
-      describe('when the given options are configured to not updates reset stale', (): void => {
+      describe('when the given options are configured to reset the stale on updates', (): void => {
         beforeEach((): void => {
           optionsInterface.updatesResetStale = false;
         });
 
-        describe('when the given options are not configured to issue updates reset stale', (): void => {
+        describe('when the given options are not configured to reset the issue stale on updates', (): void => {
           beforeEach((): void => {
             delete optionsInterface.issueUpdatesResetStale;
           });
@@ -100,7 +100,7 @@ describe('UpdatesResetStale', (): void => {
           });
         });
 
-        describe('when the given options are configured to issue updates reset stale', (): void => {
+        describe('when the given options are configured to reset the issue stale on updates', (): void => {
           beforeEach((): void => {
             optionsInterface.issueUpdatesResetStale = true;
           });
@@ -116,7 +116,7 @@ describe('UpdatesResetStale', (): void => {
           });
         });
 
-        describe('when the given options are configured to not issue updates reset stale', (): void => {
+        describe('when the given options are configured to not reset the issue stale on updates', (): void => {
           beforeEach((): void => {
             optionsInterface.issueUpdatesResetStale = false;
           });
@@ -139,12 +139,12 @@ describe('UpdatesResetStale', (): void => {
         issueInterface.pull_request = {};
       });
 
-      describe('when the given options are configured to updates reset stale', (): void => {
+      describe('when the given options are configured to reset the stale on updates', (): void => {
         beforeEach((): void => {
           optionsInterface.updatesResetStale = true;
         });
 
-        describe('when the given options are not configured to pull request updates reset stale', (): void => {
+        describe('when the given options are not configured to reset the pull request stale on updates', (): void => {
           beforeEach((): void => {
             delete optionsInterface.prUpdatesResetStale;
           });
@@ -160,7 +160,7 @@ describe('UpdatesResetStale', (): void => {
           });
         });
 
-        describe('when the given options are configured to pull request updates reset stale', (): void => {
+        describe('when the given options are configured to reset the pull request stale on updates', (): void => {
           beforeEach((): void => {
             optionsInterface.prUpdatesResetStale = true;
           });
@@ -176,7 +176,7 @@ describe('UpdatesResetStale', (): void => {
           });
         });
 
-        describe('when the given options are configured to not pull request updates reset stale', (): void => {
+        describe('when the given options are configured to not reset the pull request stale on updates', (): void => {
           beforeEach((): void => {
             optionsInterface.prUpdatesResetStale = false;
           });
@@ -193,12 +193,12 @@ describe('UpdatesResetStale', (): void => {
         });
       });
 
-      describe('when the given options are configured to not updates reset stale', (): void => {
+      describe('when the given options are configured to not reset the stale on updates', (): void => {
         beforeEach((): void => {
           optionsInterface.updatesResetStale = false;
         });
 
-        describe('when the given options are not configured to pull request updates reset stale', (): void => {
+        describe('when the given options are not configured to reset the pull request stale on updates', (): void => {
           beforeEach((): void => {
             delete optionsInterface.prUpdatesResetStale;
           });
@@ -214,7 +214,7 @@ describe('UpdatesResetStale', (): void => {
           });
         });
 
-        describe('when the given options are configured to pull request updates reset stale', (): void => {
+        describe('when the given options are configured to reset the pull request stale on updates', (): void => {
           beforeEach((): void => {
             optionsInterface.prUpdatesResetStale = true;
           });
@@ -230,7 +230,7 @@ describe('UpdatesResetStale', (): void => {
           });
         });
 
-        describe('when the given options are configured to not pull request updates reset stale', (): void => {
+        describe('when the given options are configured to not reset the pull request stale on updates', (): void => {
           beforeEach((): void => {
             optionsInterface.prUpdatesResetStale = false;
           });

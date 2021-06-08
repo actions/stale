@@ -340,19 +340,22 @@ Default value: unset
 
 Automatically remove the stale label when the issues or the pull requests are commented.
 
-Default value: `true`
+Default value: `true`  
+Required Permission: `issues: write` and `pull-requests: write`
 
 #### remove-issue-stale-when-commented
 
 Override [remove-stale-when-commented](#remove-stale-when-commented) but only to automatically remove the stale label when the issues are commented.
 
-Default value: unset
+Default value: unset  
+Required Permission: `issues: write` and `pull-requests: write`
 
 #### remove-pr-stale-when-commented
 
 Override [remove-stale-when-commented](#remove-stale-when-commented) but only to automatically remove the stale label when the pull requests are commented.
 
-Default value: unset
+Default value: unset  
+Required Permission: `issues: write` and `pull-requests: write`
 
 #### labels-to-add-when-unstale
 

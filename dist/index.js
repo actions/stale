@@ -1724,16 +1724,16 @@ class UpdatesResetStale {
     }
     _shouldUpdatesResetStale() {
         return this._issue.isPullRequest
-            ? this._shouldIgnoreAllPullRequestActivitiesBeforeStale()
+            ? this._shouldPullRequestUpdatesResetStale()
             : this._shouldIssueUpdatesResetStale();
     }
-    _shouldIgnoreAllPullRequestActivitiesBeforeStale() {
+    _shouldPullRequestUpdatesResetStale() {
         if (this._options.prUpdatesResetStale === true) {
-            this._issueLogger.info(`The option ${this._issueLogger.createOptionLink(option_1.Option.PrUpdatesResetStale)} is enabled. The stale counter will ignore any updates or comments on this $$type and will use the creation date as a reference ignoring any kind of activity`);
+            this._issueLogger.info(`The option ${this._issueLogger.createOptionLink(option_1.Option.PrUpdatesResetStale)} is enabled. The stale counter will take into account updates and comments on this $$type to avoid to stale when there is some activity`);
             return true;
         }
         else if (this._options.prUpdatesResetStale === false) {
-            this._issueLogger.info(`The option ${this._issueLogger.createOptionLink(option_1.Option.PrUpdatesResetStale)} is disabled. The stale counter will take into account updates and comments on this $$type to avoid to stale when there is some activity`);
+            this._issueLogger.info(`The option ${this._issueLogger.createOptionLink(option_1.Option.PrUpdatesResetStale)} is disabled. The stale counter will ignore any updates or comments on this $$type and will use the creation date as a reference ignoring any kind of activity`);
             return false;
         }
         this._logUpdatesResetStaleOption();
@@ -1741,11 +1741,11 @@ class UpdatesResetStale {
     }
     _shouldIssueUpdatesResetStale() {
         if (this._options.issueUpdatesResetStale === true) {
-            this._issueLogger.info(`The option ${this._issueLogger.createOptionLink(option_1.Option.IssueUpdatesResetStale)} is enabled. The stale counter will ignore any updates or comments on this $$type and will use the creation date as a reference ignoring any kind of activity`);
+            this._issueLogger.info(`The option ${this._issueLogger.createOptionLink(option_1.Option.IssueUpdatesResetStale)} is enabled. The stale counter will take into account updates and comments on this $$type to avoid to stale when there is some activity`);
             return true;
         }
         else if (this._options.issueUpdatesResetStale === false) {
-            this._issueLogger.info(`The option ${this._issueLogger.createOptionLink(option_1.Option.IssueUpdatesResetStale)} is disabled. The stale counter will take into account updates and comments on this $$type to avoid to stale when there is some activity`);
+            this._issueLogger.info(`The option ${this._issueLogger.createOptionLink(option_1.Option.IssueUpdatesResetStale)} is disabled. The stale counter will ignore any updates or comments on this $$type and will use the creation date as a reference ignoring any kind of activity`);
             return false;
         }
         this._logUpdatesResetStaleOption();
@@ -1753,10 +1753,10 @@ class UpdatesResetStale {
     }
     _logUpdatesResetStaleOption() {
         if (this._options.updatesResetStale) {
-            this._issueLogger.info(`The option ${this._issueLogger.createOptionLink(option_1.Option.UpdatesResetStale)} is enabled. The stale counter will ignore any updates or comments on this $$type and will use the creation date as a reference ignoring any kind of activity`);
+            this._issueLogger.info(`The option ${this._issueLogger.createOptionLink(option_1.Option.UpdatesResetStale)} is enabled. The stale counter will take into account updates and comments on this $$type to avoid to stale when there is some activity`);
         }
         else {
-            this._issueLogger.info(`The option ${this._issueLogger.createOptionLink(option_1.Option.UpdatesResetStale)} is disabled. The stale counter will take into account updates and comments on this $$type to avoid to stale when there is some activity`);
+            this._issueLogger.info(`The option ${this._issueLogger.createOptionLink(option_1.Option.UpdatesResetStale)} is disabled. The stale counter will ignore any updates or comments on this $$type and will use the creation date as a reference ignoring any kind of activity`);
         }
     }
 }

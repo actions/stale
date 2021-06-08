@@ -661,12 +661,14 @@ class IssuesProcessor {
                 this._consumeIssueOperation(issue);
                 (_b = this._statistics) === null || _b === void 0 ? void 0 : _b.incrementAddedItemsLabel(issue);
                 (_c = this._statistics) === null || _c === void 0 ? void 0 : _c.incrementStaleItemsCount(issue);
-                yield this.client.issues.addLabels({
-                    owner: github_1.context.repo.owner,
-                    repo: github_1.context.repo.repo,
-                    issue_number: issue.number,
-                    labels: [staleLabel]
-                });
+                if (!this.options.debugOnly) {
+                    yield this.client.issues.addLabels({
+                        owner: github_1.context.repo.owner,
+                        repo: github_1.context.repo.repo,
+                        issue_number: issue.number,
+                        labels: [staleLabel]
+                    });
+                }
             }
             catch (error) {
                 issueLogger.error(`Error when adding a label: ${error.message}`);
@@ -701,12 +703,14 @@ class IssuesProcessor {
                 try {
                     this._consumeIssueOperation(issue);
                     (_b = this._statistics) === null || _b === void 0 ? void 0 : _b.incrementAddedItemsLabel(issue);
-                    yield this.client.issues.addLabels({
-                        owner: github_1.context.repo.owner,
-                        repo: github_1.context.repo.repo,
-                        issue_number: issue.number,
-                        labels: [closeLabel]
-                    });
+                    if (!this.options.debugOnly) {
+                        yield this.client.issues.addLabels({
+                            owner: github_1.context.repo.owner,
+                            repo: github_1.context.repo.repo,
+                            issue_number: issue.number,
+                            labels: [closeLabel]
+                        });
+                    }
                 }
                 catch (error) {
                     issueLogger.error(`Error when adding a label: ${error.message}`);
@@ -715,12 +719,14 @@ class IssuesProcessor {
             try {
                 this._consumeIssueOperation(issue);
                 (_c = this._statistics) === null || _c === void 0 ? void 0 : _c.incrementClosedItemsCount(issue);
-                yield this.client.issues.update({
-                    owner: github_1.context.repo.owner,
-                    repo: github_1.context.repo.repo,
-                    issue_number: issue.number,
-                    state: 'closed'
-                });
+                if (!this.options.debugOnly) {
+                    yield this.client.issues.update({
+                        owner: github_1.context.repo.owner,
+                        repo: github_1.context.repo.repo,
+                        issue_number: issue.number,
+                        state: 'closed'
+                    });
+                }
             }
             catch (error) {
                 issueLogger.error(`Error when updating this $$type: ${error.message}`);
@@ -734,14 +740,12 @@ class IssuesProcessor {
             try {
                 this._consumeIssueOperation(issue);
                 (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.incrementFetchedPullRequestsCount();
-                if (!this.options.debugOnly) {
-                    const pullRequest = yield this.client.pulls.get({
-                        owner: github_1.context.repo.owner,
-                        repo: github_1.context.repo.repo,
-                        pull_number: issue.number
-                    });
-                    return pullRequest.data;
-                }
+                const pullRequest = yield this.client.pulls.get({
+                    owner: github_1.context.repo.owner,
+                    repo: github_1.context.repo.repo,
+                    pull_number: issue.number
+                });
+                return pullRequest.data;
             }
             catch (error) {
                 issueLogger.error(`Error when getting this $$type: ${error.message}`);

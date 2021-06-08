@@ -740,12 +740,15 @@ export class IssuesProcessor {
       this._consumeIssueOperation(issue);
       this._statistics?.incrementAddedItemsLabel(issue);
       this._statistics?.incrementStaleItemsCount(issue);
-      await this.client.issues.addLabels({
-        owner: context.repo.owner,
-        repo: context.repo.repo,
-        issue_number: issue.number,
-        labels: [staleLabel]
-      });
+
+      if (!this.options.debugOnly) {
+        await this.client.issues.addLabels({
+          owner: context.repo.owner,
+          repo: context.repo.repo,
+          issue_number: issue.number,
+          labels: [staleLabel]
+        });
+      }
     } catch (error) {
       issueLogger.error(`Error when adding a label: ${error.message}`);
     }
@@ -784,12 +787,15 @@ export class IssuesProcessor {
       try {
         this._consumeIssueOperation(issue);
         this._statistics?.incrementAddedItemsLabel(issue);
-        await this.client.issues.addLabels({
-          owner: context.repo.owner,
-          repo: context.repo.repo,
-          issue_number: issue.number,
-          labels: [closeLabel]
-        });
+
+        if (!this.options.debugOnly) {
+          await this.client.issues.addLabels({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            issue_number: issue.number,
+            labels: [closeLabel]
+          });
+        }
       } catch (error) {
         issueLogger.error(`Error when adding a label: ${error.message}`);
       }
@@ -798,12 +804,15 @@ export class IssuesProcessor {
     try {
       this._consumeIssueOperation(issue);
       this._statistics?.incrementClosedItemsCount(issue);
-      await this.client.issues.update({
-        owner: context.repo.owner,
-        repo: context.repo.repo,
-        issue_number: issue.number,
-        state: 'closed'
-      });
+
+      if (!this.options.debugOnly) {
+        await this.client.issues.update({
+          owner: context.repo.owner,
+          repo: context.repo.repo,
+          issue_number: issue.number,
+          state: 'closed'
+        });
+      }
     } catch (error) {
       issueLogger.error(`Error when updating this $$type: ${error.message}`);
     }
@@ -818,15 +827,13 @@ export class IssuesProcessor {
       this._consumeIssueOperation(issue);
       this._statistics?.incrementFetchedPullRequestsCount();
 
-      if (!this.options.debugOnly) {
-        const pullRequest = await this.client.pulls.get({
-          owner: context.repo.owner,
-          repo: context.repo.repo,
-          pull_number: issue.number
-        });
+      const pullRequest = await this.client.pulls.get({
+        owner: context.repo.owner,
+        repo: context.repo.repo,
+        pull_number: issue.number
+      });
 
-        return pullRequest.data;
-      }
+      return pullRequest.data;
     } catch (error) {
       issueLogger.error(`Error when getting this $$type: ${error.message}`);
     }

@@ -40,5 +40,7 @@ export enum Option {
   ExemptAllAssignees = 'exempt-all-assignees',
   ExemptAllIssueAssignees = 'exempt-all-issue-assignees',
   ExemptAllPrAssignees = 'exempt-all-pr-assignees',
-  EnableStatistics = 'enable-statistics'
+  EnableStatistics = 'enable-statistics',
+  LabelsToRemoveWhenUnstale = 'labels-to-remove-when-unstale',
+  LabelsToAddWhenUnstale = 'labels-to-add-when-unstale'
 }

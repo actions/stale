@@ -55,7 +55,9 @@ describe('Issue', (): void => {
       exemptAllAssignees: false,
       exemptAllIssueAssignees: undefined,
       exemptAllPrAssignees: undefined,
-      enableStatistics: false
+      enableStatistics: false,
+      labelsToRemoveWhenUnstale: '',
+      labelsToAddWhenUnstale: ''
     };
     issueInterface = {
       title: 'dummy-title',

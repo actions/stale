@@ -43,6 +43,8 @@ Every argument is optional.
 | [remove-stale-when-updated](#remove-stale-when-updated)             | Remove stale label from issues/PRs on updates/comments                   | `true`                |
 | [remove-issue-stale-when-updated](#remove-issue-stale-when-updated) | Remove stale label from issues on updates/comments                       |                       |
 | [remove-pr-stale-when-updated](#remove-pr-stale-when-updated)       | Remove stale label from PRs on updates/comments                          |                       |
+| [labels-to-add-when-unstale](#labels-to-add-when-unstale)           | Add specified labels from issues/PRs when they become unstale              |                       |
+| [labels-to-remove-when-unstale](#labels-to-remove-when-unstale)     | Remove specified labels from issues/PRs when they become unstale           |                       |
 | [debug-only](#debug-only)                                           | Dry-run                                                                  | `false`               |
 | [ascending](#ascending)                                             | Order to get issues/PRs                                                  | `false`               |
 | [start-date](#start-date)                                           | Skip stale action for issues/PRs created before it                       |                       |
@@ -304,6 +306,20 @@ Default value: unset
 #### remove-pr-stale-when-updated
 
 Override [remove-stale-when-updated](#remove-stale-when-updated) but only to automatically remove the stale label when the pull requests are updated (based on [GitHub issue](https://docs.github.com/en/rest/reference/issues) field `updated_at`) or commented.
+
+Default value: unset
+
+#### labels-to-add-when-unstale
+
+A comma delimited list of labels to add when a stale issue or pull request receives activity and has the [stale-issue-label](#stale-issue-label) or [stale-pr-label](#stale-pr-label) removed from it.
+
+Default value: unset
+
+#### labels-to-remove-when-unstale
+
+A comma delimited list of labels to remove when a stale issue or pull request receives activity and has the [stale-issue-label](#stale-issue-label) or [stale-pr-label](#stale-pr-label) removed from it.
+
+Warning: each label results in a unique API call which can drastically consume the limit of [operations-per-run](#operations-per-run).
 
 Default value: unset
 

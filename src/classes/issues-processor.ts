@@ -75,6 +75,7 @@ export class IssuesProcessor {
   readonly closedIssues: Issue[] = [];
   readonly deletedBranchIssues: Issue[] = [];
   readonly removedLabelIssues: Issue[] = [];
+  readonly addedLabelIssues: Issue[] = [];
 
   constructor(options: IIssuesProcessorOptions) {
     this.options = options;
@@ -127,6 +128,13 @@ export class IssuesProcessor {
       );
     }
 
+    const labelsToAddWhenUnstale: string[] = wordsToList(
+      this.options.labelsToAddWhenUnstale
+    );
+    const labelsToRemoveWhenUnstale: string[] = wordsToList(
+      this.options.labelsToRemoveWhenUnstale
+    );
+
     for (const issue of issues.values()) {
       // Stop the processing if no more operations remains
       if (!this.operations.hasRemainingOperations()) {
@@ -135,7 +143,12 @@ export class IssuesProcessor {
 
       const issueLogger: IssueLogger = new IssueLogger(issue);
       await issueLogger.grouping(`$$type #${issue.number}`, async () => {
-        await this.processIssue(issue, actor);
+        await this.processIssue(
+          issue,
+          actor,
+          labelsToAddWhenUnstale,
+          labelsToRemoveWhenUnstale
+        );
       });
     }
 
@@ -169,7 +182,12 @@ export class IssuesProcessor {
     return this.processIssues(page + 1);
   }
 
-  async processIssue(issue: Issue, actor: string): Promise<void> {
+  async processIssue(
+    issue: Issue,
+    actor: string,
+    labelsToAddWhenUnstale: Readonly<string>[],
+    labelsToRemoveWhenUnstale: Readonly<string>[]
+  ): Promise<void> {
     this._statistics?.incrementProcessedItemsCount(issue);
 
     const issueLogger: IssueLogger = new IssueLogger(issue);
@@ -438,6 +456,8 @@ export class IssuesProcessor {
         issue,
         staleLabel,
         actor,
+        labelsToAddWhenUnstale,
+        labelsToRemoveWhenUnstale,
         closeMessage,
         closeLabel
       );
@@ -549,6 +569,8 @@ export class IssuesProcessor {
     issue: Issue,
     staleLabel: string,
     actor: string,
+    labelsToAddWhenUnstale: Readonly<string>[],
+    labelsToRemoveWhenUnstale: Readonly<string>[],
     closeMessage?: string,
     closeLabel?: string
   ) {
@@ -607,6 +629,10 @@ export class IssuesProcessor {
         `Remove the stale label since the $$type has a comment and the workflow should remove the stale label when updated`
       );
       await this._removeStaleLabel(issue, staleLabel);
+
+      // Are there labels to remove or add when an issue is no longer stale?
+      await this._removeLabelsWhenUnstale(issue, labelsToRemoveWhenUnstale);
+      await this._addLabelsWhenUnstale(issue, labelsToAddWhenUnstale);
 
       issueLogger.info(`Skipping the process since the $$type is now un-stale`);
 
@@ -954,6 +980,63 @@ export class IssuesProcessor {
     }
 
     return this.options.removeStaleWhenUpdated;
+  }
+
+  private async _removeLabelsWhenUnstale(
+    issue: Issue,
+    removeLabels: Readonly<string>[]
+  ): Promise<void> {
+    if (!removeLabels.length) {
+      return;
+    }
+
+    const issueLogger: IssueLogger = new IssueLogger(issue);
+
+    issueLogger.info(
+      `Removing all the labels specified via the ${this._logger.createOptionLink(
+        Option.LabelsToRemoveWhenUnstale
+      )} option.`
+    );
+
+    for (const label of removeLabels.values()) {
+      await this._removeLabel(issue, label);
+    }
+  }
+
+  private async _addLabelsWhenUnstale(
+    issue: Issue,
+    labelsToAdd: Readonly<string>[]
+  ): Promise<void> {
+    if (!labelsToAdd.length) {
+      return;
+    }
+
+    const issueLogger: IssueLogger = new IssueLogger(issue);
+
+    issueLogger.info(
+      `Adding all the labels specified via the ${this._logger.createOptionLink(
+        Option.LabelsToAddWhenUnstale
+      )} option.`
+    );
+
+    this.addedLabelIssues.push(issue);
+
+    try {
+      this.operations.consumeOperation();
+      this._statistics?.incrementAddedItemsLabel(issue);
+      if (!this.options.debugOnly) {
+        await this.client.issues.addLabels({
+          owner: context.repo.owner,
+          repo: context.repo.repo,
+          issue_number: issue.number,
+          labels: labelsToAdd
+        });
+      }
+    } catch (error) {
+      this._logger.error(
+        `Error when adding labels after updated from stale: ${error.message}`
+      );
+    }
   }
 
   private async _removeStaleLabel(

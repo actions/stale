@@ -43,7 +43,8 @@ describe('IgnoreAllActivitiesBeforeStale', (): void => {
               issue
             );
 
-            const result = ignoreAllActivitiesBeforeStale.shouldIgnoreAllActivitiesBeforeStale();
+            const result =
+              ignoreAllActivitiesBeforeStale.shouldIgnoreAllActivitiesBeforeStale();
 
             expect(result).toStrictEqual(true);
           });
@@ -62,7 +63,8 @@ describe('IgnoreAllActivitiesBeforeStale', (): void => {
               issue
             );
 
-            const result = ignoreAllActivitiesBeforeStale.shouldIgnoreAllActivitiesBeforeStale();
+            const result =
+              ignoreAllActivitiesBeforeStale.shouldIgnoreAllActivitiesBeforeStale();
 
             expect(result).toStrictEqual(true);
           });
@@ -81,7 +83,8 @@ describe('IgnoreAllActivitiesBeforeStale', (): void => {
               issue
             );
 
-            const result = ignoreAllActivitiesBeforeStale.shouldIgnoreAllActivitiesBeforeStale();
+            const result =
+              ignoreAllActivitiesBeforeStale.shouldIgnoreAllActivitiesBeforeStale();
 
             expect(result).toStrictEqual(false);
           });
@@ -106,7 +109,8 @@ describe('IgnoreAllActivitiesBeforeStale', (): void => {
               issue
             );
 
-            const result = ignoreAllActivitiesBeforeStale.shouldIgnoreAllActivitiesBeforeStale();
+            const result =
+              ignoreAllActivitiesBeforeStale.shouldIgnoreAllActivitiesBeforeStale();
 
             expect(result).toStrictEqual(false);
           });
@@ -125,7 +129,8 @@ describe('IgnoreAllActivitiesBeforeStale', (): void => {
               issue
             );
 
-            const result = ignoreAllActivitiesBeforeStale.shouldIgnoreAllActivitiesBeforeStale();
+            const result =
+              ignoreAllActivitiesBeforeStale.shouldIgnoreAllActivitiesBeforeStale();
 
             expect(result).toStrictEqual(true);
           });
@@ -144,7 +149,8 @@ describe('IgnoreAllActivitiesBeforeStale', (): void => {
               issue
             );
 
-            const result = ignoreAllActivitiesBeforeStale.shouldIgnoreAllActivitiesBeforeStale();
+            const result =
+              ignoreAllActivitiesBeforeStale.shouldIgnoreAllActivitiesBeforeStale();
 
             expect(result).toStrictEqual(false);
           });
@@ -175,7 +181,8 @@ describe('IgnoreAllActivitiesBeforeStale', (): void => {
               issue
             );
 
-            const result = ignoreAllActivitiesBeforeStale.shouldIgnoreAllActivitiesBeforeStale();
+            const result =
+              ignoreAllActivitiesBeforeStale.shouldIgnoreAllActivitiesBeforeStale();
 
             expect(result).toStrictEqual(true);
           });
@@ -194,7 +201,8 @@ describe('IgnoreAllActivitiesBeforeStale', (): void => {
               issue
             );
 
-            const result = ignoreAllActivitiesBeforeStale.shouldIgnoreAllActivitiesBeforeStale();
+            const result =
+              ignoreAllActivitiesBeforeStale.shouldIgnoreAllActivitiesBeforeStale();
 
             expect(result).toStrictEqual(true);
           });
@@ -213,7 +221,8 @@ describe('IgnoreAllActivitiesBeforeStale', (): void => {
               issue
             );
 
-            const result = ignoreAllActivitiesBeforeStale.shouldIgnoreAllActivitiesBeforeStale();
+            const result =
+              ignoreAllActivitiesBeforeStale.shouldIgnoreAllActivitiesBeforeStale();
 
             expect(result).toStrictEqual(false);
           });
@@ -238,7 +247,8 @@ describe('IgnoreAllActivitiesBeforeStale', (): void => {
               issue
             );
 
-            const result = ignoreAllActivitiesBeforeStale.shouldIgnoreAllActivitiesBeforeStale();
+            const result =
+              ignoreAllActivitiesBeforeStale.shouldIgnoreAllActivitiesBeforeStale();
 
             expect(result).toStrictEqual(false);
           });
@@ -257,7 +267,8 @@ describe('IgnoreAllActivitiesBeforeStale', (): void => {
               issue
             );
 
-            const result = ignoreAllActivitiesBeforeStale.shouldIgnoreAllActivitiesBeforeStale();
+            const result =
+              ignoreAllActivitiesBeforeStale.shouldIgnoreAllActivitiesBeforeStale();
 
             expect(result).toStrictEqual(true);
           });
@@ -276,7 +287,8 @@ describe('IgnoreAllActivitiesBeforeStale', (): void => {
               issue
             );
 
-            const result = ignoreAllActivitiesBeforeStale.shouldIgnoreAllActivitiesBeforeStale();
+            const result =
+              ignoreAllActivitiesBeforeStale.shouldIgnoreAllActivitiesBeforeStale();
 
             expect(result).toStrictEqual(false);
           });

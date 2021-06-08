@@ -406,45 +406,46 @@ export class IssuesProcessor {
     }
 
     // Determine if this issue needs to be marked stale first
-      if (!issue.isStale) {
-        issueLogger.info(`This $$type is not stale`);
-        const shouldIgnoreAllActivitiesBeforeStale: boolean = new IgnoreAllActivitiesBeforeStale(
+    if (!issue.isStale) {
+      issueLogger.info(`This $$type is not stale`);
+      const shouldIgnoreAllActivitiesBeforeStale: boolean =
+        new IgnoreAllActivitiesBeforeStale(
           this.options,
           issue
         ).shouldIgnoreAllActivitiesBeforeStale();
 
-        // Should this issue be marked as stale?
-        let shouldBeStale = false;
+      // Should this issue be marked as stale?
+      let shouldBeStale = false;
 
-        // Ignore the last update and only use the creation date
-        if (shouldIgnoreAllActivitiesBeforeStale) {
-          shouldBeStale = !IssuesProcessor._updatedSince(
-            issue.created_at,
-            daysBeforeStale
-          );
-        }
-        // Use the last update instead to check if we need to stale
-        else {
-          shouldBeStale = !IssuesProcessor._updatedSince(
-            issue.updated_at,
-            daysBeforeStale
-          );
-        }
+      // Ignore the last update and only use the creation date
+      if (shouldIgnoreAllActivitiesBeforeStale) {
+        shouldBeStale = !IssuesProcessor._updatedSince(
+          issue.created_at,
+          daysBeforeStale
+        );
+      }
+      // Use the last update instead to check if we need to stale
+      else {
+        shouldBeStale = !IssuesProcessor._updatedSince(
+          issue.updated_at,
+          daysBeforeStale
+        );
+      }
 
       if (shouldBeStale) {
         if (shouldIgnoreAllActivitiesBeforeStale) {
-            issueLogger.info(
-              `This $$type should be stale based on the creation date the ${getHumanizedDate(
-                new Date(issue.created_at)
-              )} (${LoggerService.cyan(issue.created_at)})`
-            );
-          } else {
-            issueLogger.info(
-              `This $$type should be stale based on the last update date the ${getHumanizedDate(
-                new Date(issue.updated_at)
-              )} (${LoggerService.cyan(issue.updated_at)})`
-            );
-          }
+          issueLogger.info(
+            `This $$type should be stale based on the creation date the ${getHumanizedDate(
+              new Date(issue.created_at)
+            )} (${LoggerService.cyan(issue.created_at)})`
+          );
+        } else {
+          issueLogger.info(
+            `This $$type should be stale based on the last update date the ${getHumanizedDate(
+              new Date(issue.updated_at)
+            )} (${LoggerService.cyan(issue.updated_at)})`
+          );
+        }
 
         if (shouldMarkAsStale) {
           issueLogger.info(
@@ -464,20 +465,20 @@ export class IssuesProcessor {
         }
       } else {
         if (shouldIgnoreAllActivitiesBeforeStale) {
-            issueLogger.info(
-              `This $$type should not be stale based on the creation date the ${getHumanizedDate(
-                new Date(issue.created_at)
-              )} (${LoggerService.cyan(issue.created_at)})`
-            );
-          } else {
-            issueLogger.info(
-              `This $$type should not be stale based on the last update date the ${getHumanizedDate(
-                new Date(issue.updated_at)
-              )} (${LoggerService.cyan(issue.updated_at)})`
-            );
-          }
+          issueLogger.info(
+            `This $$type should not be stale based on the creation date the ${getHumanizedDate(
+              new Date(issue.created_at)
+            )} (${LoggerService.cyan(issue.created_at)})`
+          );
+        } else {
+          issueLogger.info(
+            `This $$type should not be stale based on the last update date the ${getHumanizedDate(
+              new Date(issue.updated_at)
+            )} (${LoggerService.cyan(issue.updated_at)})`
+          );
         }
       }
+    }
 
     // Process the issue if it was marked stale
     if (issue.isStale) {

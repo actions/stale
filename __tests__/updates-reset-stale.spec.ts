@@ -5,7 +5,7 @@ import {IssuesProcessorMock} from './classes/issues-processor-mock';
 import {DefaultProcessorOptions} from './constants/default-processor-options';
 import {generateIssue} from './functions/generate-issue';
 
-describe('ignore all activities before stale options', (): void => {
+describe('updates reset stale options', (): void => {
   let sut: SUT;
 
   beforeEach((): void => {
@@ -17,9 +17,73 @@ describe('ignore all activities before stale options', (): void => {
       sut.toIssue().staleIn(10).created(20).updated(5);
     });
 
-    describe('when the ignore all activities before stale option is disabled', (): void => {
+    describe('when the updates reset stale option is disabled', (): void => {
       beforeEach((): void => {
-        sut.checkAllActivitiesBeforeStale();
+        sut.staleIgnoresUpdates();
+      });
+
+      it('should stale the issue', async () => {
+        expect.assertions(3);
+
+        await sut.test();
+
+        expect(sut.processor.staleIssues).toHaveLength(1);
+        expect(sut.processor.closedIssues).toHaveLength(0);
+        expect(sut.processor.removedLabelIssues).toHaveLength(0);
+      });
+
+      describe('when the issue updates reset stale option is enabled', (): void => {
+        beforeEach((): void => {
+          sut.issueUpdatesResetStale();
+        });
+
+        it('should not stale the issue', async () => {
+          expect.assertions(3);
+
+          await sut.test();
+
+          expect(sut.processor.staleIssues).toHaveLength(0);
+          expect(sut.processor.closedIssues).toHaveLength(0);
+          expect(sut.processor.removedLabelIssues).toHaveLength(0);
+        });
+      });
+
+      describe('when the issue updates reset stale option is disabled', (): void => {
+        beforeEach((): void => {
+          sut.issueStaleIgnoresUpdates();
+        });
+
+        it('should stale the issue', async () => {
+          expect.assertions(3);
+
+          await sut.test();
+
+          expect(sut.processor.staleIssues).toHaveLength(1);
+          expect(sut.processor.closedIssues).toHaveLength(0);
+          expect(sut.processor.removedLabelIssues).toHaveLength(0);
+        });
+      });
+
+      describe('when the issue updates reset stale option is unset', (): void => {
+        beforeEach((): void => {
+          sut.unsetIssueUpdatesResetStale();
+        });
+
+        it('should stale the issue', async () => {
+          expect.assertions(3);
+
+          await sut.test();
+
+          expect(sut.processor.staleIssues).toHaveLength(1);
+          expect(sut.processor.closedIssues).toHaveLength(0);
+          expect(sut.processor.removedLabelIssues).toHaveLength(0);
+        });
+      });
+    });
+
+    describe('when the updates reset stale option is enabled', (): void => {
+      beforeEach((): void => {
+        sut.updatesResetStale();
       });
 
       it('should not stale the issue', async () => {
@@ -32,25 +96,9 @@ describe('ignore all activities before stale options', (): void => {
         expect(sut.processor.removedLabelIssues).toHaveLength(0);
       });
 
-      describe('when the ignore all issue activities before stale option is enabled', (): void => {
+      describe('when the issue updates reset stale option is enabled', (): void => {
         beforeEach((): void => {
-          sut.ignoreAllIssueActivitiesBeforeStale();
-        });
-
-        it('should stale the issue', async () => {
-          expect.assertions(3);
-
-          await sut.test();
-
-          expect(sut.processor.staleIssues).toHaveLength(1);
-          expect(sut.processor.closedIssues).toHaveLength(0);
-          expect(sut.processor.removedLabelIssues).toHaveLength(0);
-        });
-      });
-
-      describe('when the ignore all issue activities before stale option is disabled', (): void => {
-        beforeEach((): void => {
-          sut.checkAllIssueActivitiesBeforeStale();
+          sut.issueUpdatesResetStale();
         });
 
         it('should not stale the issue', async () => {
@@ -64,41 +112,9 @@ describe('ignore all activities before stale options', (): void => {
         });
       });
 
-      describe('when the ignore all issue activities before stale option is unset', (): void => {
+      describe('when the issue updates reset stale option is disabled', (): void => {
         beforeEach((): void => {
-          sut.unsetIgnoreAllIssueActivitiesBeforeStale();
-        });
-
-        it('should not stale the issue', async () => {
-          expect.assertions(3);
-
-          await sut.test();
-
-          expect(sut.processor.staleIssues).toHaveLength(0);
-          expect(sut.processor.closedIssues).toHaveLength(0);
-          expect(sut.processor.removedLabelIssues).toHaveLength(0);
-        });
-      });
-    });
-
-    describe('when the ignore all activities before stale option is enabled', (): void => {
-      beforeEach((): void => {
-        sut.ignoreAllActivitiesBeforeStale();
-      });
-
-      it('should stale the issue', async () => {
-        expect.assertions(3);
-
-        await sut.test();
-
-        expect(sut.processor.staleIssues).toHaveLength(1);
-        expect(sut.processor.closedIssues).toHaveLength(0);
-        expect(sut.processor.removedLabelIssues).toHaveLength(0);
-      });
-
-      describe('when the ignore all issue activities before stale option is enabled', (): void => {
-        beforeEach((): void => {
-          sut.ignoreAllIssueActivitiesBeforeStale();
+          sut.issueStaleIgnoresUpdates();
         });
 
         it('should stale the issue', async () => {
@@ -112,9 +128,9 @@ describe('ignore all activities before stale options', (): void => {
         });
       });
 
-      describe('when the ignore all issue activities before stale option is disabled', (): void => {
+      describe('when the issue updates reset stale option is unset', (): void => {
         beforeEach((): void => {
-          sut.checkAllIssueActivitiesBeforeStale();
+          sut.unsetIssueUpdatesResetStale();
         });
 
         it('should not stale the issue', async () => {
@@ -123,22 +139,6 @@ describe('ignore all activities before stale options', (): void => {
           await sut.test();
 
           expect(sut.processor.staleIssues).toHaveLength(0);
-          expect(sut.processor.closedIssues).toHaveLength(0);
-          expect(sut.processor.removedLabelIssues).toHaveLength(0);
-        });
-      });
-
-      describe('when the ignore all issue activities before stale option is unset', (): void => {
-        beforeEach((): void => {
-          sut.unsetIgnoreAllIssueActivitiesBeforeStale();
-        });
-
-        it('should stale the issue', async () => {
-          expect.assertions(3);
-
-          await sut.test();
-
-          expect(sut.processor.staleIssues).toHaveLength(1);
           expect(sut.processor.closedIssues).toHaveLength(0);
           expect(sut.processor.removedLabelIssues).toHaveLength(0);
         });
@@ -151,9 +151,9 @@ describe('ignore all activities before stale options', (): void => {
       sut.toIssue().staleIn(10).created(20).updated(15);
     });
 
-    describe('when the ignore all activities before stale option is disabled', (): void => {
+    describe('when the updates reset stale option is disabled', (): void => {
       beforeEach((): void => {
-        sut.checkAllActivitiesBeforeStale();
+        sut.staleIgnoresUpdates();
       });
 
       it('should stale the issue', async () => {
@@ -166,9 +166,9 @@ describe('ignore all activities before stale options', (): void => {
         expect(sut.processor.removedLabelIssues).toHaveLength(0);
       });
 
-      describe('when the ignore all issue activities before stale option is enabled', (): void => {
+      describe('when the issue updates reset stale option is enabled', (): void => {
         beforeEach((): void => {
-          sut.ignoreAllIssueActivitiesBeforeStale();
+          sut.issueUpdatesResetStale();
         });
 
         it('should stale the issue', async () => {
@@ -182,9 +182,9 @@ describe('ignore all activities before stale options', (): void => {
         });
       });
 
-      describe('when the ignore all issue activities before stale option is disabled', (): void => {
+      describe('when the issue updates reset stale option is disabled', (): void => {
         beforeEach((): void => {
-          sut.checkAllIssueActivitiesBeforeStale();
+          sut.issueStaleIgnoresUpdates();
         });
 
         it('should stale the issue', async () => {
@@ -198,9 +198,9 @@ describe('ignore all activities before stale options', (): void => {
         });
       });
 
-      describe('when the ignore all issue activities before stale option is unset', (): void => {
+      describe('when the issue updates reset stale option is unset', (): void => {
         beforeEach((): void => {
-          sut.unsetIgnoreAllIssueActivitiesBeforeStale();
+          sut.unsetIssueUpdatesResetStale();
         });
 
         it('should stale the issue', async () => {
@@ -215,9 +215,9 @@ describe('ignore all activities before stale options', (): void => {
       });
     });
 
-    describe('when the ignore all activities before stale option is enabled', (): void => {
+    describe('when the updates reset stale option is enabled', (): void => {
       beforeEach((): void => {
-        sut.ignoreAllActivitiesBeforeStale();
+        sut.updatesResetStale();
       });
 
       it('should stale the issue', async () => {
@@ -230,9 +230,9 @@ describe('ignore all activities before stale options', (): void => {
         expect(sut.processor.removedLabelIssues).toHaveLength(0);
       });
 
-      describe('when the ignore all issue activities before stale option is enabled', (): void => {
+      describe('when the issue updates reset stale option is enabled', (): void => {
         beforeEach((): void => {
-          sut.ignoreAllIssueActivitiesBeforeStale();
+          sut.issueUpdatesResetStale();
         });
 
         it('should stale the issue', async () => {
@@ -246,9 +246,9 @@ describe('ignore all activities before stale options', (): void => {
         });
       });
 
-      describe('when the ignore all issue activities before stale option is disabled', (): void => {
+      describe('when the issue updates reset stale option is disabled', (): void => {
         beforeEach((): void => {
-          sut.checkAllIssueActivitiesBeforeStale();
+          sut.issueStaleIgnoresUpdates();
         });
 
         it('should stale the issue', async () => {
@@ -262,9 +262,9 @@ describe('ignore all activities before stale options', (): void => {
         });
       });
 
-      describe('when the ignore all issue activities before stale option is unset', (): void => {
+      describe('when the issue updates reset stale option is unset', (): void => {
         beforeEach((): void => {
-          sut.unsetIgnoreAllIssueActivitiesBeforeStale();
+          sut.unsetIssueUpdatesResetStale();
         });
 
         it('should stale the issue', async () => {
@@ -285,9 +285,73 @@ describe('ignore all activities before stale options', (): void => {
       sut.toPullRequest().staleIn(10).created(20).updated(5);
     });
 
-    describe('when the ignore all activities before stale option is disabled', (): void => {
+    describe('when the updates reset stale option is disabled', (): void => {
       beforeEach((): void => {
-        sut.checkAllActivitiesBeforeStale();
+        sut.staleIgnoresUpdates();
+      });
+
+      it('should stale the pull request', async () => {
+        expect.assertions(3);
+
+        await sut.test();
+
+        expect(sut.processor.staleIssues).toHaveLength(1);
+        expect(sut.processor.closedIssues).toHaveLength(0);
+        expect(sut.processor.removedLabelIssues).toHaveLength(0);
+      });
+
+      describe('when the pull request updates reset stale option is enabled', (): void => {
+        beforeEach((): void => {
+          sut.pullRequestUpdatesResetStale();
+        });
+
+        it('should not stale the pull request', async () => {
+          expect.assertions(3);
+
+          await sut.test();
+
+          expect(sut.processor.staleIssues).toHaveLength(0);
+          expect(sut.processor.closedIssues).toHaveLength(0);
+          expect(sut.processor.removedLabelIssues).toHaveLength(0);
+        });
+      });
+
+      describe('when the pull request updates reset stale option is disabled', (): void => {
+        beforeEach((): void => {
+          sut.pullRequestStaleIgnoresUpdates();
+        });
+
+        it('should stale the pull request', async () => {
+          expect.assertions(3);
+
+          await sut.test();
+
+          expect(sut.processor.staleIssues).toHaveLength(1);
+          expect(sut.processor.closedIssues).toHaveLength(0);
+          expect(sut.processor.removedLabelIssues).toHaveLength(0);
+        });
+      });
+
+      describe('when the pull request updates reset stale option is unset', (): void => {
+        beforeEach((): void => {
+          sut.unsetPullRequestUpdatesResetStale();
+        });
+
+        it('should stale the pull request', async () => {
+          expect.assertions(3);
+
+          await sut.test();
+
+          expect(sut.processor.staleIssues).toHaveLength(1);
+          expect(sut.processor.closedIssues).toHaveLength(0);
+          expect(sut.processor.removedLabelIssues).toHaveLength(0);
+        });
+      });
+    });
+
+    describe('when the updates reset stale option is enabled', (): void => {
+      beforeEach((): void => {
+        sut.updatesResetStale();
       });
 
       it('should not stale the pull request', async () => {
@@ -300,25 +364,9 @@ describe('ignore all activities before stale options', (): void => {
         expect(sut.processor.removedLabelIssues).toHaveLength(0);
       });
 
-      describe('when the ignore all pull request activities before stale option is enabled', (): void => {
+      describe('when the pull request updates reset stale option is enabled', (): void => {
         beforeEach((): void => {
-          sut.ignoreAllPullRequestActivitiesBeforeStale();
-        });
-
-        it('should stale the pull request', async () => {
-          expect.assertions(3);
-
-          await sut.test();
-
-          expect(sut.processor.staleIssues).toHaveLength(1);
-          expect(sut.processor.closedIssues).toHaveLength(0);
-          expect(sut.processor.removedLabelIssues).toHaveLength(0);
-        });
-      });
-
-      describe('when the ignore all pull request activities before stale option is disabled', (): void => {
-        beforeEach((): void => {
-          sut.checkAllPullRequestActivitiesBeforeStale();
+          sut.pullRequestUpdatesResetStale();
         });
 
         it('should not stale the pull request', async () => {
@@ -332,41 +380,9 @@ describe('ignore all activities before stale options', (): void => {
         });
       });
 
-      describe('when the ignore all pull request activities before stale option is unset', (): void => {
+      describe('when the pull request updates reset stale option is disabled', (): void => {
         beforeEach((): void => {
-          sut.unsetIgnoreAllPullRequestActivitiesBeforeStale();
-        });
-
-        it('should not stale the pull request', async () => {
-          expect.assertions(3);
-
-          await sut.test();
-
-          expect(sut.processor.staleIssues).toHaveLength(0);
-          expect(sut.processor.closedIssues).toHaveLength(0);
-          expect(sut.processor.removedLabelIssues).toHaveLength(0);
-        });
-      });
-    });
-
-    describe('when the ignore all activities before stale option is enabled', (): void => {
-      beforeEach((): void => {
-        sut.ignoreAllActivitiesBeforeStale();
-      });
-
-      it('should stale the pull request', async () => {
-        expect.assertions(3);
-
-        await sut.test();
-
-        expect(sut.processor.staleIssues).toHaveLength(1);
-        expect(sut.processor.closedIssues).toHaveLength(0);
-        expect(sut.processor.removedLabelIssues).toHaveLength(0);
-      });
-
-      describe('when the ignore all pull request activities before stale option is enabled', (): void => {
-        beforeEach((): void => {
-          sut.ignoreAllPullRequestActivitiesBeforeStale();
+          sut.pullRequestStaleIgnoresUpdates();
         });
 
         it('should stale the pull request', async () => {
@@ -380,9 +396,9 @@ describe('ignore all activities before stale options', (): void => {
         });
       });
 
-      describe('when the ignore all pull request activities before stale option is disabled', (): void => {
+      describe('when the pull request updates reset stale option is unset', (): void => {
         beforeEach((): void => {
-          sut.checkAllPullRequestActivitiesBeforeStale();
+          sut.unsetPullRequestUpdatesResetStale();
         });
 
         it('should not stale the pull request', async () => {
@@ -391,22 +407,6 @@ describe('ignore all activities before stale options', (): void => {
           await sut.test();
 
           expect(sut.processor.staleIssues).toHaveLength(0);
-          expect(sut.processor.closedIssues).toHaveLength(0);
-          expect(sut.processor.removedLabelIssues).toHaveLength(0);
-        });
-      });
-
-      describe('when the ignore all pull request activities before stale option is unset', (): void => {
-        beforeEach((): void => {
-          sut.unsetIgnoreAllPullRequestActivitiesBeforeStale();
-        });
-
-        it('should stale the pull request', async () => {
-          expect.assertions(3);
-
-          await sut.test();
-
-          expect(sut.processor.staleIssues).toHaveLength(1);
           expect(sut.processor.closedIssues).toHaveLength(0);
           expect(sut.processor.removedLabelIssues).toHaveLength(0);
         });
@@ -419,9 +419,9 @@ describe('ignore all activities before stale options', (): void => {
       sut.toPullRequest().staleIn(10).created(20).updated(15);
     });
 
-    describe('when the ignore all activities before stale option is disabled', (): void => {
+    describe('when the updates reset stale option is disabled', (): void => {
       beforeEach((): void => {
-        sut.checkAllActivitiesBeforeStale();
+        sut.staleIgnoresUpdates();
       });
 
       it('should stale the pull request', async () => {
@@ -434,9 +434,9 @@ describe('ignore all activities before stale options', (): void => {
         expect(sut.processor.removedLabelIssues).toHaveLength(0);
       });
 
-      describe('when the ignore all pull request activities before stale option is enabled', (): void => {
+      describe('when the pull request updates reset stale option is enabled', (): void => {
         beforeEach((): void => {
-          sut.ignoreAllPullRequestActivitiesBeforeStale();
+          sut.pullRequestUpdatesResetStale();
         });
 
         it('should stale the pull request', async () => {
@@ -450,9 +450,9 @@ describe('ignore all activities before stale options', (): void => {
         });
       });
 
-      describe('when the ignore all pull request activities before stale option is disabled', (): void => {
+      describe('when the pull request updates reset stale option is disabled', (): void => {
         beforeEach((): void => {
-          sut.checkAllPullRequestActivitiesBeforeStale();
+          sut.pullRequestStaleIgnoresUpdates();
         });
 
         it('should stale the pull request', async () => {
@@ -466,9 +466,9 @@ describe('ignore all activities before stale options', (): void => {
         });
       });
 
-      describe('when the ignore all pull request activities before stale option is unset', (): void => {
+      describe('when the pull request updates reset stale option is unset', (): void => {
         beforeEach((): void => {
-          sut.unsetIgnoreAllPullRequestActivitiesBeforeStale();
+          sut.unsetPullRequestUpdatesResetStale();
         });
 
         it('should stale the pull request', async () => {
@@ -483,9 +483,9 @@ describe('ignore all activities before stale options', (): void => {
       });
     });
 
-    describe('when the ignore all activities before stale option is enabled', (): void => {
+    describe('when the updates reset stale option is enabled', (): void => {
       beforeEach((): void => {
-        sut.ignoreAllActivitiesBeforeStale();
+        sut.updatesResetStale();
       });
 
       it('should stale the pull request', async () => {
@@ -498,9 +498,9 @@ describe('ignore all activities before stale options', (): void => {
         expect(sut.processor.removedLabelIssues).toHaveLength(0);
       });
 
-      describe('when the ignore all pull request activities before stale option is enabled', (): void => {
+      describe('when the pull request updates reset stale option is enabled', (): void => {
         beforeEach((): void => {
-          sut.ignoreAllPullRequestActivitiesBeforeStale();
+          sut.pullRequestUpdatesResetStale();
         });
 
         it('should stale the pull request', async () => {
@@ -514,9 +514,9 @@ describe('ignore all activities before stale options', (): void => {
         });
       });
 
-      describe('when the ignore all pull request activities before stale option is disabled', (): void => {
+      describe('when the pull request updates reset stale option is disabled', (): void => {
         beforeEach((): void => {
-          sut.checkAllPullRequestActivitiesBeforeStale();
+          sut.pullRequestStaleIgnoresUpdates();
         });
 
         it('should stale the pull request', async () => {
@@ -530,9 +530,9 @@ describe('ignore all activities before stale options', (): void => {
         });
       });
 
-      describe('when the ignore all pull request activities before stale option is unset', (): void => {
+      describe('when the pull request updates reset stale option is unset', (): void => {
         beforeEach((): void => {
-          sut.unsetIgnoreAllPullRequestActivitiesBeforeStale();
+          sut.unsetPullRequestUpdatesResetStale();
         });
 
         it('should stale the pull request', async () => {
@@ -594,65 +594,65 @@ class SUT {
     return this;
   }
 
-  ignoreAllActivitiesBeforeStale(): SUT {
+  updatesResetStale(): SUT {
     this._updateOptions({
-      ignoreAllActivitiesBeforeStale: true
+      updatesResetStale: true
     });
 
     return this;
   }
 
-  checkAllActivitiesBeforeStale(): SUT {
+  staleIgnoresUpdates(): SUT {
     this._updateOptions({
-      ignoreAllActivitiesBeforeStale: false
+      updatesResetStale: false
     });
 
     return this;
   }
 
-  ignoreAllIssueActivitiesBeforeStale(): SUT {
+  issueUpdatesResetStale(): SUT {
     this._updateOptions({
-      ignoreAllIssueActivitiesBeforeStale: true
+      issueUpdatesResetStale: true
     });
 
     return this;
   }
 
-  checkAllIssueActivitiesBeforeStale(): SUT {
+  issueStaleIgnoresUpdates(): SUT {
     this._updateOptions({
-      ignoreAllIssueActivitiesBeforeStale: false
+      issueUpdatesResetStale: false
     });
 
     return this;
   }
 
-  unsetIgnoreAllIssueActivitiesBeforeStale(): SUT {
+  unsetIssueUpdatesResetStale(): SUT {
     this._updateOptions({
-      ignoreAllIssueActivitiesBeforeStale: undefined
+      issueUpdatesResetStale: undefined
     });
 
     return this;
   }
 
-  ignoreAllPullRequestActivitiesBeforeStale(): SUT {
+  pullRequestUpdatesResetStale(): SUT {
     this._updateOptions({
-      ignoreAllPrActivitiesBeforeStale: true
+      prUpdatesResetStale: true
     });
 
     return this;
   }
 
-  checkAllPullRequestActivitiesBeforeStale(): SUT {
+  pullRequestStaleIgnoresUpdates(): SUT {
     this._updateOptions({
-      ignoreAllPrActivitiesBeforeStale: false
+      prUpdatesResetStale: false
     });
 
     return this;
   }
 
-  unsetIgnoreAllPullRequestActivitiesBeforeStale(): SUT {
+  unsetPullRequestUpdatesResetStale(): SUT {
     this._updateOptions({
-      ignoreAllPrActivitiesBeforeStale: undefined
+      prUpdatesResetStale: undefined
     });
 
     return this;

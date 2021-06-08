@@ -144,67 +144,6 @@ exports.Assignees = Assignees;
 
 /***/ }),
 
-/***/ 3414:
-/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.IgnoreAllActivitiesBeforeStale = void 0;
-const option_1 = __nccwpck_require__(5931);
-const issue_logger_1 = __nccwpck_require__(2984);
-class IgnoreAllActivitiesBeforeStale {
-    constructor(options, issue) {
-        this._options = options;
-        this._issue = issue;
-        this._issueLogger = new issue_logger_1.IssueLogger(issue);
-    }
-    shouldIgnoreAllActivitiesBeforeStale() {
-        return this._shouldIgnoreAllActivitiesBeforeStale();
-    }
-    _shouldIgnoreAllActivitiesBeforeStale() {
-        return this._issue.isPullRequest
-            ? this._shouldIgnoreAllPullRequestActivitiesBeforeStale()
-            : this._shouldIgnoreAllIssueActivitiesBeforeStale();
-    }
-    _shouldIgnoreAllPullRequestActivitiesBeforeStale() {
-        if (this._options.ignoreAllPrActivitiesBeforeStale === true) {
-            this._issueLogger.info(`The option ${this._issueLogger.createOptionLink(option_1.Option.IgnoreAllPrActivitiesBeforeStale)} is enabled. The stale counter will ignore any updates or comments on this $$type and will use the creation date as a reference ignoring any kind of activity`);
-            return true;
-        }
-        else if (this._options.ignoreAllPrActivitiesBeforeStale === false) {
-            this._issueLogger.info(`The option ${this._issueLogger.createOptionLink(option_1.Option.IgnoreAllPrActivitiesBeforeStale)} is disabled. The stale counter will take into account updates and comments on this $$type to avoid to stale when there is some activity`);
-            return false;
-        }
-        this._logIgnoreAllActivitiesBeforeStaleOption();
-        return this._options.ignoreAllActivitiesBeforeStale;
-    }
-    _shouldIgnoreAllIssueActivitiesBeforeStale() {
-        if (this._options.ignoreAllIssueActivitiesBeforeStale === true) {
-            this._issueLogger.info(`The option ${this._issueLogger.createOptionLink(option_1.Option.IgnoreAllIssueActivitiesBeforeStale)} is enabled. The stale counter will ignore any updates or comments on this $$type and will use the creation date as a reference ignoring any kind of activity`);
-            return true;
-        }
-        else if (this._options.ignoreAllIssueActivitiesBeforeStale === false) {
-            this._issueLogger.info(`The option ${this._issueLogger.createOptionLink(option_1.Option.IgnoreAllIssueActivitiesBeforeStale)} is disabled. The stale counter will take into account updates and comments on this $$type to avoid to stale when there is some activity`);
-            return false;
-        }
-        this._logIgnoreAllActivitiesBeforeStaleOption();
-        return this._options.ignoreAllActivitiesBeforeStale;
-    }
-    _logIgnoreAllActivitiesBeforeStaleOption() {
-        if (this._options.ignoreAllActivitiesBeforeStale) {
-            this._issueLogger.info(`The option ${this._issueLogger.createOptionLink(option_1.Option.IgnoreAllActivitiesBeforeStale)} is enabled. The stale counter will ignore any updates or comments on this $$type and will use the creation date as a reference ignoring any kind of activity`);
-        }
-        else {
-            this._issueLogger.info(`The option ${this._issueLogger.createOptionLink(option_1.Option.IgnoreAllActivitiesBeforeStale)} is disabled. The stale counter will take into account updates and comments on this $$type to avoid to stale when there is some activity`);
-        }
-    }
-}
-exports.IgnoreAllActivitiesBeforeStale = IgnoreAllActivitiesBeforeStale;
-
-
-/***/ }),
-
 /***/ 4783:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
@@ -297,7 +236,7 @@ const is_labeled_1 = __nccwpck_require__(6792);
 const should_mark_when_stale_1 = __nccwpck_require__(2461);
 const words_to_list_1 = __nccwpck_require__(1883);
 const assignees_1 = __nccwpck_require__(7236);
-const ignore_all_activities_before_stale_1 = __nccwpck_require__(3414);
+const updates_reset_stale_1 = __nccwpck_require__(4530);
 const issue_1 = __nccwpck_require__(4783);
 const issue_logger_1 = __nccwpck_require__(2984);
 const logger_1 = __nccwpck_require__(6212);
@@ -512,23 +451,23 @@ class IssuesProcessor {
             // Determine if this issue needs to be marked stale first
             if (!issue.isStale) {
                 issueLogger.info(`This $$type is not stale`);
-                const shouldIgnoreAllActivitiesBeforeStale = new ignore_all_activities_before_stale_1.IgnoreAllActivitiesBeforeStale(this.options, issue).shouldIgnoreAllActivitiesBeforeStale();
+                const shouldUpdatesResetStale = new updates_reset_stale_1.UpdatesResetStale(this.options, issue).shouldUpdatesResetStale();
                 // Should this issue be marked as stale?
                 let shouldBeStale = false;
-                // Ignore the last update and only use the creation date
-                if (shouldIgnoreAllActivitiesBeforeStale) {
-                    shouldBeStale = !IssuesProcessor._updatedSince(issue.created_at, daysBeforeStale);
-                }
-                // Use the last update instead to check if we need to stale
-                else {
+                // Use the last update to check if we need to stale
+                if (shouldUpdatesResetStale) {
                     shouldBeStale = !IssuesProcessor._updatedSince(issue.updated_at, daysBeforeStale);
                 }
+                // Ignore the last update and only use the creation date
+                else {
+                    shouldBeStale = !IssuesProcessor._updatedSince(issue.created_at, daysBeforeStale);
+                }
                 if (shouldBeStale) {
-                    if (shouldIgnoreAllActivitiesBeforeStale) {
-                        issueLogger.info(`This $$type should be stale based on the creation date the ${get_humanized_date_1.getHumanizedDate(new Date(issue.created_at))} (${logger_service_1.LoggerService.cyan(issue.created_at)})`);
+                    if (shouldUpdatesResetStale) {
+                        issueLogger.info(`This $$type should be stale based on the last update date the ${get_humanized_date_1.getHumanizedDate(new Date(issue.updated_at))} (${logger_service_1.LoggerService.cyan(issue.updated_at)})`);
                     }
                     else {
-                        issueLogger.info(`This $$type should be stale based on the last update date the ${get_humanized_date_1.getHumanizedDate(new Date(issue.updated_at))} (${logger_service_1.LoggerService.cyan(issue.updated_at)})`);
+                        issueLogger.info(`This $$type should be stale based on the creation date the ${get_humanized_date_1.getHumanizedDate(new Date(issue.created_at))} (${logger_service_1.LoggerService.cyan(issue.created_at)})`);
                     }
                     if (shouldMarkAsStale) {
                         issueLogger.info(`This $$type should be marked as stale based on the option ${issueLogger.createOptionLink(this._getDaysBeforeStaleUsedOptionName(issue))} (${logger_service_1.LoggerService.cyan(daysBeforeStale)})`);
@@ -541,11 +480,11 @@ class IssuesProcessor {
                     }
                 }
                 else {
-                    if (shouldIgnoreAllActivitiesBeforeStale) {
-                        issueLogger.info(`This $$type should not be stale based on the creation date the ${get_humanized_date_1.getHumanizedDate(new Date(issue.created_at))} (${logger_service_1.LoggerService.cyan(issue.created_at)})`);
+                    if (shouldUpdatesResetStale) {
+                        issueLogger.info(`This $$type should not be stale based on the last update date the ${get_humanized_date_1.getHumanizedDate(new Date(issue.updated_at))} (${logger_service_1.LoggerService.cyan(issue.updated_at)})`);
                     }
                     else {
-                        issueLogger.info(`This $$type should not be stale based on the last update date the ${get_humanized_date_1.getHumanizedDate(new Date(issue.updated_at))} (${logger_service_1.LoggerService.cyan(issue.updated_at)})`);
+                        issueLogger.info(`This $$type should not be stale based on the creation date the ${get_humanized_date_1.getHumanizedDate(new Date(issue.created_at))} (${logger_service_1.LoggerService.cyan(issue.created_at)})`);
                     }
                 }
             }
@@ -1769,6 +1708,67 @@ exports.Statistics = Statistics;
 
 /***/ }),
 
+/***/ 4530:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.UpdatesResetStale = void 0;
+const option_1 = __nccwpck_require__(5931);
+const issue_logger_1 = __nccwpck_require__(2984);
+class UpdatesResetStale {
+    constructor(options, issue) {
+        this._options = options;
+        this._issue = issue;
+        this._issueLogger = new issue_logger_1.IssueLogger(issue);
+    }
+    shouldUpdatesResetStale() {
+        return this._shouldUpdatesResetStale();
+    }
+    _shouldUpdatesResetStale() {
+        return this._issue.isPullRequest
+            ? this._shouldIgnoreAllPullRequestActivitiesBeforeStale()
+            : this._shouldIssueUpdatesResetStale();
+    }
+    _shouldIgnoreAllPullRequestActivitiesBeforeStale() {
+        if (this._options.prUpdatesResetStale === true) {
+            this._issueLogger.info(`The option ${this._issueLogger.createOptionLink(option_1.Option.PrUpdatesResetStale)} is enabled. The stale counter will ignore any updates or comments on this $$type and will use the creation date as a reference ignoring any kind of activity`);
+            return true;
+        }
+        else if (this._options.prUpdatesResetStale === false) {
+            this._issueLogger.info(`The option ${this._issueLogger.createOptionLink(option_1.Option.PrUpdatesResetStale)} is disabled. The stale counter will take into account updates and comments on this $$type to avoid to stale when there is some activity`);
+            return false;
+        }
+        this._logUpdatesResetStaleOption();
+        return this._options.updatesResetStale;
+    }
+    _shouldIssueUpdatesResetStale() {
+        if (this._options.issueUpdatesResetStale === true) {
+            this._issueLogger.info(`The option ${this._issueLogger.createOptionLink(option_1.Option.IssueUpdatesResetStale)} is enabled. The stale counter will ignore any updates or comments on this $$type and will use the creation date as a reference ignoring any kind of activity`);
+            return true;
+        }
+        else if (this._options.issueUpdatesResetStale === false) {
+            this._issueLogger.info(`The option ${this._issueLogger.createOptionLink(option_1.Option.IssueUpdatesResetStale)} is disabled. The stale counter will take into account updates and comments on this $$type to avoid to stale when there is some activity`);
+            return false;
+        }
+        this._logUpdatesResetStaleOption();
+        return this._options.updatesResetStale;
+    }
+    _logUpdatesResetStaleOption() {
+        if (this._options.updatesResetStale) {
+            this._issueLogger.info(`The option ${this._issueLogger.createOptionLink(option_1.Option.UpdatesResetStale)} is enabled. The stale counter will ignore any updates or comments on this $$type and will use the creation date as a reference ignoring any kind of activity`);
+        }
+        else {
+            this._issueLogger.info(`The option ${this._issueLogger.createOptionLink(option_1.Option.UpdatesResetStale)} is disabled. The stale counter will take into account updates and comments on this $$type to avoid to stale when there is some activity`);
+        }
+    }
+}
+exports.UpdatesResetStale = UpdatesResetStale;
+
+
+/***/ }),
+
 /***/ 5931:
 /***/ ((__unused_webpack_module, exports) => {
 
@@ -1822,9 +1822,9 @@ var Option;
     Option["EnableStatistics"] = "enable-statistics";
     Option["LabelsToRemoveWhenUnstale"] = "labels-to-remove-when-unstale";
     Option["LabelsToAddWhenUnstale"] = "labels-to-add-when-unstale";
-    Option["IgnoreAllActivitiesBeforeStale"] = "ignore-all-activities-before-stale";
-    Option["IgnoreAllIssueActivitiesBeforeStale"] = "ignore-all-issue-activities-before-stale";
-    Option["IgnoreAllPrActivitiesBeforeStale"] = "ignore-all-pr-activities-before-stale";
+    Option["UpdatesResetStale"] = "updates-reset-stale";
+    Option["IssueUpdatesResetStale"] = "issue-updates-reset-stale";
+    Option["PrUpdatesResetStale"] = "pr-updates-reset-stale";
 })(Option = exports.Option || (exports.Option = {}));
 
 
@@ -2111,9 +2111,9 @@ function _getAndValidateArgs() {
         enableStatistics: core.getInput('enable-statistics') === 'true',
         labelsToRemoveWhenUnstale: core.getInput('labels-to-remove-when-unstale'),
         labelsToAddWhenUnstale: core.getInput('labels-to-add-when-unstale'),
-        ignoreAllActivitiesBeforeStale: core.getInput('ignore-all-activities-before-stale') === 'true',
-        ignoreAllIssueActivitiesBeforeStale: _toOptionalBoolean('ignore-all-issue-activities-before-stale'),
-        ignoreAllPrActivitiesBeforeStale: _toOptionalBoolean('ignore-all-pr-activities-before-stale')
+        updatesResetStale: core.getInput('updates-reset-stale') === 'true',
+        issueUpdatesResetStale: _toOptionalBoolean('issue-updates-reset-stale'),
+        prUpdatesResetStale: _toOptionalBoolean('pr-updates-reset-stale')
     };
     for (const numberInput of [
         'days-before-stale',

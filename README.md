@@ -19,8 +19,15 @@ permissions:
   pull-requests: read
 ```
   
-In addition, based on the provided configuration, the action could require more permission(s) (e.g.: add label, remove label, comment, close, etc).  
-You can find more information about the required permissions under the corresponding options that you wish to use.
+In addition, based on the provided configuration, the action could require more permission(s) (e.g.: add label, remove label, comment, close, etc.).  
+You can find more information about the required permissions under the corresponding options that you wish to use.  
+However, if don't want to bother, you can use set these permissions:
+
+```yaml
+permissions:
+  issues: write
+  pull-requests: write
+```
 
 ## All options
 

@@ -15,8 +15,8 @@ This can be achieved with the following [configuration in the action](https://do
 
 ```yaml
 permissions:
-  issues: write
-  pull-requests: write
+  issues: read
+  pull-requests: read
 ```
   
 In addition, based on the provided configuration, the action could require more permission(s) (e.g.: add label, remove label, comment, close, etc).  

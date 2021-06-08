@@ -176,16 +176,16 @@ inputs:
     description: 'A comma delimited list of labels to remove when a stale issue or pull request receives activity and has the stale-issue-label or stale-pr-label removed from it.'
     default: ''
     required: false
-  ignore-all-activities-before-stale:
-    description: 'No activity (update/comment) can stop to stale the issues and pull requests.'
-    default: 'false'
+  updates-reset-stale:
+    description: 'Any activity (update/comment) can reset the stale idle time on the issues and pull requests.'
+    default: 'true'
     required: false
-  ignore-all-issue-activities-before-stale:
-    description: 'No activity (update/comment) can stop to stale the issues. Override "ignore-all-activities-before-stale" option regarding only the issues.'
+  issue-updates-reset-stale:
+    description: 'Any activity (update/comment) can reset the stale idle time on the issues. Override "updates-reset-stale" option regarding only the issues.'
     default: ''
     required: false
-  ignore-all-pr-activities-before-stale:
-    description: 'No activity (update/comment) can stop to stale the pull requests. Override "ignore-all-activities-before-stale" option regarding only the pull requests.'
+  pr-updates-reset-stale:
+    description: 'Any activity (update/comment) can reset the stale idle time on the pull requests. Override "updates-reset-stale" option regarding only the pull requests.'
     default: ''
     required: false
 outputs:

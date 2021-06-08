@@ -47,7 +47,7 @@ export interface IIssuesProcessorOptions {
   enableStatistics: boolean;
   labelsToRemoveWhenUnstale: string;
   labelsToAddWhenUnstale: string;
-  ignoreAllActivitiesBeforeStale: boolean;
-  ignoreAllIssueActivitiesBeforeStale: boolean | undefined;
-  ignoreAllPrActivitiesBeforeStale: boolean | undefined;
+  updatesResetStale: boolean;
+  issueUpdatesResetStale: boolean | undefined;
+  prUpdatesResetStale: boolean | undefined;
 }

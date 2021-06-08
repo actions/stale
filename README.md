@@ -76,16 +76,16 @@ Every argument is optional.
 | [exempt-all-issue-assignees](#exempt-all-issue-assignees)           | Override [exempt-all-assignees](#exempt-all-assignees) for issues only   |                       |
 | [exempt-all-pr-assignees](#exempt-all-pr-assignees)                 | Override [exempt-all-assignees](#exempt-all-assignees) for PRs only      |                       |
 | [enable-statistics](#enable-statistics)                             | Display statistics in the logs                                           | `true`                |
-| [ignore-all-activities-before-stale](#ignore-all-activities-before-stale)             | No activity (update/comment) can stop to stale issues/PRs                                                      | `false`               |
-| [ignore-all-issue-activities-before-stale](#ignore-all-issue-activities-before-stale) | Override [ignore-all-issue-activities-before-stale](#ignore-all-issue-activities-before-stale) for issues only |                       |
-| [ignore-all-pr-activities-before-stale](#ignore-all-pr-activities-before-stale)       | Override [ignore-all-issue-activities-before-stale](#ignore-all-issue-activities-before-stale) for PRs only    |                       |
+| [updates-reset-stale](#updates-reset-stale)                         | Any activity (update/comment) can reset the stale idle time on the issues/PRs    | `true`                |
+| [issue-updates-reset-stale](#issue-updates-reset-stale)             | Override [issue-updates-reset-stale](#issue-updates-reset-stale) for issues only |                       |
+| [pr-updates-reset-stale](#pr-updates-reset-stale)                   | Override [issue-updates-reset-stale](#issue-updates-reset-stale) for PRs only    |                       |
 
 ### List of output options
 
-| Output            | Description                                  |
-| ----------------- | -------------------------------------------- |
-| staled-issues-prs | List of all staled issues and pull requests. |
-| closed-issues-prs | List of all closed issues and pull requests. |
+| Output            | Description                                 |
+| ----------------- | ------------------------------------------- |
+| staled-issues-prs | List of all staled issues and pull requests |
+| closed-issues-prs | List of all closed issues and pull requests |
 
 ### Detailed options
 
@@ -101,7 +101,7 @@ Default value: `${{ github.token }}`
 The idle number of days before marking the issues or the pull requests as stale (by adding a label).  
 The issues or the pull requests will be marked as stale if the last update (based on [GitHub issue](https://docs.github.com/en/rest/reference/issues) field `updated_at`) is older than the idle number of days.  
 It means that any updates made, or any comments added to the issues or to the pull requests will restart the counter of days before marking as stale.  
-However, if you wish to ignore this behaviour so that the creation date (based on [GitHub issue](https://docs.github.com/en/rest/reference/issues) field `created_at`) only matters, you can enable the [ignore-all-activities-before-stale](#ignore-all-activities-before-stale) option.
+However, if you wish to ignore this behaviour so that the creation date (based on [GitHub issue](https://docs.github.com/en/rest/reference/issues) field `created_at`) only matters, you can disable the [updates-reset-stale](#updates-reset-stale) option.
 
 If set to a negative number like `-1`, no issues or pull requests will be marked as stale automatically.  
 In that case, you can still add the stale label manually to mark as stale.
@@ -478,24 +478,24 @@ This option is only useful if the debug output secret `ACTIONS_STEP_DEBUG` is se
 
 Default value: `true`
 
-#### ignore-all-activities-before-stale
+#### updates-reset-stale
 
 The option [days-before-stale](#days-before-stale) will define the number of days before considering the issues or the pull requests as stale.  
 In most cases, the purpose of this action is to only stale when necessary so if any update occurs or if a comment is added to them, the counter will restart.  
-Nonetheless, if you don't care about this, and you prefer to stick to this number of days no matter the activity, you can enable this option.  
+Nonetheless, if you don't care about this, and you prefer to stick to this number of days no matter the activity, you can disable this option.  
 Instead of comparing the number of days based on the [GitHub issue](https://docs.github.com/en/rest/reference/issues) field `updated_at`, it will be based on the [GitHub issue](https://docs.github.com/en/rest/reference/issues) field `created_at`.
 
-Default value: `false`
+Default value: `true`
 
-#### ignore-all-issue-activities-before-stale
+#### issue-updates-reset-stale
 
-Useful to override [ignore-all-activities-before-stale](#ignore-all-activities-before-stale) but only to ignore the activities for the issues.
+Useful to override [updates-reset-stale](#updates-reset-stale) but only to ignore the activities for the issues.
 
 Default value: unset
 
-#### ignore-all-pr-activities-before-stale
+#### pr-updates-reset-stale
 
-Useful to override [ignore-all-activities-before-stale](#ignore-all-activities-before-stale) but only to ignore the activities for the pull requests.
+Useful to override [updates-reset-stale](#updates-reset-stale) but only to ignore the activities for the pull requests.
 
 Default value: unset
 

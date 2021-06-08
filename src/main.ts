@@ -84,14 +84,9 @@ function _getAndValidateArgs(): IIssuesProcessorOptions {
     enableStatistics: core.getInput('enable-statistics') === 'true',
     labelsToRemoveWhenUnstale: core.getInput('labels-to-remove-when-unstale'),
     labelsToAddWhenUnstale: core.getInput('labels-to-add-when-unstale'),
-    ignoreAllActivitiesBeforeStale:
-      core.getInput('ignore-all-activities-before-stale') === 'true',
-    ignoreAllIssueActivitiesBeforeStale: _toOptionalBoolean(
-      'ignore-all-issue-activities-before-stale'
-    ),
-    ignoreAllPrActivitiesBeforeStale: _toOptionalBoolean(
-      'ignore-all-pr-activities-before-stale'
-    )
+    updatesResetStale: core.getInput('updates-reset-stale') === 'true',
+    issueUpdatesResetStale: _toOptionalBoolean('issue-updates-reset-stale'),
+    prUpdatesResetStale: _toOptionalBoolean('pr-updates-reset-stale')
   };
 
   for (const numberInput of [

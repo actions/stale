@@ -58,9 +58,9 @@ describe('Issue', (): void => {
       enableStatistics: false,
       labelsToRemoveWhenUnstale: '',
       labelsToAddWhenUnstale: '',
-      ignoreAllActivitiesBeforeStale: false,
-      ignoreAllIssueActivitiesBeforeStale: undefined,
-      ignoreAllPrActivitiesBeforeStale: undefined
+      updatesResetStale: true,
+      issueUpdatesResetStale: undefined,
+      prUpdatesResetStale: undefined
     };
     issueInterface = {
       title: 'dummy-title',

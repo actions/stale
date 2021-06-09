@@ -751,7 +751,7 @@ If the [debug-only](#debug-only) option is enabled, this is very helpful because
 
 **Job frequency:**  
 You could change the cron job frequency in the stale workflow to run the stale workflow more often.  
-Usually, this is not very helpful though.
+Usually, we recommended running the workflow once per day nonetheless you could use a more frequent job and use a higher [query-operations-per-run](#query-operations-per-run) count to process all the issues in your repository and a lower [mutation-operations-per-run](#mutation-operations-per-run) count to only perform a few operations which reduce the risk in case of bad configuration.
 
 ### Contributing
 

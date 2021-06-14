@@ -579,35 +579,33 @@ class IssuesProcessor {
             issueLogger.info(`$$type has been updated: ${logger_service_1.LoggerService.cyan(issueHasUpdate)}`);
             const shouldRemoveStaleWhenUpdated = this._shouldRemoveStaleWhenUpdated(issue);
             issueLogger.info(`The option ${issueLogger.createOptionLink(this._getRemoveStaleWhenUpdatedUsedOptionName(issue))} is: ${logger_service_1.LoggerService.cyan(shouldRemoveStaleWhenUpdated)}`);
-            if (shouldRemoveStaleWhenUpdated) {
+            if (!shouldRemoveStaleWhenUpdated) {
                 issueLogger.info(`The stale label should not be removed due to an update`);
-            }
-            else {
-                issueLogger.info(`The stale label should be removed if all conditions met`);
             }
             const shouldRemoveStaleWhenCommented = this._shouldRemoveStaleWhenCommented(issue);
             issueLogger.info(`The option ${issueLogger.createOptionLink(this._getRemoveStaleWhenCommentedUsedOptionName(issue))} is: ${logger_service_1.LoggerService.cyan(shouldRemoveStaleWhenCommented)}`);
-            if (shouldRemoveStaleWhenCommented) {
+            if (!shouldRemoveStaleWhenCommented) {
                 issueLogger.info(`The stale label should not be removed due to a comment`);
             }
-            else {
-                issueLogger.info(`The stale label should be removed if all conditions met`);
-            }
+            issueLogger.info(`Checking if the stale label should be removed...`);
             // Should we un-stale this issue?
             if (shouldRemoveStaleWhenUpdated && issueHasUpdate) {
-                issueLogger.info(`Remove the stale label since the $$type has an update and the workflow should remove the stale label when updated`);
-                yield this._removeStaleLabel(issue, staleLabel);
-                issueLogger.info(`Skipping the process since the $$type is now un-stale`);
+                issueLogger.info(logger_service_1.LoggerService.white('├── '), `Remove the stale label since the $$type has an update and the workflow should remove the stale label when updated`);
+                yield this._removeStaleLabel(issue, staleLabel, true);
+                issueLogger.info(logger_service_1.LoggerService.white('└── '), `Skipping the process since the $$type is now un-stale`);
                 return; // Nothing to do because it is no longer stale
             }
             else if (shouldRemoveStaleWhenCommented && issueHasComments) {
-                issueLogger.info(`Remove the stale label since the $$type has a comment and the workflow should remove the stale label when commented`);
-                yield this._removeStaleLabel(issue, staleLabel);
+                issueLogger.info(logger_service_1.LoggerService.white('├── '), `Remove the stale label since the $$type has a comment and the workflow should remove the stale label when commented`);
+                yield this._removeStaleLabel(issue, staleLabel, true);
+                issueLogger.info(logger_service_1.LoggerService.white('└── '), `Skipping the process since the $$type is now un-stale`);
                 // Are there labels to remove or add when an issue is no longer stale?
                 yield this._removeLabelsWhenUnstale(issue, labelsToRemoveWhenUnstale);
                 yield this._addLabelsWhenUnstale(issue, labelsToAddWhenUnstale);
-                issueLogger.info(`Skipping the process since the $$type is now un-stale`);
                 return; // Nothing to do because it is no longer stale
+            }
+            else {
+                issueLogger.info(logger_service_1.LoggerService.white('└── '), `The stale label should not be removed`);
             }
             // Now start closing logic
             if (daysBeforeClose < 0) {
@@ -650,8 +648,8 @@ class IssuesProcessor {
             const issueLogger = new issue_logger_1.IssueLogger(issue);
             issueLogger.info(`Marking this $$type as stale`);
             this.staleIssues.push(issue);
-            // if the issue is being marked stale, the updated date should be changed to right now
-            // so that close calculations work correctly
+            // If the issue is being marked stale, the updated date should be changed to right now
+            // So that close calculations work correctly
             const newUpdatedAtDate = new Date();
             issue.updated_at = newUpdatedAtDate.toString();
             if (!skipMessage) {
@@ -796,11 +794,11 @@ class IssuesProcessor {
         });
     }
     // Remove a label from an issue or a pull request
-    _removeLabel(issue, label, isSubStep = false) {
+    _removeLabel(issue, label, stepType = 'normal') {
         var _a;
         return __awaiter(this, void 0, void 0, function* () {
             const issueLogger = new issue_logger_1.IssueLogger(issue);
-            issueLogger.info(`${isSubStep ? logger_service_1.LoggerService.white('├── ') : ''}Removing the label "${logger_service_1.LoggerService.cyan(label)}" from this $$type...`);
+            issueLogger.info(`${stepType !== 'normal' ? logger_service_1.LoggerService.white('├── ') : ''}Removing the label "${logger_service_1.LoggerService.cyan(label)}" from this $$type...`);
             this.removedLabelIssues.push(issue);
             try {
                 this._consumeIssueOperation(issue);
@@ -813,10 +811,14 @@ class IssuesProcessor {
                         name: label
                     });
                 }
-                issueLogger.info(`${isSubStep ? logger_service_1.LoggerService.white('└── ') : ''}The label "${logger_service_1.LoggerService.cyan(label)}" was removed`);
+                issueLogger.info(`${stepType !== 'normal'
+                    ? logger_service_1.LoggerService.white(stepType === 'last' ? '└── ' : '├── ')
+                    : ''}The label "${logger_service_1.LoggerService.cyan(label)}" was removed`);
             }
             catch (error) {
-                issueLogger.error(`${isSubStep ? logger_service_1.LoggerService.white('└── ') : ''}Error when removing the label: "${logger_service_1.LoggerService.cyan(error.message)}"`);
+                issueLogger.error(`${stepType !== 'normal'
+                    ? logger_service_1.LoggerService.white(stepType === 'last' ? '└── ' : '├── ')
+                    : ''}Error when removing the label: "${logger_service_1.LoggerService.cyan(error.message)}"`);
             }
         });
     }
@@ -928,12 +930,12 @@ class IssuesProcessor {
         }
         return this.options.removeStaleWhenCommented;
     }
-    _removeStaleLabel(issue, staleLabel) {
+    _removeStaleLabel(issue, staleLabel, isSubStep = false) {
         var _a;
         return __awaiter(this, void 0, void 0, function* () {
             const issueLogger = new issue_logger_1.IssueLogger(issue);
-            issueLogger.info(`The $$type is no longer stale. Removing the stale label...`);
-            yield this._removeLabel(issue, staleLabel);
+            issueLogger.info(`${isSubStep ? logger_service_1.LoggerService.white('├── ') : ''}The $$type is no longer stale. Removing the stale label...`);
+            yield this._removeLabel(issue, staleLabel, 'sub');
             (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.incrementUndoStaleItemsCount(issue);
         });
     }
@@ -949,7 +951,7 @@ class IssuesProcessor {
             }
             if (is_labeled_1.isLabeled(issue, closeLabel)) {
                 issueLogger.info(logger_service_1.LoggerService.white('├──'), `The $$type has a close label "${logger_service_1.LoggerService.cyan(closeLabel)}". Removing the close label...`);
-                yield this._removeLabel(issue, closeLabel, true);
+                yield this._removeLabel(issue, closeLabel, 'last');
                 (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.incrementDeletedCloseItemsLabelsCount(issue);
             }
             else {

@@ -62,15 +62,6 @@ function _getAndValidateArgs(): IIssuesProcessorOptions {
     removePrStaleWhenUpdated: _toOptionalBoolean(
       core.getInput('remove-pr-stale-when-updated')
     ),
-    removeStaleWhenCommented: !(
-      core.getInput('remove-stale-when-commented') === 'false'
-    ),
-    removeIssueStaleWhenCommented: _toOptionalBoolean(
-      core.getInput('remove-issue-stale-when-commented')
-    ),
-    removePrStaleWhenCommented: _toOptionalBoolean(
-      core.getInput('remove-pr-stale-when-commented')
-    ),
     debugOnly: core.getInput('debug-only') === 'true',
     ascending: core.getInput('ascending') === 'true',
     deleteBranch: core.getInput('delete-branch') === 'true',

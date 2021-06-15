@@ -11,7 +11,7 @@ let issuesProcessor: IssuesProcessorMock;
 
 /**
  * @description
- * Assuming there is an update on the issue
+ * Assuming there is a comment on the issue
  */
 describe('remove-stale-when-updated option', (): void => {
   beforeEach((): void => {
@@ -480,9 +480,8 @@ class IssuesProcessorBuilder {
       issues.map((issue: Readonly<Partial<IIssue>>): Partial<IIssue> => {
         return {
           ...issue,
-          // Note this update
-          updated_at: new Date().toDateString(),
-          created_at: new Date().toDateString(),
+          updated_at: '2020-01-01T17:00:00Z',
+          created_at: '2020-01-01T17:00:00Z',
           labels: issue.labels?.map((label: Readonly<ILabel>): ILabel => {
             return {
               ...label,
@@ -518,9 +517,8 @@ class IssuesProcessorBuilder {
       issues.map((issue: Readonly<Partial<IIssue>>): Partial<IIssue> => {
         return {
           ...issue,
-          // Note this update
-          updated_at: new Date().toDateString(),
-          created_at: new Date().toDateString(),
+          updated_at: '2020-01-01T17:00:00Z',
+          created_at: '2020-01-01T17:00:00Z',
           labels: issue.labels?.map((label: Readonly<ILabel>): ILabel => {
             return {
               ...label,
@@ -543,7 +541,14 @@ class IssuesProcessorBuilder {
       this._options,
       async () => 'abot',
       async p => (p === 1 ? this._issues : []),
-      async () => [],
+      async () => [
+        {
+          user: {
+            login: 'notme',
+            type: 'User'
+          }
+        }
+      ],
       async () => new Date().toDateString()
     );
   }

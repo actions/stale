@@ -16,7 +16,7 @@ import {IIssueEvent} from '../interfaces/issue-event';
 import {IIssuesProcessorOptions} from '../interfaces/issues-processor-options';
 import {IPullRequest} from '../interfaces/pull-request';
 import {Assignees} from './assignees';
-import {UpdatesResetStale} from './updates-reset-stale';
+import {ActivitiesResetStale} from './activities-reset-stale';
 import {Issue} from './issue';
 import {IssueLogger} from './loggers/issue-logger';
 import {Logger} from './loggers/logger';
@@ -410,16 +410,16 @@ export class IssuesProcessor {
     // Determine if this issue needs to be marked stale first
     if (!issue.isStale) {
       issueLogger.info(`This $$type is not stale`);
-      const shouldUpdatesResetStale: boolean = new UpdatesResetStale(
+      const shouldActivitiesResetStale: boolean = new ActivitiesResetStale(
         this.options,
         issue
-      ).shouldUpdatesResetStale();
+      ).shouldActivitiesResetStale();
 
       // Should this issue be marked as stale?
       let shouldBeStale = false;
 
       // Use the last update to check if we need to stale
-      if (shouldUpdatesResetStale) {
+      if (shouldActivitiesResetStale) {
         shouldBeStale = !IssuesProcessor._updatedSince(
           issue.updated_at,
           daysBeforeStale
@@ -434,7 +434,7 @@ export class IssuesProcessor {
       }
 
       if (shouldBeStale) {
-        if (shouldUpdatesResetStale) {
+        if (shouldActivitiesResetStale) {
           issueLogger.info(
             `This $$type should be stale based on the last update date the ${getHumanizedDate(
               new Date(issue.updated_at)
@@ -465,7 +465,7 @@ export class IssuesProcessor {
           );
         }
       } else {
-        if (shouldUpdatesResetStale) {
+        if (shouldActivitiesResetStale) {
           issueLogger.info(
             `This $$type should not be stale based on the last update date the ${getHumanizedDate(
               new Date(issue.updated_at)

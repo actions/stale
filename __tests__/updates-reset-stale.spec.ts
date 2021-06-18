@@ -5,7 +5,7 @@ import {IssuesProcessorMock} from './classes/issues-processor-mock';
 import {DefaultProcessorOptions} from './constants/default-processor-options';
 import {generateIssue} from './functions/generate-issue';
 
-describe('updates reset stale options', (): void => {
+describe('activities reset stale options', (): void => {
   let sut: SUT;
 
   beforeEach((): void => {
@@ -17,7 +17,7 @@ describe('updates reset stale options', (): void => {
       sut.toIssue().staleIn(10).created(20).updated(5);
     });
 
-    describe('when the updates reset stale option is disabled', (): void => {
+    describe('when the activities reset stale option is disabled', (): void => {
       beforeEach((): void => {
         sut.staleIgnoresUpdates();
       });
@@ -32,9 +32,9 @@ describe('updates reset stale options', (): void => {
         expect(sut.processor.removedLabelIssues).toHaveLength(0);
       });
 
-      describe('when the issue updates reset stale option is enabled', (): void => {
+      describe('when the issue activities reset stale option is enabled', (): void => {
         beforeEach((): void => {
-          sut.issueUpdatesResetStale();
+          sut.issueActivitiesResetStale();
         });
 
         it('should not stale the issue', async () => {
@@ -48,7 +48,7 @@ describe('updates reset stale options', (): void => {
         });
       });
 
-      describe('when the issue updates reset stale option is disabled', (): void => {
+      describe('when the issue activities reset stale option is disabled', (): void => {
         beforeEach((): void => {
           sut.issueStaleIgnoresUpdates();
         });
@@ -64,9 +64,9 @@ describe('updates reset stale options', (): void => {
         });
       });
 
-      describe('when the issue updates reset stale option is unset', (): void => {
+      describe('when the issue activities reset stale option is unset', (): void => {
         beforeEach((): void => {
-          sut.unsetIssueUpdatesResetStale();
+          sut.unsetIssueActivitiesResetStale();
         });
 
         it('should stale the issue', async () => {
@@ -81,9 +81,9 @@ describe('updates reset stale options', (): void => {
       });
     });
 
-    describe('when the updates reset stale option is enabled', (): void => {
+    describe('when the activities reset stale option is enabled', (): void => {
       beforeEach((): void => {
-        sut.updatesResetStale();
+        sut.activitiesResetStale();
       });
 
       it('should not stale the issue', async () => {
@@ -96,9 +96,9 @@ describe('updates reset stale options', (): void => {
         expect(sut.processor.removedLabelIssues).toHaveLength(0);
       });
 
-      describe('when the issue updates reset stale option is enabled', (): void => {
+      describe('when the issue activities reset stale option is enabled', (): void => {
         beforeEach((): void => {
-          sut.issueUpdatesResetStale();
+          sut.issueActivitiesResetStale();
         });
 
         it('should not stale the issue', async () => {
@@ -112,7 +112,7 @@ describe('updates reset stale options', (): void => {
         });
       });
 
-      describe('when the issue updates reset stale option is disabled', (): void => {
+      describe('when the issue activities reset stale option is disabled', (): void => {
         beforeEach((): void => {
           sut.issueStaleIgnoresUpdates();
         });
@@ -128,9 +128,9 @@ describe('updates reset stale options', (): void => {
         });
       });
 
-      describe('when the issue updates reset stale option is unset', (): void => {
+      describe('when the issue activities reset stale option is unset', (): void => {
         beforeEach((): void => {
-          sut.unsetIssueUpdatesResetStale();
+          sut.unsetIssueActivitiesResetStale();
         });
 
         it('should not stale the issue', async () => {
@@ -151,7 +151,7 @@ describe('updates reset stale options', (): void => {
       sut.toIssue().staleIn(10).created(20).updated(15);
     });
 
-    describe('when the updates reset stale option is disabled', (): void => {
+    describe('when the activities reset stale option is disabled', (): void => {
       beforeEach((): void => {
         sut.staleIgnoresUpdates();
       });
@@ -166,9 +166,9 @@ describe('updates reset stale options', (): void => {
         expect(sut.processor.removedLabelIssues).toHaveLength(0);
       });
 
-      describe('when the issue updates reset stale option is enabled', (): void => {
+      describe('when the issue activities reset stale option is enabled', (): void => {
         beforeEach((): void => {
-          sut.issueUpdatesResetStale();
+          sut.issueActivitiesResetStale();
         });
 
         it('should stale the issue', async () => {
@@ -182,7 +182,7 @@ describe('updates reset stale options', (): void => {
         });
       });
 
-      describe('when the issue updates reset stale option is disabled', (): void => {
+      describe('when the issue activities reset stale option is disabled', (): void => {
         beforeEach((): void => {
           sut.issueStaleIgnoresUpdates();
         });
@@ -198,9 +198,9 @@ describe('updates reset stale options', (): void => {
         });
       });
 
-      describe('when the issue updates reset stale option is unset', (): void => {
+      describe('when the issue activities reset stale option is unset', (): void => {
         beforeEach((): void => {
-          sut.unsetIssueUpdatesResetStale();
+          sut.unsetIssueActivitiesResetStale();
         });
 
         it('should stale the issue', async () => {
@@ -215,9 +215,9 @@ describe('updates reset stale options', (): void => {
       });
     });
 
-    describe('when the updates reset stale option is enabled', (): void => {
+    describe('when the activities reset stale option is enabled', (): void => {
       beforeEach((): void => {
-        sut.updatesResetStale();
+        sut.activitiesResetStale();
       });
 
       it('should stale the issue', async () => {
@@ -230,9 +230,9 @@ describe('updates reset stale options', (): void => {
         expect(sut.processor.removedLabelIssues).toHaveLength(0);
       });
 
-      describe('when the issue updates reset stale option is enabled', (): void => {
+      describe('when the issue activities reset stale option is enabled', (): void => {
         beforeEach((): void => {
-          sut.issueUpdatesResetStale();
+          sut.issueActivitiesResetStale();
         });
 
         it('should stale the issue', async () => {
@@ -246,7 +246,7 @@ describe('updates reset stale options', (): void => {
         });
       });
 
-      describe('when the issue updates reset stale option is disabled', (): void => {
+      describe('when the issue activities reset stale option is disabled', (): void => {
         beforeEach((): void => {
           sut.issueStaleIgnoresUpdates();
         });
@@ -262,9 +262,9 @@ describe('updates reset stale options', (): void => {
         });
       });
 
-      describe('when the issue updates reset stale option is unset', (): void => {
+      describe('when the issue activities reset stale option is unset', (): void => {
         beforeEach((): void => {
-          sut.unsetIssueUpdatesResetStale();
+          sut.unsetIssueActivitiesResetStale();
         });
 
         it('should stale the issue', async () => {
@@ -285,7 +285,7 @@ describe('updates reset stale options', (): void => {
       sut.toPullRequest().staleIn(10).created(20).updated(5);
     });
 
-    describe('when the updates reset stale option is disabled', (): void => {
+    describe('when the activities reset stale option is disabled', (): void => {
       beforeEach((): void => {
         sut.staleIgnoresUpdates();
       });
@@ -300,9 +300,9 @@ describe('updates reset stale options', (): void => {
         expect(sut.processor.removedLabelIssues).toHaveLength(0);
       });
 
-      describe('when the pull request updates reset stale option is enabled', (): void => {
+      describe('when the pull request activities reset stale option is enabled', (): void => {
         beforeEach((): void => {
-          sut.pullRequestUpdatesResetStale();
+          sut.pullRequestActivitiesResetStale();
         });
 
         it('should not stale the pull request', async () => {
@@ -316,7 +316,7 @@ describe('updates reset stale options', (): void => {
         });
       });
 
-      describe('when the pull request updates reset stale option is disabled', (): void => {
+      describe('when the pull request activities reset stale option is disabled', (): void => {
         beforeEach((): void => {
           sut.pullRequestStaleIgnoresUpdates();
         });
@@ -332,9 +332,9 @@ describe('updates reset stale options', (): void => {
         });
       });
 
-      describe('when the pull request updates reset stale option is unset', (): void => {
+      describe('when the pull request activities reset stale option is unset', (): void => {
         beforeEach((): void => {
-          sut.unsetPullRequestUpdatesResetStale();
+          sut.unsetPullRequestActivitiesResetStale();
         });
 
         it('should stale the pull request', async () => {
@@ -349,9 +349,9 @@ describe('updates reset stale options', (): void => {
       });
     });
 
-    describe('when the updates reset stale option is enabled', (): void => {
+    describe('when the activities reset stale option is enabled', (): void => {
       beforeEach((): void => {
-        sut.updatesResetStale();
+        sut.activitiesResetStale();
       });
 
       it('should not stale the pull request', async () => {
@@ -364,9 +364,9 @@ describe('updates reset stale options', (): void => {
         expect(sut.processor.removedLabelIssues).toHaveLength(0);
       });
 
-      describe('when the pull request updates reset stale option is enabled', (): void => {
+      describe('when the pull request activities reset stale option is enabled', (): void => {
         beforeEach((): void => {
-          sut.pullRequestUpdatesResetStale();
+          sut.pullRequestActivitiesResetStale();
         });
 
         it('should not stale the pull request', async () => {
@@ -380,7 +380,7 @@ describe('updates reset stale options', (): void => {
         });
       });
 
-      describe('when the pull request updates reset stale option is disabled', (): void => {
+      describe('when the pull request activities reset stale option is disabled', (): void => {
         beforeEach((): void => {
           sut.pullRequestStaleIgnoresUpdates();
         });
@@ -396,9 +396,9 @@ describe('updates reset stale options', (): void => {
         });
       });
 
-      describe('when the pull request updates reset stale option is unset', (): void => {
+      describe('when the pull request activities reset stale option is unset', (): void => {
         beforeEach((): void => {
-          sut.unsetPullRequestUpdatesResetStale();
+          sut.unsetPullRequestActivitiesResetStale();
         });
 
         it('should not stale the pull request', async () => {
@@ -419,7 +419,7 @@ describe('updates reset stale options', (): void => {
       sut.toPullRequest().staleIn(10).created(20).updated(15);
     });
 
-    describe('when the updates reset stale option is disabled', (): void => {
+    describe('when the activities reset stale option is disabled', (): void => {
       beforeEach((): void => {
         sut.staleIgnoresUpdates();
       });
@@ -434,9 +434,9 @@ describe('updates reset stale options', (): void => {
         expect(sut.processor.removedLabelIssues).toHaveLength(0);
       });
 
-      describe('when the pull request updates reset stale option is enabled', (): void => {
+      describe('when the pull request activities reset stale option is enabled', (): void => {
         beforeEach((): void => {
-          sut.pullRequestUpdatesResetStale();
+          sut.pullRequestActivitiesResetStale();
         });
 
         it('should stale the pull request', async () => {
@@ -450,7 +450,7 @@ describe('updates reset stale options', (): void => {
         });
       });
 
-      describe('when the pull request updates reset stale option is disabled', (): void => {
+      describe('when the pull request activities reset stale option is disabled', (): void => {
         beforeEach((): void => {
           sut.pullRequestStaleIgnoresUpdates();
         });
@@ -466,9 +466,9 @@ describe('updates reset stale options', (): void => {
         });
       });
 
-      describe('when the pull request updates reset stale option is unset', (): void => {
+      describe('when the pull request activities reset stale option is unset', (): void => {
         beforeEach((): void => {
-          sut.unsetPullRequestUpdatesResetStale();
+          sut.unsetPullRequestActivitiesResetStale();
         });
 
         it('should stale the pull request', async () => {
@@ -483,9 +483,9 @@ describe('updates reset stale options', (): void => {
       });
     });
 
-    describe('when the updates reset stale option is enabled', (): void => {
+    describe('when the activities reset stale option is enabled', (): void => {
       beforeEach((): void => {
-        sut.updatesResetStale();
+        sut.activitiesResetStale();
       });
 
       it('should stale the pull request', async () => {
@@ -498,9 +498,9 @@ describe('updates reset stale options', (): void => {
         expect(sut.processor.removedLabelIssues).toHaveLength(0);
       });
 
-      describe('when the pull request updates reset stale option is enabled', (): void => {
+      describe('when the pull request activities reset stale option is enabled', (): void => {
         beforeEach((): void => {
-          sut.pullRequestUpdatesResetStale();
+          sut.pullRequestActivitiesResetStale();
         });
 
         it('should stale the pull request', async () => {
@@ -514,7 +514,7 @@ describe('updates reset stale options', (): void => {
         });
       });
 
-      describe('when the pull request updates reset stale option is disabled', (): void => {
+      describe('when the pull request activities reset stale option is disabled', (): void => {
         beforeEach((): void => {
           sut.pullRequestStaleIgnoresUpdates();
         });
@@ -530,9 +530,9 @@ describe('updates reset stale options', (): void => {
         });
       });
 
-      describe('when the pull request updates reset stale option is unset', (): void => {
+      describe('when the pull request activities reset stale option is unset', (): void => {
         beforeEach((): void => {
-          sut.unsetPullRequestUpdatesResetStale();
+          sut.unsetPullRequestActivitiesResetStale();
         });
 
         it('should stale the pull request', async () => {
@@ -594,9 +594,9 @@ class SUT {
     return this;
   }
 
-  updatesResetStale(): SUT {
+  activitiesResetStale(): SUT {
     this._updateOptions({
-      updatesResetStale: true
+      activitiesResetStale: true
     });
 
     return this;
@@ -604,15 +604,15 @@ class SUT {
 
   staleIgnoresUpdates(): SUT {
     this._updateOptions({
-      updatesResetStale: false
+      activitiesResetStale: false
     });
 
     return this;
   }
 
-  issueUpdatesResetStale(): SUT {
+  issueActivitiesResetStale(): SUT {
     this._updateOptions({
-      issueUpdatesResetStale: true
+      issueActivitiesResetStale: true
     });
 
     return this;
@@ -620,23 +620,23 @@ class SUT {
 
   issueStaleIgnoresUpdates(): SUT {
     this._updateOptions({
-      issueUpdatesResetStale: false
+      issueActivitiesResetStale: false
     });
 
     return this;
   }
 
-  unsetIssueUpdatesResetStale(): SUT {
+  unsetIssueActivitiesResetStale(): SUT {
     this._updateOptions({
-      issueUpdatesResetStale: undefined
+      issueActivitiesResetStale: undefined
     });
 
     return this;
   }
 
-  pullRequestUpdatesResetStale(): SUT {
+  pullRequestActivitiesResetStale(): SUT {
     this._updateOptions({
-      prUpdatesResetStale: true
+      prActivitiesResetStale: true
     });
 
     return this;
@@ -644,15 +644,15 @@ class SUT {
 
   pullRequestStaleIgnoresUpdates(): SUT {
     this._updateOptions({
-      prUpdatesResetStale: false
+      prActivitiesResetStale: false
     });
 
     return this;
   }
 
-  unsetPullRequestUpdatesResetStale(): SUT {
+  unsetPullRequestActivitiesResetStale(): SUT {
     this._updateOptions({
-      prUpdatesResetStale: undefined
+      prActivitiesResetStale: undefined
     });
 
     return this;

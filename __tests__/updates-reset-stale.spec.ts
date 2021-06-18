@@ -19,7 +19,7 @@ describe('activities reset stale options', (): void => {
 
     describe('when the activities reset stale option is disabled', (): void => {
       beforeEach((): void => {
-        sut.staleIgnoresUpdates();
+        sut.staleIgnoresActivities();
       });
 
       it('should stale the issue', async () => {
@@ -50,7 +50,7 @@ describe('activities reset stale options', (): void => {
 
       describe('when the issue activities reset stale option is disabled', (): void => {
         beforeEach((): void => {
-          sut.issueStaleIgnoresUpdates();
+          sut.issueStaleIgnoresActivities();
         });
 
         it('should stale the issue', async () => {
@@ -114,7 +114,7 @@ describe('activities reset stale options', (): void => {
 
       describe('when the issue activities reset stale option is disabled', (): void => {
         beforeEach((): void => {
-          sut.issueStaleIgnoresUpdates();
+          sut.issueStaleIgnoresActivities();
         });
 
         it('should stale the issue', async () => {
@@ -153,7 +153,7 @@ describe('activities reset stale options', (): void => {
 
     describe('when the activities reset stale option is disabled', (): void => {
       beforeEach((): void => {
-        sut.staleIgnoresUpdates();
+        sut.staleIgnoresActivities();
       });
 
       it('should stale the issue', async () => {
@@ -184,7 +184,7 @@ describe('activities reset stale options', (): void => {
 
       describe('when the issue activities reset stale option is disabled', (): void => {
         beforeEach((): void => {
-          sut.issueStaleIgnoresUpdates();
+          sut.issueStaleIgnoresActivities();
         });
 
         it('should stale the issue', async () => {
@@ -248,7 +248,7 @@ describe('activities reset stale options', (): void => {
 
       describe('when the issue activities reset stale option is disabled', (): void => {
         beforeEach((): void => {
-          sut.issueStaleIgnoresUpdates();
+          sut.issueStaleIgnoresActivities();
         });
 
         it('should stale the issue', async () => {
@@ -287,7 +287,7 @@ describe('activities reset stale options', (): void => {
 
     describe('when the activities reset stale option is disabled', (): void => {
       beforeEach((): void => {
-        sut.staleIgnoresUpdates();
+        sut.staleIgnoresActivities();
       });
 
       it('should stale the pull request', async () => {
@@ -318,7 +318,7 @@ describe('activities reset stale options', (): void => {
 
       describe('when the pull request activities reset stale option is disabled', (): void => {
         beforeEach((): void => {
-          sut.pullRequestStaleIgnoresUpdates();
+          sut.pullRequestStaleIgnoresActivities();
         });
 
         it('should stale the pull request', async () => {
@@ -382,7 +382,7 @@ describe('activities reset stale options', (): void => {
 
       describe('when the pull request activities reset stale option is disabled', (): void => {
         beforeEach((): void => {
-          sut.pullRequestStaleIgnoresUpdates();
+          sut.pullRequestStaleIgnoresActivities();
         });
 
         it('should stale the pull request', async () => {
@@ -421,7 +421,7 @@ describe('activities reset stale options', (): void => {
 
     describe('when the activities reset stale option is disabled', (): void => {
       beforeEach((): void => {
-        sut.staleIgnoresUpdates();
+        sut.staleIgnoresActivities();
       });
 
       it('should stale the pull request', async () => {
@@ -452,7 +452,7 @@ describe('activities reset stale options', (): void => {
 
       describe('when the pull request activities reset stale option is disabled', (): void => {
         beforeEach((): void => {
-          sut.pullRequestStaleIgnoresUpdates();
+          sut.pullRequestStaleIgnoresActivities();
         });
 
         it('should stale the pull request', async () => {
@@ -516,7 +516,7 @@ describe('activities reset stale options', (): void => {
 
       describe('when the pull request activities reset stale option is disabled', (): void => {
         beforeEach((): void => {
-          sut.pullRequestStaleIgnoresUpdates();
+          sut.pullRequestStaleIgnoresActivities();
         });
 
         it('should stale the pull request', async () => {
@@ -602,7 +602,7 @@ class SUT {
     return this;
   }
 
-  staleIgnoresUpdates(): SUT {
+  staleIgnoresActivities(): SUT {
     this._updateOptions({
       activitiesResetStale: false
     });
@@ -618,7 +618,7 @@ class SUT {
     return this;
   }
 
-  issueStaleIgnoresUpdates(): SUT {
+  issueStaleIgnoresActivities(): SUT {
     this._updateOptions({
       issueActivitiesResetStale: false
     });
@@ -642,7 +642,7 @@ class SUT {
     return this;
   }
 
-  pullRequestStaleIgnoresUpdates(): SUT {
+  pullRequestStaleIgnoresActivities(): SUT {
     this._updateOptions({
       prActivitiesResetStale: false
     });

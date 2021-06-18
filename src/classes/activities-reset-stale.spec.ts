@@ -25,12 +25,12 @@ describe('ActivitiesResetStale', (): void => {
         issueInterface.pull_request = undefined;
       });
 
-      describe('when the given options are configured to reset the stale on updates', (): void => {
+      describe('when the given options are configured to reset the stale on activities', (): void => {
         beforeEach((): void => {
           optionsInterface.activitiesResetStale = true;
         });
 
-        describe('when the given options are not configured to reset the issue stale on updates', (): void => {
+        describe('when the given options are not configured to reset the issue stale on activities', (): void => {
           beforeEach((): void => {
             delete optionsInterface.issueActivitiesResetStale;
           });
@@ -49,7 +49,7 @@ describe('ActivitiesResetStale', (): void => {
           });
         });
 
-        describe('when the given options are configured to reset the issue stale on updates', (): void => {
+        describe('when the given options are configured to reset the issue stale on activities', (): void => {
           beforeEach((): void => {
             optionsInterface.issueActivitiesResetStale = true;
           });
@@ -68,7 +68,7 @@ describe('ActivitiesResetStale', (): void => {
           });
         });
 
-        describe('when the given options are configured to not reset the issue stale on updates', (): void => {
+        describe('when the given options are configured to not reset the issue stale on activities', (): void => {
           beforeEach((): void => {
             optionsInterface.issueActivitiesResetStale = false;
           });
@@ -88,12 +88,12 @@ describe('ActivitiesResetStale', (): void => {
         });
       });
 
-      describe('when the given options are configured to reset the stale on updates', (): void => {
+      describe('when the given options are configured to reset the stale on activities', (): void => {
         beforeEach((): void => {
           optionsInterface.activitiesResetStale = false;
         });
 
-        describe('when the given options are not configured to reset the issue stale on updates', (): void => {
+        describe('when the given options are not configured to reset the issue stale on activities', (): void => {
           beforeEach((): void => {
             delete optionsInterface.issueActivitiesResetStale;
           });
@@ -112,7 +112,7 @@ describe('ActivitiesResetStale', (): void => {
           });
         });
 
-        describe('when the given options are configured to reset the issue stale on updates', (): void => {
+        describe('when the given options are configured to reset the issue stale on activities', (): void => {
           beforeEach((): void => {
             optionsInterface.issueActivitiesResetStale = true;
           });
@@ -131,7 +131,7 @@ describe('ActivitiesResetStale', (): void => {
           });
         });
 
-        describe('when the given options are configured to not reset the issue stale on updates', (): void => {
+        describe('when the given options are configured to not reset the issue stale on activities', (): void => {
           beforeEach((): void => {
             optionsInterface.issueActivitiesResetStale = false;
           });
@@ -157,12 +157,12 @@ describe('ActivitiesResetStale', (): void => {
         issueInterface.pull_request = {};
       });
 
-      describe('when the given options are configured to reset the stale on updates', (): void => {
+      describe('when the given options are configured to reset the stale on activities', (): void => {
         beforeEach((): void => {
           optionsInterface.activitiesResetStale = true;
         });
 
-        describe('when the given options are not configured to reset the pull request stale on updates', (): void => {
+        describe('when the given options are not configured to reset the pull request stale on activities', (): void => {
           beforeEach((): void => {
             delete optionsInterface.prActivitiesResetStale;
           });
@@ -181,7 +181,7 @@ describe('ActivitiesResetStale', (): void => {
           });
         });
 
-        describe('when the given options are configured to reset the pull request stale on updates', (): void => {
+        describe('when the given options are configured to reset the pull request stale on activities', (): void => {
           beforeEach((): void => {
             optionsInterface.prActivitiesResetStale = true;
           });
@@ -200,7 +200,7 @@ describe('ActivitiesResetStale', (): void => {
           });
         });
 
-        describe('when the given options are configured to not reset the pull request stale on updates', (): void => {
+        describe('when the given options are configured to not reset the pull request stale on activities', (): void => {
           beforeEach((): void => {
             optionsInterface.prActivitiesResetStale = false;
           });
@@ -220,12 +220,12 @@ describe('ActivitiesResetStale', (): void => {
         });
       });
 
-      describe('when the given options are configured to not reset the stale on updates', (): void => {
+      describe('when the given options are configured to not reset the stale on activities', (): void => {
         beforeEach((): void => {
           optionsInterface.activitiesResetStale = false;
         });
 
-        describe('when the given options are not configured to reset the pull request stale on updates', (): void => {
+        describe('when the given options are not configured to reset the pull request stale on activities', (): void => {
           beforeEach((): void => {
             delete optionsInterface.prActivitiesResetStale;
           });
@@ -244,7 +244,7 @@ describe('ActivitiesResetStale', (): void => {
           });
         });
 
-        describe('when the given options are configured to reset the pull request stale on updates', (): void => {
+        describe('when the given options are configured to reset the pull request stale on activities', (): void => {
           beforeEach((): void => {
             optionsInterface.prActivitiesResetStale = true;
           });
@@ -263,7 +263,7 @@ describe('ActivitiesResetStale', (): void => {
           });
         });
 
-        describe('when the given options are configured to not reset the pull request stale on updates', (): void => {
+        describe('when the given options are configured to not reset the pull request stale on activities', (): void => {
           beforeEach((): void => {
             optionsInterface.prActivitiesResetStale = false;
           });

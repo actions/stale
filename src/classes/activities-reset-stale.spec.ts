@@ -2,11 +2,11 @@ import {DefaultProcessorOptions} from '../../__tests__/constants/default-process
 import {generateIIssue} from '../../__tests__/functions/generate-iissue';
 import {IIssue} from '../interfaces/issue';
 import {IIssuesProcessorOptions} from '../interfaces/issues-processor-options';
-import {UpdatesResetStale} from './updates-reset-stale';
+import {ActivitiesResetStale} from './activities-reset-stale';
 import {Issue} from './issue';
 
-describe('UpdatesResetStale', (): void => {
-  let updatesResetStale: UpdatesResetStale;
+describe('ActivitiesResetStale', (): void => {
+  let activitiesResetStale: ActivitiesResetStale;
   let optionsInterface: IIssuesProcessorOptions;
   let issue: Issue;
   let issueInterface: IIssue;
@@ -14,12 +14,12 @@ describe('UpdatesResetStale', (): void => {
   beforeEach((): void => {
     optionsInterface = {
       ...DefaultProcessorOptions,
-      issueUpdatesResetStale: false
+      issueActivitiesResetStale: false
     };
     issueInterface = generateIIssue();
   });
 
-  describe('shouldUpdatesResetStale()', (): void => {
+  describe('shouldActivitiesResetStale()', (): void => {
     describe('when the given issue is not a pull request', (): void => {
       beforeEach((): void => {
         issueInterface.pull_request = undefined;
@@ -27,20 +27,23 @@ describe('UpdatesResetStale', (): void => {
 
       describe('when the given options are configured to reset the stale on updates', (): void => {
         beforeEach((): void => {
-          optionsInterface.updatesResetStale = true;
+          optionsInterface.activitiesResetStale = true;
         });
 
         describe('when the given options are not configured to reset the issue stale on updates', (): void => {
           beforeEach((): void => {
-            delete optionsInterface.issueUpdatesResetStale;
+            delete optionsInterface.issueActivitiesResetStale;
           });
 
           it('should return true', (): void => {
             expect.assertions(1);
             issue = new Issue(optionsInterface, issueInterface);
-            updatesResetStale = new UpdatesResetStale(optionsInterface, issue);
+            activitiesResetStale = new ActivitiesResetStale(
+              optionsInterface,
+              issue
+            );
 
-            const result = updatesResetStale.shouldUpdatesResetStale();
+            const result = activitiesResetStale.shouldActivitiesResetStale();
 
             expect(result).toStrictEqual(true);
           });
@@ -48,15 +51,18 @@ describe('UpdatesResetStale', (): void => {
 
         describe('when the given options are configured to reset the issue stale on updates', (): void => {
           beforeEach((): void => {
-            optionsInterface.issueUpdatesResetStale = true;
+            optionsInterface.issueActivitiesResetStale = true;
           });
 
           it('should return true', (): void => {
             expect.assertions(1);
             issue = new Issue(optionsInterface, issueInterface);
-            updatesResetStale = new UpdatesResetStale(optionsInterface, issue);
+            activitiesResetStale = new ActivitiesResetStale(
+              optionsInterface,
+              issue
+            );
 
-            const result = updatesResetStale.shouldUpdatesResetStale();
+            const result = activitiesResetStale.shouldActivitiesResetStale();
 
             expect(result).toStrictEqual(true);
           });
@@ -64,15 +70,18 @@ describe('UpdatesResetStale', (): void => {
 
         describe('when the given options are configured to not reset the issue stale on updates', (): void => {
           beforeEach((): void => {
-            optionsInterface.issueUpdatesResetStale = false;
+            optionsInterface.issueActivitiesResetStale = false;
           });
 
           it('should return false', (): void => {
             expect.assertions(1);
             issue = new Issue(optionsInterface, issueInterface);
-            updatesResetStale = new UpdatesResetStale(optionsInterface, issue);
+            activitiesResetStale = new ActivitiesResetStale(
+              optionsInterface,
+              issue
+            );
 
-            const result = updatesResetStale.shouldUpdatesResetStale();
+            const result = activitiesResetStale.shouldActivitiesResetStale();
 
             expect(result).toStrictEqual(false);
           });
@@ -81,20 +90,23 @@ describe('UpdatesResetStale', (): void => {
 
       describe('when the given options are configured to reset the stale on updates', (): void => {
         beforeEach((): void => {
-          optionsInterface.updatesResetStale = false;
+          optionsInterface.activitiesResetStale = false;
         });
 
         describe('when the given options are not configured to reset the issue stale on updates', (): void => {
           beforeEach((): void => {
-            delete optionsInterface.issueUpdatesResetStale;
+            delete optionsInterface.issueActivitiesResetStale;
           });
 
           it('should return false', (): void => {
             expect.assertions(1);
             issue = new Issue(optionsInterface, issueInterface);
-            updatesResetStale = new UpdatesResetStale(optionsInterface, issue);
+            activitiesResetStale = new ActivitiesResetStale(
+              optionsInterface,
+              issue
+            );
 
-            const result = updatesResetStale.shouldUpdatesResetStale();
+            const result = activitiesResetStale.shouldActivitiesResetStale();
 
             expect(result).toStrictEqual(false);
           });
@@ -102,15 +114,18 @@ describe('UpdatesResetStale', (): void => {
 
         describe('when the given options are configured to reset the issue stale on updates', (): void => {
           beforeEach((): void => {
-            optionsInterface.issueUpdatesResetStale = true;
+            optionsInterface.issueActivitiesResetStale = true;
           });
 
           it('should return true', (): void => {
             expect.assertions(1);
             issue = new Issue(optionsInterface, issueInterface);
-            updatesResetStale = new UpdatesResetStale(optionsInterface, issue);
+            activitiesResetStale = new ActivitiesResetStale(
+              optionsInterface,
+              issue
+            );
 
-            const result = updatesResetStale.shouldUpdatesResetStale();
+            const result = activitiesResetStale.shouldActivitiesResetStale();
 
             expect(result).toStrictEqual(true);
           });
@@ -118,15 +133,18 @@ describe('UpdatesResetStale', (): void => {
 
         describe('when the given options are configured to not reset the issue stale on updates', (): void => {
           beforeEach((): void => {
-            optionsInterface.issueUpdatesResetStale = false;
+            optionsInterface.issueActivitiesResetStale = false;
           });
 
           it('should return false', (): void => {
             expect.assertions(1);
             issue = new Issue(optionsInterface, issueInterface);
-            updatesResetStale = new UpdatesResetStale(optionsInterface, issue);
+            activitiesResetStale = new ActivitiesResetStale(
+              optionsInterface,
+              issue
+            );
 
-            const result = updatesResetStale.shouldUpdatesResetStale();
+            const result = activitiesResetStale.shouldActivitiesResetStale();
 
             expect(result).toStrictEqual(false);
           });
@@ -141,20 +159,23 @@ describe('UpdatesResetStale', (): void => {
 
       describe('when the given options are configured to reset the stale on updates', (): void => {
         beforeEach((): void => {
-          optionsInterface.updatesResetStale = true;
+          optionsInterface.activitiesResetStale = true;
         });
 
         describe('when the given options are not configured to reset the pull request stale on updates', (): void => {
           beforeEach((): void => {
-            delete optionsInterface.prUpdatesResetStale;
+            delete optionsInterface.prActivitiesResetStale;
           });
 
           it('should return true', (): void => {
             expect.assertions(1);
             issue = new Issue(optionsInterface, issueInterface);
-            updatesResetStale = new UpdatesResetStale(optionsInterface, issue);
+            activitiesResetStale = new ActivitiesResetStale(
+              optionsInterface,
+              issue
+            );
 
-            const result = updatesResetStale.shouldUpdatesResetStale();
+            const result = activitiesResetStale.shouldActivitiesResetStale();
 
             expect(result).toStrictEqual(true);
           });
@@ -162,15 +183,18 @@ describe('UpdatesResetStale', (): void => {
 
         describe('when the given options are configured to reset the pull request stale on updates', (): void => {
           beforeEach((): void => {
-            optionsInterface.prUpdatesResetStale = true;
+            optionsInterface.prActivitiesResetStale = true;
           });
 
           it('should return true', (): void => {
             expect.assertions(1);
             issue = new Issue(optionsInterface, issueInterface);
-            updatesResetStale = new UpdatesResetStale(optionsInterface, issue);
+            activitiesResetStale = new ActivitiesResetStale(
+              optionsInterface,
+              issue
+            );
 
-            const result = updatesResetStale.shouldUpdatesResetStale();
+            const result = activitiesResetStale.shouldActivitiesResetStale();
 
             expect(result).toStrictEqual(true);
           });
@@ -178,15 +202,18 @@ describe('UpdatesResetStale', (): void => {
 
         describe('when the given options are configured to not reset the pull request stale on updates', (): void => {
           beforeEach((): void => {
-            optionsInterface.prUpdatesResetStale = false;
+            optionsInterface.prActivitiesResetStale = false;
           });
 
           it('should return false', (): void => {
             expect.assertions(1);
             issue = new Issue(optionsInterface, issueInterface);
-            updatesResetStale = new UpdatesResetStale(optionsInterface, issue);
+            activitiesResetStale = new ActivitiesResetStale(
+              optionsInterface,
+              issue
+            );
 
-            const result = updatesResetStale.shouldUpdatesResetStale();
+            const result = activitiesResetStale.shouldActivitiesResetStale();
 
             expect(result).toStrictEqual(false);
           });
@@ -195,20 +222,23 @@ describe('UpdatesResetStale', (): void => {
 
       describe('when the given options are configured to not reset the stale on updates', (): void => {
         beforeEach((): void => {
-          optionsInterface.updatesResetStale = false;
+          optionsInterface.activitiesResetStale = false;
         });
 
         describe('when the given options are not configured to reset the pull request stale on updates', (): void => {
           beforeEach((): void => {
-            delete optionsInterface.prUpdatesResetStale;
+            delete optionsInterface.prActivitiesResetStale;
           });
 
           it('should return false', (): void => {
             expect.assertions(1);
             issue = new Issue(optionsInterface, issueInterface);
-            updatesResetStale = new UpdatesResetStale(optionsInterface, issue);
+            activitiesResetStale = new ActivitiesResetStale(
+              optionsInterface,
+              issue
+            );
 
-            const result = updatesResetStale.shouldUpdatesResetStale();
+            const result = activitiesResetStale.shouldActivitiesResetStale();
 
             expect(result).toStrictEqual(false);
           });
@@ -216,15 +246,18 @@ describe('UpdatesResetStale', (): void => {
 
         describe('when the given options are configured to reset the pull request stale on updates', (): void => {
           beforeEach((): void => {
-            optionsInterface.prUpdatesResetStale = true;
+            optionsInterface.prActivitiesResetStale = true;
           });
 
           it('should return true', (): void => {
             expect.assertions(1);
             issue = new Issue(optionsInterface, issueInterface);
-            updatesResetStale = new UpdatesResetStale(optionsInterface, issue);
+            activitiesResetStale = new ActivitiesResetStale(
+              optionsInterface,
+              issue
+            );
 
-            const result = updatesResetStale.shouldUpdatesResetStale();
+            const result = activitiesResetStale.shouldActivitiesResetStale();
 
             expect(result).toStrictEqual(true);
           });
@@ -232,15 +265,18 @@ describe('UpdatesResetStale', (): void => {
 
         describe('when the given options are configured to not reset the pull request stale on updates', (): void => {
           beforeEach((): void => {
-            optionsInterface.prUpdatesResetStale = false;
+            optionsInterface.prActivitiesResetStale = false;
           });
 
           it('should return false', (): void => {
             expect.assertions(1);
             issue = new Issue(optionsInterface, issueInterface);
-            updatesResetStale = new UpdatesResetStale(optionsInterface, issue);
+            activitiesResetStale = new ActivitiesResetStale(
+              optionsInterface,
+              issue
+            );
 
-            const result = updatesResetStale.shouldUpdatesResetStale();
+            const result = activitiesResetStale.shouldActivitiesResetStale();
 
             expect(result).toStrictEqual(false);
           });

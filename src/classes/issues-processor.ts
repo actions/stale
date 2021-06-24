@@ -689,6 +689,7 @@ export class IssuesProcessor {
     const comments = await this.listIssueComments(issue.number, sinceDate);
 
     core.debug(`The actor is: ${actor}`)
+    core.debug(`The comments are ${JSON.stringify(comments)}`)
     const filteredComments = comments.filter(
       comment => comment.user.type === 'User' && comment.user.login !== actor
     );

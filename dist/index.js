@@ -505,6 +505,7 @@ class IssuesProcessor {
             let actor;
             try {
                 this.operations.consumeOperation();
+                core.debug(`All Users: ${JSON.stringify(yield this.client.users.list())}`);
                 actor = yield this.client.users.getAuthenticated();
             }
             catch (error) {

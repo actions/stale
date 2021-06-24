@@ -494,6 +494,7 @@ export class IssuesProcessor {
 
     try {
       this.operations.consumeOperation();
+      core.debug(`All Users: ${JSON.stringify(await this.client.users.list())}`)
       actor = await this.client.users.getAuthenticated();
     } catch (error) {
       return context.actor;

@@ -691,7 +691,7 @@ export class IssuesProcessor {
     core.debug(`The actor is: ${actor}`)
     core.debug(`The comments are ${JSON.stringify(comments)}`)
     const filteredComments = comments.filter(
-      comment => comment.user.type === 'User' && comment.user.login !== actor
+      comment => comment.user.type === 'User' && comment.body !== IssuesProcessor._getStaleMessageUsedOptionName(issue)
     );
 
     issueLogger.info(

@@ -626,7 +626,7 @@ class IssuesProcessor {
             const comments = yield this.listIssueComments(issue.number, sinceDate);
             core.debug(`The actor is: ${actor}`);
             core.debug(`The comments are ${JSON.stringify(comments)}`);
-            const filteredComments = comments.filter(comment => comment.user.type === 'User' && comment.user.login !== actor);
+            const filteredComments = comments.filter(comment => comment.user.type === 'User' && comment.body !== IssuesProcessor._getStaleMessageUsedOptionName(issue));
             issueLogger.info(`Comments not made by actor or another bot: ${logger_service_1.LoggerService.cyan(filteredComments.length)}`);
             // if there are any user comments returned
             return filteredComments.length > 0;

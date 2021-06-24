@@ -11,23 +11,16 @@ The default configuration will:
 ## Recommended permissions
 
 For the execution of this action, it must be able to fetch all issues and pull requests from your repository.  
-This can be achieved with the following [configuration in the action](https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions#permissions) if the permissions are restricted:
-
-```yaml
-permissions:
-  issues: read
-  pull-requests: read
-```
-  
 In addition, based on the provided configuration, the action could require more permission(s) (e.g.: add label, remove label, comment, close, etc.).  
-You can find more information about the required permissions under the corresponding options that you wish to use.  
-However, if don't want to bother, you can use these permissions:
+This can be achieved with the following [configuration in the action](https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions#permissions) if the permissions are restricted:
 
 ```yaml
 permissions:
   issues: write
   pull-requests: write
 ```
+
+You can find more information about the required permissions under the corresponding options that you wish to use.
 
 ## All options
 

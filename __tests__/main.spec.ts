@@ -2311,3 +2311,46 @@ test('processing an issue stale since less than the daysBeforeStale without a st
   expect(processor.deletedBranchIssues).toHaveLength(0);
   expect(processor.closedIssues).toHaveLength(0);
 });
+
+test('processing an issue unstale that should be stale should not unstale and should keep the stale label added', async () => {
+  expect.assertions(3);
+  const opts: IIssuesProcessorOptions = {
+    ...DefaultProcessorOptions,
+    daysBeforeStale: 7,
+    daysBeforeClose: 7,
+    staleIssueMessage: 'Message',
+    staleIssueLabel: 'stale',
+    removeStaleWhenUpdated: true,
+    removeStaleWhenCommented: true
+  };
+  const now: Date = new Date();
+  const updatedAt: Date = new Date(now.setDate(now.getDate() - 8));
+  const createdAt: Date = new Date(now.setDate(now.getDate() - 9));
+  const TestIssueList: Issue[] = [
+    generateIssue(
+      opts,
+      1,
+      'A real issue example; see https://github.com/actions/stale/issues/441#issuecomment-860820600',
+      updatedAt.toDateString(),
+      createdAt.toDateString(),
+      false,
+      [],
+      false,
+      false
+    )
+  ];
+  const processor = new IssuesProcessorMock(
+    opts,
+    async () => 'abot',
+    async p => (p === 1 ? TestIssueList : []),
+    async (): Promise<IComment[]> => Promise.resolve([]),
+    async () => new Date().toDateString()
+  );
+
+  // process our fake issue list
+  await processor.processIssues(1);
+
+  expect(processor.staleIssues).toHaveLength(1);
+  expect(processor.addedLabelIssues).toHaveLength(1);
+  expect(processor.closedIssues).toHaveLength(0);
+});

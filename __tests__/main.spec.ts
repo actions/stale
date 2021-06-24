@@ -1214,7 +1214,7 @@ test('stale label should be removed if a comment was added to a stale issue', as
   expect(processor.removedLabelIssues).toHaveLength(1);
 });
 
-test('when the option "labelsToAddWhenUnstale" is set, the labels should be added when unstale', async () => {
+test('when the option "labelsToAddWhenUnstale" is set, the labels should be added when unstale due to added comment', async () => {
   expect.assertions(4);
   const opts = {
     ...DefaultProcessorOptions,
@@ -1226,7 +1226,51 @@ test('when the option "labelsToAddWhenUnstale" is set, the labels should be adde
       opts,
       1,
       'An issue that should have labels added to it when unstale',
+      new Date().toDateString(),
       '2020-01-01T17:00:00Z',
+      false,
+      ['Stale']
+    )
+  ];
+  const processor = new IssuesProcessorMock(
+    opts,
+    async () => 'abot',
+    async p => (p === 1 ? TestIssueList : []),
+    async () => [
+      {
+        user: {
+          login: 'notme',
+          type: 'User'
+        }
+      }
+    ], // return a fake comment to indicate there was an update
+    async () => new Date().toDateString()
+  );
+
+  // process our fake issue list
+  await processor.processIssues(1);
+
+  expect(processor.closedIssues).toHaveLength(0);
+  expect(processor.staleIssues).toHaveLength(0);
+  // Stale should have been removed
+  expect(processor.removedLabelIssues).toHaveLength(1);
+  // Some label should have been added
+  expect(processor.addedLabelIssues).toHaveLength(1);
+});
+
+test('when the option "labelsToAddWhenUnstale" is set, the labels should be added when unstale due to update', async () => {
+  expect.assertions(4);
+  const opts = {
+    ...DefaultProcessorOptions,
+    removeStaleWhenUpdated: true,
+    labelsToAddWhenUnstale: 'test'
+  };
+  const TestIssueList: Issue[] = [
+    generateIssue(
+      opts,
+      1,
+      'An issue that should have labels added to it when unstale',
+      new Date().toDateString(),
       '2020-01-01T17:00:00Z',
       false,
       ['Stale']
@@ -2312,7 +2356,7 @@ test('processing an issue stale since less than the daysBeforeStale without a st
   expect(processor.closedIssues).toHaveLength(0);
 });
 
-test('processing an issue unstale that should be stale should not unstale and should keep the stale label added', async () => {
+test('processing an issue unstale that should be stale should not unstale once again and should keep the stale label added when processing it for unstale', async () => {
   expect.assertions(3);
   const opts: IIssuesProcessorOptions = {
     ...DefaultProcessorOptions,

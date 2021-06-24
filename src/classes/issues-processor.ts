@@ -621,6 +621,7 @@ export class IssuesProcessor {
     }
 
     issueLogger.info(`Checking if the stale label should be removed...`);
+    let shouldRemoveStaleLabel = false;
 
     // Should we un-stale this issue?
     if (shouldRemoveStaleWhenUpdated && issueHasUpdate) {
@@ -628,19 +629,16 @@ export class IssuesProcessor {
         LoggerService.white('├── '),
         `Remove the stale label since the $$type has an update and the workflow should remove the stale label when updated`
       );
-      await this._removeStaleLabel(issue, staleLabel, true);
-
-      issueLogger.info(
-        LoggerService.white('└── '),
-        `Skipping the process since the $$type is now un-stale`
-      );
-
-      return; // Nothing to do because it is no longer stale
+      shouldRemoveStaleLabel = true;
     } else if (shouldRemoveStaleWhenCommented && issueHasComments) {
       issueLogger.info(
         LoggerService.white('├── '),
         `Remove the stale label since the $$type has a comment and the workflow should remove the stale label when commented`
       );
+      shouldRemoveStaleLabel = true;
+    }
+
+    if (shouldRemoveStaleLabel) {
       await this._removeStaleLabel(issue, staleLabel, true);
 
       issueLogger.info(

@@ -687,6 +687,7 @@ export class IssuesProcessor {
     // find any comments since the date
     const comments = await this.listIssueComments(issue.number, sinceDate);
 
+    core.debug(`The actor is: ${actor}`)
     const filteredComments = comments.filter(
       comment => comment.user.type === 'User' && comment.user.login !== actor
     );

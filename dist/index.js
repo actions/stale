@@ -623,6 +623,7 @@ class IssuesProcessor {
             }
             // find any comments since the date
             const comments = yield this.listIssueComments(issue.number, sinceDate);
+            core.debug(`The actor is: ${actor}`);
             const filteredComments = comments.filter(comment => comment.user.type === 'User' && comment.user.login !== actor);
             issueLogger.info(`Comments not made by actor or another bot: ${logger_service_1.LoggerService.cyan(filteredComments.length)}`);
             // if there are any user comments returned

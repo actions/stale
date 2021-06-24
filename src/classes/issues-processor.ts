@@ -615,28 +615,63 @@ export class IssuesProcessor {
       )} is: ${LoggerService.cyan(shouldRemoveStaleWhenUpdated)}`
     );
 
-    if (shouldRemoveStaleWhenUpdated) {
-      issueLogger.info(`The stale label should not be removed`);
-    } else {
+    if (!shouldRemoveStaleWhenUpdated) {
       issueLogger.info(
-        `The stale label should be removed if all conditions met`
+        `The stale label should not be removed due to an update`
       );
     }
 
-    // Should we un-stale this issue?
-    if (shouldRemoveStaleWhenUpdated && issueHasComments) {
+    const shouldRemoveStaleWhenCommented: boolean =
+      this._shouldRemoveStaleWhenCommented(issue);
+
+    issueLogger.info(
+      `The option ${issueLogger.createOptionLink(
+        this._getRemoveStaleWhenCommentedUsedOptionName(issue)
+      )} is: ${LoggerService.cyan(shouldRemoveStaleWhenCommented)}`
+    );
+
+    if (!shouldRemoveStaleWhenCommented) {
       issueLogger.info(
-        `Remove the stale label since the $$type has a comment and the workflow should remove the stale label when updated`
+        `The stale label should not be removed due to a comment`
       );
-      await this._removeStaleLabel(issue, staleLabel);
+    }
+
+    issueLogger.info(`Checking if the stale label should be removed...`);
+    let shouldRemoveStaleLabel = false;
+
+    // Should we un-stale this issue?
+    if (shouldRemoveStaleWhenUpdated && issueHasUpdate) {
+      issueLogger.info(
+        LoggerService.white('├── '),
+        `Remove the stale label since the $$type has an update and the workflow should remove the stale label when updated`
+      );
+      shouldRemoveStaleLabel = true;
+    } else if (shouldRemoveStaleWhenCommented && issueHasComments) {
+      issueLogger.info(
+        LoggerService.white('├── '),
+        `Remove the stale label since the $$type has a comment and the workflow should remove the stale label when commented`
+      );
+      shouldRemoveStaleLabel = true;
+    }
+
+    if (shouldRemoveStaleLabel) {
+      await this._removeStaleLabel(issue, staleLabel, true);
+
+      issueLogger.info(
+        LoggerService.white('└── '),
+        `Skipping the process since the $$type is now un-stale`
+      );
 
       // Are there labels to remove or add when an issue is no longer stale?
       await this._removeLabelsWhenUnstale(issue, labelsToRemoveWhenUnstale);
       await this._addLabelsWhenUnstale(issue, labelsToAddWhenUnstale);
 
-      issueLogger.info(`Skipping the process since the $$type is now un-stale`);
-
       return; // Nothing to do because it is no longer stale
+    } else {
+      issueLogger.info(
+        LoggerService.white('└── '),
+        `The stale label should not be removed`
+      );
     }
 
     // Now start closing logic
@@ -713,8 +748,8 @@ export class IssuesProcessor {
     issueLogger.info(`Marking this $$type as stale`);
     this.staleIssues.push(issue);
 
-    // if the issue is being marked stale, the updated date should be changed to right now
-    // so that close calculations work correctly
+    // If the issue is being marked stale, the updated date should be changed to right now
+    // So that close calculations work correctly
     const newUpdatedAtDate: Date = new Date();
     issue.updated_at = newUpdatedAtDate.toString();
 
@@ -883,13 +918,13 @@ export class IssuesProcessor {
   private async _removeLabel(
     issue: Issue,
     label: string,
-    isSubStep: Readonly<boolean> = false
+    stepType: Readonly<'normal' | 'sub' | 'last'> = 'normal'
   ): Promise<void> {
     const issueLogger: IssueLogger = new IssueLogger(issue);
 
     issueLogger.info(
       `${
-        isSubStep ? LoggerService.white('├── ') : ''
+        stepType !== 'normal' ? LoggerService.white('├── ') : ''
       }Removing the label "${LoggerService.cyan(label)}" from this $$type...`
     );
     this.removedLabelIssues.push(issue);
@@ -909,13 +944,17 @@ export class IssuesProcessor {
 
       issueLogger.info(
         `${
-          isSubStep ? LoggerService.white('└── ') : ''
+          stepType !== 'normal'
+            ? LoggerService.white(stepType === 'last' ? '└── ' : '├── ')
+            : ''
         }The label "${LoggerService.cyan(label)}" was removed`
       );
     } catch (error) {
       issueLogger.error(
         `${
-          isSubStep ? LoggerService.white('└── ') : ''
+          stepType !== 'normal'
+            ? LoggerService.white(stepType === 'last' ? '└── ' : '├── ')
+            : ''
         }Error when removing the label: "${LoggerService.cyan(error.message)}"`
       );
     }
@@ -1046,17 +1085,36 @@ export class IssuesProcessor {
     }
   }
 
+  private _shouldRemoveStaleWhenCommented(issue: Issue): boolean {
+    if (issue.isPullRequest) {
+      if (isBoolean(this.options.removePrStaleWhenCommented)) {
+        return this.options.removePrStaleWhenCommented;
+      }
+
+      return this.options.removeStaleWhenCommented;
+    }
+
+    if (isBoolean(this.options.removeIssueStaleWhenCommented)) {
+      return this.options.removeIssueStaleWhenCommented;
+    }
+
+    return this.options.removeStaleWhenCommented;
+  }
+
   private async _removeStaleLabel(
     issue: Issue,
-    staleLabel: Readonly<string>
+    staleLabel: Readonly<string>,
+    isSubStep: Readonly<boolean> = false
   ): Promise<void> {
     const issueLogger: IssueLogger = new IssueLogger(issue);
 
     issueLogger.info(
-      `The $$type is no longer stale. Removing the stale label...`
+      `${
+        isSubStep ? LoggerService.white('├── ') : ''
+      }The $$type is no longer stale. Removing the stale label...`
     );
 
-    await this._removeLabel(issue, staleLabel);
+    await this._removeLabel(issue, staleLabel, 'sub');
     this._statistics?.incrementUndoStaleItemsCount(issue);
   }
 
@@ -1093,7 +1151,7 @@ export class IssuesProcessor {
         )}". Removing the close label...`
       );
 
-      await this._removeLabel(issue, closeLabel, true);
+      await this._removeLabel(issue, closeLabel, 'last');
       this._statistics?.incrementDeletedCloseItemsLabelsCount(issue);
     } else {
       issueLogger.info(
@@ -1156,5 +1214,26 @@ export class IssuesProcessor {
     }
 
     return Option.RemoveStaleWhenUpdated;
+  }
+
+  private _getRemoveStaleWhenCommentedUsedOptionName(
+    issue: Readonly<Issue>
+  ):
+    | Option.RemovePrStaleWhenCommented
+    | Option.RemoveStaleWhenCommented
+    | Option.RemoveIssueStaleWhenCommented {
+    if (issue.isPullRequest) {
+      if (isBoolean(this.options.removePrStaleWhenCommented)) {
+        return Option.RemovePrStaleWhenCommented;
+      }
+
+      return Option.RemoveStaleWhenCommented;
+    }
+
+    if (isBoolean(this.options.removeIssueStaleWhenCommented)) {
+      return Option.RemoveIssueStaleWhenCommented;
+    }
+
+    return Option.RemoveStaleWhenCommented;
   }
 }

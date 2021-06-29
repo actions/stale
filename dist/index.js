@@ -505,7 +505,6 @@ class IssuesProcessor {
             let actor;
             try {
                 this.operations.consumeOperation();
-                core.debug(`All Users: ${JSON.stringify(yield this.client.users.list())}`);
                 actor = yield this.client.users.getAuthenticated();
             }
             catch (error) {
@@ -556,7 +555,7 @@ class IssuesProcessor {
             });
             const events = yield this.client.paginate(options);
             const reversedEvents = events.reverse();
-            core.debug(`Reversed Events: ${JSON.stringify(reversedEvents)}`);
+            issueLogger.info(`Reversed Events: ${JSON.stringify(reversedEvents)}`);
             const staleLabeledEvent = reversedEvents.find(event => event.event === 'labeled' && event.label.name === label);
             if (!staleLabeledEvent) {
                 // Must be old rather than labeled

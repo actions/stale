@@ -494,7 +494,6 @@ export class IssuesProcessor {
 
     try {
       this.operations.consumeOperation();
-      core.debug(`All Users: ${JSON.stringify(await this.client.users.list())}`)
       actor = await this.client.users.getAuthenticated();
     } catch (error) {
       return context.actor;
@@ -552,7 +551,7 @@ export class IssuesProcessor {
 
     const events: IIssueEvent[] = await this.client.paginate(options);
     const reversedEvents = events.reverse();
-    core.debug(`Reversed Events: ${JSON.stringify(reversedEvents)}`)
+    issueLogger.info(`Reversed Events: ${JSON.stringify(reversedEvents)}`)
 
     const staleLabeledEvent = reversedEvents.find(
       event => event.event === 'labeled' && event.label.name === label

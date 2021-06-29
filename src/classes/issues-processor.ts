@@ -552,6 +552,7 @@ export class IssuesProcessor {
 
     const events: IIssueEvent[] = await this.client.paginate(options);
     const reversedEvents = events.reverse();
+    core.debug(`Reversed Events: ${JSON.stringify(reversedEvents)}`)
 
     const staleLabeledEvent = reversedEvents.find(
       event => event.event === 'labeled' && event.label.name === label

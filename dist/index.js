@@ -556,6 +556,7 @@ class IssuesProcessor {
             });
             const events = yield this.client.paginate(options);
             const reversedEvents = events.reverse();
+            core.debug(`Reversed Events: ${JSON.stringify(reversedEvents)}`);
             const staleLabeledEvent = reversedEvents.find(event => event.event === 'labeled' && event.label.name === label);
             if (!staleLabeledEvent) {
                 // Must be old rather than labeled

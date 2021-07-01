@@ -105,7 +105,6 @@ export class IssuesProcessor {
   async processIssues(page: Readonly<number> = 1): Promise<number> {
     // get the next batch of issues
     const issues: Issue[] = await this.getIssues(page);
-    const actor: string = await this.getActor();
 
     if (issues.length <= 0) {
       this._logger.info(
@@ -145,7 +144,6 @@ export class IssuesProcessor {
       await issueLogger.grouping(`$$type #${issue.number}`, async () => {
         await this.processIssue(
           issue,
-          actor,
           labelsToAddWhenUnstale,
           labelsToRemoveWhenUnstale
         );
@@ -184,7 +182,6 @@ export class IssuesProcessor {
 
   async processIssue(
     issue: Issue,
-    actor: string,
     labelsToAddWhenUnstale: Readonly<string>[],
     labelsToRemoveWhenUnstale: Readonly<string>[]
   ): Promise<void> {
@@ -455,7 +452,6 @@ export class IssuesProcessor {
       await this._processStaleIssue(
         issue,
         staleLabel,
-        actor,
         staleMessage,
         labelsToAddWhenUnstale,
         labelsToRemoveWhenUnstale,
@@ -487,20 +483,6 @@ export class IssuesProcessor {
       this._logger.error(`List issue comments error: ${error.message}`);
       return Promise.resolve([]);
     }
-  }
-
-  // get the actor from the GitHub token or context
-  async getActor(): Promise<string> {
-    let actor;
-
-    try {
-      this.operations.consumeOperation();
-      actor = await this.client.users.getAuthenticated();
-    } catch (error) {
-      return context.actor;
-    }
-
-    return actor.data.login;
   }
 
   // grab issues from github in batches of 100
@@ -569,7 +551,6 @@ export class IssuesProcessor {
   private async _processStaleIssue(
     issue: Issue,
     staleLabel: string,
-    actor: string,
     staleMessage: string,
     labelsToAddWhenUnstale: Readonly<string>[],
     labelsToRemoveWhenUnstale: Readonly<string>[],
@@ -586,7 +567,7 @@ export class IssuesProcessor {
     const issueHasComments: boolean = await this._hasCommentsSince(
       issue,
       markedStaleOn,
-      actor
+      staleMessage
     );
     issueLogger.info(
       `$$type has been commented on: ${LoggerService.cyan(issueHasComments)}`
@@ -694,7 +675,7 @@ export class IssuesProcessor {
     );
 
     issueLogger.info(
-      `Comments not made by actor or another bot: ${LoggerService.cyan(
+      `Comments that are not the stale comment or another bot: ${LoggerService.cyan(
         filteredComments.length
       )}`
     );

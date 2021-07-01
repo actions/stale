@@ -539,14 +539,14 @@ class IssuesProcessorBuilder {
   build(): IssuesProcessorMock {
     return new IssuesProcessorMock(
       this._options,
-      async () => 'abot',
       async p => (p === 1 ? this._issues : []),
       async () => [
         {
           user: {
             login: 'notme',
             type: 'User'
-          }
+          },
+          body: 'body'
         }
       ],
       async () => new Date().toDateString()

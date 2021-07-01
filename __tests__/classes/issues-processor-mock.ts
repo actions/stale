@@ -6,7 +6,6 @@ import {IIssuesProcessorOptions} from '../../src/interfaces/issues-processor-opt
 export class IssuesProcessorMock extends IssuesProcessor {
   constructor(
     options: IIssuesProcessorOptions,
-    getActor?: () => Promise<string>,
     getIssues?: (page: number) => Promise<Issue[]>,
     listIssueComments?: (
       issueNumber: number,
@@ -18,10 +17,6 @@ export class IssuesProcessorMock extends IssuesProcessor {
     ) => Promise<string | undefined>
   ) {
     super(options);
-
-    if (getActor) {
-      this.getActor = getActor;
-    }
 
     if (getIssues) {
       this.getIssues = getIssues;

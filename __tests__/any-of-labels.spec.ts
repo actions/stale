@@ -1139,7 +1139,6 @@ class IssuesProcessorBuilder {
   build(): IssuesProcessorMock {
     return new IssuesProcessorMock(
       this._options,
-      async () => 'abot',
       async p => (p === 1 ? this._issues : []),
       async () => [],
       async () => new Date().toDateString()

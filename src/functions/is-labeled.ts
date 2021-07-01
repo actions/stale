@@ -21,6 +21,6 @@ export function isLabeled(
   });
 }
 
-function cleanLabel(label: Readonly<string>): CleanLabel {
+export function cleanLabel(label: Readonly<string>): CleanLabel {
   return deburr(label.toLowerCase());
 }

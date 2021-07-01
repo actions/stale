@@ -540,7 +540,7 @@ class IssuesProcessor {
             });
             const events = yield this.client.paginate(options);
             const reversedEvents = events.reverse();
-            const staleLabeledEvent = reversedEvents.find(event => event.event === 'labeled' && event.label.name === label);
+            const staleLabeledEvent = reversedEvents.find(event => event.event === 'labeled' && is_labeled_1.cleanLabel(event.label.name) === is_labeled_1.cleanLabel(label));
             if (!staleLabeledEvent) {
                 // Must be old rather than labeled
                 return undefined;
@@ -1824,7 +1824,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.isLabeled = void 0;
+exports.cleanLabel = exports.isLabeled = void 0;
 const lodash_deburr_1 = __importDefault(__nccwpck_require__(1601));
 /**
  * @description
@@ -1844,6 +1844,7 @@ exports.isLabeled = isLabeled;
 function cleanLabel(label) {
     return lodash_deburr_1.default(label.toLowerCase());
 }
+exports.cleanLabel = cleanLabel;
 
 
 /***/ }),

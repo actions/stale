@@ -456,6 +456,7 @@ export class IssuesProcessor {
         issue,
         staleLabel,
         actor,
+        staleMessage,
         labelsToAddWhenUnstale,
         labelsToRemoveWhenUnstale,
         closeMessage,
@@ -534,7 +535,7 @@ export class IssuesProcessor {
   ///see https://developer.github.com/v3/activity/events/
   async getLabelCreationDate(
     issue: Issue,
-    label: string
+    label: string,
   ): Promise<string | undefined> {
     const issueLogger: IssueLogger = new IssueLogger(issue);
 
@@ -569,6 +570,7 @@ export class IssuesProcessor {
     issue: Issue,
     staleLabel: string,
     actor: string,
+    staleMessage: string,
     labelsToAddWhenUnstale: Readonly<string>[],
     labelsToRemoveWhenUnstale: Readonly<string>[],
     closeMessage?: string,
@@ -672,7 +674,7 @@ export class IssuesProcessor {
   private async _hasCommentsSince(
     issue: Issue,
     sinceDate: string,
-    actor: string
+    staleMessage: string
   ): Promise<boolean> {
     const issueLogger: IssueLogger = new IssueLogger(issue);
 
@@ -688,7 +690,7 @@ export class IssuesProcessor {
     const comments = await this.listIssueComments(issue.number, sinceDate);
 
     const filteredComments = comments.filter(
-      comment => comment.user.type === 'User' && comment.user.login !== actor
+      comment => comment.user.type === 'User' && comment.body.toLowerCase() !== staleMessage.toLowerCase()
     );
 
     issueLogger.info(

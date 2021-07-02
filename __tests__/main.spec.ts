@@ -871,9 +871,8 @@ test('locked issues will not be marked stale', async () => {
       true
     )
   ];
-  const processor = new IssuesProcessorMock(
-    DefaultProcessorOptions,
-    async p => (p === 1 ? TestIssueList : [])
+  const processor = new IssuesProcessorMock(DefaultProcessorOptions, async p =>
+    p === 1 ? TestIssueList : []
   );
 
   // process our fake issue list
@@ -925,9 +924,8 @@ test('locked prs will not be marked stale', async () => {
       true
     )
   ];
-  const processor = new IssuesProcessorMock(
-    DefaultProcessorOptions,
-    async p => (p === 1 ? TestIssueList : [])
+  const processor = new IssuesProcessorMock(DefaultProcessorOptions, async p =>
+    p === 1 ? TestIssueList : []
   );
 
   // process our fake issue list
@@ -1283,7 +1281,7 @@ test('stale label should not be removed if a comment was added by the bot (and t
           login: 'abot',
           type: 'User'
         },
-        body: 'Body'
+        body: 'This issue is stale'
       }
     ], // return a fake comment to indicate there was an update by the bot
     async () => new Date().toDateString()

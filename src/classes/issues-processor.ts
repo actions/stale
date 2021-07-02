@@ -517,7 +517,7 @@ export class IssuesProcessor {
   ///see https://developer.github.com/v3/activity/events/
   async getLabelCreationDate(
     issue: Issue,
-    label: string,
+    label: string
   ): Promise<string | undefined> {
     const issueLogger: IssueLogger = new IssueLogger(issue);
 
@@ -671,7 +671,9 @@ export class IssuesProcessor {
     const comments = await this.listIssueComments(issue.number, sinceDate);
 
     const filteredComments = comments.filter(
-      comment => comment.user.type === 'User' && comment.body.toLowerCase() !== staleMessage.toLowerCase()
+      comment =>
+        comment.user.type === 'User' &&
+        comment.body.toLowerCase() !== staleMessage.toLowerCase()
     );
 
     issueLogger.info(

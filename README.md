@@ -4,7 +4,7 @@ Warns and then closes issues and PRs that have had no activity for a specified a
 
 The configuration must be on the default branch and the default values will:
 
-- Add a label "Stale" on issues and pull requests after 60 days of inactivity
+- Add a label "Stale" on issues and pull requests after 60 days of inactivity and comment them
 - Close the stale issues and pull requests after 7 days of inactivity
 - If an update/comment occur on stale issues or pull requests, the stale label will be removed and the timer will restart
 
@@ -175,7 +175,7 @@ Default value: unset
 
 The message that will be added as a comment to the issues when the stale workflow marks it automatically as stale with a label.
 
-You can skip the comment sending by omitting the option or by passing an empty string.
+You can skip the comment sending by passing an empty string.
 
 Default value: unset  
 Required Permission: `issues: write`
@@ -184,7 +184,7 @@ Required Permission: `issues: write`
 
 The message that will be added as a comment to the pull requests when the stale workflow marks it automatically as stale with a label.
 
-You can skip the comment sending by omitting the option or by passing an empty string.
+You can skip the comment sending by passing an empty string.
 
 Default value: unset  
 Required Permission: `pull-requests: write`

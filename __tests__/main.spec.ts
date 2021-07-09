@@ -2282,3 +2282,75 @@ test('processing an issue stale since less than the daysBeforeStale without a st
   expect(processor.deletedBranchIssues).toHaveLength(0);
   expect(processor.closedIssues).toHaveLength(0);
 });
+
+test('processing a pull request to be stale with the "stalePrMessage" option set will send a PR comment', async () => {
+  expect.assertions(3);
+  const opts: IIssuesProcessorOptions = {
+    ...DefaultProcessorOptions,
+    stalePrMessage: 'This PR is stale',
+    daysBeforeStale: 10,
+    daysBeforePrStale: 1
+  };
+  const issueDate = new Date();
+  issueDate.setDate(issueDate.getDate() - 2);
+  const TestIssueList: Issue[] = [
+    generateIssue(
+      opts,
+      1,
+      'A pull request with no label and a stale message',
+      issueDate.toDateString(),
+      issueDate.toDateString(),
+      true
+    )
+  ];
+  const processor = new IssuesProcessorMock(
+    opts,
+    async () => 'abot',
+    async p => (p === 1 ? TestIssueList : []),
+    async () => [],
+    async () => new Date().toDateString()
+  );
+
+  // process our fake issue list
+  await processor.processIssues(1);
+
+  expect(processor.staleIssues).toHaveLength(1);
+  expect(processor.closedIssues).toHaveLength(0);
+  expect(processor.addedStaleCommentIssues).toHaveLength(1);
+});
+
+test('processing a pull request to be stale with the "stalePrMessage" option set to empty will not send a PR comment', async () => {
+  expect.assertions(3);
+  const opts: IIssuesProcessorOptions = {
+    ...DefaultProcessorOptions,
+    stalePrMessage: '',
+    daysBeforeStale: 10,
+    daysBeforePrStale: 1
+  };
+  const issueDate = new Date();
+  issueDate.setDate(issueDate.getDate() - 2);
+  const TestIssueList: Issue[] = [
+    generateIssue(
+      opts,
+      1,
+      'A pull request with no label and a stale message',
+      issueDate.toDateString(),
+      issueDate.toDateString(),
+      true
+    )
+  ];
+  const processor = new IssuesProcessorMock(
+    opts,
+    async () => 'abot',
+    async p => (p === 1 ? TestIssueList : []),
+    async () => [],
+    async () => new Date().toDateString()
+  );
+
+  // process our fake issue list
+  await processor.processIssues(1);
+
+  expect(processor.staleIssues).toHaveLength(1);
+  expect(processor.closedIssues).toHaveLength(0);
+  expect(processor.addedStaleCommentIssues).toHaveLength(0);
+});

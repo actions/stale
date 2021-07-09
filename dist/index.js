@@ -371,6 +371,8 @@ class IssuesProcessor {
         this.removedLabelIssues = [];
         this.addedLabelIssues = [];
         this._logger = new logger_1.Logger();
+        this.addedStaleCommentIssues = [];
+        this.addedCloseCommentIssues = [];
         this.options = options;
         this.client = github_1.getOctokit(this.options.repoToken);
         this.operations = new stale_operations_1.StaleOperations(this.options);
@@ -790,6 +792,7 @@ class IssuesProcessor {
                 try {
                     this._consumeIssueOperation(issue);
                     (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.incrementAddedItemsComment(issue);
+                    this.addedStaleCommentIssues.push(issue);
                     if (!this.options.debugOnly) {
                         yield this.client.issues.createComment({
                             owner: github_1.context.repo.owner,
@@ -832,6 +835,7 @@ class IssuesProcessor {
                 try {
                     this._consumeIssueOperation(issue);
                     (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.incrementAddedItemsComment(issue);
+                    this.addedCloseCommentIssues.push(issue);
                     if (!this.options.debugOnly) {
                         yield this.client.issues.createComment({
                             owner: github_1.context.repo.owner,

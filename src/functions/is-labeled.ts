@@ -1,7 +1,6 @@
-import deburr from 'lodash.deburr';
 import {Issue} from '../classes/issue';
 import {ILabel} from '../interfaces/label';
-import {CleanLabel} from '../types/clean-label';
+import {cleanLabel} from './clean-label';
 
 /**
  * @description
@@ -19,8 +18,4 @@ export function isLabeled(
   return !!issue.labels.find((issueLabel: Readonly<ILabel>): boolean => {
     return cleanLabel(label) === cleanLabel(issueLabel.name);
   });
-}
-
-export function cleanLabel(label: Readonly<string>): CleanLabel {
-  return deburr(label.toLowerCase());
 }

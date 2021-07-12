@@ -291,7 +291,6 @@ class IssuesProcessor {
         return __awaiter(this, void 0, void 0, function* () {
             // get the next batch of issues
             const issues = yield this.getIssues(page);
-            const actor = yield this.getActor();
             if (issues.length <= 0) {
                 this._logger.info(logger_service_1.LoggerService.green(`No more issues found to process. Exiting...`));
                 (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.setOperationsCount(this.operations.getConsumedOperationsCount()).logStats();
@@ -309,7 +308,7 @@ class IssuesProcessor {
                 }
                 const issueLogger = new issue_logger_1.IssueLogger(issue);
                 yield issueLogger.grouping(`$$type #${issue.number}`, () => __awaiter(this, void 0, void 0, function* () {
-                    yield this.processIssue(issue, actor, labelsToAddWhenUnstale, labelsToRemoveWhenUnstale);
+                    yield this.processIssue(issue, labelsToAddWhenUnstale, labelsToRemoveWhenUnstale);
                 }));
             }
             if (!this.operations.hasRemainingOperations()) {
@@ -323,7 +322,7 @@ class IssuesProcessor {
             return this.processIssues(page + 1);
         });
     }
-    processIssue(issue, actor, labelsToAddWhenUnstale, labelsToRemoveWhenUnstale) {
+    processIssue(issue, labelsToAddWhenUnstale, labelsToRemoveWhenUnstale) {
         var _a;
         return __awaiter(this, void 0, void 0, function* () {
             (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.incrementProcessedItemsCount(issue);
@@ -472,7 +471,7 @@ class IssuesProcessor {
             // Process the issue if it was marked stale
             if (issue.isStale) {
                 issueLogger.info(`This $$type is already stale`);
-                yield this._processStaleIssue(issue, staleLabel, actor, labelsToAddWhenUnstale, labelsToRemoveWhenUnstale, closeMessage, closeLabel);
+                yield this._processStaleIssue(issue, staleLabel, staleMessage, labelsToAddWhenUnstale, labelsToRemoveWhenUnstale, closeMessage, closeLabel);
             }
             IssuesProcessor._endIssueProcessing(issue);
         });
@@ -497,20 +496,6 @@ class IssuesProcessor {
                 this._logger.error(`List issue comments error: ${error.message}`);
                 return Promise.resolve([]);
             }
-        });
-    }
-    // get the actor from the GitHub token or context
-    getActor() {
-        return __awaiter(this, void 0, void 0, function* () {
-            let actor;
-            try {
-                this.operations.consumeOperation();
-                actor = yield this.client.users.getAuthenticated();
-            }
-            catch (error) {
-                return github_1.context.actor;
-            }
-            return actor.data.login;
         });
     }
     // grab issues from github in batches of 100
@@ -564,12 +549,12 @@ class IssuesProcessor {
         });
     }
     // handle all of the stale issue logic when we find a stale issue
-    _processStaleIssue(issue, staleLabel, actor, labelsToAddWhenUnstale, labelsToRemoveWhenUnstale, closeMessage, closeLabel) {
+    _processStaleIssue(issue, staleLabel, staleMessage, labelsToAddWhenUnstale, labelsToRemoveWhenUnstale, closeMessage, closeLabel) {
         return __awaiter(this, void 0, void 0, function* () {
             const issueLogger = new issue_logger_1.IssueLogger(issue);
             const markedStaleOn = (yield this.getLabelCreationDate(issue, staleLabel)) || issue.updated_at;
             issueLogger.info(`$$type marked stale on: ${logger_service_1.LoggerService.cyan(markedStaleOn)}`);
-            const issueHasComments = yield this._hasCommentsSince(issue, markedStaleOn, actor);
+            const issueHasComments = yield this._hasCommentsSince(issue, markedStaleOn, staleMessage);
             issueLogger.info(`$$type has been commented on: ${logger_service_1.LoggerService.cyan(issueHasComments)}`);
             const daysBeforeClose = issue.isPullRequest
                 ? this._getDaysBeforePrClose()
@@ -614,7 +599,7 @@ class IssuesProcessor {
         });
     }
     // checks to see if a given issue is still stale (has had activity on it)
-    _hasCommentsSince(issue, sinceDate, actor) {
+    _hasCommentsSince(issue, sinceDate, staleMessage) {
         return __awaiter(this, void 0, void 0, function* () {
             const issueLogger = new issue_logger_1.IssueLogger(issue);
             issueLogger.info(`Checking for comments on $$type since: ${logger_service_1.LoggerService.cyan(sinceDate)}`);
@@ -623,8 +608,8 @@ class IssuesProcessor {
             }
             // find any comments since the date
             const comments = yield this.listIssueComments(issue.number, sinceDate);
-            const filteredComments = comments.filter(comment => comment.user.type === 'User' && comment.user.login !== actor);
-            issueLogger.info(`Comments not made by actor or another bot: ${logger_service_1.LoggerService.cyan(filteredComments.length)}`);
+            const filteredComments = comments.filter(comment => comment.user.type === 'User' && comment.body.toLowerCase() !== staleMessage.toLowerCase());
+            issueLogger.info(`Comments that are not the stale comment or another bot: ${logger_service_1.LoggerService.cyan(filteredComments.length)}`);
             // if there are any user comments returned
             return filteredComments.length > 0;
         });
@@ -5792,13 +5777,16 @@ ansiEscapes.iTerm = {
 /***/ }),
 
 /***/ 2068:
-/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __nccwpck_require__) => {
 
 "use strict";
-/* module decorator */ module = __nccwpck_require__.nmd(module);
-
-
+__nccwpck_require__.r(__webpack_exports__);
+/* harmony export */ __nccwpck_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => __WEBPACK_DEFAULT_EXPORT__
+/* harmony export */ });
 const ANSI_BACKGROUND_OFFSET = 10;
+
+const wrapAnsi16 = (offset = 0) => code => `\u001B[${code + offset}m`;
 
 const wrapAnsi256 = (offset = 0) => code => `\u001B[${38 + offset};5;${code}m`;
 
@@ -5893,8 +5881,10 @@ function assembleStyles() {
 	styles.color.close = '\u001B[39m';
 	styles.bgColor.close = '\u001B[49m';
 
+	styles.color.ansi = wrapAnsi16();
 	styles.color.ansi256 = wrapAnsi256();
 	styles.color.ansi16m = wrapAnsi16m();
+	styles.bgColor.ansi = wrapAnsi16(ANSI_BACKGROUND_OFFSET);
 	styles.bgColor.ansi256 = wrapAnsi256(ANSI_BACKGROUND_OFFSET);
 	styles.bgColor.ansi16m = wrapAnsi16m(ANSI_BACKGROUND_OFFSET);
 
@@ -5949,17 +5939,67 @@ function assembleStyles() {
 		hexToAnsi256: {
 			value: hex => styles.rgbToAnsi256(...styles.hexToRgb(hex)),
 			enumerable: false
+		},
+		ansi256ToAnsi: {
+			value: code => {
+				if (code < 8) {
+					return 30 + code;
+				}
+
+				if (code < 16) {
+					return 90 + (code - 8);
+				}
+
+				let red;
+				let green;
+				let blue;
+
+				if (code >= 232) {
+					red = (((code - 232) * 10) + 8) / 255;
+					green = red;
+					blue = red;
+				} else {
+					code -= 16;
+
+					const remainder = code % 36;
+
+					red = Math.floor(code / 36) / 5;
+					green = Math.floor(remainder / 6) / 5;
+					blue = (remainder % 6) / 5;
+				}
+
+				const value = Math.max(red, green, blue) * 2;
+
+				if (value === 0) {
+					return 30;
+				}
+
+				let result = 30 + ((Math.round(blue) << 2) | (Math.round(green) << 1) | Math.round(red));
+
+				if (value === 2) {
+					result += 60;
+				}
+
+				return result;
+			},
+			enumerable: false
+		},
+		rgbToAnsi: {
+			value: (red, green, blue) => styles.ansi256ToAnsi(styles.rgbToAnsi256(red, green, blue)),
+			enumerable: false
+		},
+		hexToAnsi: {
+			value: hex => styles.ansi256ToAnsi(styles.hexToAnsi256(hex)),
+			enumerable: false
 		}
 	});
 
 	return styles;
 }
 
-// Make the export immutable
-Object.defineProperty(module, 'exports', {
-	enumerable: true,
-	get: assembleStyles
-});
+const ansiStyles = assembleStyles();
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (ansiStyles);
 
 
 /***/ }),
@@ -8950,8 +8990,8 @@ module.exports = require("zlib");;
 /******/ 		}
 /******/ 		// Create a new module (and put it into the cache)
 /******/ 		var module = __webpack_module_cache__[moduleId] = {
-/******/ 			id: moduleId,
-/******/ 			loaded: false,
+/******/ 			// no module.id needed
+/******/ 			// no module.loaded needed
 /******/ 			exports: {}
 /******/ 		};
 /******/ 	
@@ -8964,20 +9004,36 @@ module.exports = require("zlib");;
 /******/ 			if(threw) delete __webpack_module_cache__[moduleId];
 /******/ 		}
 /******/ 	
-/******/ 		// Flag the module as loaded
-/******/ 		module.loaded = true;
-/******/ 	
 /******/ 		// Return the exports of the module
 /******/ 		return module.exports;
 /******/ 	}
 /******/ 	
 /************************************************************************/
-/******/ 	/* webpack/runtime/node module decorator */
+/******/ 	/* webpack/runtime/define property getters */
 /******/ 	(() => {
-/******/ 		__nccwpck_require__.nmd = (module) => {
-/******/ 			module.paths = [];
-/******/ 			if (!module.children) module.children = [];
-/******/ 			return module;
+/******/ 		// define getter functions for harmony exports
+/******/ 		__nccwpck_require__.d = (exports, definition) => {
+/******/ 			for(var key in definition) {
+/******/ 				if(__nccwpck_require__.o(definition, key) && !__nccwpck_require__.o(exports, key)) {
+/******/ 					Object.defineProperty(exports, key, { enumerable: true, get: definition[key] });
+/******/ 				}
+/******/ 			}
+/******/ 		};
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/hasOwnProperty shorthand */
+/******/ 	(() => {
+/******/ 		__nccwpck_require__.o = (obj, prop) => Object.prototype.hasOwnProperty.call(obj, prop)
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/make namespace object */
+/******/ 	(() => {
+/******/ 		// define __esModule on exports
+/******/ 		__nccwpck_require__.r = (exports) => {
+/******/ 			if(typeof Symbol !== 'undefined' && Symbol.toStringTag) {
+/******/ 				Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
+/******/ 			}
+/******/ 			Object.defineProperty(exports, '__esModule', { value: true });
 /******/ 		};
 /******/ 	})();
 /******/ 	

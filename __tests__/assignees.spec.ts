@@ -48,7 +48,6 @@ describe('assignees options', (): void => {
   const setProcessor = () => {
     processor = new IssuesProcessorMock(
       opts,
-      async () => 'abot',
       async p => (p === 1 ? testIssueList : []),
       async () => [],
       async () => new Date().toDateString()

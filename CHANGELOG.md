@@ -18,4 +18,5 @@ Starting in version 4.0.0 we will maintain a changelog
 
 ### Breaking Changes
 
-??
+* The options `skip-stale-issue-message` and `skip-stale-pr-message` were removed. Instead, setting the options `stale-issue-message` and `stale-pr-message` will be enough to let the stale workflow add a comment. If the options are unset, a comment will be added which was the equivalent of setting `skip-stale-issue-message` at `false`.
+* The `operations-per-run` option will be more effective. After migrating, you could face a failed-fast process workflow if you let the default value (30) or set it to a small number. In that case, you will see a warning at the end of the logs (if enabled) indicating that the workflow was stopped sooner to avoid consuming too much API calls. In most cases, you can just increase this limit to make sure to process everything in a single run.

@@ -6,8 +6,6 @@ Starting in version 4.0.0 we will maintain a changelog
 
 ### Features
 
-* **options:** add new options to avoid stale base on comments ([#494](https://github.com/actions/stale/issues/494)) ([1efddcb](https://github.com/actions/stale/commit/1efddcbe9ff0497885b9746a8ea5fa0314286053)), closes [#441](https://github.com/actions/stale/issues/441) [#470](https://github.com/actions/stale/issues/470) [#435](https://github.com/acti
-ons/stale/issues/435) [#390](https://github.com/actions/stale/issues/390)
 * **options:** simplify config by removing skip stale message options ([#457](https://github.com/actions/stale/issues/457)) ([6ec637d](https://github.com/actions/stale/commit/6ec637d238067ab8cc96c9289dcdac280bbd3f4a)), closes [#405](https://github.com/actions/stale/issues/405) [#455](https://github.com/actions/stale/issues/455)
 * **output:** print output parameters ([#458](https://github.com/actions/stale/issues/458)) ([3e6d35b](https://github.com/actions/stale/commit/3e6d35b685f0b2fa1a69be893fa07d3d85e05ee0))
 

@@ -38,7 +38,7 @@
   "license": "MIT",
   "dependencies": {
     "@actions/core": "^1.2.6",
-    "@actions/github": "^4.0.0",
+    "@actions/github": "^5.0.0",
     "lodash.deburr": "^4.1.0",
     "semver": "^7.3.5"
   },

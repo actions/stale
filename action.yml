@@ -108,9 +108,13 @@ inputs:
     description: 'Only pull requests with all of these labels are checked if stale. Defaults to `[]` (disabled) and can be a comma-separated list of labels. Override "only-labels" option regarding only the pull requests.'
     default: ''
     required: false
-  operations-per-run:
-    description: 'The maximum number of operations per run, used to control rate limiting (GitHub API CRUD related).'
+  query-operations-per-run:
+    description: 'The maximum number of query operations per run, used to control rate limiting (GitHub API CRUD related).'
     default: '30'
+    required: false
+  mutation-operations-per-run:
+    description: 'The maximum number of mutation operations per run, used to control rate limiting (GitHub API CRUD related).'
+    default: '200'
     required: false
   remove-stale-when-updated:
     description: 'Remove stale labels from issues and pull requests when they are updated or commented on.'

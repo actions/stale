@@ -29,9 +29,9 @@ describe('StaleOperations', (): void => {
 
     it('should increase the count of operation consume by 1', (): void => {
       expect.assertions(1);
-      operations.consumeOperation();
+      operations.consumeQueryOperation();
 
-      const result = operations.getConsumedOperationsCount();
+      const result = operations.getConsumedQueryOperationsCount();
 
       expect(result).toStrictEqual(1);
     });
@@ -44,9 +44,9 @@ describe('StaleOperations', (): void => {
 
     it('should increase the count of operation consume by the provided quantity', (): void => {
       expect.assertions(1);
-      operations.consumeOperations(8);
+      operations.consumeQueryOperations(8);
 
-      const result = operations.getConsumedOperationsCount();
+      const result = operations.getConsumedQueryOperationsCount();
 
       expect(result).toStrictEqual(8);
     });
@@ -60,7 +60,7 @@ describe('StaleOperations', (): void => {
     it('should return 0 by default', (): void => {
       expect.assertions(1);
 
-      const result = operations.getConsumedOperationsCount();
+      const result = operations.getConsumedQueryOperationsCount();
 
       expect(result).toStrictEqual(0);
     });
@@ -83,15 +83,15 @@ describe('StaleOperations', (): void => {
         hasRemainingOperations
       }: IHasRemainingOperationsMatrix): void => {
         beforeEach((): void => {
-          options.operationsPerRun = operationsPerRun;
+          options.queryOperationsPerRun = operationsPerRun;
           operations = new StaleOperations(options);
         });
 
         it(`should return ${hasRemainingOperations}`, (): void => {
           expect.assertions(1);
-          operations.consumeOperations(consumeOperations);
+          operations.consumeQueryOperations(consumeOperations);
 
-          const result = operations.hasRemainingOperations();
+          const result = operations.hasRemainingQueryOperations();
 
           expect(result).toStrictEqual(hasRemainingOperations);
         });
@@ -116,15 +116,15 @@ describe('StaleOperations', (): void => {
         getRemainingOperationsCount
       }: IGetRemainingOperationsCountMatrix): void => {
         beforeEach((): void => {
-          options.operationsPerRun = operationsPerRun;
+          options.queryOperationsPerRun = operationsPerRun;
           operations = new StaleOperations(options);
         });
 
         it(`should return ${getRemainingOperationsCount}`, (): void => {
           expect.assertions(1);
-          operations.consumeOperations(consumeOperations);
+          operations.consumeQueryOperations(consumeOperations);
 
-          const result = operations.getRemainingOperationsCount();
+          const result = operations.getRemainingQueryOperationsCount();
 
           expect(result).toStrictEqual(getRemainingOperationsCount);
         });

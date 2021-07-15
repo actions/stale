@@ -10,9 +10,9 @@ describe('Operations', (): void => {
 
     it('should increase the count of operation consume by 1', (): void => {
       expect.assertions(1);
-      operations.consumeOperation();
+      operations.consumeQueryOperation();
 
-      const result = operations.getConsumedOperationsCount();
+      const result = operations.getConsumedQueryOperationsCount();
 
       expect(result).toStrictEqual(1);
     });
@@ -25,9 +25,9 @@ describe('Operations', (): void => {
 
     it('should increase the count of operation consume by the provided quantity', (): void => {
       expect.assertions(1);
-      operations.consumeOperations(8);
+      operations.consumeQueryOperations(8);
 
-      const result = operations.getConsumedOperationsCount();
+      const result = operations.getConsumedQueryOperationsCount();
 
       expect(result).toStrictEqual(8);
     });
@@ -41,7 +41,7 @@ describe('Operations', (): void => {
     it('should return 0 by default', (): void => {
       expect.assertions(1);
 
-      const result = operations.getConsumedOperationsCount();
+      const result = operations.getConsumedQueryOperationsCount();
 
       expect(result).toStrictEqual(0);
     });

@@ -9,28 +9,28 @@ interface IGroupValue {
 
 export class Statistics {
   private readonly _logger: Logger = new Logger();
-  private _processedIssuesCount = 0;
-  private _processedPullRequestsCount = 0;
-  private _staleIssuesCount = 0;
-  private _stalePullRequestsCount = 0;
-  private _undoStaleIssuesCount = 0;
-  private _undoStalePullRequestsCount = 0;
-  private _operationsCount = 0;
-  private _closedIssuesCount = 0;
-  private _closedPullRequestsCount = 0;
-  private _deletedIssuesLabelsCount = 0;
-  private _deletedPullRequestsLabelsCount = 0;
-  private _deletedCloseIssuesLabelsCount = 0;
-  private _deletedClosePullRequestsLabelsCount = 0;
-  private _deletedBranchesCount = 0;
-  private _addedIssuesLabelsCount = 0;
-  private _addedPullRequestsLabelsCount = 0;
-  private _addedIssuesCommentsCount = 0;
-  private _addedPullRequestsCommentsCount = 0;
-  private _fetchedItemsCount = 0;
-  private _fetchedItemsEventsCount = 0;
-  private _fetchedItemsCommentsCount = 0;
-  private _fetchedPullRequestsCount = 0;
+  processedIssuesCount = 0;
+  processedPullRequestsCount = 0;
+  staleIssuesCount = 0;
+  stalePullRequestsCount = 0;
+  undoStaleIssuesCount = 0;
+  undoStalePullRequestsCount = 0;
+  operationsCount = 0;
+  closedIssuesCount = 0;
+  closedPullRequestsCount = 0;
+  deletedIssuesLabelsCount = 0;
+  deletedPullRequestsLabelsCount = 0;
+  deletedCloseIssuesLabelsCount = 0;
+  deletedClosePullRequestsLabelsCount = 0;
+  deletedBranchesCount = 0;
+  addedIssuesLabelsCount = 0;
+  addedPullRequestsLabelsCount = 0;
+  addedIssuesCommentsCount = 0;
+  addedPullRequestsCommentsCount = 0;
+  fetchedItemsCount = 0;
+  fetchedItemsEventsCount = 0;
+  fetchedItemsCommentsCount = 0;
+  fetchedPullRequestsCount = 0;
 
   incrementProcessedItemsCount(
     issue: Readonly<Issue>,
@@ -66,7 +66,7 @@ export class Statistics {
   }
 
   setOperationsCount(operationsCount: Readonly<number>): Statistics {
-    this._operationsCount = operationsCount;
+    this.operationsCount = operationsCount;
 
     return this;
   }
@@ -105,7 +105,7 @@ export class Statistics {
   }
 
   incrementDeletedBranchesCount(increment: Readonly<number> = 1): Statistics {
-    this._deletedBranchesCount += increment;
+    this.deletedBranchesCount += increment;
 
     return this;
   }
@@ -133,7 +133,7 @@ export class Statistics {
   }
 
   incrementFetchedItemsCount(increment: Readonly<number> = 1): Statistics {
-    this._fetchedItemsCount += increment;
+    this.fetchedItemsCount += increment;
 
     return this;
   }
@@ -141,7 +141,7 @@ export class Statistics {
   incrementFetchedItemsEventsCount(
     increment: Readonly<number> = 1
   ): Statistics {
-    this._fetchedItemsEventsCount += increment;
+    this.fetchedItemsEventsCount += increment;
 
     return this;
   }
@@ -149,7 +149,7 @@ export class Statistics {
   incrementFetchedItemsCommentsCount(
     increment: Readonly<number> = 1
   ): Statistics {
-    this._fetchedItemsCommentsCount += increment;
+    this.fetchedItemsCommentsCount += increment;
 
     return this;
   }
@@ -157,7 +157,7 @@ export class Statistics {
   incrementFetchedPullRequestsCount(
     increment: Readonly<number> = 1
   ): Statistics {
-    this._fetchedPullRequestsCount += increment;
+    this.fetchedPullRequestsCount += increment;
 
     return this;
   }
@@ -185,7 +185,7 @@ export class Statistics {
   private _incrementProcessedIssuesCount(
     increment: Readonly<number> = 1
   ): Statistics {
-    this._processedIssuesCount += increment;
+    this.processedIssuesCount += increment;
 
     return this;
   }
@@ -193,7 +193,7 @@ export class Statistics {
   private _incrementProcessedPullRequestsCount(
     increment: Readonly<number> = 1
   ): Statistics {
-    this._processedPullRequestsCount += increment;
+    this.processedPullRequestsCount += increment;
 
     return this;
   }
@@ -201,7 +201,7 @@ export class Statistics {
   private _incrementStaleIssuesCount(
     increment: Readonly<number> = 1
   ): Statistics {
-    this._staleIssuesCount += increment;
+    this.staleIssuesCount += increment;
 
     return this;
   }
@@ -209,7 +209,7 @@ export class Statistics {
   private _incrementStalePullRequestsCount(
     increment: Readonly<number> = 1
   ): Statistics {
-    this._stalePullRequestsCount += increment;
+    this.stalePullRequestsCount += increment;
 
     return this;
   }
@@ -217,7 +217,7 @@ export class Statistics {
   private _incrementUndoStaleIssuesCount(
     increment: Readonly<number> = 1
   ): Statistics {
-    this._undoStaleIssuesCount += increment;
+    this.undoStaleIssuesCount += increment;
 
     return this;
   }
@@ -225,7 +225,7 @@ export class Statistics {
   private _incrementUndoStalePullRequestsCount(
     increment: Readonly<number> = 1
   ): Statistics {
-    this._undoStalePullRequestsCount += increment;
+    this.undoStalePullRequestsCount += increment;
 
     return this;
   }
@@ -233,7 +233,7 @@ export class Statistics {
   private _incrementClosedIssuesCount(
     increment: Readonly<number> = 1
   ): Statistics {
-    this._closedIssuesCount += increment;
+    this.closedIssuesCount += increment;
 
     return this;
   }
@@ -241,7 +241,7 @@ export class Statistics {
   private _incrementClosedPullRequestsCount(
     increment: Readonly<number> = 1
   ): Statistics {
-    this._closedPullRequestsCount += increment;
+    this.closedPullRequestsCount += increment;
 
     return this;
   }
@@ -249,7 +249,7 @@ export class Statistics {
   private _incrementDeletedIssuesLabelsCount(
     increment: Readonly<number> = 1
   ): Statistics {
-    this._deletedIssuesLabelsCount += increment;
+    this.deletedIssuesLabelsCount += increment;
 
     return this;
   }
@@ -257,7 +257,7 @@ export class Statistics {
   private _incrementDeletedPullRequestsLabelsCount(
     increment: Readonly<number> = 1
   ): Statistics {
-    this._deletedPullRequestsLabelsCount += increment;
+    this.deletedPullRequestsLabelsCount += increment;
 
     return this;
   }
@@ -265,7 +265,7 @@ export class Statistics {
   private _incrementDeletedCloseIssuesLabelsCount(
     increment: Readonly<number> = 1
   ): Statistics {
-    this._deletedCloseIssuesLabelsCount += increment;
+    this.deletedCloseIssuesLabelsCount += increment;
 
     return this;
   }
@@ -273,7 +273,7 @@ export class Statistics {
   private _incrementDeletedClosePullRequestsLabelsCount(
     increment: Readonly<number> = 1
   ): Statistics {
-    this._deletedClosePullRequestsLabelsCount += increment;
+    this.deletedClosePullRequestsLabelsCount += increment;
 
     return this;
   }
@@ -281,7 +281,7 @@ export class Statistics {
   private _incrementAddedIssuesLabel(
     increment: Readonly<number> = 1
   ): Statistics {
-    this._addedIssuesLabelsCount += increment;
+    this.addedIssuesLabelsCount += increment;
 
     return this;
   }
@@ -289,7 +289,7 @@ export class Statistics {
   private _incrementAddedPullRequestsLabel(
     increment: Readonly<number> = 1
   ): Statistics {
-    this._addedPullRequestsLabelsCount += increment;
+    this.addedPullRequestsLabelsCount += increment;
 
     return this;
   }
@@ -297,7 +297,7 @@ export class Statistics {
   private _incrementAddedIssuesComment(
     increment: Readonly<number> = 1
   ): Statistics {
-    this._addedIssuesCommentsCount += increment;
+    this.addedIssuesCommentsCount += increment;
 
     return this;
   }
@@ -305,7 +305,7 @@ export class Statistics {
   private _incrementAddedPullRequestsComment(
     increment: Readonly<number> = 1
   ): Statistics {
-    this._addedPullRequestsCommentsCount += increment;
+    this.addedPullRequestsCommentsCount += increment;
 
     return this;
   }
@@ -314,11 +314,11 @@ export class Statistics {
     this._logGroup('Processed items', [
       {
         name: 'Processed issues',
-        count: this._processedIssuesCount
+        count: this.processedIssuesCount
       },
       {
         name: 'Processed PRs',
-        count: this._processedPullRequestsCount
+        count: this.processedPullRequestsCount
       }
     ]);
   }
@@ -327,11 +327,11 @@ export class Statistics {
     this._logGroup('New stale items', [
       {
         name: 'New stale issues',
-        count: this._staleIssuesCount
+        count: this.staleIssuesCount
       },
       {
         name: 'New stale PRs',
-        count: this._stalePullRequestsCount
+        count: this.stalePullRequestsCount
       }
     ]);
   }
@@ -340,11 +340,11 @@ export class Statistics {
     this._logGroup('No longer stale items', [
       {
         name: 'No longer stale issues',
-        count: this._undoStaleIssuesCount
+        count: this.undoStaleIssuesCount
       },
       {
         name: 'No longer stale PRs',
-        count: this._undoStalePullRequestsCount
+        count: this.undoStalePullRequestsCount
       }
     ]);
   }
@@ -353,11 +353,11 @@ export class Statistics {
     this._logGroup('Closed items', [
       {
         name: 'Closed issues',
-        count: this._closedIssuesCount
+        count: this.closedIssuesCount
       },
       {
         name: 'Closed PRs',
-        count: this._closedPullRequestsCount
+        count: this.closedPullRequestsCount
       }
     ]);
   }
@@ -366,11 +366,11 @@ export class Statistics {
     this._logGroup('Deleted items labels', [
       {
         name: 'Deleted issues labels',
-        count: this._deletedIssuesLabelsCount
+        count: this.deletedIssuesLabelsCount
       },
       {
         name: 'Deleted PRs labels',
-        count: this._deletedPullRequestsLabelsCount
+        count: this.deletedPullRequestsLabelsCount
       }
     ]);
   }
@@ -379,28 +379,28 @@ export class Statistics {
     this._logGroup('Deleted close items labels', [
       {
         name: 'Deleted close issues labels',
-        count: this._deletedCloseIssuesLabelsCount
+        count: this.deletedCloseIssuesLabelsCount
       },
       {
         name: 'Deleted close PRs labels',
-        count: this._deletedClosePullRequestsLabelsCount
+        count: this.deletedClosePullRequestsLabelsCount
       }
     ]);
   }
 
   private _logDeletedBranchesCount(): void {
-    this._logCount('Deleted branches', this._deletedBranchesCount);
+    this._logCount('Deleted branches', this.deletedBranchesCount);
   }
 
   private _logAddedIssuesAndPullRequestsLabelsCount(): void {
     this._logGroup('Added items labels', [
       {
         name: 'Added issues labels',
-        count: this._addedIssuesLabelsCount
+        count: this.addedIssuesLabelsCount
       },
       {
         name: 'Added PRs labels',
-        count: this._addedPullRequestsLabelsCount
+        count: this.addedPullRequestsLabelsCount
       }
     ]);
   }
@@ -409,33 +409,33 @@ export class Statistics {
     this._logGroup('Added items comments', [
       {
         name: 'Added issues comments',
-        count: this._addedIssuesCommentsCount
+        count: this.addedIssuesCommentsCount
       },
       {
         name: 'Added PRs comments',
-        count: this._addedPullRequestsCommentsCount
+        count: this.addedPullRequestsCommentsCount
       }
     ]);
   }
 
   private _logFetchedItemsCount(): void {
-    this._logCount('Fetched items', this._fetchedItemsCount);
+    this._logCount('Fetched items', this.fetchedItemsCount);
   }
 
   private _logFetchedItemsEventsCount(): void {
-    this._logCount('Fetched items events', this._fetchedItemsEventsCount);
+    this._logCount('Fetched items events', this.fetchedItemsEventsCount);
   }
 
   private _logFetchedItemsCommentsCount(): void {
-    this._logCount('Fetched items comments', this._fetchedItemsCommentsCount);
+    this._logCount('Fetched items comments', this.fetchedItemsCommentsCount);
   }
 
   private _logFetchedPullRequestsCount(): void {
-    this._logCount('Fetched pull requests', this._fetchedPullRequestsCount);
+    this._logCount('Fetched pull requests', this.fetchedPullRequestsCount);
   }
 
   private _logOperationsCount(): void {
-    this._logCount('Operations performed', this._operationsCount);
+    this._logCount('Operations performed', this.operationsCount);
   }
 
   private _logCount(name: Readonly<string>, count: Readonly<number>): void {

@@ -1,5 +1,5 @@
 import deburr from 'lodash.deburr';
-import { CleanLabel } from '../types/clean-label';
+import {CleanLabel} from '../types/clean-label';
 
 /**
  * @description
@@ -10,5 +10,5 @@ import { CleanLabel } from '../types/clean-label';
  * @return {string} A lowercased, deburred version of the passed in label
  */
 export function cleanLabel(label: Readonly<string>): CleanLabel {
-    return deburr(label.toLowerCase());
+  return deburr(label.toLowerCase());
 }

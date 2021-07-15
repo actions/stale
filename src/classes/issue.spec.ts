@@ -57,7 +57,10 @@ describe('Issue', (): void => {
       exemptAllPrAssignees: undefined,
       enableStatistics: false,
       labelsToRemoveWhenUnstale: '',
-      labelsToAddWhenUnstale: ''
+      labelsToAddWhenUnstale: '',
+      activitiesResetStale: true,
+      issueActivitiesResetStale: undefined,
+      prActivitiesResetStale: undefined
     };
     issueInterface = {
       title: 'dummy-title',

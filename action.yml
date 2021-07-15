@@ -168,6 +168,18 @@ inputs:
     description: 'Display some statistics at the end regarding the stale workflow (only when the logs are enabled).'
     default: 'true'
     required: false
+  activities-reset-stale:
+    description: 'Any activity (update/comment) can reset the stale idle time on the issues and pull requests.'
+    default: 'true'
+    required: false
+  issue-activities-reset-stale:
+    description: 'Any activity (update/comment) can reset the stale idle time on the issues. Override "activities-reset-stale" option regarding only the issues.'
+    default: ''
+    required: false
+  pr-activities-reset-stale:
+    description: 'Any activity (update/comment) can reset the stale idle time on the pull requests. Override "activities-reset-stale" option regarding only the pull requests.'
+    default: ''
+    required: false
 outputs:
   closed-issues-prs:
     description: 'List of all closed issues and pull requests.'

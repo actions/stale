@@ -42,5 +42,8 @@ export enum Option {
   ExemptAllPrAssignees = 'exempt-all-pr-assignees',
   EnableStatistics = 'enable-statistics',
   LabelsToRemoveWhenUnstale = 'labels-to-remove-when-unstale',
-  LabelsToAddWhenUnstale = 'labels-to-add-when-unstale'
+  LabelsToAddWhenUnstale = 'labels-to-add-when-unstale',
+  ActivitiesResetStale = 'activities-reset-stale',
+  IssueActivitiesResetStale = 'issue-activities-reset-stale',
+  PrActivitiesResetStale = 'pr-activities-reset-stale'
 }

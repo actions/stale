@@ -69,7 +69,6 @@ export class IssuesProcessor {
   readonly deletedBranchIssues: Issue[] = [];
   readonly removedLabelIssues: Issue[] = [];
   readonly addedLabelIssues: Issue[] = [];
-  readonly addedStaleCommentIssues: Issue[] = [];
   readonly addedCloseCommentIssues: Issue[] = [];
   private readonly _logger: Logger = new Logger();
   private readonly _statistics: Statistics | undefined;
@@ -95,7 +94,7 @@ export class IssuesProcessor {
     }
 
     if (this.options.enableStatistics) {
-      this._statistics = new Statistics();
+      this.statistics = new Statistics();
     }
   }
 
@@ -107,7 +106,7 @@ export class IssuesProcessor {
       this._logger.info(
         LoggerService.green(`No more issues found to process. Exiting...`)
       );
-      this._statistics
+      this.statistics
         ?.setOperationsCount(this.operations.getConsumedOperationsCount())
         .logStats();
 
@@ -160,7 +159,7 @@ export class IssuesProcessor {
           'option which is currently set to'
         )} ${LoggerService.cyan(this.options.operationsPerRun)}`
       );
-      this._statistics
+      this.statistics
         ?.setOperationsCount(this.operations.getConsumedOperationsCount())
         .logStats();
 
@@ -182,7 +181,7 @@ export class IssuesProcessor {
     labelsToAddWhenUnstale: Readonly<string>[],
     labelsToRemoveWhenUnstale: Readonly<string>[]
   ): Promise<void> {
-    this._statistics?.incrementProcessedItemsCount(issue);
+    this.statistics?.incrementProcessedItemsCount(issue);
 
     const issueLogger: IssueLogger = new IssueLogger(issue);
     issueLogger.info(
@@ -517,7 +516,7 @@ export class IssuesProcessor {
     // Find any comments since date on the given issue
     try {
       this.operations.consumeOperation();
-      this._statistics?.incrementFetchedItemsCommentsCount();
+      this.statistics?.incrementFetchedItemsCommentsCount();
       const comments = await this.client.issues.listComments({
         owner: context.repo.owner,
         repo: context.repo.repo,
@@ -548,7 +547,7 @@ export class IssuesProcessor {
           direction: this.options.ascending ? 'asc' : 'desc',
           page
         });
-      this._statistics?.incrementFetchedItemsCount(issueResult.data.length);
+      this.statistics?.incrementFetchedItemsCount(issueResult.data.length);
 
       return issueResult.data.map(
         (issue: Readonly<IIssue>): Issue => new Issue(this.options, issue)
@@ -570,7 +569,7 @@ export class IssuesProcessor {
     issueLogger.info(`Checking for label on this $$type`);
 
     this._consumeIssueOperation(issue);
-    this._statistics?.incrementFetchedItemsEventsCount();
+    this.statistics?.incrementFetchedItemsEventsCount();
     const options = this.client.issues.listEvents.endpoint.merge({
       owner: context.repo.owner,
       repo: context.repo.repo,
@@ -773,8 +772,7 @@ export class IssuesProcessor {
     if (!skipMessage) {
       try {
         this._consumeIssueOperation(issue);
-        this._statistics?.incrementAddedItemsComment(issue);
-        this.addedStaleCommentIssues.push(issue);
+        this.statistics?.incrementAddedItemsComment(issue);
 
         if (!this.options.debugOnly) {
           await this.client.issues.createComment({
@@ -791,8 +789,8 @@ export class IssuesProcessor {
 
     try {
       this._consumeIssueOperation(issue);
-      this._statistics?.incrementAddedItemsLabel(issue);
-      this._statistics?.incrementStaleItemsCount(issue);
+      this.statistics?.incrementAddedItemsLabel(issue);
+      this.statistics?.incrementStaleItemsCount(issue);
 
       if (!this.options.debugOnly) {
         await this.client.issues.addLabels({
@@ -821,7 +819,7 @@ export class IssuesProcessor {
     if (closeMessage) {
       try {
         this._consumeIssueOperation(issue);
-        this._statistics?.incrementAddedItemsComment(issue);
+        this.statistics?.incrementAddedItemsComment(issue);
         this.addedCloseCommentIssues.push(issue);
 
         if (!this.options.debugOnly) {
@@ -840,7 +838,7 @@ export class IssuesProcessor {
     if (closeLabel) {
       try {
         this._consumeIssueOperation(issue);
-        this._statistics?.incrementAddedItemsLabel(issue);
+        this.statistics?.incrementAddedItemsLabel(issue);
 
         if (!this.options.debugOnly) {
           await this.client.issues.addLabels({
@@ -857,7 +855,7 @@ export class IssuesProcessor {
 
     try {
       this._consumeIssueOperation(issue);
-      this._statistics?.incrementClosedItemsCount(issue);
+      this.statistics?.incrementClosedItemsCount(issue);
 
       if (!this.options.debugOnly) {
         await this.client.issues.update({
@@ -899,7 +897,7 @@ export class IssuesProcessor {
 
     try {
       this._consumeIssueOperation(issue);
-      this._statistics?.incrementDeletedBranchesCount();
+      this.statistics?.incrementDeletedBranchesCount();
 
       if (!this.options.debugOnly) {
         await this.client.git.deleteRef({
@@ -934,7 +932,7 @@ export class IssuesProcessor {
 
     try {
       this._consumeIssueOperation(issue);
-      this._statistics?.incrementDeletedItemsLabelsCount(issue);
+      this.statistics?.incrementDeletedItemsLabelsCount(issue);
 
       if (!this.options.debugOnly) {
         await this.client.issues.removeLabel({
@@ -1068,7 +1066,7 @@ export class IssuesProcessor {
 
     try {
       this.operations.consumeOperation();
-      this._statistics?.incrementAddedItemsLabel(issue);
+      this.statistics?.incrementAddedItemsLabel(issue);
       if (!this.options.debugOnly) {
         await this.client.issues.addLabels({
           owner: context.repo.owner,
@@ -1095,7 +1093,7 @@ export class IssuesProcessor {
     );
 
     await this._removeLabel(issue, staleLabel);
-    this._statistics?.incrementUndoStaleItemsCount(issue);
+    this.statistics?.incrementUndoStaleItemsCount(issue);
   }
 
   private async _removeCloseLabel(
@@ -1132,7 +1130,7 @@ export class IssuesProcessor {
       );
 
       await this._removeLabel(issue, closeLabel, true);
-      this._statistics?.incrementDeletedCloseItemsLabelsCount(issue);
+      this.statistics?.incrementDeletedCloseItemsLabelsCount(issue);
     } else {
       issueLogger.info(
         LoggerService.white('└──'),

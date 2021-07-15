@@ -2305,7 +2305,6 @@ test('processing a pull request to be stale with the "stalePrMessage" option set
   ];
   const processor = new IssuesProcessorMock(
     opts,
-    async () => 'abot',
     async p => (p === 1 ? TestIssueList : []),
     async () => [],
     async () => new Date().toDateString()
@@ -2316,7 +2315,7 @@ test('processing a pull request to be stale with the "stalePrMessage" option set
 
   expect(processor.staleIssues).toHaveLength(1);
   expect(processor.closedIssues).toHaveLength(0);
-  expect(processor.addedStaleCommentIssues).toHaveLength(1);
+  expect(processor.statistics?.addedPullRequestsCommentsCount).toStrictEqual(1);
 });
 
 test('processing a pull request to be stale with the "stalePrMessage" option set to empty will not send a PR comment', async () => {
@@ -2341,7 +2340,6 @@ test('processing a pull request to be stale with the "stalePrMessage" option set
   ];
   const processor = new IssuesProcessorMock(
     opts,
-    async () => 'abot',
     async p => (p === 1 ? TestIssueList : []),
     async () => [],
     async () => new Date().toDateString()
@@ -2352,5 +2350,5 @@ test('processing a pull request to be stale with the "stalePrMessage" option set
 
   expect(processor.staleIssues).toHaveLength(1);
   expect(processor.closedIssues).toHaveLength(0);
-  expect(processor.addedStaleCommentIssues).toHaveLength(0);
+  expect(processor.statistics?.addedPullRequestsCommentsCount).toStrictEqual(0);
 });

@@ -2,7 +2,7 @@
 
 Warns and then closes issues and PRs that have had no activity for a specified amount of time.
 
-The default configuration will:
+The configuration must be on the default branch und the default values will:
 
 - Add a label "Stale" on issues and pull requests after 60 days of inactivity
 - Close the stale issues and pull requests after 7 days of inactivity

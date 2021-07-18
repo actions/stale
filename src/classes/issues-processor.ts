@@ -1058,6 +1058,7 @@ export class IssuesProcessor {
     try {
       this.operations.consumeOperation();
       this._statistics?.incrementAddedItemsLabel(issue);
+
       if (!this.options.debugOnly) {
         await this.client.issues.addLabels({
           owner: context.repo.owner,

@@ -2356,7 +2356,7 @@ test('processing an issue stale since less than the daysBeforeStale without a st
 });
 
 test('processing an issue unstale that should be stale should not unstale once again and should keep the stale label added when processing it for unstale', async () => {
-  expect.assertions(3);
+  expect.assertions(4);
   const opts: IIssuesProcessorOptions = {
     ...DefaultProcessorOptions,
     daysBeforeStale: 7,
@@ -2393,6 +2393,7 @@ test('processing an issue unstale that should be stale should not unstale once a
   await processor.processIssues(1);
 
   expect(processor.staleIssues).toHaveLength(1);
-  expect(processor.addedLabelIssues).toHaveLength(1);
+  expect(processor.addedLabelIssues).toHaveLength(0);
+  expect(processor.removedLabelIssues).toHaveLength(0);
   expect(processor.closedIssues).toHaveLength(0);
 });

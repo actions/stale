@@ -50,7 +50,7 @@ describe('assignees options', (): void => {
       opts,
       async p => (p === 1 ? testIssueList : []),
       async () => [],
-      async () => new Date().toDateString()
+      async () => new Date().toISOString()
     );
   };
 

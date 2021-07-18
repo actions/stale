@@ -17,6 +17,7 @@ import {IIssue} from '../interfaces/issue';
 import {IIssueEvent} from '../interfaces/issue-event';
 import {IIssuesProcessorOptions} from '../interfaces/issues-processor-options';
 import {IPullRequest} from '../interfaces/pull-request';
+import {IsoDateString} from '../types/iso-date-string';
 import {Assignees} from './assignees';
 import {Issue} from './issue';
 import {IssueLogger} from './loggers/issue-logger';
@@ -509,7 +510,7 @@ export class IssuesProcessor {
   async getLabelCreationDate(
     issue: Issue,
     label: string
-  ): Promise<string | undefined> {
+  ): Promise<IsoDateString | undefined> {
     const issueLogger: IssueLogger = new IssueLogger(issue);
 
     issueLogger.info(`Checking for label on this $$type`);
@@ -551,7 +552,7 @@ export class IssuesProcessor {
     closeLabel?: string
   ) {
     const issueLogger: IssueLogger = new IssueLogger(issue);
-    const markedStaleOn: string =
+    const markedStaleOn: IsoDateString =
       (await this.getLabelCreationDate(issue, staleLabel)) || issue.updated_at;
     issueLogger.info(
       `$$type marked stale on: ${LoggerService.cyan(markedStaleOn)}`

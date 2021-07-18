@@ -452,8 +452,8 @@ class IssuesProcessorBuilder {
           this._options,
           index,
           issue.title ?? 'dummy-title',
-          issue.updated_at ?? new Date().toDateString(),
-          issue.created_at ?? new Date().toDateString(),
+          issue.updated_at ?? new Date().toISOString(),
+          issue.created_at ?? new Date().toISOString(),
           !!issue.pull_request,
           issue.labels ? issue.labels.map(label => label.name) : []
         )
@@ -481,8 +481,8 @@ class IssuesProcessorBuilder {
         return {
           ...issue,
           // Note this update
-          updated_at: new Date().toDateString(),
-          created_at: new Date().toDateString(),
+          updated_at: new Date().toISOString(),
+          created_at: new Date().toISOString(),
           labels: issue.labels?.map((label: Readonly<ILabel>): ILabel => {
             return {
               ...label,
@@ -519,8 +519,8 @@ class IssuesProcessorBuilder {
         return {
           ...issue,
           // Note this update
-          updated_at: new Date().toDateString(),
-          created_at: new Date().toDateString(),
+          updated_at: new Date().toISOString(),
+          created_at: new Date().toISOString(),
           labels: issue.labels?.map((label: Readonly<ILabel>): ILabel => {
             return {
               ...label,
@@ -543,7 +543,7 @@ class IssuesProcessorBuilder {
       this._options,
       async p => (p === 1 ? this._issues : []),
       async () => [],
-      async () => new Date().toDateString()
+      async () => new Date().toISOString()
     );
   }
 }

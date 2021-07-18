@@ -452,8 +452,8 @@ class IssuesProcessorBuilder {
           this._options,
           index,
           issue.title ?? 'dummy-title',
-          issue.updated_at ?? new Date().toDateString(),
-          issue.created_at ?? new Date().toDateString(),
+          issue.updated_at ?? new Date().toISOString(),
+          issue.created_at ?? new Date().toISOString(),
           !!issue.pull_request,
           issue.labels ? issue.labels.map(label => label.name) : []
         )
@@ -550,7 +550,7 @@ class IssuesProcessorBuilder {
           body: 'Body'
         }
       ],
-      async () => new Date().toDateString()
+      async () => new Date().toISOString()
     );
   }
 }

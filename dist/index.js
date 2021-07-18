@@ -230,6 +230,7 @@ const option_1 = __nccwpck_require__(5931);
 const get_humanized_date_1 = __nccwpck_require__(965);
 const is_date_more_recent_than_1 = __nccwpck_require__(1473);
 const is_valid_date_1 = __nccwpck_require__(891);
+const updated_since_1 = __nccwpck_require__(2346);
 const is_boolean_1 = __nccwpck_require__(8236);
 const is_labeled_1 = __nccwpck_require__(6792);
 const clean_label_1 = __nccwpck_require__(7752);
@@ -265,11 +266,6 @@ class IssuesProcessor {
         if (this.options.enableStatistics) {
             this._statistics = new statistics_1.Statistics();
         }
-    }
-    static _updatedSince(timestamp, num_days) {
-        const daysInMillis = 1000 * 60 * 60 * 24 * num_days;
-        const millisSinceLastUpdated = new Date().getTime() - new Date(timestamp).getTime();
-        return millisSinceLastUpdated <= daysInMillis;
     }
     static _endIssueProcessing(issue) {
         const consumedOperationsCount = issue.operations.getConsumedOperationsCount();
@@ -447,7 +443,7 @@ class IssuesProcessor {
                 return; // Don't process exempt assignees
             }
             // Should this issue be marked stale?
-            const shouldBeStale = !IssuesProcessor._updatedSince(issue.updated_at, daysBeforeStale);
+            const shouldBeStale = !updated_since_1.updatedSince(issue.updated_at, daysBeforeStale);
             // Determine if this issue needs to be marked stale first
             if (!issue.isStale) {
                 issueLogger.info(`This $$type is not stale`);
@@ -540,7 +536,8 @@ class IssuesProcessor {
             });
             const events = yield this.client.paginate(options);
             const reversedEvents = events.reverse();
-            const staleLabeledEvent = reversedEvents.find(event => event.event === 'labeled' && clean_label_1.cleanLabel(event.label.name) === clean_label_1.cleanLabel(label));
+            const staleLabeledEvent = reversedEvents.find(event => event.event === 'labeled' &&
+                clean_label_1.cleanLabel(event.label.name) === clean_label_1.cleanLabel(label));
             if (!staleLabeledEvent) {
                 // Must be old rather than labeled
                 return undefined;
@@ -560,7 +557,7 @@ class IssuesProcessor {
                 ? this._getDaysBeforePrClose()
                 : this._getDaysBeforeIssueClose();
             issueLogger.info(`Days before $$type close: ${logger_service_1.LoggerService.cyan(daysBeforeClose)}`);
-            const issueHasUpdate = IssuesProcessor._updatedSince(issue.updated_at, daysBeforeClose);
+            const issueHasUpdate = updated_since_1.updatedSince(issue.updated_at, daysBeforeClose);
             issueLogger.info(`$$type has been updated: ${logger_service_1.LoggerService.cyan(issueHasUpdate)}`);
             const shouldRemoveStaleWhenUpdated = this._shouldRemoveStaleWhenUpdated(issue);
             issueLogger.info(`The option ${issueLogger.createOptionLink(this._getRemoveStaleWhenUpdatedUsedOptionName(issue))} is: ${logger_service_1.LoggerService.cyan(shouldRemoveStaleWhenUpdated)}`);
@@ -602,7 +599,7 @@ class IssuesProcessor {
                 issueLogger.info(`Closing $$type because it was last updated on: ${logger_service_1.LoggerService.cyan(issue.updated_at)}`);
                 yield this._closeIssue(issue, closeMessage, closeLabel);
                 if (this.options.deleteBranch && issue.pull_request) {
-                    issueLogger.info(`Deleting the branch since the option ${issueLogger.createOptionLink(option_1.Option.DeleteBranch)} was specified`);
+                    issueLogger.info(`Deleting the branch since the option ${issueLogger.createOptionLink(option_1.Option.DeleteBranch)} is enabled`);
                     yield this._deleteBranch(issue);
                     this.deletedBranchIssues.push(issue);
                 }
@@ -1869,6 +1866,26 @@ function isValidDate(date) {
     return false;
 }
 exports.isValidDate = isValidDate;
+
+
+/***/ }),
+
+/***/ 2346:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.updatedSince = void 0;
+function updatedSince(timestamp, numberOfDays) {
+    const daysInMillis = 1000 * 60 * 60 * 24 * numberOfDays;
+    const millisSinceLastUpdated = new Date().getTime() - new Date(timestamp).getTime();
+    if (isNaN(millisSinceLastUpdated)) {
+        throw new Error('updatedSince should have a valid timestamp to avoid NaN result');
+    }
+    return millisSinceLastUpdated <= daysInMillis;
+}
+exports.updatedSince = updatedSince;
 
 
 /***/ }),

@@ -1,4 +1,3 @@
-module.exports =
 /******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
@@ -574,15 +573,17 @@ class IssuesProcessor {
                 issueLogger.info(`The stale label should not be removed due to a comment`);
             }
             issueLogger.info(`Checking if the stale label should be removed...`);
+            let shouldRemoveStaleLabel = false;
             // Should we un-stale this issue?
             if (shouldRemoveStaleWhenUpdated && issueHasUpdate) {
                 issueLogger.info(logger_service_1.LoggerService.white('├── '), `Remove the stale label since the $$type has an update and the workflow should remove the stale label when updated`);
-                yield this._removeStaleLabel(issue, staleLabel, true);
-                issueLogger.info(logger_service_1.LoggerService.white('└── '), `Skipping the process since the $$type is now un-stale`);
-                return; // Nothing to do because it is no longer stale
+                shouldRemoveStaleLabel = true;
             }
             else if (shouldRemoveStaleWhenCommented && issueHasComments) {
                 issueLogger.info(logger_service_1.LoggerService.white('├── '), `Remove the stale label since the $$type has a comment and the workflow should remove the stale label when commented`);
+                shouldRemoveStaleLabel = true;
+            }
+            if (shouldRemoveStaleLabel) {
                 yield this._removeStaleLabel(issue, staleLabel, true);
                 issueLogger.info(logger_service_1.LoggerService.white('└── '), `Skipping the process since the $$type is now un-stale`);
                 // Are there labels to remove or add when an issue is no longer stale?
@@ -8999,8 +9000,9 @@ module.exports = require("zlib");;
 /******/ 	// The require function
 /******/ 	function __nccwpck_require__(moduleId) {
 /******/ 		// Check if module is in cache
-/******/ 		if(__webpack_module_cache__[moduleId]) {
-/******/ 			return __webpack_module_cache__[moduleId].exports;
+/******/ 		var cachedModule = __webpack_module_cache__[moduleId];
+/******/ 		if (cachedModule !== undefined) {
+/******/ 			return cachedModule.exports;
 /******/ 		}
 /******/ 		// Create a new module (and put it into the cache)
 /******/ 		var module = __webpack_module_cache__[moduleId] = {
@@ -9037,10 +9039,13 @@ module.exports = require("zlib");;
 /******/ 	
 /******/ 	/* webpack/runtime/compat */
 /******/ 	
-/******/ 	__nccwpck_require__.ab = __dirname + "/";/************************************************************************/
-/******/ 	// module exports must be returned from runtime so entry inlining is disabled
+/******/ 	if (typeof __nccwpck_require__ !== 'undefined') __nccwpck_require__.ab = __dirname + "/";/************************************************************************/
+/******/ 	
 /******/ 	// startup
 /******/ 	// Load entry module and return exports
-/******/ 	return __nccwpck_require__(3109);
+/******/ 	// This entry module is referenced by other modules so it can't be inlined
+/******/ 	var __webpack_exports__ = __nccwpck_require__(3109);
+/******/ 	module.exports = __webpack_exports__;
+/******/ 	
 /******/ })()
 ;

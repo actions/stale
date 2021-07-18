@@ -1234,14 +1234,14 @@ test('when the option "labelsToAddWhenUnstale" is set, the labels should be adde
   ];
   const processor = new IssuesProcessorMock(
     opts,
-    async () => 'abot',
     async p => (p === 1 ? TestIssueList : []),
     async () => [
       {
         user: {
           login: 'notme',
           type: 'User'
-        }
+        },
+        body: 'Body'
       }
     ], // return a fake comment to indicate there was an update
     async () => new Date().toDateString()
@@ -1317,7 +1317,6 @@ test('stale label should be removed if a stale issue was updated', async () => {
   ];
   const processor = new IssuesProcessorMock(
     opts,
-    async () => 'abot',
     async p => (p === 1 ? TestIssueList : []),
     async () => [],
     async () => '2020-01-02T17:00:00Z'
@@ -2385,7 +2384,6 @@ test('processing an issue unstale that should be stale should not unstale once a
   ];
   const processor = new IssuesProcessorMock(
     opts,
-    async () => 'abot',
     async p => (p === 1 ? TestIssueList : []),
     async (): Promise<IComment[]> => Promise.resolve([]),
     async () => new Date().toDateString()

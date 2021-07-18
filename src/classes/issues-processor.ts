@@ -8,7 +8,7 @@ import {isDateMoreRecentThan} from '../functions/dates/is-date-more-recent-than'
 import {isValidDate} from '../functions/dates/is-valid-date';
 import {isBoolean} from '../functions/is-boolean';
 import {isLabeled} from '../functions/is-labeled';
-import { cleanLabel } from '../functions/clean-label';
+import {cleanLabel} from '../functions/clean-label';
 import {shouldMarkWhenStale} from '../functions/should-mark-when-stale';
 import {wordsToList} from '../functions/words-to-list';
 import {IComment} from '../interfaces/comment';
@@ -537,7 +537,9 @@ export class IssuesProcessor {
     const reversedEvents = events.reverse();
 
     const staleLabeledEvent = reversedEvents.find(
-      event => event.event === 'labeled' && cleanLabel(event.label.name) === cleanLabel(label)
+      event =>
+        event.event === 'labeled' &&
+        cleanLabel(event.label.name) === cleanLabel(label)
     );
 
     if (!staleLabeledEvent) {

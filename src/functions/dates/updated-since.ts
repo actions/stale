@@ -12,5 +12,5 @@ export function updatedSince(
     );
   }
 
-  return millisSinceLastUpdated <= daysInMillis;
+  return millisSinceLastUpdated < daysInMillis;
 }

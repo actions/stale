@@ -158,7 +158,7 @@ test('processing an issue with no label and a start date as ISO 8601 being befor
   const opts: IIssuesProcessorOptions = {
     ...DefaultProcessorOptions,
     daysBeforeClose: 0,
-    startDate: january2000.toString()
+    startDate: january2000
   };
   const TestIssueList: Issue[] = [
     generateIssue(
@@ -179,8 +179,8 @@ test('processing an issue with no label and a start date as ISO 8601 being befor
   // process our fake issue list
   await processor.processIssues(1);
 
-  expect(processor.staleIssues.length).toStrictEqual(1);
-  expect(processor.closedIssues.length).toStrictEqual(1);
+  expect(processor.staleIssues).toHaveLength(1);
+  expect(processor.closedIssues).toHaveLength(1);
 });
 
 test('processing an issue with no label and a start date as ISO 8601 being after the issue creation date will not make it stale nor close it when it is old enough and days-before-close is set to 0', async () => {

@@ -34,12 +34,12 @@ describe('updatedSince()', (): void => {
         timestamp = new Date().toISOString();
       });
 
-      it('should return true', (): void => {
+      it('should return false', (): void => {
         expect.assertions(1);
 
         const result = updatedSince(timestamp, numberOfDays);
 
-        expect(result).toStrictEqual(true);
+        expect(result).toStrictEqual(false);
       });
     });
   });

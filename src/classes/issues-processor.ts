@@ -729,8 +729,7 @@ export class IssuesProcessor {
 
     // If the issue is being marked stale, the updated date should be changed to right now
     // So that close calculations work correctly
-    const newUpdatedAtDate: Date = new Date();
-    issue.updated_at = newUpdatedAtDate.toString();
+    issue.updated_at = new Date().toISOString();
 
     if (!skipMessage) {
       try {

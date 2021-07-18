@@ -677,7 +677,7 @@ export class IssuesProcessor {
       }
     } else {
       issueLogger.info(
-        `Stale $$type is not old enough to close yet (hasComments? ${issueHasComments}, hasUpdate? ${issueHasUpdate})`
+        `Stale $$type is not old enough to close yet (no comment nor update)`
       );
     }
   }

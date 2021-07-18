@@ -49,8 +49,7 @@ describe('assignees options', (): void => {
     processor = new IssuesProcessorMock(
       opts,
       async p => (p === 1 ? testIssueList : []),
-      async () => [],
-      async () => new Date().toISOString()
+      async () => []
     );
   };
 

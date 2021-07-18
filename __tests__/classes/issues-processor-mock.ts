@@ -28,6 +28,8 @@ export class IssuesProcessorMock extends IssuesProcessor {
 
     if (getLabelCreationDate) {
       this.getLabelCreationDate = getLabelCreationDate;
+    } else {
+      this.getLabelCreationDate = async () => Promise.resolve(undefined);
     }
   }
 }

@@ -206,8 +206,7 @@ class SUT {
     this.processor = new IssuesProcessorMock(
       this._opts,
       async p => (p === 1 ? this._testIssueList : []),
-      async () => [],
-      async () => new Date().toISOString()
+      async () => []
     );
 
     return this.processor.processIssues(1);

@@ -549,8 +549,7 @@ class IssuesProcessorBuilder {
           },
           body: 'Body'
         }
-      ],
-      async () => new Date().toISOString()
+      ]
     );
   }
 }

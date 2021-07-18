@@ -552,8 +552,10 @@ export class IssuesProcessor {
     closeLabel?: string
   ) {
     const issueLogger: IssueLogger = new IssueLogger(issue);
+    const staleLabelCreationDate: IsoDateString | undefined =
+      await this.getLabelCreationDate(issue, staleLabel);
     const markedStaleOn: IsoDateString =
-      (await this.getLabelCreationDate(issue, staleLabel)) || issue.updated_at;
+      staleLabelCreationDate ?? issue.updated_at;
     issueLogger.info(
       `$$type marked stale on: ${LoggerService.cyan(markedStaleOn)}`
     );
@@ -680,7 +682,7 @@ export class IssuesProcessor {
     }
   }
 
-  // checks to see if a given issue is still stale (has had activity on it)
+  // Checks to see if a given issue is still stale (has had activity on it)
   private async _hasCommentsSince(
     issue: Issue,
     sinceDate: string,
@@ -696,7 +698,7 @@ export class IssuesProcessor {
       return true;
     }
 
-    // find any comments since the date
+    // Find any comments since the date
     const comments = await this.listIssueComments(issue.number, sinceDate);
 
     const filteredComments = comments.filter(
@@ -711,7 +713,7 @@ export class IssuesProcessor {
       )}`
     );
 
-    // if there are any user comments returned
+    // If there are any user comments returned
     return filteredComments.length > 0;
   }
 

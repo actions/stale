@@ -6,6 +6,7 @@ import {Option} from '../enums/option';
 import {getHumanizedDate} from '../functions/dates/get-humanized-date';
 import {isDateMoreRecentThan} from '../functions/dates/is-date-more-recent-than';
 import {isValidDate} from '../functions/dates/is-valid-date';
+import {updatedSince} from '../functions/dates/updated-since';
 import {isBoolean} from '../functions/is-boolean';
 import {isLabeled} from '../functions/is-labeled';
 import {cleanLabel} from '../functions/clean-label';
@@ -29,14 +30,6 @@ import {LoggerService} from '../services/logger.service';
  * Handle processing of issues for staleness/closure.
  */
 export class IssuesProcessor {
-  private static _updatedSince(timestamp: string, num_days: number): boolean {
-    const daysInMillis = 1000 * 60 * 60 * 24 * num_days;
-    const millisSinceLastUpdated =
-      new Date().getTime() - new Date(timestamp).getTime();
-
-    return millisSinceLastUpdated <= daysInMillis;
-  }
-
   private static _endIssueProcessing(issue: Issue): void {
     const consumedOperationsCount: number =
       issue.operations.getConsumedOperationsCount();
@@ -405,10 +398,7 @@ export class IssuesProcessor {
     }
 
     // Should this issue be marked stale?
-    const shouldBeStale = !IssuesProcessor._updatedSince(
-      issue.updated_at,
-      daysBeforeStale
-    );
+    const shouldBeStale = !updatedSince(issue.updated_at, daysBeforeStale);
 
     // Determine if this issue needs to be marked stale first
     if (!issue.isStale) {
@@ -584,7 +574,7 @@ export class IssuesProcessor {
       `Days before $$type close: ${LoggerService.cyan(daysBeforeClose)}`
     );
 
-    const issueHasUpdate: boolean = IssuesProcessor._updatedSince(
+    const issueHasUpdate: boolean = updatedSince(
       issue.updated_at,
       daysBeforeClose
     );
@@ -677,7 +667,7 @@ export class IssuesProcessor {
         issueLogger.info(
           `Deleting the branch since the option ${issueLogger.createOptionLink(
             Option.DeleteBranch
-          )} was specified`
+          )} is enabled`
         );
         await this._deleteBranch(issue);
         this.deletedBranchIssues.push(issue);

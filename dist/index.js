@@ -267,8 +267,8 @@ class IssuesProcessor {
             this._statistics = new statistics_1.Statistics();
         }
     }
-    static _updatedSince(timestamp, num_days) {
-        const daysInMillis = 1000 * 60 * 60 * 24 * num_days;
+    static _updatedSince(timestamp, num_minutes) {
+        const daysInMillis = 1000 * 60 * num_minutes;
         const millisSinceLastUpdated = new Date().getTime() - new Date(timestamp).getTime();
         return millisSinceLastUpdated <= daysInMillis;
     }

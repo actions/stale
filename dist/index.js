@@ -303,6 +303,7 @@ const should_mark_when_stale_1 = __nccwpck_require__(2461);
 const words_to_list_1 = __nccwpck_require__(1883);
 const assignees_1 = __nccwpck_require__(7236);
 const ignore_updates_1 = __nccwpck_require__(2935);
+const exempt_draft_pull_request_1 = __nccwpck_require__(854);
 const issue_1 = __nccwpck_require__(4783);
 const issue_logger_1 = __nccwpck_require__(2984);
 const logger_1 = __nccwpck_require__(6212);
@@ -419,20 +420,6 @@ class IssuesProcessor {
                 IssuesProcessor._endIssueProcessing(issue);
                 return; // Don't process locked issues
             }
-            if (issue.isPullRequest) {
-                if (this.options.exemptDraftPr) {
-                    issueLogger.info(`The option ${issueLogger.createOptionLink(option_1.Option.ExemptDraftPr)} is enabled`);
-                    const pullRequest = yield this.getPullRequest(issue);
-                    if ((pullRequest === null || pullRequest === void 0 ? void 0 : pullRequest.draft) === true) {
-                        issueLogger.info(logger_service_1.LoggerService.white('└──'), `Skipping this $$type because it is a draft`);
-                        IssuesProcessor._endIssueProcessing(issue);
-                        return;
-                    }
-                    else {
-                        issueLogger.info(logger_service_1.LoggerService.white('└──'), `Continuing the process for this $$type because it is not a draft`);
-                    }
-                }
-            }
             const onlyLabels = words_to_list_1.wordsToList(this._getOnlyLabels(issue));
             if (onlyLabels.length > 0) {
                 issueLogger.info(`The option ${issueLogger.createOptionLink(option_1.Option.OnlyLabels)} was specified to only process issues and pull requests with all those labels (${logger_service_1.LoggerService.cyan(onlyLabels.length)})`);
@@ -522,6 +509,18 @@ class IssuesProcessor {
                 IssuesProcessor._endIssueProcessing(issue);
                 return; // Don't process exempt assignees
             }
+            // Ignore draft PR
+            // Note that this check is so far below because it cost one read operation
+            // So it's simply better to do all the stale checks which don't cost more operation before this one
+            const exemptDraftPullRequest = new exempt_draft_pull_request_1.ExemptDraftPullRequest(this.options, issue);
+            if (yield exemptDraftPullRequest.shouldExemptDraftPullRequest(() => __awaiter(this, void 0, void 0, function* () {
+                return this.getPullRequest(issue);
+            }))) {
+                IssuesProcessor._endIssueProcessing(issue);
+                return; // Don't process draft PR
+            }
+            // Should this issue be marked stale?
+            const shouldBeStale = !IssuesProcessor._updatedSince(issue.updated_at, daysBeforeStale);
             // Determine if this issue needs to be marked stale first
             if (!issue.isStale) {
                 issueLogger.info(`This $$type is not stale`);

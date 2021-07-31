@@ -476,7 +476,7 @@ Default value: unset
 #### exempt-draft-pr
 
 If set to `true`, the pull requests currently in draft will not be marked as stale automatically.  
-⚠️ This option consume more one operation per pull request to process because we need to fetch the pull request with the GitHub API.
+⚠️ This option consume one operation per pull request to process because we need to fetch the pull request with the GitHub API to know if it's a draft one or not.
 
 Default value: `false`  
 Required Permission: `pull-requests: read`

@@ -17,6 +17,7 @@ import {IIssuesProcessorOptions} from '../interfaces/issues-processor-options';
 import {IPullRequest} from '../interfaces/pull-request';
 import {Assignees} from './assignees';
 import {IgnoreUpdates} from './ignore-updates';
+import {ExemptDraftPullRequest} from './exempt-draft-pull-request';
 import {Issue} from './issue';
 import {IssueLogger} from './loggers/issue-logger';
 import {Logger} from './loggers/logger';
@@ -220,33 +221,6 @@ export class IssuesProcessor {
       return; // Don't process locked issues
     }
 
-    if (issue.isPullRequest) {
-      if (this.options.exemptDraftPr) {
-        issueLogger.info(
-          `The option ${issueLogger.createOptionLink(
-            Option.ExemptDraftPr
-          )} is enabled`
-        );
-
-        const pullRequest: IPullRequest | undefined | void =
-          await this.getPullRequest(issue);
-
-        if (pullRequest?.draft === true) {
-          issueLogger.info(
-            LoggerService.white('└──'),
-            `Skipping this $$type because it is a draft`
-          );
-          IssuesProcessor._endIssueProcessing(issue);
-          return;
-        } else {
-          issueLogger.info(
-            LoggerService.white('└──'),
-            `Continuing the process for this $$type because it is not a draft`
-          );
-        }
-      }
-    }
-
     const onlyLabels: string[] = wordsToList(this._getOnlyLabels(issue));
 
     if (onlyLabels.length > 0) {
@@ -423,6 +397,23 @@ export class IssuesProcessor {
     if (assignees.shouldExemptAssignees()) {
       IssuesProcessor._endIssueProcessing(issue);
       return; // Don't process exempt assignees
+    }
+
+    // Ignore draft PR
+    // Note that this check is so far below because it cost one read operation
+    // So it's simply better to do all the stale checks which don't cost more operation before this one
+    const exemptDraftPullRequest: ExemptDraftPullRequest =
+      new ExemptDraftPullRequest(this.options, issue);
+
+    if (
+      await exemptDraftPullRequest.shouldExemptDraftPullRequest(
+        async (): Promise<IPullRequest | undefined | void> => {
+          return this.getPullRequest(issue);
+        }
+      )
+    ) {
+      IssuesProcessor._endIssueProcessing(issue);
+      return; // Don't process draft PR
     }
 
     // Determine if this issue needs to be marked stale first
@@ -881,11 +872,7 @@ export class IssuesProcessor {
   private async _deleteBranch(issue: Issue): Promise<void> {
     const issueLogger: IssueLogger = new IssueLogger(issue);
 
-    issueLogger.info(`Delete
-    branch from closed $
-    $type
-    -
-    ${issue.title}`);
+    issueLogger.info(`Delete branch from closed $$type - ${issue.title}`);
 
     const pullRequest: IPullRequest | undefined | void =
       await this.getPullRequest(issue);

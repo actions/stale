@@ -207,6 +207,46 @@ export class IssuesProcessor {
     const daysBeforeStale: number = issue.isPullRequest
       ? this._getDaysBeforePrStale()
       : this._getDaysBeforeIssueStale();
+
+    if (issue.state === 'closed') {
+      issueLogger.info(`Skipping this $$type because it is closed`);
+      IssuesProcessor._endIssueProcessing(issue);
+      return; // Don't process closed issues
+    }
+
+    if (issue.locked) {
+      issueLogger.info(`Skipping this $$type because it is locked`);
+      IssuesProcessor._endIssueProcessing(issue);
+      return; // Don't process locked issues
+    }
+
+    if (issue.isPullRequest) {
+      if (this.options.exemptDraftPr) {
+        issueLogger.info(
+          `The option ${issueLogger.createOptionLink(
+            Option.ExemptDraftPr
+          )} is enabled`
+        );
+
+        const pullRequest: IPullRequest | undefined | void =
+          await this.getPullRequest(issue);
+
+        if (pullRequest?.draft === true) {
+          issueLogger.info(
+            LoggerService.white('└──'),
+            `Skipping this $$type because it is a draft`
+          );
+          IssuesProcessor._endIssueProcessing(issue);
+          return;
+        } else {
+          issueLogger.info(
+            LoggerService.white('└──'),
+            `Continuing the process for this $$type because it is not a draft`
+          );
+        }
+      }
+    }
+
     const onlyLabels: string[] = wordsToList(this._getOnlyLabels(issue));
 
     if (onlyLabels.length > 0) {
@@ -259,18 +299,6 @@ export class IssuesProcessor {
     );
 
     const shouldMarkAsStale: boolean = shouldMarkWhenStale(daysBeforeStale);
-
-    if (issue.state === 'closed') {
-      issueLogger.info(`Skipping this $$type because it is closed`);
-      IssuesProcessor._endIssueProcessing(issue);
-      return; // Don't process closed issues
-    }
-
-    if (issue.locked) {
-      issueLogger.info(`Skipping this $$type because it is locked`);
-      IssuesProcessor._endIssueProcessing(issue);
-      return; // Don't process locked issues
-    }
 
     // Try to remove the close label when not close/locked issue or PR
     await this._removeCloseLabel(issue, closeLabel);
@@ -574,6 +602,25 @@ export class IssuesProcessor {
     return staleLabeledEvent.created_at;
   }
 
+  async getPullRequest(issue: Issue): Promise<IPullRequest | undefined | void> {
+    const issueLogger: IssueLogger = new IssueLogger(issue);
+
+    try {
+      this._consumeIssueOperation(issue);
+      this._statistics?.incrementFetchedPullRequestsCount();
+
+      const pullRequest = await this.client.pulls.get({
+        owner: context.repo.owner,
+        repo: context.repo.repo,
+        pull_number: issue.number
+      });
+
+      return pullRequest.data;
+    } catch (error) {
+      issueLogger.error(`Error when getting this $$type: ${error.message}`);
+    }
+  }
+
   // handle all of the stale issue logic when we find a stale issue
   private async _processStaleIssue(
     issue: Issue,
@@ -666,7 +713,7 @@ export class IssuesProcessor {
         issueLogger.info(
           `Deleting the branch since the option ${issueLogger.createOptionLink(
             Option.DeleteBranch
-          )} was specified`
+          )} is enabled`
         );
         await this._deleteBranch(issue);
         this.deletedBranchIssues.push(issue);
@@ -830,27 +877,6 @@ export class IssuesProcessor {
     }
   }
 
-  private async _getPullRequest(
-    issue: Issue
-  ): Promise<IPullRequest | undefined | void> {
-    const issueLogger: IssueLogger = new IssueLogger(issue);
-
-    try {
-      this._consumeIssueOperation(issue);
-      this._statistics?.incrementFetchedPullRequestsCount();
-
-      const pullRequest = await this.client.pulls.get({
-        owner: context.repo.owner,
-        repo: context.repo.repo,
-        pull_number: issue.number
-      });
-
-      return pullRequest.data;
-    } catch (error) {
-      issueLogger.error(`Error when getting this $$type: ${error.message}`);
-    }
-  }
-
   // Delete the branch on closed pull request
   private async _deleteBranch(issue: Issue): Promise<void> {
     const issueLogger: IssueLogger = new IssueLogger(issue);
@@ -861,7 +887,8 @@ export class IssuesProcessor {
     -
     ${issue.title}`);
 
-    const pullRequest = await this._getPullRequest(issue);
+    const pullRequest: IPullRequest | undefined | void =
+      await this.getPullRequest(issue);
 
     if (!pullRequest) {
       issueLogger.info(

@@ -45,5 +45,6 @@ export enum Option {
   LabelsToAddWhenUnstale = 'labels-to-add-when-unstale',
   IgnoreUpdates = 'ignore-updates',
   IgnoreIssueUpdates = 'ignore-issue-updates',
-  IgnorePrUpdates = 'ignore-pr-updates'
+  IgnorePrUpdates = 'ignore-pr-updates',
+  ExemptDraftPr = 'exempt-draft-pr'
 }

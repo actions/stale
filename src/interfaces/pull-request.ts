@@ -3,4 +3,5 @@ export interface IPullRequest {
   head: {
     ref: string;
   };
+  draft: boolean;
 }

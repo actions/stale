@@ -686,7 +686,6 @@ class SUT {
   private async _setProcessor(): Promise<number> {
     this.processor = new IssuesProcessorMock(
       this._opts,
-      async () => 'abot',
       async p => (p === 1 ? this._testIssueList : []),
       async () => [],
       async () => new Date().toDateString()

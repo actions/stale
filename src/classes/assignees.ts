@@ -1,7 +1,7 @@
 import deburr from 'lodash.deburr';
 import {Option} from '../enums/option';
 import {wordsToList} from '../functions/words-to-list';
-import {IAssignee} from '../interfaces/assignee';
+import {Assignee} from '../interfaces/assignee';
 import {IIssuesProcessorOptions} from '../interfaces/issues-processor-options';
 import {Issue} from './issue';
 import {IssueLogger} from './loggers/issue-logger';
@@ -10,10 +10,6 @@ import {LoggerService} from '../services/logger.service';
 type CleanAssignee = string;
 
 export class Assignees {
-  private static _cleanAssignee(assignee: Readonly<string>): CleanAssignee {
-    return deburr(assignee.toLowerCase());
-  }
-
   private readonly _options: IIssuesProcessorOptions;
   private readonly _issue: Issue;
   private readonly _issueLogger: IssueLogger;
@@ -22,6 +18,10 @@ export class Assignees {
     this._options = options;
     this._issue = issue;
     this._issueLogger = new IssueLogger(issue);
+  }
+
+  private static _cleanAssignee(assignee: Readonly<string>): CleanAssignee {
+    return deburr(assignee.toLowerCase());
   }
 
   shouldExemptAssignees(): boolean {
@@ -195,7 +195,7 @@ export class Assignees {
     const cleanAssignee: CleanAssignee = Assignees._cleanAssignee(assignee);
 
     return this._issue.assignees.some(
-      (issueAssignee: Readonly<IAssignee>): boolean => {
+      (issueAssignee: Readonly<Assignee>): boolean => {
         const isSameAssignee: boolean =
           cleanAssignee === Assignees._cleanAssignee(issueAssignee.login);
 

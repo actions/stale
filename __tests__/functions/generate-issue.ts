@@ -1,5 +1,5 @@
 import {Issue} from '../../src/classes/issue';
-import {IAssignee} from '../../src/interfaces/assignee';
+import {IUserAssignee} from '../../src/interfaces/assignee';
 import {IIssuesProcessorOptions} from '../../src/interfaces/issues-processor-options';
 import {IsoDateString} from '../../src/types/iso-date-string';
 
@@ -32,9 +32,10 @@ export function generateIssue(
           title: milestone
         }
       : undefined,
-    assignees: assignees.map((assignee: Readonly<string>): IAssignee => {
+    assignees: assignees.map((assignee: Readonly<string>): IUserAssignee => {
       return {
-        login: assignee
+        login: assignee,
+        type: 'User'
       };
     })
   });

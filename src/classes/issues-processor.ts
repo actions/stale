@@ -12,7 +12,6 @@ import {cleanLabel} from '../functions/clean-label';
 import {shouldMarkWhenStale} from '../functions/should-mark-when-stale';
 import {wordsToList} from '../functions/words-to-list';
 import {IComment} from '../interfaces/comment';
-import {IIssue} from '../interfaces/issue';
 import {IIssueEvent} from '../interfaces/issue-event';
 import {IIssuesProcessorOptions} from '../interfaces/issues-processor-options';
 import {IPullRequest} from '../interfaces/pull-request';
@@ -24,11 +23,48 @@ import {Milestones} from './milestones';
 import {StaleOperations} from './stale-operations';
 import {Statistics} from './statistics';
 import {LoggerService} from '../services/logger.service';
+import {IIssue} from '../interfaces/issue';
 
 /***
  * Handle processing of issues for staleness/closure.
  */
 export class IssuesProcessor {
+  readonly operations: StaleOperations;
+  readonly client: InstanceType<typeof GitHub>;
+  readonly options: IIssuesProcessorOptions;
+  readonly staleIssues: Issue[] = [];
+  readonly closedIssues: Issue[] = [];
+  readonly deletedBranchIssues: Issue[] = [];
+  readonly removedLabelIssues: Issue[] = [];
+  readonly addedLabelIssues: Issue[] = [];
+  private readonly _logger: Logger = new Logger();
+  private readonly _statistics: Statistics | undefined;
+
+  constructor(options: IIssuesProcessorOptions) {
+    this.options = options;
+    this.client = getOctokit(this.options.repoToken);
+    this.operations = new StaleOperations(this.options);
+
+    this._logger.info(
+      LoggerService.yellow(`Starting the stale action process...`)
+    );
+
+    if (this.options.debugOnly) {
+      this._logger.warning(
+        LoggerService.yellowBright(`Executing in debug mode!`)
+      );
+      this._logger.warning(
+        LoggerService.yellowBright(
+          `The debug output will be written but no issues/PRs will be processed.`
+        )
+      );
+    }
+
+    if (this.options.enableStatistics) {
+      this._statistics = new Statistics();
+    }
+  }
+
   private static _updatedSince(timestamp: string, num_days: number): boolean {
     const daysInMillis = 1000 * 60 * 60 * 24 * num_days;
     const millisSinceLastUpdated =
@@ -65,42 +101,6 @@ export class IssuesProcessor {
     issue: Readonly<Issue>
   ): Option.ClosePrLabel | Option.CloseIssueLabel {
     return issue.isPullRequest ? Option.ClosePrLabel : Option.CloseIssueLabel;
-  }
-
-  private readonly _logger: Logger = new Logger();
-  private readonly _statistics: Statistics | undefined;
-  readonly operations: StaleOperations;
-  readonly client: InstanceType<typeof GitHub>;
-  readonly options: IIssuesProcessorOptions;
-  readonly staleIssues: Issue[] = [];
-  readonly closedIssues: Issue[] = [];
-  readonly deletedBranchIssues: Issue[] = [];
-  readonly removedLabelIssues: Issue[] = [];
-  readonly addedLabelIssues: Issue[] = [];
-
-  constructor(options: IIssuesProcessorOptions) {
-    this.options = options;
-    this.client = getOctokit(this.options.repoToken);
-    this.operations = new StaleOperations(this.options);
-
-    this._logger.info(
-      LoggerService.yellow(`Starting the stale action process...`)
-    );
-
-    if (this.options.debugOnly) {
-      this._logger.warning(
-        LoggerService.yellowBright(`Executing in debug mode!`)
-      );
-      this._logger.warning(
-        LoggerService.yellowBright(
-          `The debug output will be written but no issues/PRs will be processed.`
-        )
-      );
-    }
-
-    if (this.options.enableStatistics) {
-      this._statistics = new Statistics();
-    }
   }
 
   async processIssues(page: Readonly<number> = 1): Promise<number> {
@@ -831,7 +831,11 @@ export class IssuesProcessor {
   private async _deleteBranch(issue: Issue): Promise<void> {
     const issueLogger: IssueLogger = new IssueLogger(issue);
 
-    issueLogger.info(`Delete branch from closed $$type - ${issue.title}`);
+    issueLogger.info(`Delete
+    branch from closed $
+    $type
+    -
+    ${issue.title}`);
 
     const pullRequest = await this._getPullRequest(issue);
 

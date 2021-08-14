@@ -1,4 +1,4 @@
-import {IAssignee} from '../interfaces/assignee';
+import {IUserAssignee} from '../interfaces/assignee';
 import {IIssue} from '../interfaces/issue';
 import {IIssuesProcessorOptions} from '../interfaces/issues-processor-options';
 import {ILabel} from '../interfaces/label';
@@ -77,7 +77,8 @@ describe('Issue', (): void => {
       },
       assignees: [
         {
-          login: 'dummy-login'
+          login: 'dummy-login',
+          type: 'User'
         }
       ]
     };
@@ -150,8 +151,9 @@ describe('Issue', (): void => {
 
       expect(issue.assignees).toStrictEqual([
         {
-          login: 'dummy-login'
-        } as IAssignee
+          login: 'dummy-login',
+          type: 'User'
+        } as IUserAssignee
       ]);
     });
 
@@ -272,7 +274,8 @@ describe('Issue', (): void => {
       beforeEach((): void => {
         issueInterface.assignees = [
           {
-            login: 'dummy-login'
+            login: 'dummy-login',
+            type: 'User'
           }
         ];
         issue = new Issue(optionsInterface, issueInterface);

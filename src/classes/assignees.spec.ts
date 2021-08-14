@@ -55,7 +55,8 @@ describe('Assignees', (): void => {
             beforeEach((): void => {
               issueInterface.assignees = [
                 {
-                  login: 'dummy-login'
+                  login: 'dummy-login',
+                  type: 'User'
                 }
               ];
             });
@@ -98,7 +99,8 @@ describe('Assignees', (): void => {
             beforeEach((): void => {
               issueInterface.assignees = [
                 {
-                  login: 'dummy-login'
+                  login: 'dummy-login',
+                  type: 'User'
                 }
               ];
             });
@@ -118,7 +120,8 @@ describe('Assignees', (): void => {
             beforeEach((): void => {
               issueInterface.assignees = [
                 {
-                  login: 'dummy-exempt-issue-assignee'
+                  login: 'dummy-exempt-issue-assignee',
+                  type: 'User'
                 }
               ];
             });
@@ -166,7 +169,8 @@ describe('Assignees', (): void => {
             beforeEach((): void => {
               issueInterface.assignees = [
                 {
-                  login: 'dummy-login'
+                  login: 'dummy-login',
+                  type: 'User'
                 }
               ];
             });
@@ -186,7 +190,8 @@ describe('Assignees', (): void => {
             beforeEach((): void => {
               issueInterface.assignees = [
                 {
-                  login: 'dummy-exempt-assignee'
+                  login: 'dummy-exempt-assignee',
+                  type: 'User'
                 }
               ];
             });
@@ -229,7 +234,8 @@ describe('Assignees', (): void => {
             beforeEach((): void => {
               issueInterface.assignees = [
                 {
-                  login: 'dummy-login'
+                  login: 'dummy-login',
+                  type: 'User'
                 }
               ];
             });
@@ -249,7 +255,8 @@ describe('Assignees', (): void => {
             beforeEach((): void => {
               issueInterface.assignees = [
                 {
-                  login: 'dummy-exempt-issue-assignee'
+                  login: 'dummy-exempt-issue-assignee',
+                  type: 'User'
                 }
               ];
             });
@@ -269,7 +276,8 @@ describe('Assignees', (): void => {
             beforeEach((): void => {
               issueInterface.assignees = [
                 {
-                  login: 'dummy-login'
+                  login: 'dummy-login',
+                  type: 'User'
                 }
               ];
             });
@@ -289,7 +297,8 @@ describe('Assignees', (): void => {
             beforeEach((): void => {
               issueInterface.assignees = [
                 {
-                  login: 'dummy-exempt-assignee'
+                  login: 'dummy-exempt-assignee',
+                  type: 'User'
                 }
               ];
             });
@@ -332,7 +341,8 @@ describe('Assignees', (): void => {
           beforeEach((): void => {
             issueInterface.assignees = [
               {
-                login: 'dummy-exempt-assignee'
+                login: 'dummy-exempt-assignee',
+                type: 'User'
               }
             ];
           });
@@ -373,7 +383,8 @@ describe('Assignees', (): void => {
             beforeEach((): void => {
               issueInterface.assignees = [
                 {
-                  login: 'dummy-exempt-assignee'
+                  login: 'dummy-exempt-assignee',
+                  type: 'User'
                 }
               ];
             });
@@ -415,7 +426,8 @@ describe('Assignees', (): void => {
             beforeEach((): void => {
               issueInterface.assignees = [
                 {
-                  login: 'dummy-exempt-issue-assignee'
+                  login: 'dummy-exempt-issue-assignee',
+                  type: 'User'
                 }
               ];
             });
@@ -469,7 +481,8 @@ describe('Assignees', (): void => {
             beforeEach((): void => {
               issueInterface.assignees = [
                 {
-                  login: 'dummy-login'
+                  login: 'dummy-login',
+                  type: 'User'
                 }
               ];
             });
@@ -511,7 +524,8 @@ describe('Assignees', (): void => {
             beforeEach((): void => {
               issueInterface.assignees = [
                 {
-                  login: 'dummy-login'
+                  login: 'dummy-login',
+                  type: 'User'
                 }
               ];
             });
@@ -531,7 +545,8 @@ describe('Assignees', (): void => {
             beforeEach((): void => {
               issueInterface.assignees = [
                 {
-                  login: 'dummy-exempt-pr-assignee'
+                  login: 'dummy-exempt-pr-assignee',
+                  type: 'User'
                 }
               ];
             });
@@ -579,7 +594,8 @@ describe('Assignees', (): void => {
             beforeEach((): void => {
               issueInterface.assignees = [
                 {
-                  login: 'dummy-login'
+                  login: 'dummy-login',
+                  type: 'User'
                 }
               ];
             });
@@ -599,7 +615,8 @@ describe('Assignees', (): void => {
             beforeEach((): void => {
               issueInterface.assignees = [
                 {
-                  login: 'dummy-exempt-assignee'
+                  login: 'dummy-exempt-assignee',
+                  type: 'User'
                 }
               ];
             });
@@ -641,7 +658,8 @@ describe('Assignees', (): void => {
             beforeEach((): void => {
               issueInterface.assignees = [
                 {
-                  login: 'dummy-login'
+                  login: 'dummy-login',
+                  type: 'User'
                 }
               ];
             });
@@ -661,7 +679,8 @@ describe('Assignees', (): void => {
             beforeEach((): void => {
               issueInterface.assignees = [
                 {
-                  login: 'dummy-exempt-pr-assignee'
+                  login: 'dummy-exempt-pr-assignee',
+                  type: 'User'
                 }
               ];
             });
@@ -681,7 +700,8 @@ describe('Assignees', (): void => {
             beforeEach((): void => {
               issueInterface.assignees = [
                 {
-                  login: 'dummy-login'
+                  login: 'dummy-login',
+                  type: 'User'
                 }
               ];
             });
@@ -701,7 +721,8 @@ describe('Assignees', (): void => {
             beforeEach((): void => {
               issueInterface.assignees = [
                 {
-                  login: 'dummy-exempt-assignee'
+                  login: 'dummy-exempt-assignee',
+                  type: 'User'
                 }
               ];
             });
@@ -744,7 +765,8 @@ describe('Assignees', (): void => {
           beforeEach((): void => {
             issueInterface.assignees = [
               {
-                login: 'dummy-exempt-assignee'
+                login: 'dummy-exempt-assignee',
+                type: 'User'
               }
             ];
           });
@@ -785,7 +807,8 @@ describe('Assignees', (): void => {
             beforeEach((): void => {
               issueInterface.assignees = [
                 {
-                  login: 'dummy-exempt-assignee'
+                  login: 'dummy-exempt-assignee',
+                  type: 'User'
                 }
               ];
             });
@@ -827,7 +850,8 @@ describe('Assignees', (): void => {
             beforeEach((): void => {
               issueInterface.assignees = [
                 {
-                  login: 'dummy-exempt-issue-assignee'
+                  login: 'dummy-exempt-issue-assignee',
+                  type: 'User'
                 }
               ];
             });

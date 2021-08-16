@@ -2,13 +2,13 @@
 
 Warns and then closes issues and PRs that have had no activity for a specified amount of time.
 
-The default configuration will:
+The default configuration will: 
 
 - Add a label "Stale" on issues and pull requests after 60 days of inactivity
 - Close the stale issues and pull requests after 7 days of inactivity
 - If an update/comment occur on stale issues or pull requests, the stale label will be removed and the timer will restart
 
-## Recommended permissions
+## Recommended permissions 
 
 For the execution of this action, it must be able to fetch all issues and pull requests from your repository.  
 In addition, based on the provided configuration, the action could require more permission(s) (e.g.: add label, remove label, comment, close, etc.).  

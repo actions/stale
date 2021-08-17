@@ -1,9 +1,9 @@
-name: 'Code scanning'
+name: 'Code scanning' 
 
 on:
   push:
     branches:
-      - main
+      - main 
   pull_request:
   schedule:
     - cron: '0 19 * * 0'

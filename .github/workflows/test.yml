@@ -17,11 +17,11 @@ jobs:
   test: # make sure the action works on a clean machine without building
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v2 
       - uses: ./
         id: stale
         with:
-          stale-issue-message: 'This issue is stale'
+          stale-issue-message: 'This issue is stale' 
           stale-pr-message: 'This PR is stale'
           debug-only: true
       - name: Print outputs

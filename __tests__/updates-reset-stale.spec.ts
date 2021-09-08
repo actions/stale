@@ -5,7 +5,7 @@ import {IssuesProcessorMock} from './classes/issues-processor-mock';
 import {DefaultProcessorOptions} from './constants/default-processor-options';
 import {generateIssue} from './functions/generate-issue';
 
-describe('ignore updates options', (): void => {
+describe('ignore-updates options', (): void => {
   let sut: SUT;
 
   beforeEach((): void => {

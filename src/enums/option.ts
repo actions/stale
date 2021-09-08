@@ -43,7 +43,7 @@ export enum Option {
   EnableStatistics = 'enable-statistics',
   LabelsToRemoveWhenUnstale = 'labels-to-remove-when-unstale',
   LabelsToAddWhenUnstale = 'labels-to-add-when-unstale',
-  ActivitiesResetStale = 'activities-reset-stale',
-  IssueActivitiesResetStale = 'issue-activities-reset-stale',
-  PrActivitiesResetStale = 'pr-activities-reset-stale'
+  IgnoreUpdates = 'ignore-updates',
+  IgnoreIssueUpdates = 'ignore-issue-updates',
+  IgnorePrUpdates = 'ignore-pr-updates'
 }

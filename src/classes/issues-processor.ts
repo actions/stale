@@ -16,7 +16,7 @@ import {IIssueEvent} from '../interfaces/issue-event';
 import {IIssuesProcessorOptions} from '../interfaces/issues-processor-options';
 import {IPullRequest} from '../interfaces/pull-request';
 import {Assignees} from './assignees';
-import {ActivitiesResetStale} from './activities-reset-stale';
+import {IgnoreUpdates} from './ignore-updates';
 import {Issue} from './issue';
 import {IssueLogger} from './loggers/issue-logger';
 import {Logger} from './loggers/logger';
@@ -408,41 +408,41 @@ export class IssuesProcessor {
     // Determine if this issue needs to be marked stale first
     if (!issue.isStale) {
       issueLogger.info(`This $$type is not stale`);
-      const shouldActivitiesResetStale: boolean = new ActivitiesResetStale(
+      const shouldIgnoreUpdates: boolean = new IgnoreUpdates(
         this.options,
         issue
-      ).shouldActivitiesResetStale();
+      ).shouldIgnoreUpdates();
 
       // Should this issue be marked as stale?
-      let shouldBeStale = false;
+      let shouldBeStale: boolean;
 
-      // Use the last update to check if we need to stale
-      if (shouldActivitiesResetStale) {
-        shouldBeStale = !IssuesProcessor._updatedSince(
-          issue.updated_at,
-          daysBeforeStale
-        );
-      }
       // Ignore the last update and only use the creation date
-      else {
+      if (shouldIgnoreUpdates) {
         shouldBeStale = !IssuesProcessor._updatedSince(
           issue.created_at,
           daysBeforeStale
         );
       }
+      // Use the last update to check if we need to stale
+      else {
+        shouldBeStale = !IssuesProcessor._updatedSince(
+          issue.updated_at,
+          daysBeforeStale
+        );
+      }
 
       if (shouldBeStale) {
-        if (shouldActivitiesResetStale) {
-          issueLogger.info(
-            `This $$type should be stale based on the last update date the ${getHumanizedDate(
-              new Date(issue.updated_at)
-            )} (${LoggerService.cyan(issue.updated_at)})`
-          );
-        } else {
+        if (shouldIgnoreUpdates) {
           issueLogger.info(
             `This $$type should be stale based on the creation date the ${getHumanizedDate(
               new Date(issue.created_at)
             )} (${LoggerService.cyan(issue.created_at)})`
+          );
+        } else {
+          issueLogger.info(
+            `This $$type should be stale based on the last update date the ${getHumanizedDate(
+              new Date(issue.updated_at)
+            )} (${LoggerService.cyan(issue.updated_at)})`
           );
         }
 
@@ -463,17 +463,17 @@ export class IssuesProcessor {
           );
         }
       } else {
-        if (shouldActivitiesResetStale) {
-          issueLogger.info(
-            `This $$type should not be stale based on the last update date the ${getHumanizedDate(
-              new Date(issue.updated_at)
-            )} (${LoggerService.cyan(issue.updated_at)})`
-          );
-        } else {
+        if (shouldIgnoreUpdates) {
           issueLogger.info(
             `This $$type should not be stale based on the creation date the ${getHumanizedDate(
               new Date(issue.created_at)
             )} (${LoggerService.cyan(issue.created_at)})`
+          );
+        } else {
+          issueLogger.info(
+            `This $$type should not be stale based on the last update date the ${getHumanizedDate(
+              new Date(issue.updated_at)
+            )} (${LoggerService.cyan(issue.updated_at)})`
           );
         }
       }

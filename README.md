@@ -127,6 +127,7 @@ You can fine tune which issues or pull requests should be marked as stale based 
 - [exempt-all-milestones](#exempt-all-milestones)
 - [exempt-assignees](#exempt-assignees)
 - [exempt-all-assignees](#exempt-all-assignees)
+- [ignore-updates](#ignore-updates)
 
 Default value: `60`
 

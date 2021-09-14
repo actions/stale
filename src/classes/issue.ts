@@ -7,7 +7,6 @@ import {ILabel} from '../interfaces/label';
 import {IMilestone} from '../interfaces/milestone';
 import {IsoDateString} from '../types/iso-date-string';
 import {Operations} from './operations';
-import {Logger} from './loggers/logger';
 
 export class Issue implements IIssue {
   readonly title: string;
@@ -39,16 +38,6 @@ export class Issue implements IIssue {
     this.locked = issue.locked;
     this.milestone = issue.milestone;
     this.assignees = issue.assignees;
-
-    // @todo remove this log
-    const logger: Logger = new Logger();
-    logger.info('Assignees:');
-    logger.info(
-      ...this.assignees.map((assignee: Assignee): string =>
-        JSON.stringify(assignee)
-      )
-    );
-
     this.isStale = isLabeled(this, this.staleLabel);
   }
 

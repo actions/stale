@@ -30,6 +30,36 @@ import {IIssue} from '../interfaces/issue';
  * Handle processing of issues for staleness/closure.
  */
 export class IssuesProcessor {
+  private static _updatedSince(timestamp: string, num_days: number): boolean {
+    const daysInMillis = 1000 * 60 * 60 * 24 * num_days;
+    const millisSinceLastUpdated =
+      new Date().getTime() - new Date(timestamp).getTime();
+
+    return millisSinceLastUpdated <= daysInMillis;
+  }
+
+  private static _endIssueProcessing(issue: Issue): void {
+    const consumedOperationsCount: number =
+      issue.operations.getConsumedOperationsCount();
+
+    if (consumedOperationsCount > 0) {
+      const issueLogger: IssueLogger = new IssueLogger(issue);
+
+      issueLogger.info(
+        LoggerService.cyan(consumedOperationsCount),
+        `operation${
+          consumedOperationsCount > 1 ? 's' : ''
+        } consumed for this $$type`
+      );
+    }
+  }
+
+  private static _getCloseLabelUsedOptionName(
+    issue: Readonly<Issue>
+  ): Option.ClosePrLabel | Option.CloseIssueLabel {
+    return issue.isPullRequest ? Option.ClosePrLabel : Option.CloseIssueLabel;
+  }
+
   readonly operations: StaleOperations;
   readonly client: InstanceType<typeof GitHub>;
   readonly options: IIssuesProcessorOptions;
@@ -64,44 +94,6 @@ export class IssuesProcessor {
     if (this.options.enableStatistics) {
       this._statistics = new Statistics();
     }
-  }
-
-  private static _updatedSince(timestamp: string, num_days: number): boolean {
-    const daysInMillis = 1000 * 60 * 60 * 24 * num_days;
-    const millisSinceLastUpdated =
-      new Date().getTime() - new Date(timestamp).getTime();
-
-    return millisSinceLastUpdated <= daysInMillis;
-  }
-
-  private static _endIssueProcessing(issue: Issue): void {
-    const consumedOperationsCount: number =
-      issue.operations.getConsumedOperationsCount();
-
-    if (consumedOperationsCount > 0) {
-      const issueLogger: IssueLogger = new IssueLogger(issue);
-
-      issueLogger.info(
-        LoggerService.cyan(consumedOperationsCount),
-        `operation${
-          consumedOperationsCount > 1 ? 's' : ''
-        } consumed for this $$type`
-      );
-    }
-  }
-
-  private static _getStaleMessageUsedOptionName(
-    issue: Readonly<Issue>
-  ): Option.StalePrMessage | Option.StaleIssueMessage {
-    return issue.isPullRequest
-      ? Option.StalePrMessage
-      : Option.StaleIssueMessage;
-  }
-
-  private static _getCloseLabelUsedOptionName(
-    issue: Readonly<Issue>
-  ): Option.ClosePrLabel | Option.CloseIssueLabel {
-    return issue.isPullRequest ? Option.ClosePrLabel : Option.CloseIssueLabel;
   }
 
   async processIssues(page: Readonly<number> = 1): Promise<number> {
@@ -863,11 +855,7 @@ export class IssuesProcessor {
   private async _deleteBranch(issue: Issue): Promise<void> {
     const issueLogger: IssueLogger = new IssueLogger(issue);
 
-    issueLogger.info(`Delete
-    branch from closed $
-    $type
-    -
-    ${issue.title}`);
+    issueLogger.info(`Delete branch from closed $$type - ${issue.title}`);
 
     const pullRequest = await this._getPullRequest(issue);
 

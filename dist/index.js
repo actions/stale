@@ -345,11 +345,6 @@ class IssuesProcessor {
             issueLogger.info(logger_service_1.LoggerService.cyan(consumedOperationsCount), `operation${consumedOperationsCount > 1 ? 's' : ''} consumed for this $$type`);
         }
     }
-    static _getStaleMessageUsedOptionName(issue) {
-        return issue.isPullRequest
-            ? option_1.Option.StalePrMessage
-            : option_1.Option.StaleIssueMessage;
-    }
     static _getCloseLabelUsedOptionName(issue) {
         return issue.isPullRequest ? option_1.Option.ClosePrLabel : option_1.Option.CloseIssueLabel;
     }

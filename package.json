@@ -17,6 +17,7 @@
     "test:only-errors": "jest --reporters jest-silent-reporter --silent",
     "test:watch": "jest --watch --notify --expand",
     "all": "npm run build && npm run format && npm run lint && npm run pack && npm test",
+    "all:ci": "npm run build && npm run lint:all && npm run pack && npm run test:only-errors",
     "prerelease": "npm run build && npm run pack",
     "release": "standard-version",
     "release:dry-run": "standard-version --dry-run"
@@ -53,7 +54,7 @@
     "ansi-styles": "5.2.0",
     "eslint": "^7.28.0",
     "eslint-plugin-github": "^4.1.2",
-    "eslint-plugin-jest": "^24.3.6",
+    "eslint-plugin-jest": "^24.4.2",
     "jest": "^26.6.3",
     "jest-circus": "^26.6.3",
     "jest-silent-reporter": "^0.4.0",

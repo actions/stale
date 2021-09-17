@@ -12,11 +12,11 @@ import {cleanLabel} from '../functions/clean-label';
 import {shouldMarkWhenStale} from '../functions/should-mark-when-stale';
 import {wordsToList} from '../functions/words-to-list';
 import {IComment} from '../interfaces/comment';
-import {IIssue} from '../interfaces/issue';
 import {IIssueEvent} from '../interfaces/issue-event';
 import {IIssuesProcessorOptions} from '../interfaces/issues-processor-options';
 import {IPullRequest} from '../interfaces/pull-request';
 import {Assignees} from './assignees';
+import {IgnoreUpdates} from './ignore-updates';
 import {Issue} from './issue';
 import {IssueLogger} from './loggers/issue-logger';
 import {Logger} from './loggers/logger';
@@ -24,6 +24,7 @@ import {Milestones} from './milestones';
 import {StaleOperations} from './stale-operations';
 import {Statistics} from './statistics';
 import {LoggerService} from '../services/logger.service';
+import {IIssue} from '../interfaces/issue';
 
 /***
  * Handle processing of issues for staleness/closure.
@@ -53,22 +54,12 @@ export class IssuesProcessor {
     }
   }
 
-  private static _getStaleMessageUsedOptionName(
-    issue: Readonly<Issue>
-  ): Option.StalePrMessage | Option.StaleIssueMessage {
-    return issue.isPullRequest
-      ? Option.StalePrMessage
-      : Option.StaleIssueMessage;
-  }
-
   private static _getCloseLabelUsedOptionName(
     issue: Readonly<Issue>
   ): Option.ClosePrLabel | Option.CloseIssueLabel {
     return issue.isPullRequest ? Option.ClosePrLabel : Option.CloseIssueLabel;
   }
 
-  private readonly _logger: Logger = new Logger();
-  private readonly _statistics: Statistics | undefined;
   readonly operations: StaleOperations;
   readonly client: InstanceType<typeof GitHub>;
   readonly options: IIssuesProcessorOptions;
@@ -77,6 +68,8 @@ export class IssuesProcessor {
   readonly deletedBranchIssues: Issue[] = [];
   readonly removedLabelIssues: Issue[] = [];
   readonly addedLabelIssues: Issue[] = [];
+  private readonly _logger: Logger = new Logger();
+  private readonly _statistics: Statistics | undefined;
 
   constructor(options: IIssuesProcessorOptions) {
     this.options = options;
@@ -404,23 +397,46 @@ export class IssuesProcessor {
       return; // Don't process exempt assignees
     }
 
-    // Should this issue be marked stale?
-    const shouldBeStale = !IssuesProcessor._updatedSince(
-      issue.updated_at,
-      daysBeforeStale
-    );
-
     // Determine if this issue needs to be marked stale first
     if (!issue.isStale) {
       issueLogger.info(`This $$type is not stale`);
-      const updatedAtDate: Date = new Date(issue.updated_at);
+      const shouldIgnoreUpdates: boolean = new IgnoreUpdates(
+        this.options,
+        issue
+      ).shouldIgnoreUpdates();
+
+      // Should this issue be marked as stale?
+      let shouldBeStale: boolean;
+
+      // Ignore the last update and only use the creation date
+      if (shouldIgnoreUpdates) {
+        shouldBeStale = !IssuesProcessor._updatedSince(
+          issue.created_at,
+          daysBeforeStale
+        );
+      }
+      // Use the last update to check if we need to stale
+      else {
+        shouldBeStale = !IssuesProcessor._updatedSince(
+          issue.updated_at,
+          daysBeforeStale
+        );
+      }
 
       if (shouldBeStale) {
-        issueLogger.info(
-          `This $$type should be stale based on the last update date the ${getHumanizedDate(
-            updatedAtDate
-          )} (${LoggerService.cyan(issue.updated_at)})`
-        );
+        if (shouldIgnoreUpdates) {
+          issueLogger.info(
+            `This $$type should be stale based on the creation date the ${getHumanizedDate(
+              new Date(issue.created_at)
+            )} (${LoggerService.cyan(issue.created_at)})`
+          );
+        } else {
+          issueLogger.info(
+            `This $$type should be stale based on the last update date the ${getHumanizedDate(
+              new Date(issue.updated_at)
+            )} (${LoggerService.cyan(issue.updated_at)})`
+          );
+        }
 
         if (shouldMarkAsStale) {
           issueLogger.info(
@@ -439,11 +455,19 @@ export class IssuesProcessor {
           );
         }
       } else {
-        issueLogger.info(
-          `This $$type should not be stale based on the last update date the ${getHumanizedDate(
-            updatedAtDate
-          )} (${LoggerService.cyan(issue.updated_at)})`
-        );
+        if (shouldIgnoreUpdates) {
+          issueLogger.info(
+            `This $$type should not be stale based on the creation date the ${getHumanizedDate(
+              new Date(issue.created_at)
+            )} (${LoggerService.cyan(issue.created_at)})`
+          );
+        } else {
+          issueLogger.info(
+            `This $$type should not be stale based on the last update date the ${getHumanizedDate(
+              new Date(issue.updated_at)
+            )} (${LoggerService.cyan(issue.updated_at)})`
+          );
+        }
       }
     }
 

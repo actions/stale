@@ -8,7 +8,7 @@ import {generateIssue} from './functions/generate-issue';
 let issuesProcessorBuilder: IssuesProcessorBuilder;
 let issuesProcessor: IssuesProcessorMock;
 
-describe('only-labels option', (): void => {
+describe('only-labels options', (): void => {
   beforeEach((): void => {
     issuesProcessorBuilder = new IssuesProcessorBuilder();
   });

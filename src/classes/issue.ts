@@ -1,6 +1,6 @@
 import {isLabeled} from '../functions/is-labeled';
 import {isPullRequest} from '../functions/is-pull-request';
-import {IAssignee} from '../interfaces/assignee';
+import {Assignee} from '../interfaces/assignee';
 import {IIssue} from '../interfaces/issue';
 import {IIssuesProcessorOptions} from '../interfaces/issues-processor-options';
 import {ILabel} from '../interfaces/label';
@@ -9,7 +9,6 @@ import {IsoDateString} from '../types/iso-date-string';
 import {Operations} from './operations';
 
 export class Issue implements IIssue {
-  private readonly _options: IIssuesProcessorOptions;
   readonly title: string;
   readonly number: number;
   created_at: IsoDateString;
@@ -19,21 +18,10 @@ export class Issue implements IIssue {
   readonly state: string | 'closed' | 'open';
   readonly locked: boolean;
   readonly milestone: IMilestone | undefined;
-  readonly assignees: IAssignee[];
+  readonly assignees: Assignee[];
   isStale: boolean;
   operations = new Operations();
-
-  get isPullRequest(): boolean {
-    return isPullRequest(this);
-  }
-
-  get staleLabel(): string {
-    return this._getStaleLabel();
-  }
-
-  get hasAssignees(): boolean {
-    return this.assignees.length > 0;
-  }
+  private readonly _options: IIssuesProcessorOptions;
 
   constructor(
     options: Readonly<IIssuesProcessorOptions>,
@@ -50,8 +38,19 @@ export class Issue implements IIssue {
     this.locked = issue.locked;
     this.milestone = issue.milestone;
     this.assignees = issue.assignees;
-
     this.isStale = isLabeled(this, this.staleLabel);
+  }
+
+  get isPullRequest(): boolean {
+    return isPullRequest(this);
+  }
+
+  get staleLabel(): string {
+    return this._getStaleLabel();
+  }
+
+  get hasAssignees(): boolean {
+    return this.assignees.length > 0;
   }
 
   private _getStaleLabel(): string {

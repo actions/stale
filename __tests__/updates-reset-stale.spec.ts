@@ -658,7 +658,7 @@ class SUT {
     return this;
   }
 
-  async test(): Promise<number> {
+  async test(): Promise<void> {
     return this._setTestIssueList()._setProcessor();
   }
 
@@ -683,7 +683,7 @@ class SUT {
     return this;
   }
 
-  private async _setProcessor(): Promise<number> {
+  private async _setProcessor(): Promise<void> {
     this.processor = new IssuesProcessorMock(
       this._opts,
       async p => (p === 1 ? this._testIssueList : []),

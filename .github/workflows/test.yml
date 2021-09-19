@@ -13,7 +13,7 @@ jobs:
       - uses: actions/checkout@v2
       - run: |
           npm ci
-          npm run build
+          npm run build && npm run pack
   lint:
     runs-on: ubuntu-latest
     steps:
@@ -21,13 +21,6 @@ jobs:
       - run: |
           npm ci
           npm run lint:all
-  pack:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - run: |
-          npm ci
-          npm run pack
   test:
     runs-on: ubuntu-latest
     steps:

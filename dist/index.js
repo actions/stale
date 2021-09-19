@@ -263,7 +263,6 @@ exports.Issue = void 0;
 const is_labeled_1 = __nccwpck_require__(6792);
 const is_pull_request_1 = __nccwpck_require__(5400);
 const operations_1 = __nccwpck_require__(7957);
-const logger_1 = __nccwpck_require__(6212);
 class Issue {
     constructor(options, issue) {
         this.operations = new operations_1.Operations();
@@ -278,10 +277,6 @@ class Issue {
         this.locked = issue.locked;
         this.milestone = issue.milestone;
         this.assignees = issue.assignees;
-        // @todo remove this log
-        const logger = new logger_1.Logger();
-        logger.info('Assignees:');
-        logger.info(...this.assignees.map((assignee) => JSON.stringify(assignee)));
         this.isStale = is_labeled_1.isLabeled(this, this.staleLabel);
     }
     get isPullRequest() {
@@ -370,9 +365,8 @@ class IssuesProcessor {
         this.deletedBranchIssues = [];
         this.removedLabelIssues = [];
         this.addedLabelIssues = [];
-        this._logger = new logger_1.Logger();
-        this.addedStaleCommentIssues = [];
         this.addedCloseCommentIssues = [];
+        this._logger = new logger_1.Logger();
         this.options = options;
         this.client = github_1.getOctokit(this.options.repoToken);
         this.operations = new stale_operations_1.StaleOperations(this.options);
@@ -9178,12 +9172,12 @@ module.exports = require("zlib");;
 /******/ 	/* webpack/runtime/compat */
 /******/ 	
 /******/ 	if (typeof __nccwpck_require__ !== 'undefined') __nccwpck_require__.ab = __dirname + "/";/************************************************************************/
-/******/
+/******/ 	
 /******/ 	// startup
 /******/ 	// Load entry module and return exports
 /******/ 	// This entry module is referenced by other modules so it can't be inlined
 /******/ 	var __webpack_exports__ = __nccwpck_require__(3109);
 /******/ 	module.exports = __webpack_exports__;
-/******/
+/******/ 	
 /******/ })()
 ;

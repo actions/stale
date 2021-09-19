@@ -70,8 +70,8 @@ export class IssuesProcessor {
   readonly removedLabelIssues: Issue[] = [];
   readonly addedLabelIssues: Issue[] = [];
   readonly addedCloseCommentIssues: Issue[] = [];
+  readonly statistics: Statistics | undefined;
   private readonly _logger: Logger = new Logger();
-  private readonly _statistics: Statistics | undefined;
 
   constructor(options: IIssuesProcessorOptions) {
     this.options = options;

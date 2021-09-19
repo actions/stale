@@ -53,8 +53,8 @@ Every argument is optional.
 | [any-of-labels](#any-of-labels)                                     | Only issues/PRs with ANY of these labels are checked                        |                       |
 | [any-of-issue-labels](#any-of-issue-labels)                         | Override [any-of-labels](#any-of-labels) for issues only                    |                       |
 | [any-of-pr-labels](#any-of-pr-labels)                               | Override [any-of-labels](#any-of-labels) for PRs only                       |                       |
-| [query-operations-per-run](#query-operations-per-run)               | Max number of query operations per run (GitHub read)                     | `30`                  |
-| [mutation-operations-per-run](#mutation-operations-per-run)         | Max number of mutation operations per run (GitHub write)                 | `200`                 |
+| [query-operations-per-run](#query-operations-per-run)               | Max number of query operations per run (GitHub read)                        | `30`                  |
+| [mutation-operations-per-run](#mutation-operations-per-run)         | Max number of mutation operations per run (GitHub write)                    | `200`                 |
 | [remove-stale-when-updated](#remove-stale-when-updated)             | Remove stale label from issues/PRs on updates                               | `true`                |
 | [remove-issue-stale-when-updated](#remove-issue-stale-when-updated) | Remove stale label from issues on updates/comments                          |                       |
 | [remove-pr-stale-when-updated](#remove-pr-stale-when-updated)       | Remove stale label from PRs on updates/comments                             |                       |

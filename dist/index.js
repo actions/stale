@@ -143,6 +143,55 @@ exports.Assignees = Assignees;
 
 /***/ }),
 
+/***/ 854:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ExemptDraftPullRequest = void 0;
+const option_1 = __nccwpck_require__(5931);
+const logger_service_1 = __nccwpck_require__(1973);
+const issue_logger_1 = __nccwpck_require__(2984);
+class ExemptDraftPullRequest {
+    constructor(options, issue) {
+        this._options = options;
+        this._issue = issue;
+        this._issueLogger = new issue_logger_1.IssueLogger(issue);
+    }
+    shouldExemptDraftPullRequest(pullRequestCallback) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (this._issue.isPullRequest) {
+                if (this._options.exemptDraftPr) {
+                    this._issueLogger.info(`The option ${this._issueLogger.createOptionLink(option_1.Option.ExemptDraftPr)} is enabled`);
+                    const pullRequest = yield pullRequestCallback();
+                    if ((pullRequest === null || pullRequest === void 0 ? void 0 : pullRequest.draft) === true) {
+                        this._issueLogger.info(logger_service_1.LoggerService.white('└──'), `Skip the $$type draft checks`);
+                        return true;
+                    }
+                    else {
+                        this._issueLogger.info(logger_service_1.LoggerService.white('└──'), `Continuing the process for this $$type because it is not a draft`);
+                    }
+                }
+            }
+            return false;
+        });
+    }
+}
+exports.ExemptDraftPullRequest = ExemptDraftPullRequest;
+
+
+/***/ }),
+
 /***/ 2935:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
@@ -214,7 +263,6 @@ exports.Issue = void 0;
 const is_labeled_1 = __nccwpck_require__(6792);
 const is_pull_request_1 = __nccwpck_require__(5400);
 const operations_1 = __nccwpck_require__(7957);
-const logger_1 = __nccwpck_require__(6212);
 class Issue {
     constructor(options, issue) {
         this.operations = new operations_1.Operations();
@@ -229,10 +277,6 @@ class Issue {
         this.locked = issue.locked;
         this.milestone = issue.milestone;
         this.assignees = issue.assignees;
-        // @todo remove this log
-        const logger = new logger_1.Logger();
-        logger.info('Assignees:');
-        logger.info(...this.assignees.map((assignee) => JSON.stringify(assignee)));
         this.isStale = is_labeled_1.isLabeled(this, this.staleLabel);
     }
     get isPullRequest() {
@@ -519,8 +563,6 @@ class IssuesProcessor {
                 IssuesProcessor._endIssueProcessing(issue);
                 return; // Don't process draft PR
             }
-            // Should this issue be marked stale?
-            const shouldBeStale = !IssuesProcessor._updatedSince(issue.updated_at, daysBeforeStale);
             // Determine if this issue needs to be marked stale first
             if (!issue.isStale) {
                 issueLogger.info(`This $$type is not stale`);
@@ -837,11 +879,7 @@ class IssuesProcessor {
         var _a;
         return __awaiter(this, void 0, void 0, function* () {
             const issueLogger = new issue_logger_1.IssueLogger(issue);
-            issueLogger.info(`Delete
-    branch from closed $
-    $type
-    -
-    ${issue.title}`);
+            issueLogger.info(`Delete branch from closed $$type - ${issue.title}`);
             const pullRequest = yield this.getPullRequest(issue);
             if (!pullRequest) {
                 issueLogger.info(`Not deleting this branch as no pull request was found for this $$type`);
@@ -2139,7 +2177,7 @@ function _getAndValidateArgs() {
         labelsToAddWhenUnstale: core.getInput('labels-to-add-when-unstale'),
         ignoreUpdates: core.getInput('ignore-updates') === 'true',
         ignoreIssueUpdates: _toOptionalBoolean('ignore-issue-updates'),
-        ignorePrUpdates: _toOptionalBoolean('ignore-pr-updates')
+        ignorePrUpdates: _toOptionalBoolean('ignore-pr-updates'),
         exemptDraftPr: core.getInput('exempt-draft-pr') === 'true'
     };
     for (const numberInput of [
@@ -9109,12 +9147,12 @@ module.exports = require("zlib");;
 /******/ 	/* webpack/runtime/compat */
 /******/ 	
 /******/ 	if (typeof __nccwpck_require__ !== 'undefined') __nccwpck_require__.ab = __dirname + "/";/************************************************************************/
-/******/
+/******/ 	
 /******/ 	// startup
 /******/ 	// Load entry module and return exports
 /******/ 	// This entry module is referenced by other modules so it can't be inlined
 /******/ 	var __webpack_exports__ = __nccwpck_require__(3109);
 /******/ 	module.exports = __webpack_exports__;
-/******/
+/******/ 	
 /******/ })()
 ;

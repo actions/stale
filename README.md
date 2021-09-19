@@ -75,7 +75,7 @@ Every argument is optional.
 | [exempt-all-assignees](#exempt-all-assignees)                       | Exempt all issues/PRs with assignees from stale                             | `false`               |
 | [exempt-all-issue-assignees](#exempt-all-issue-assignees)           | Override [exempt-all-assignees](#exempt-all-assignees) for issues only      |                       |
 | [exempt-all-pr-assignees](#exempt-all-pr-assignees)                 | Override [exempt-all-assignees](#exempt-all-assignees) for PRs only         |                       |
-| [exempt-draft-pr](#exempt-draft-pr)                                 | Skip the stale action for draft PRs                                      | `false`               |
+| [exempt-draft-pr](#exempt-draft-pr)                                 | Skip the stale action for draft PRs                                         | `false`               |
 | [enable-statistics](#enable-statistics)                             | Display statistics in the logs                                              | `true`                |
 | [ignore-updates](#ignore-updates)                                   | Any update (update/comment) can reset the stale idle time on the issues/PRs | `false`               |
 | [ignore-issue-updates](#ignore-issue-updates)                       | Override [ignore-updates](#ignore-updates) for issues only                  |                       |

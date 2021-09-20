@@ -164,6 +164,10 @@ inputs:
     description: 'Exempt all pull requests with assignees from being marked as stale. Override "exempt-all-assignees" option regarding only the pull requests.'
     default: ''
     required: false
+  exempt-draft-pr:
+    description: 'Exempt draft pull requests from being marked as stale. Default to false.'
+    default: 'false'
+    required: false
   enable-statistics:
     description: 'Display some statistics at the end regarding the stale workflow (only when the logs are enabled).'
     default: 'true'

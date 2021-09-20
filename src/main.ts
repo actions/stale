@@ -86,7 +86,8 @@ function _getAndValidateArgs(): IIssuesProcessorOptions {
     labelsToAddWhenUnstale: core.getInput('labels-to-add-when-unstale'),
     ignoreUpdates: core.getInput('ignore-updates') === 'true',
     ignoreIssueUpdates: _toOptionalBoolean('ignore-issue-updates'),
-    ignorePrUpdates: _toOptionalBoolean('ignore-pr-updates')
+    ignorePrUpdates: _toOptionalBoolean('ignore-pr-updates'),
+    exemptDraftPr: core.getInput('exempt-draft-pr') === 'true'
   };
 
   for (const numberInput of [

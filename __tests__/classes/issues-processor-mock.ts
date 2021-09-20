@@ -2,6 +2,7 @@ import {Issue} from '../../src/classes/issue';
 import {IssuesProcessor} from '../../src/classes/issues-processor';
 import {IComment} from '../../src/interfaces/comment';
 import {IIssuesProcessorOptions} from '../../src/interfaces/issues-processor-options';
+import {IPullRequest} from '../../src/interfaces/pull-request';
 
 export class IssuesProcessorMock extends IssuesProcessor {
   constructor(
@@ -14,7 +15,8 @@ export class IssuesProcessorMock extends IssuesProcessor {
     getLabelCreationDate?: (
       issue: Issue,
       label: string
-    ) => Promise<string | undefined>
+    ) => Promise<string | undefined>,
+    getPullRequest?: (issue: Issue) => Promise<IPullRequest | undefined | void>
   ) {
     super(options);
 
@@ -28,6 +30,10 @@ export class IssuesProcessorMock extends IssuesProcessor {
 
     if (getLabelCreationDate) {
       this.getLabelCreationDate = getLabelCreationDate;
+    }
+
+    if (getPullRequest) {
+      this.getPullRequest = getPullRequest;
     }
   }
 }

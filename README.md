@@ -75,6 +75,7 @@ Every argument is optional.
 | [exempt-all-assignees](#exempt-all-assignees)                       | Exempt all issues/PRs with assignees from stale                             | `false`               |
 | [exempt-all-issue-assignees](#exempt-all-issue-assignees)           | Override [exempt-all-assignees](#exempt-all-assignees) for issues only      |                       |
 | [exempt-all-pr-assignees](#exempt-all-pr-assignees)                 | Override [exempt-all-assignees](#exempt-all-assignees) for PRs only         |                       |
+| [exempt-draft-pr](#exempt-draft-pr)                                 | Skip the stale action for draft PRs                                         | `false`               |
 | [enable-statistics](#enable-statistics)                             | Display statistics in the logs                                              | `true`                |
 | [ignore-updates](#ignore-updates)                                   | Any update (update/comment) can reset the stale idle time on the issues/PRs | `false`               |
 | [ignore-issue-updates](#ignore-issue-updates)                       | Override [ignore-updates](#ignore-updates) for issues only                  |                       |
@@ -471,6 +472,14 @@ Default value: unset
 Override [exempt-all-assignees](#exempt-all-assignees) but only to exempt the pull requests with an assignee to be marked as stale automatically.
 
 Default value: unset
+
+#### exempt-draft-pr
+
+If set to `true`, the pull requests currently in draft will not be marked as stale automatically.  
+⚠️ This option consume one operation per pull request to process because we need to fetch the pull request with the GitHub API to know if it's a draft one or not.
+
+Default value: `false`  
+Required Permission: `pull-requests: read`
 
 #### enable-statistics
 

@@ -143,6 +143,55 @@ exports.Assignees = Assignees;
 
 /***/ }),
 
+/***/ 854:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ExemptDraftPullRequest = void 0;
+const option_1 = __nccwpck_require__(5931);
+const logger_service_1 = __nccwpck_require__(1973);
+const issue_logger_1 = __nccwpck_require__(2984);
+class ExemptDraftPullRequest {
+    constructor(options, issue) {
+        this._options = options;
+        this._issue = issue;
+        this._issueLogger = new issue_logger_1.IssueLogger(issue);
+    }
+    shouldExemptDraftPullRequest(pullRequestCallback) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (this._issue.isPullRequest) {
+                if (this._options.exemptDraftPr) {
+                    this._issueLogger.info(`The option ${this._issueLogger.createOptionLink(option_1.Option.ExemptDraftPr)} is enabled`);
+                    const pullRequest = yield pullRequestCallback();
+                    if ((pullRequest === null || pullRequest === void 0 ? void 0 : pullRequest.draft) === true) {
+                        this._issueLogger.info(logger_service_1.LoggerService.white('└──'), `Skip the $$type draft checks`);
+                        return true;
+                    }
+                    else {
+                        this._issueLogger.info(logger_service_1.LoggerService.white('└──'), `Continuing the process for this $$type because it is not a draft`);
+                    }
+                }
+            }
+            return false;
+        });
+    }
+}
+exports.ExemptDraftPullRequest = ExemptDraftPullRequest;
+
+
+/***/ }),
+
 /***/ 2935:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
@@ -298,6 +347,7 @@ const should_mark_when_stale_1 = __nccwpck_require__(2461);
 const words_to_list_1 = __nccwpck_require__(1883);
 const assignees_1 = __nccwpck_require__(7236);
 const ignore_updates_1 = __nccwpck_require__(2935);
+const exempt_draft_pull_request_1 = __nccwpck_require__(854);
 const issue_1 = __nccwpck_require__(4783);
 const issue_logger_1 = __nccwpck_require__(2984);
 const logger_1 = __nccwpck_require__(6212);
@@ -404,6 +454,16 @@ class IssuesProcessor {
             const daysBeforeStale = issue.isPullRequest
                 ? this._getDaysBeforePrStale()
                 : this._getDaysBeforeIssueStale();
+            if (issue.state === 'closed') {
+                issueLogger.info(`Skipping this $$type because it is closed`);
+                IssuesProcessor._endIssueProcessing(issue);
+                return; // Don't process closed issues
+            }
+            if (issue.locked) {
+                issueLogger.info(`Skipping this $$type because it is locked`);
+                IssuesProcessor._endIssueProcessing(issue);
+                return; // Don't process locked issues
+            }
             const onlyLabels = words_to_list_1.wordsToList(this._getOnlyLabels(issue));
             if (onlyLabels.length > 0) {
                 issueLogger.info(`The option ${issueLogger.createOptionLink(option_1.Option.OnlyLabels)} was specified to only process issues and pull requests with all those labels (${logger_service_1.LoggerService.cyan(onlyLabels.length)})`);
@@ -426,16 +486,6 @@ class IssuesProcessor {
             }
             issueLogger.info(`Days before $$type stale: ${logger_service_1.LoggerService.cyan(daysBeforeStale)}`);
             const shouldMarkAsStale = should_mark_when_stale_1.shouldMarkWhenStale(daysBeforeStale);
-            if (issue.state === 'closed') {
-                issueLogger.info(`Skipping this $$type because it is closed`);
-                IssuesProcessor._endIssueProcessing(issue);
-                return; // Don't process closed issues
-            }
-            if (issue.locked) {
-                issueLogger.info(`Skipping this $$type because it is locked`);
-                IssuesProcessor._endIssueProcessing(issue);
-                return; // Don't process locked issues
-            }
             // Try to remove the close label when not close/locked issue or PR
             yield this._removeCloseLabel(issue, closeLabel);
             if (this.options.startDate) {
@@ -502,6 +552,16 @@ class IssuesProcessor {
             if (assignees.shouldExemptAssignees()) {
                 IssuesProcessor._endIssueProcessing(issue);
                 return; // Don't process exempt assignees
+            }
+            // Ignore draft PR
+            // Note that this check is so far below because it cost one read operation
+            // So it's simply better to do all the stale checks which don't cost more operation before this one
+            const exemptDraftPullRequest = new exempt_draft_pull_request_1.ExemptDraftPullRequest(this.options, issue);
+            if (yield exemptDraftPullRequest.shouldExemptDraftPullRequest(() => __awaiter(this, void 0, void 0, function* () {
+                return this.getPullRequest(issue);
+            }))) {
+                IssuesProcessor._endIssueProcessing(issue);
+                return; // Don't process draft PR
             }
             // Determine if this issue needs to be marked stale first
             if (!issue.isStale) {
@@ -624,6 +684,25 @@ class IssuesProcessor {
             return staleLabeledEvent.created_at;
         });
     }
+    getPullRequest(issue) {
+        var _a;
+        return __awaiter(this, void 0, void 0, function* () {
+            const issueLogger = new issue_logger_1.IssueLogger(issue);
+            try {
+                this._consumeIssueOperation(issue);
+                (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.incrementFetchedPullRequestsCount();
+                const pullRequest = yield this.client.pulls.get({
+                    owner: github_1.context.repo.owner,
+                    repo: github_1.context.repo.repo,
+                    pull_number: issue.number
+                });
+                return pullRequest.data;
+            }
+            catch (error) {
+                issueLogger.error(`Error when getting this $$type: ${error.message}`);
+            }
+        });
+    }
     // handle all of the stale issue logic when we find a stale issue
     _processStaleIssue(issue, staleLabel, staleMessage, labelsToAddWhenUnstale, labelsToRemoveWhenUnstale, closeMessage, closeLabel) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -664,7 +743,7 @@ class IssuesProcessor {
                 issueLogger.info(`Closing $$type because it was last updated on: ${logger_service_1.LoggerService.cyan(issue.updated_at)}`);
                 yield this._closeIssue(issue, closeMessage, closeLabel);
                 if (this.options.deleteBranch && issue.pull_request) {
-                    issueLogger.info(`Deleting the branch since the option ${issueLogger.createOptionLink(option_1.Option.DeleteBranch)} was specified`);
+                    issueLogger.info(`Deleting the branch since the option ${issueLogger.createOptionLink(option_1.Option.DeleteBranch)} is enabled`);
                     yield this._deleteBranch(issue);
                     this.deletedBranchIssues.push(issue);
                 }
@@ -795,32 +874,13 @@ class IssuesProcessor {
             }
         });
     }
-    _getPullRequest(issue) {
-        var _a;
-        return __awaiter(this, void 0, void 0, function* () {
-            const issueLogger = new issue_logger_1.IssueLogger(issue);
-            try {
-                this._consumeIssueOperation(issue);
-                (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.incrementFetchedPullRequestsCount();
-                const pullRequest = yield this.client.pulls.get({
-                    owner: github_1.context.repo.owner,
-                    repo: github_1.context.repo.repo,
-                    pull_number: issue.number
-                });
-                return pullRequest.data;
-            }
-            catch (error) {
-                issueLogger.error(`Error when getting this $$type: ${error.message}`);
-            }
-        });
-    }
     // Delete the branch on closed pull request
     _deleteBranch(issue) {
         var _a;
         return __awaiter(this, void 0, void 0, function* () {
             const issueLogger = new issue_logger_1.IssueLogger(issue);
             issueLogger.info(`Delete branch from closed $$type - ${issue.title}`);
-            const pullRequest = yield this._getPullRequest(issue);
+            const pullRequest = yield this.getPullRequest(issue);
             if (!pullRequest) {
                 issueLogger.info(`Not deleting this branch as no pull request was found for this $$type`);
                 return;
@@ -1807,6 +1867,7 @@ var Option;
     Option["IgnoreUpdates"] = "ignore-updates";
     Option["IgnoreIssueUpdates"] = "ignore-issue-updates";
     Option["IgnorePrUpdates"] = "ignore-pr-updates";
+    Option["ExemptDraftPr"] = "exempt-draft-pr";
 })(Option = exports.Option || (exports.Option = {}));
 
 
@@ -2116,7 +2177,8 @@ function _getAndValidateArgs() {
         labelsToAddWhenUnstale: core.getInput('labels-to-add-when-unstale'),
         ignoreUpdates: core.getInput('ignore-updates') === 'true',
         ignoreIssueUpdates: _toOptionalBoolean('ignore-issue-updates'),
-        ignorePrUpdates: _toOptionalBoolean('ignore-pr-updates')
+        ignorePrUpdates: _toOptionalBoolean('ignore-pr-updates'),
+        exemptDraftPr: core.getInput('exempt-draft-pr') === 'true'
     };
     for (const numberInput of [
         'days-before-stale',

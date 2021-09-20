@@ -60,7 +60,8 @@ describe('Issue', (): void => {
       labelsToAddWhenUnstale: '',
       ignoreUpdates: false,
       ignoreIssueUpdates: undefined,
-      ignorePrUpdates: undefined
+      ignorePrUpdates: undefined,
+      exemptDraftPr: false
     };
     issueInterface = {
       title: 'dummy-title',

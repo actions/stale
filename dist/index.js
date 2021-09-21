@@ -691,7 +691,7 @@ class IssuesProcessor {
             const issueLogger = new issue_logger_1.IssueLogger(issue);
             try {
                 this._consumeIssueOperation(issue);
-                (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.incrementFetchedPullRequestsCount();
+                (_a = this.statistics) === null || _a === void 0 ? void 0 : _a.incrementFetchedPullRequestsCount();
                 const pullRequest = yield this.client.pulls.get({
                     owner: github_1.context.repo.owner,
                     repo: github_1.context.repo.repo,
@@ -873,25 +873,6 @@ class IssuesProcessor {
             }
             catch (error) {
                 issueLogger.error(`Error when updating this $$type: ${error.message}`);
-            }
-        });
-    }
-    _getPullRequest(issue) {
-        var _a;
-        return __awaiter(this, void 0, void 0, function* () {
-            const issueLogger = new issue_logger_1.IssueLogger(issue);
-            try {
-                this._consumeIssueOperation(issue);
-                (_a = this.statistics) === null || _a === void 0 ? void 0 : _a.incrementFetchedPullRequestsCount();
-                const pullRequest = yield this.client.pulls.get({
-                    owner: github_1.context.repo.owner,
-                    repo: github_1.context.repo.repo,
-                    pull_number: issue.number
-                });
-                return pullRequest.data;
-            }
-            catch (error) {
-                issueLogger.error(`Error when getting this $$type: ${error.message}`);
             }
         });
     }

@@ -599,7 +599,7 @@ export class IssuesProcessor {
 
     try {
       this._consumeIssueOperation(issue);
-      this._statistics?.incrementFetchedPullRequestsCount();
+      this.statistics?.incrementFetchedPullRequestsCount();
 
       const pullRequest = await this.client.pulls.get({
         owner: context.repo.owner,

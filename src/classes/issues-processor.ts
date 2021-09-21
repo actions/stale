@@ -859,27 +859,6 @@ export class IssuesProcessor {
     }
   }
 
-  private async _getPullRequest(
-    issue: Issue
-  ): Promise<IPullRequest | undefined | void> {
-    const issueLogger: IssueLogger = new IssueLogger(issue);
-
-    try {
-      this._consumeIssueQueryOperation(issue);
-      this._statistics?.incrementFetchedPullRequestsCount();
-
-      const pullRequest = await this.client.pulls.get({
-        owner: context.repo.owner,
-        repo: context.repo.repo,
-        pull_number: issue.number
-      });
-
-      return pullRequest.data;
-    } catch (error) {
-      issueLogger.error(`Error when getting this $$type: ${error.message}`);
-    }
-  }
-
   // Delete the branch on closed pull request
   private async _deleteBranch(issue: Issue): Promise<void> {
     const issueLogger: IssueLogger = new IssueLogger(issue);

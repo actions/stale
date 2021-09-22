@@ -385,24 +385,23 @@ class IssuesProcessor {
         return millisSinceLastUpdated <= daysInMillis;
     }
     static _endIssueProcessing(issue) {
-        const consumedOperationsCount = issue.operations.getConsumedOperationsCount();
-        if (consumedOperationsCount > 0) {
+        const consumedQueryOperationsCount = issue.operations.getConsumedQueryOperationsCount();
+        if (consumedQueryOperationsCount > 0) {
             const issueLogger = new issue_logger_1.IssueLogger(issue);
-            issueLogger.info(logger_service_1.LoggerService.cyan(consumedOperationsCount), `operation${consumedOperationsCount > 1 ? 's' : ''} consumed for this $$type`);
+            issueLogger.info(logger_service_1.LoggerService.cyan(consumedQueryOperationsCount), `query operation${consumedQueryOperationsCount > 1 ? 's' : ''} consumed for this $$type`);
         }
     }
     static _getCloseLabelUsedOptionName(issue) {
         return issue.isPullRequest ? option_1.Option.ClosePrLabel : option_1.Option.CloseIssueLabel;
     }
     processIssues(page = 1) {
-        var _a, _b;
         return __awaiter(this, void 0, void 0, function* () {
             // get the next batch of issues
             const issues = yield this.getIssues(page);
             if (issues.length <= 0) {
                 this._logger.info(logger_service_1.LoggerService.green(`No more issues found to process. Exiting...`));
-                (_a = this.statistics) === null || _a === void 0 ? void 0 : _a.setOperationsCount(this.operations.getConsumedOperationsCount()).logStats();
-                return this.operations.getRemainingOperationsCount();
+                this._onProcessingCompletion();
+                return;
             }
             else {
                 this._logger.info(`${logger_service_1.LoggerService.yellow('Processing the batch of issues')} ${logger_service_1.LoggerService.cyan(`#${page}`)} ${logger_service_1.LoggerService.yellow('containing')} ${logger_service_1.LoggerService.cyan(issues.length)} ${logger_service_1.LoggerService.yellow(`issue${issues.length > 1 ? 's' : ''}...`)}`);
@@ -411,7 +410,7 @@ class IssuesProcessor {
             const labelsToRemoveWhenUnstale = words_to_list_1.wordsToList(this.options.labelsToRemoveWhenUnstale);
             for (const issue of issues.values()) {
                 // Stop the processing if no more operations remains
-                if (!this.operations.hasRemainingOperations()) {
+                if (!this._hasRemainingOperations()) {
                     break;
                 }
                 const issueLogger = new issue_logger_1.IssueLogger(issue);
@@ -419,11 +418,10 @@ class IssuesProcessor {
                     yield this.processIssue(issue, labelsToAddWhenUnstale, labelsToRemoveWhenUnstale);
                 }));
             }
-            if (!this.operations.hasRemainingOperations()) {
+            if (!this._hasRemainingOperations()) {
                 this._logger.warning(logger_service_1.LoggerService.yellowBright(`No more operations left! Exiting...`));
-                this._logger.warning(`${logger_service_1.LoggerService.yellowBright('If you think that not enough issues were processed you could try to increase the quantity related to the')} ${this._logger.createOptionLink(option_1.Option.OperationsPerRun)} ${logger_service_1.LoggerService.yellowBright('option which is currently set to')} ${logger_service_1.LoggerService.cyan(this.options.operationsPerRun)}`);
-                (_b = this.statistics) === null || _b === void 0 ? void 0 : _b.setOperationsCount(this.operations.getConsumedOperationsCount()).logStats();
-                return 0;
+                this._onProcessingCompletion();
+                return;
             }
             this._logger.info(`${logger_service_1.LoggerService.green('Batch')} ${logger_service_1.LoggerService.cyan(`#${page}`)} ${logger_service_1.LoggerService.green('processed.')}`);
             // Do the next batch
@@ -618,7 +616,7 @@ class IssuesProcessor {
         return __awaiter(this, void 0, void 0, function* () {
             // Find any comments since date on the given issue
             try {
-                this.operations.consumeOperation();
+                this.operations.consumeQueryOperation();
                 (_a = this.statistics) === null || _a === void 0 ? void 0 : _a.incrementFetchedItemsCommentsCount();
                 const comments = yield this.client.issues.listComments({
                     owner: github_1.context.repo.owner,
@@ -641,7 +639,7 @@ class IssuesProcessor {
             // generate type for response
             const endpoint = this.client.issues.listForRepo;
             try {
-                this.operations.consumeOperation();
+                this.operations.consumeQueryOperation();
                 const issueResult = yield this.client.issues.listForRepo({
                     owner: github_1.context.repo.owner,
                     repo: github_1.context.repo.repo,
@@ -666,7 +664,7 @@ class IssuesProcessor {
         return __awaiter(this, void 0, void 0, function* () {
             const issueLogger = new issue_logger_1.IssueLogger(issue);
             issueLogger.info(`Checking for label on this $$type`);
-            this._consumeIssueOperation(issue);
+            this._consumeIssueQueryOperation(issue);
             (_a = this.statistics) === null || _a === void 0 ? void 0 : _a.incrementFetchedItemsEventsCount();
             const options = this.client.issues.listEvents.endpoint.merge({
                 owner: github_1.context.repo.owner,
@@ -690,7 +688,7 @@ class IssuesProcessor {
         return __awaiter(this, void 0, void 0, function* () {
             const issueLogger = new issue_logger_1.IssueLogger(issue);
             try {
-                this._consumeIssueOperation(issue);
+                this._consumeIssueQueryOperation(issue);
                 (_a = this.statistics) === null || _a === void 0 ? void 0 : _a.incrementFetchedPullRequestsCount();
                 const pullRequest = yield this.client.pulls.get({
                     owner: github_1.context.repo.owner,
@@ -784,7 +782,7 @@ class IssuesProcessor {
             issue.updated_at = newUpdatedAtDate.toString();
             if (!skipMessage) {
                 try {
-                    this._consumeIssueOperation(issue);
+                    this._consumeIssueMutationOperation(issue);
                     (_a = this.statistics) === null || _a === void 0 ? void 0 : _a.incrementAddedItemsComment(issue);
                     if (!this.options.debugOnly) {
                         yield this.client.issues.createComment({
@@ -800,7 +798,7 @@ class IssuesProcessor {
                 }
             }
             try {
-                this._consumeIssueOperation(issue);
+                this._consumeIssueMutationOperation(issue);
                 (_b = this.statistics) === null || _b === void 0 ? void 0 : _b.incrementAddedItemsLabel(issue);
                 (_c = this.statistics) === null || _c === void 0 ? void 0 : _c.incrementStaleItemsCount(issue);
                 if (!this.options.debugOnly) {
@@ -826,7 +824,7 @@ class IssuesProcessor {
             this.closedIssues.push(issue);
             if (closeMessage) {
                 try {
-                    this._consumeIssueOperation(issue);
+                    this._consumeIssueMutationOperation(issue);
                     (_a = this.statistics) === null || _a === void 0 ? void 0 : _a.incrementAddedItemsComment(issue);
                     this.addedCloseCommentIssues.push(issue);
                     if (!this.options.debugOnly) {
@@ -844,7 +842,7 @@ class IssuesProcessor {
             }
             if (closeLabel) {
                 try {
-                    this._consumeIssueOperation(issue);
+                    this._consumeIssueMutationOperation(issue);
                     (_b = this.statistics) === null || _b === void 0 ? void 0 : _b.incrementAddedItemsLabel(issue);
                     if (!this.options.debugOnly) {
                         yield this.client.issues.addLabels({
@@ -860,7 +858,7 @@ class IssuesProcessor {
                 }
             }
             try {
-                this._consumeIssueOperation(issue);
+                this._consumeIssueMutationOperation(issue);
                 (_c = this.statistics) === null || _c === void 0 ? void 0 : _c.incrementClosedItemsCount(issue);
                 if (!this.options.debugOnly) {
                     yield this.client.issues.update({
@@ -890,7 +888,7 @@ class IssuesProcessor {
             const branch = pullRequest.head.ref;
             issueLogger.info(`Deleting the branch "${logger_service_1.LoggerService.cyan(branch)}" from closed $$type`);
             try {
-                this._consumeIssueOperation(issue);
+                this._consumeIssueMutationOperation(issue);
                 (_a = this.statistics) === null || _a === void 0 ? void 0 : _a.incrementDeletedBranchesCount();
                 if (!this.options.debugOnly) {
                     yield this.client.git.deleteRef({
@@ -913,7 +911,7 @@ class IssuesProcessor {
             issueLogger.info(`${isSubStep ? logger_service_1.LoggerService.white('├── ') : ''}Removing the label "${logger_service_1.LoggerService.cyan(label)}" from this $$type...`);
             this.removedLabelIssues.push(issue);
             try {
-                this._consumeIssueOperation(issue);
+                this._consumeIssueMutationOperation(issue);
                 (_a = this.statistics) === null || _a === void 0 ? void 0 : _a.incrementDeletedItemsLabelsCount(issue);
                 if (!this.options.debugOnly) {
                     yield this.client.issues.removeLabel({
@@ -1010,7 +1008,7 @@ class IssuesProcessor {
             issueLogger.info(`Adding all the labels specified via the ${this._logger.createOptionLink(option_1.Option.LabelsToAddWhenUnstale)} option.`);
             this.addedLabelIssues.push(issue);
             try {
-                this.operations.consumeOperation();
+                this.operations.consumeMutationOperation();
                 (_a = this.statistics) === null || _a === void 0 ? void 0 : _a.incrementAddedItemsLabel(issue);
                 if (!this.options.debugOnly) {
                     yield this.client.issues.addLabels({
@@ -1056,9 +1054,29 @@ class IssuesProcessor {
             }
         });
     }
-    _consumeIssueOperation(issue) {
-        this.operations.consumeOperation();
-        issue.operations.consumeOperation();
+    /**
+     * @private
+     *
+     * @description
+     * Increase the counter of consumed operation related to queries (GitHub read)
+     *
+     * @param {Readonly<Issue>} issue The processed issue
+     */
+    _consumeIssueQueryOperation(issue) {
+        this.operations.consumeQueryOperation();
+        issue.operations.consumeQueryOperation();
+    }
+    /**
+     * @private
+     *
+     * @description
+     * Increase the counter of consumed operation related to mutations (GitHub write)
+     *
+     * @param {Readonly<Issue>} issue The processed issue
+     */
+    _consumeIssueMutationOperation(issue) {
+        this.operations.consumeMutationOperation();
+        issue.operations.consumeMutationOperation();
     }
     _getDaysBeforeStaleUsedOptionName(issue) {
         return issue.isPullRequest
@@ -1086,6 +1104,55 @@ class IssuesProcessor {
             return option_1.Option.RemoveIssueStaleWhenUpdated;
         }
         return option_1.Option.RemoveStaleWhenUpdated;
+    }
+    /**
+     * @private
+     *
+     * @description
+     * Check if there is remaining operations
+     * Useful to stop the processing since it's pointless if there is no more operations available
+     *
+     * @returns {boolean} Return true if there is some remaining operations
+     */
+    _hasRemainingOperations() {
+        return (this.operations.hasRemainingQueryOperations() &&
+            this.operations.hasRemainingMutationOperations());
+    }
+    /**
+     * @private
+     *
+     * @description
+     * Update the statistics about the operations and log the stats
+     */
+    _logStats() {
+        var _a, _b;
+        (_b = (_a = this.statistics) === null || _a === void 0 ? void 0 : _a.setQueryOperationsCount(this.operations.getConsumedQueryOperationsCount())) === null || _b === void 0 ? void 0 : _b.setMutationOperationsCount(this.operations.getConsumedMutationOperationsCount()).logStats();
+    }
+    /**
+     * @private
+     *
+     * @description
+     * Log if there is no more operations
+     */
+    _logOperationsOverflow() {
+        if (!this.operations.hasRemainingQueryOperations()) {
+            this._logger.warning(logger_service_1.LoggerService.yellowBright(`No more query operations left! The action was not able to process all the issues from your repository`));
+            this._logger.warning(`${logger_service_1.LoggerService.yellowBright('If you think that not enough issues were processed you could try to increase the quantity related to the')} ${this._logger.createOptionLink(option_1.Option.QueryOperationsPerRun)} ${logger_service_1.LoggerService.yellowBright('option which is currently set to')} ${logger_service_1.LoggerService.cyan(this.options.queryOperationsPerRun)}`);
+        }
+        if (!this.operations.hasRemainingMutationOperations()) {
+            this._logger.warning(logger_service_1.LoggerService.yellowBright(`No more mutation operations left! The action was not able to add/remove/close all the labels/comments/issues`));
+            this._logger.warning(`${logger_service_1.LoggerService.yellowBright('If you think that not enough actions were taken to process the issues you could try to increase the quantity related to the')} ${this._logger.createOptionLink(option_1.Option.MutationOperationsPerRun)} ${logger_service_1.LoggerService.yellowBright('option which is currently set to')} ${logger_service_1.LoggerService.cyan(this.options.mutationOperationsPerRun)}`);
+        }
+    }
+    /**
+     * @private
+     *
+     * @description
+     * Start the logic when the issue processor can no longer process or when it's done processing
+     */
+    _onProcessingCompletion() {
+        this._logOperationsOverflow();
+        this._logStats();
     }
 }
 exports.IssuesProcessor = IssuesProcessor;
@@ -1404,17 +1471,28 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.Operations = void 0;
 class Operations {
     constructor() {
-        this._operationsConsumed = 0;
+        this._queryOperationsConsumed = 0;
+        this._mutationOperationsConsumed = 0;
     }
-    consumeOperation() {
-        return this.consumeOperations(1);
+    consumeQueryOperation() {
+        return this.consumeQueryOperations(1);
     }
-    consumeOperations(quantity) {
-        this._operationsConsumed += quantity;
+    consumeMutationOperation() {
+        return this.consumeMutationOperations(1);
+    }
+    consumeQueryOperations(quantity) {
+        this._queryOperationsConsumed += quantity;
         return this;
     }
-    getConsumedOperationsCount() {
-        return this._operationsConsumed;
+    consumeMutationOperations(quantity) {
+        this._mutationOperationsConsumed += quantity;
+        return this;
+    }
+    getConsumedQueryOperationsCount() {
+        return this._queryOperationsConsumed;
+    }
+    getConsumedMutationOperationsCount() {
+        return this._mutationOperationsConsumed;
     }
 }
 exports.Operations = Operations;
@@ -1435,11 +1513,17 @@ class StaleOperations extends operations_1.Operations {
         super();
         this._options = options;
     }
-    hasRemainingOperations() {
-        return this._operationsConsumed < this._options.operationsPerRun;
+    hasRemainingQueryOperations() {
+        return this._queryOperationsConsumed < this._options.queryOperationsPerRun;
     }
-    getRemainingOperationsCount() {
-        return this._options.operationsPerRun - this._operationsConsumed;
+    hasRemainingMutationOperations() {
+        return (this._mutationOperationsConsumed < this._options.mutationOperationsPerRun);
+    }
+    getRemainingQueryOperationsCount() {
+        return this._options.queryOperationsPerRun - this._queryOperationsConsumed;
+    }
+    getRemainingMutationOperationsCount() {
+        return (this._options.mutationOperationsPerRun - this._mutationOperationsConsumed);
     }
 }
 exports.StaleOperations = StaleOperations;
@@ -1465,7 +1549,8 @@ class Statistics {
         this.stalePullRequestsCount = 0;
         this.undoStaleIssuesCount = 0;
         this.undoStalePullRequestsCount = 0;
-        this.operationsCount = 0;
+        this.queryOperationsCount = 0;
+        this.mutationOperationsCount = 0;
         this.closedIssuesCount = 0;
         this.closedPullRequestsCount = 0;
         this.deletedIssuesLabelsCount = 0;
@@ -1500,8 +1585,12 @@ class Statistics {
         }
         return this._incrementUndoStaleIssuesCount(increment);
     }
-    setOperationsCount(operationsCount) {
-        this.operationsCount = operationsCount;
+    setQueryOperationsCount(count) {
+        this.queryOperationsCount = count;
+        return this;
+    }
+    setMutationOperationsCount(count) {
+        this.mutationOperationsCount = count;
         return this;
     }
     incrementClosedItemsCount(issue, increment = 1) {
@@ -1748,7 +1837,16 @@ class Statistics {
         this._logCount('Fetched pull requests', this.fetchedPullRequestsCount);
     }
     _logOperationsCount() {
-        this._logCount('Operations performed', this.operationsCount);
+        this._logGroup('Operations performed', [
+            {
+                name: 'Query operations performed',
+                count: this.queryOperationsCount
+            },
+            {
+                name: 'Mutation operations performed',
+                count: this.mutationOperationsCount
+            }
+        ]);
     }
     _logCount(name, count) {
         if (count > 0) {
@@ -1843,7 +1941,8 @@ var Option;
     Option["OnlyIssueLabels"] = "only-issue-labels";
     Option["OnlyPrLabels"] = "only-pr-labels";
     Option["AnyOfLabels"] = "any-of-labels";
-    Option["OperationsPerRun"] = "operations-per-run";
+    Option["QueryOperationsPerRun"] = "query-operations-per-run";
+    Option["MutationOperationsPerRun"] = "mutation-operations-per-run";
     Option["RemoveStaleWhenUpdated"] = "remove-stale-when-updated";
     Option["RemoveIssueStaleWhenUpdated"] = "remove-issue-stale-when-updated";
     Option["RemovePrStaleWhenUpdated"] = "remove-pr-stale-when-updated";
@@ -2152,7 +2251,8 @@ function _getAndValidateArgs() {
         anyOfLabels: core.getInput('any-of-labels'),
         anyOfIssueLabels: core.getInput('any-of-issue-labels'),
         anyOfPrLabels: core.getInput('any-of-pr-labels'),
-        operationsPerRun: parseInt(core.getInput('operations-per-run', { required: true })),
+        queryOperationsPerRun: parseInt(core.getInput('query-operations-per-run', { required: true })),
+        mutationOperationsPerRun: parseInt(core.getInput('mutation-operations-per-run', { required: true })),
         removeStaleWhenUpdated: !(core.getInput('remove-stale-when-updated') === 'false'),
         removeIssueStaleWhenUpdated: _toOptionalBoolean('remove-issue-stale-when-updated'),
         removePrStaleWhenUpdated: _toOptionalBoolean('remove-pr-stale-when-updated'),
@@ -2185,7 +2285,8 @@ function _getAndValidateArgs() {
     for (const numberInput of [
         'days-before-stale',
         'days-before-close',
-        'operations-per-run'
+        'query-operations-per-run',
+        'mutation-operations-per-run'
     ]) {
         if (isNaN(parseInt(core.getInput(numberInput)))) {
             const errorMessage = `Option "${numberInput}" did not parse to a valid integer`;
@@ -9149,12 +9250,12 @@ module.exports = require("zlib");;
 /******/ 	/* webpack/runtime/compat */
 /******/ 	
 /******/ 	if (typeof __nccwpck_require__ !== 'undefined') __nccwpck_require__.ab = __dirname + "/";/************************************************************************/
-/******/
+/******/ 	
 /******/ 	// startup
 /******/ 	// Load entry module and return exports
 /******/ 	// This entry module is referenced by other modules so it can't be inlined
 /******/ 	var __webpack_exports__ = __nccwpck_require__(3109);
 /******/ 	module.exports = __webpack_exports__;
-/******/
+/******/ 	
 /******/ })()
 ;

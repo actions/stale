@@ -365,6 +365,7 @@ class IssuesProcessor {
         this.deletedBranchIssues = [];
         this.removedLabelIssues = [];
         this.addedLabelIssues = [];
+        this.addedCloseCommentIssues = [];
         this._logger = new logger_1.Logger();
         this.options = options;
         this.client = github_1.getOctokit(this.options.repoToken);
@@ -375,7 +376,7 @@ class IssuesProcessor {
             this._logger.warning(logger_service_1.LoggerService.yellowBright(`The debug output will be written but no issues/PRs will be processed.`));
         }
         if (this.options.enableStatistics) {
-            this._statistics = new statistics_1.Statistics();
+            this.statistics = new statistics_1.Statistics();
         }
     }
     static _updatedSince(timestamp, num_days) {
@@ -400,7 +401,7 @@ class IssuesProcessor {
             const issues = yield this.getIssues(page);
             if (issues.length <= 0) {
                 this._logger.info(logger_service_1.LoggerService.green(`No more issues found to process. Exiting...`));
-                (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.setOperationsCount(this.operations.getConsumedOperationsCount()).logStats();
+                (_a = this.statistics) === null || _a === void 0 ? void 0 : _a.setOperationsCount(this.operations.getConsumedOperationsCount()).logStats();
                 return this.operations.getRemainingOperationsCount();
             }
             else {
@@ -421,7 +422,7 @@ class IssuesProcessor {
             if (!this.operations.hasRemainingOperations()) {
                 this._logger.warning(logger_service_1.LoggerService.yellowBright(`No more operations left! Exiting...`));
                 this._logger.warning(`${logger_service_1.LoggerService.yellowBright('If you think that not enough issues were processed you could try to increase the quantity related to the')} ${this._logger.createOptionLink(option_1.Option.OperationsPerRun)} ${logger_service_1.LoggerService.yellowBright('option which is currently set to')} ${logger_service_1.LoggerService.cyan(this.options.operationsPerRun)}`);
-                (_b = this._statistics) === null || _b === void 0 ? void 0 : _b.setOperationsCount(this.operations.getConsumedOperationsCount()).logStats();
+                (_b = this.statistics) === null || _b === void 0 ? void 0 : _b.setOperationsCount(this.operations.getConsumedOperationsCount()).logStats();
                 return 0;
             }
             this._logger.info(`${logger_service_1.LoggerService.green('Batch')} ${logger_service_1.LoggerService.cyan(`#${page}`)} ${logger_service_1.LoggerService.green('processed.')}`);
@@ -432,7 +433,7 @@ class IssuesProcessor {
     processIssue(issue, labelsToAddWhenUnstale, labelsToRemoveWhenUnstale) {
         var _a;
         return __awaiter(this, void 0, void 0, function* () {
-            (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.incrementProcessedItemsCount(issue);
+            (_a = this.statistics) === null || _a === void 0 ? void 0 : _a.incrementProcessedItemsCount(issue);
             const issueLogger = new issue_logger_1.IssueLogger(issue);
             issueLogger.info(`Found this $$type last updated at: ${logger_service_1.LoggerService.cyan(issue.updated_at)}`);
             // calculate string based messages for this issue
@@ -618,7 +619,7 @@ class IssuesProcessor {
             // Find any comments since date on the given issue
             try {
                 this.operations.consumeOperation();
-                (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.incrementFetchedItemsCommentsCount();
+                (_a = this.statistics) === null || _a === void 0 ? void 0 : _a.incrementFetchedItemsCommentsCount();
                 const comments = yield this.client.issues.listComments({
                     owner: github_1.context.repo.owner,
                     repo: github_1.context.repo.repo,
@@ -649,7 +650,7 @@ class IssuesProcessor {
                     direction: this.options.ascending ? 'asc' : 'desc',
                     page
                 });
-                (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.incrementFetchedItemsCount(issueResult.data.length);
+                (_a = this.statistics) === null || _a === void 0 ? void 0 : _a.incrementFetchedItemsCount(issueResult.data.length);
                 return issueResult.data.map((issue) => new issue_1.Issue(this.options, issue));
             }
             catch (error) {
@@ -666,7 +667,7 @@ class IssuesProcessor {
             const issueLogger = new issue_logger_1.IssueLogger(issue);
             issueLogger.info(`Checking for label on this $$type`);
             this._consumeIssueOperation(issue);
-            (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.incrementFetchedItemsEventsCount();
+            (_a = this.statistics) === null || _a === void 0 ? void 0 : _a.incrementFetchedItemsEventsCount();
             const options = this.client.issues.listEvents.endpoint.merge({
                 owner: github_1.context.repo.owner,
                 repo: github_1.context.repo.repo,
@@ -690,7 +691,7 @@ class IssuesProcessor {
             const issueLogger = new issue_logger_1.IssueLogger(issue);
             try {
                 this._consumeIssueOperation(issue);
-                (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.incrementFetchedPullRequestsCount();
+                (_a = this.statistics) === null || _a === void 0 ? void 0 : _a.incrementFetchedPullRequestsCount();
                 const pullRequest = yield this.client.pulls.get({
                     owner: github_1.context.repo.owner,
                     repo: github_1.context.repo.repo,
@@ -784,7 +785,7 @@ class IssuesProcessor {
             if (!skipMessage) {
                 try {
                     this._consumeIssueOperation(issue);
-                    (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.incrementAddedItemsComment(issue);
+                    (_a = this.statistics) === null || _a === void 0 ? void 0 : _a.incrementAddedItemsComment(issue);
                     if (!this.options.debugOnly) {
                         yield this.client.issues.createComment({
                             owner: github_1.context.repo.owner,
@@ -800,8 +801,8 @@ class IssuesProcessor {
             }
             try {
                 this._consumeIssueOperation(issue);
-                (_b = this._statistics) === null || _b === void 0 ? void 0 : _b.incrementAddedItemsLabel(issue);
-                (_c = this._statistics) === null || _c === void 0 ? void 0 : _c.incrementStaleItemsCount(issue);
+                (_b = this.statistics) === null || _b === void 0 ? void 0 : _b.incrementAddedItemsLabel(issue);
+                (_c = this.statistics) === null || _c === void 0 ? void 0 : _c.incrementStaleItemsCount(issue);
                 if (!this.options.debugOnly) {
                     yield this.client.issues.addLabels({
                         owner: github_1.context.repo.owner,
@@ -826,7 +827,8 @@ class IssuesProcessor {
             if (closeMessage) {
                 try {
                     this._consumeIssueOperation(issue);
-                    (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.incrementAddedItemsComment(issue);
+                    (_a = this.statistics) === null || _a === void 0 ? void 0 : _a.incrementAddedItemsComment(issue);
+                    this.addedCloseCommentIssues.push(issue);
                     if (!this.options.debugOnly) {
                         yield this.client.issues.createComment({
                             owner: github_1.context.repo.owner,
@@ -843,7 +845,7 @@ class IssuesProcessor {
             if (closeLabel) {
                 try {
                     this._consumeIssueOperation(issue);
-                    (_b = this._statistics) === null || _b === void 0 ? void 0 : _b.incrementAddedItemsLabel(issue);
+                    (_b = this.statistics) === null || _b === void 0 ? void 0 : _b.incrementAddedItemsLabel(issue);
                     if (!this.options.debugOnly) {
                         yield this.client.issues.addLabels({
                             owner: github_1.context.repo.owner,
@@ -859,7 +861,7 @@ class IssuesProcessor {
             }
             try {
                 this._consumeIssueOperation(issue);
-                (_c = this._statistics) === null || _c === void 0 ? void 0 : _c.incrementClosedItemsCount(issue);
+                (_c = this.statistics) === null || _c === void 0 ? void 0 : _c.incrementClosedItemsCount(issue);
                 if (!this.options.debugOnly) {
                     yield this.client.issues.update({
                         owner: github_1.context.repo.owner,
@@ -879,7 +881,11 @@ class IssuesProcessor {
         var _a;
         return __awaiter(this, void 0, void 0, function* () {
             const issueLogger = new issue_logger_1.IssueLogger(issue);
-            issueLogger.info(`Delete branch from closed $$type - ${issue.title}`);
+            issueLogger.info(`Delete
+    branch from closed $
+    $type
+    -
+    ${issue.title}`);
             const pullRequest = yield this.getPullRequest(issue);
             if (!pullRequest) {
                 issueLogger.info(`Not deleting this branch as no pull request was found for this $$type`);
@@ -889,7 +895,7 @@ class IssuesProcessor {
             issueLogger.info(`Deleting the branch "${logger_service_1.LoggerService.cyan(branch)}" from closed $$type`);
             try {
                 this._consumeIssueOperation(issue);
-                (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.incrementDeletedBranchesCount();
+                (_a = this.statistics) === null || _a === void 0 ? void 0 : _a.incrementDeletedBranchesCount();
                 if (!this.options.debugOnly) {
                     yield this.client.git.deleteRef({
                         owner: github_1.context.repo.owner,
@@ -912,7 +918,7 @@ class IssuesProcessor {
             this.removedLabelIssues.push(issue);
             try {
                 this._consumeIssueOperation(issue);
-                (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.incrementDeletedItemsLabelsCount(issue);
+                (_a = this.statistics) === null || _a === void 0 ? void 0 : _a.incrementDeletedItemsLabelsCount(issue);
                 if (!this.options.debugOnly) {
                     yield this.client.issues.removeLabel({
                         owner: github_1.context.repo.owner,
@@ -1009,7 +1015,7 @@ class IssuesProcessor {
             this.addedLabelIssues.push(issue);
             try {
                 this.operations.consumeOperation();
-                (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.incrementAddedItemsLabel(issue);
+                (_a = this.statistics) === null || _a === void 0 ? void 0 : _a.incrementAddedItemsLabel(issue);
                 if (!this.options.debugOnly) {
                     yield this.client.issues.addLabels({
                         owner: github_1.context.repo.owner,
@@ -1030,7 +1036,7 @@ class IssuesProcessor {
             const issueLogger = new issue_logger_1.IssueLogger(issue);
             issueLogger.info(`The $$type is no longer stale. Removing the stale label...`);
             yield this._removeLabel(issue, staleLabel);
-            (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.incrementUndoStaleItemsCount(issue);
+            (_a = this.statistics) === null || _a === void 0 ? void 0 : _a.incrementUndoStaleItemsCount(issue);
         });
     }
     _removeCloseLabel(issue, closeLabel) {
@@ -1046,7 +1052,7 @@ class IssuesProcessor {
             if (is_labeled_1.isLabeled(issue, closeLabel)) {
                 issueLogger.info(logger_service_1.LoggerService.white('├──'), `The $$type has a close label "${logger_service_1.LoggerService.cyan(closeLabel)}". Removing the close label...`);
                 yield this._removeLabel(issue, closeLabel, true);
-                (_a = this._statistics) === null || _a === void 0 ? void 0 : _a.incrementDeletedCloseItemsLabelsCount(issue);
+                (_a = this.statistics) === null || _a === void 0 ? void 0 : _a.incrementDeletedCloseItemsLabelsCount(issue);
             }
             else {
                 issueLogger.info(logger_service_1.LoggerService.white('└──'), `There is no close label on this $$type. Skipping`);
@@ -1457,28 +1463,28 @@ const logger_service_1 = __nccwpck_require__(1973);
 class Statistics {
     constructor() {
         this._logger = new logger_1.Logger();
-        this._processedIssuesCount = 0;
-        this._processedPullRequestsCount = 0;
-        this._staleIssuesCount = 0;
-        this._stalePullRequestsCount = 0;
-        this._undoStaleIssuesCount = 0;
-        this._undoStalePullRequestsCount = 0;
-        this._operationsCount = 0;
-        this._closedIssuesCount = 0;
-        this._closedPullRequestsCount = 0;
-        this._deletedIssuesLabelsCount = 0;
-        this._deletedPullRequestsLabelsCount = 0;
-        this._deletedCloseIssuesLabelsCount = 0;
-        this._deletedClosePullRequestsLabelsCount = 0;
-        this._deletedBranchesCount = 0;
-        this._addedIssuesLabelsCount = 0;
-        this._addedPullRequestsLabelsCount = 0;
-        this._addedIssuesCommentsCount = 0;
-        this._addedPullRequestsCommentsCount = 0;
-        this._fetchedItemsCount = 0;
-        this._fetchedItemsEventsCount = 0;
-        this._fetchedItemsCommentsCount = 0;
-        this._fetchedPullRequestsCount = 0;
+        this.processedIssuesCount = 0;
+        this.processedPullRequestsCount = 0;
+        this.staleIssuesCount = 0;
+        this.stalePullRequestsCount = 0;
+        this.undoStaleIssuesCount = 0;
+        this.undoStalePullRequestsCount = 0;
+        this.operationsCount = 0;
+        this.closedIssuesCount = 0;
+        this.closedPullRequestsCount = 0;
+        this.deletedIssuesLabelsCount = 0;
+        this.deletedPullRequestsLabelsCount = 0;
+        this.deletedCloseIssuesLabelsCount = 0;
+        this.deletedClosePullRequestsLabelsCount = 0;
+        this.deletedBranchesCount = 0;
+        this.addedIssuesLabelsCount = 0;
+        this.addedPullRequestsLabelsCount = 0;
+        this.addedIssuesCommentsCount = 0;
+        this.addedPullRequestsCommentsCount = 0;
+        this.fetchedItemsCount = 0;
+        this.fetchedItemsEventsCount = 0;
+        this.fetchedItemsCommentsCount = 0;
+        this.fetchedPullRequestsCount = 0;
     }
     incrementProcessedItemsCount(issue, increment = 1) {
         if (issue.isPullRequest) {
@@ -1499,7 +1505,7 @@ class Statistics {
         return this._incrementUndoStaleIssuesCount(increment);
     }
     setOperationsCount(operationsCount) {
-        this._operationsCount = operationsCount;
+        this.operationsCount = operationsCount;
         return this;
     }
     incrementClosedItemsCount(issue, increment = 1) {
@@ -1521,7 +1527,7 @@ class Statistics {
         return this._incrementDeletedCloseIssuesLabelsCount(increment);
     }
     incrementDeletedBranchesCount(increment = 1) {
-        this._deletedBranchesCount += increment;
+        this.deletedBranchesCount += increment;
         return this;
     }
     incrementAddedItemsLabel(issue, increment = 1) {
@@ -1537,19 +1543,19 @@ class Statistics {
         return this._incrementAddedIssuesComment(increment);
     }
     incrementFetchedItemsCount(increment = 1) {
-        this._fetchedItemsCount += increment;
+        this.fetchedItemsCount += increment;
         return this;
     }
     incrementFetchedItemsEventsCount(increment = 1) {
-        this._fetchedItemsEventsCount += increment;
+        this.fetchedItemsEventsCount += increment;
         return this;
     }
     incrementFetchedItemsCommentsCount(increment = 1) {
-        this._fetchedItemsCommentsCount += increment;
+        this.fetchedItemsCommentsCount += increment;
         return this;
     }
     incrementFetchedPullRequestsCount(increment = 1) {
-        this._fetchedPullRequestsCount += increment;
+        this.fetchedPullRequestsCount += increment;
         return this;
     }
     logStats() {
@@ -1571,78 +1577,78 @@ class Statistics {
         return this;
     }
     _incrementProcessedIssuesCount(increment = 1) {
-        this._processedIssuesCount += increment;
+        this.processedIssuesCount += increment;
         return this;
     }
     _incrementProcessedPullRequestsCount(increment = 1) {
-        this._processedPullRequestsCount += increment;
+        this.processedPullRequestsCount += increment;
         return this;
     }
     _incrementStaleIssuesCount(increment = 1) {
-        this._staleIssuesCount += increment;
+        this.staleIssuesCount += increment;
         return this;
     }
     _incrementStalePullRequestsCount(increment = 1) {
-        this._stalePullRequestsCount += increment;
+        this.stalePullRequestsCount += increment;
         return this;
     }
     _incrementUndoStaleIssuesCount(increment = 1) {
-        this._undoStaleIssuesCount += increment;
+        this.undoStaleIssuesCount += increment;
         return this;
     }
     _incrementUndoStalePullRequestsCount(increment = 1) {
-        this._undoStalePullRequestsCount += increment;
+        this.undoStalePullRequestsCount += increment;
         return this;
     }
     _incrementClosedIssuesCount(increment = 1) {
-        this._closedIssuesCount += increment;
+        this.closedIssuesCount += increment;
         return this;
     }
     _incrementClosedPullRequestsCount(increment = 1) {
-        this._closedPullRequestsCount += increment;
+        this.closedPullRequestsCount += increment;
         return this;
     }
     _incrementDeletedIssuesLabelsCount(increment = 1) {
-        this._deletedIssuesLabelsCount += increment;
+        this.deletedIssuesLabelsCount += increment;
         return this;
     }
     _incrementDeletedPullRequestsLabelsCount(increment = 1) {
-        this._deletedPullRequestsLabelsCount += increment;
+        this.deletedPullRequestsLabelsCount += increment;
         return this;
     }
     _incrementDeletedCloseIssuesLabelsCount(increment = 1) {
-        this._deletedCloseIssuesLabelsCount += increment;
+        this.deletedCloseIssuesLabelsCount += increment;
         return this;
     }
     _incrementDeletedClosePullRequestsLabelsCount(increment = 1) {
-        this._deletedClosePullRequestsLabelsCount += increment;
+        this.deletedClosePullRequestsLabelsCount += increment;
         return this;
     }
     _incrementAddedIssuesLabel(increment = 1) {
-        this._addedIssuesLabelsCount += increment;
+        this.addedIssuesLabelsCount += increment;
         return this;
     }
     _incrementAddedPullRequestsLabel(increment = 1) {
-        this._addedPullRequestsLabelsCount += increment;
+        this.addedPullRequestsLabelsCount += increment;
         return this;
     }
     _incrementAddedIssuesComment(increment = 1) {
-        this._addedIssuesCommentsCount += increment;
+        this.addedIssuesCommentsCount += increment;
         return this;
     }
     _incrementAddedPullRequestsComment(increment = 1) {
-        this._addedPullRequestsCommentsCount += increment;
+        this.addedPullRequestsCommentsCount += increment;
         return this;
     }
     _logProcessedIssuesAndPullRequestsCount() {
         this._logGroup('Processed items', [
             {
                 name: 'Processed issues',
-                count: this._processedIssuesCount
+                count: this.processedIssuesCount
             },
             {
                 name: 'Processed PRs',
-                count: this._processedPullRequestsCount
+                count: this.processedPullRequestsCount
             }
         ]);
     }
@@ -1650,11 +1656,11 @@ class Statistics {
         this._logGroup('New stale items', [
             {
                 name: 'New stale issues',
-                count: this._staleIssuesCount
+                count: this.staleIssuesCount
             },
             {
                 name: 'New stale PRs',
-                count: this._stalePullRequestsCount
+                count: this.stalePullRequestsCount
             }
         ]);
     }
@@ -1662,11 +1668,11 @@ class Statistics {
         this._logGroup('No longer stale items', [
             {
                 name: 'No longer stale issues',
-                count: this._undoStaleIssuesCount
+                count: this.undoStaleIssuesCount
             },
             {
                 name: 'No longer stale PRs',
-                count: this._undoStalePullRequestsCount
+                count: this.undoStalePullRequestsCount
             }
         ]);
     }
@@ -1674,11 +1680,11 @@ class Statistics {
         this._logGroup('Closed items', [
             {
                 name: 'Closed issues',
-                count: this._closedIssuesCount
+                count: this.closedIssuesCount
             },
             {
                 name: 'Closed PRs',
-                count: this._closedPullRequestsCount
+                count: this.closedPullRequestsCount
             }
         ]);
     }
@@ -1686,11 +1692,11 @@ class Statistics {
         this._logGroup('Deleted items labels', [
             {
                 name: 'Deleted issues labels',
-                count: this._deletedIssuesLabelsCount
+                count: this.deletedIssuesLabelsCount
             },
             {
                 name: 'Deleted PRs labels',
-                count: this._deletedPullRequestsLabelsCount
+                count: this.deletedPullRequestsLabelsCount
             }
         ]);
     }
@@ -1698,26 +1704,26 @@ class Statistics {
         this._logGroup('Deleted close items labels', [
             {
                 name: 'Deleted close issues labels',
-                count: this._deletedCloseIssuesLabelsCount
+                count: this.deletedCloseIssuesLabelsCount
             },
             {
                 name: 'Deleted close PRs labels',
-                count: this._deletedClosePullRequestsLabelsCount
+                count: this.deletedClosePullRequestsLabelsCount
             }
         ]);
     }
     _logDeletedBranchesCount() {
-        this._logCount('Deleted branches', this._deletedBranchesCount);
+        this._logCount('Deleted branches', this.deletedBranchesCount);
     }
     _logAddedIssuesAndPullRequestsLabelsCount() {
         this._logGroup('Added items labels', [
             {
                 name: 'Added issues labels',
-                count: this._addedIssuesLabelsCount
+                count: this.addedIssuesLabelsCount
             },
             {
                 name: 'Added PRs labels',
-                count: this._addedPullRequestsLabelsCount
+                count: this.addedPullRequestsLabelsCount
             }
         ]);
     }
@@ -1725,28 +1731,28 @@ class Statistics {
         this._logGroup('Added items comments', [
             {
                 name: 'Added issues comments',
-                count: this._addedIssuesCommentsCount
+                count: this.addedIssuesCommentsCount
             },
             {
                 name: 'Added PRs comments',
-                count: this._addedPullRequestsCommentsCount
+                count: this.addedPullRequestsCommentsCount
             }
         ]);
     }
     _logFetchedItemsCount() {
-        this._logCount('Fetched items', this._fetchedItemsCount);
+        this._logCount('Fetched items', this.fetchedItemsCount);
     }
     _logFetchedItemsEventsCount() {
-        this._logCount('Fetched items events', this._fetchedItemsEventsCount);
+        this._logCount('Fetched items events', this.fetchedItemsEventsCount);
     }
     _logFetchedItemsCommentsCount() {
-        this._logCount('Fetched items comments', this._fetchedItemsCommentsCount);
+        this._logCount('Fetched items comments', this.fetchedItemsCommentsCount);
     }
     _logFetchedPullRequestsCount() {
-        this._logCount('Fetched pull requests', this._fetchedPullRequestsCount);
+        this._logCount('Fetched pull requests', this.fetchedPullRequestsCount);
     }
     _logOperationsCount() {
-        this._logCount('Operations performed', this._operationsCount);
+        this._logCount('Operations performed', this.operationsCount);
     }
     _logCount(name, count) {
         if (count > 0) {

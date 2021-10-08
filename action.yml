@@ -72,17 +72,13 @@ inputs:
     description: 'The milestones that mean a pull request is exempt from being marked as stale. Separate multiple milestones with commas (eg. "milestone1,milestone2"). Override "exempt-milestones" option regarding only the pull requests.'
     default: ''
     required: false
-  exempt-all-milestones:
-    description: 'Exempt all issues and pull requests with milestones from being marked as stale. Default to false.'
+  exempt-all-issue-milestones:
+    description: 'Exempt all issues with milestones from being marked as stale. Default to false.'
     default: 'false'
     required: false
-  exempt-all-issue-milestones:
-    description: 'Exempt all issues with milestones from being marked as stale. Override "exempt-all-milestones" option regarding only the issues.'
-    default: ''
-    required: false
   exempt-all-pr-milestones:
-    description: 'Exempt all pull requests with milestones from being marked as stale. Override "exempt-all-milestones" option regarding only the pull requests.'
-    default: ''
+    description: 'Exempt all pull requests with milestones from being marked as stale. Default to false.'
+    default: 'false'
     required: false
   only-labels:
     description: 'Only issues or pull requests with all of these labels are checked if stale. Defaults to `` (disabled) and can be a comma-separated list of labels.'

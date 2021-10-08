@@ -12,7 +12,11 @@ describe('Milestones', (): void => {
   let issueInterface: IIssue;
 
   beforeEach((): void => {
-    optionsInterface = {...DefaultProcessorOptions, exemptAllMilestones: false};
+    optionsInterface = {
+      ...DefaultProcessorOptions,
+      exemptAllIssueAssignees: false,
+      exemptAllPrMilestones: false
+    };
     issueInterface = generateIIssue();
   });
 
@@ -286,9 +290,49 @@ describe('Milestones', (): void => {
         });
       });
 
-      describe('when the given options are configured to exempt all milestones', (): void => {
+      describe('when the given options are not configured to exempt all issue milestones', (): void => {
         beforeEach((): void => {
-          optionsInterface.exemptAllMilestones = true;
+          optionsInterface.exemptAllIssueMilestones = false;
+        });
+
+        describe('when the given issue does not have a milestone', (): void => {
+          beforeEach((): void => {
+            issueInterface.milestone = undefined;
+          });
+
+          it('should return false', (): void => {
+            expect.assertions(1);
+            issue = new Issue(optionsInterface, issueInterface);
+            milestones = new Milestones(optionsInterface, issue);
+
+            const result = milestones.shouldExemptMilestones();
+
+            expect(result).toStrictEqual(false);
+          });
+        });
+
+        describe('when the given issue does have a milestone', (): void => {
+          beforeEach((): void => {
+            issueInterface.milestone = {
+              title: 'dummy-exempt-milestone'
+            };
+          });
+
+          it('should return false', (): void => {
+            expect.assertions(1);
+            issue = new Issue(optionsInterface, issueInterface);
+            milestones = new Milestones(optionsInterface, issue);
+
+            const result = milestones.shouldExemptMilestones();
+
+            expect(result).toStrictEqual(false);
+          });
+        });
+      });
+
+      describe('when the given options are configured to exempt all issue milestones', (): void => {
+        beforeEach((): void => {
+          optionsInterface.exemptAllIssueMilestones = true;
         });
 
         describe('when the given issue does not have a milestone', (): void => {
@@ -322,86 +366,6 @@ describe('Milestones', (): void => {
             const result = milestones.shouldExemptMilestones();
 
             expect(result).toStrictEqual(true);
-          });
-        });
-
-        describe('when the given options are not configured to exempt all issue milestones', (): void => {
-          beforeEach((): void => {
-            optionsInterface.exemptAllIssueMilestones = false;
-          });
-
-          describe('when the given issue does not have a milestone', (): void => {
-            beforeEach((): void => {
-              issueInterface.milestone = undefined;
-            });
-
-            it('should return false', (): void => {
-              expect.assertions(1);
-              issue = new Issue(optionsInterface, issueInterface);
-              milestones = new Milestones(optionsInterface, issue);
-
-              const result = milestones.shouldExemptMilestones();
-
-              expect(result).toStrictEqual(false);
-            });
-          });
-
-          describe('when the given issue does have a milestone', (): void => {
-            beforeEach((): void => {
-              issueInterface.milestone = {
-                title: 'dummy-exempt-milestone'
-              };
-            });
-
-            it('should return false', (): void => {
-              expect.assertions(1);
-              issue = new Issue(optionsInterface, issueInterface);
-              milestones = new Milestones(optionsInterface, issue);
-
-              const result = milestones.shouldExemptMilestones();
-
-              expect(result).toStrictEqual(false);
-            });
-          });
-        });
-
-        describe('when the given options are configured to exempt all issue milestones', (): void => {
-          beforeEach((): void => {
-            optionsInterface.exemptAllIssueMilestones = true;
-          });
-
-          describe('when the given issue does not have a milestone', (): void => {
-            beforeEach((): void => {
-              issueInterface.milestone = undefined;
-            });
-
-            it('should return false', (): void => {
-              expect.assertions(1);
-              issue = new Issue(optionsInterface, issueInterface);
-              milestones = new Milestones(optionsInterface, issue);
-
-              const result = milestones.shouldExemptMilestones();
-
-              expect(result).toStrictEqual(false);
-            });
-          });
-
-          describe('when the given issue does have a milestone', (): void => {
-            beforeEach((): void => {
-              issueInterface.milestone = {
-                title: 'dummy-exempt-issue-milestone'
-              };
-            });
-
-            it('should return true', (): void => {
-              expect.assertions(1);
-              issue = new Issue(optionsInterface, issueInterface);
-              milestones = new Milestones(optionsInterface, issue);
-
-              const result = milestones.shouldExemptMilestones();
-
-              expect(result).toStrictEqual(true);
-            });
           });
         });
       });
@@ -674,9 +638,49 @@ describe('Milestones', (): void => {
         });
       });
 
-      describe('when the given options are configured to exempt all milestones', (): void => {
+      describe('when the given options are not configured to exempt all pull request milestones', (): void => {
         beforeEach((): void => {
-          optionsInterface.exemptAllMilestones = true;
+          optionsInterface.exemptAllPrMilestones = false;
+        });
+
+        describe('when the given pull request does not have a milestone', (): void => {
+          beforeEach((): void => {
+            issueInterface.milestone = undefined;
+          });
+
+          it('should return false', (): void => {
+            expect.assertions(1);
+            issue = new Issue(optionsInterface, issueInterface);
+            milestones = new Milestones(optionsInterface, issue);
+
+            const result = milestones.shouldExemptMilestones();
+
+            expect(result).toStrictEqual(false);
+          });
+        });
+
+        describe('when the given pull request does have a milestone', (): void => {
+          beforeEach((): void => {
+            issueInterface.milestone = {
+              title: 'dummy-exempt-milestone'
+            };
+          });
+
+          it('should return false', (): void => {
+            expect.assertions(1);
+            issue = new Issue(optionsInterface, issueInterface);
+            milestones = new Milestones(optionsInterface, issue);
+
+            const result = milestones.shouldExemptMilestones();
+
+            expect(result).toStrictEqual(false);
+          });
+        });
+      });
+
+      describe('when the given options are configured to exempt all pull request milestones', (): void => {
+        beforeEach((): void => {
+          optionsInterface.exemptAllPrMilestones = true;
         });
 
         describe('when the given pull request does not have a milestone', (): void => {
@@ -710,86 +714,6 @@ describe('Milestones', (): void => {
             const result = milestones.shouldExemptMilestones();
 
             expect(result).toStrictEqual(true);
-          });
-        });
-
-        describe('when the given options are not configured to exempt all pull request milestones', (): void => {
-          beforeEach((): void => {
-            optionsInterface.exemptAllPrMilestones = false;
-          });
-
-          describe('when the given pull request does not have a milestone', (): void => {
-            beforeEach((): void => {
-              issueInterface.milestone = undefined;
-            });
-
-            it('should return false', (): void => {
-              expect.assertions(1);
-              issue = new Issue(optionsInterface, issueInterface);
-              milestones = new Milestones(optionsInterface, issue);
-
-              const result = milestones.shouldExemptMilestones();
-
-              expect(result).toStrictEqual(false);
-            });
-          });
-
-          describe('when the given pull request does have a milestone', (): void => {
-            beforeEach((): void => {
-              issueInterface.milestone = {
-                title: 'dummy-exempt-milestone'
-              };
-            });
-
-            it('should return false', (): void => {
-              expect.assertions(1);
-              issue = new Issue(optionsInterface, issueInterface);
-              milestones = new Milestones(optionsInterface, issue);
-
-              const result = milestones.shouldExemptMilestones();
-
-              expect(result).toStrictEqual(false);
-            });
-          });
-        });
-
-        describe('when the given options are configured to exempt all pull request milestones', (): void => {
-          beforeEach((): void => {
-            optionsInterface.exemptAllPrMilestones = true;
-          });
-
-          describe('when the given pull request does not have a milestone', (): void => {
-            beforeEach((): void => {
-              issueInterface.milestone = undefined;
-            });
-
-            it('should return false', (): void => {
-              expect.assertions(1);
-              issue = new Issue(optionsInterface, issueInterface);
-              milestones = new Milestones(optionsInterface, issue);
-
-              const result = milestones.shouldExemptMilestones();
-
-              expect(result).toStrictEqual(false);
-            });
-          });
-
-          describe('when the given pull request does have a milestone', (): void => {
-            beforeEach((): void => {
-              issueInterface.milestone = {
-                title: 'dummy-exempt-pr-milestone'
-              };
-            });
-
-            it('should return true', (): void => {
-              expect.assertions(1);
-              issue = new Issue(optionsInterface, issueInterface);
-              milestones = new Milestones(optionsInterface, issue);
-
-              const result = milestones.shouldExemptMilestones();
-
-              expect(result).toStrictEqual(true);
-            });
           });
         });
       });

@@ -225,7 +225,7 @@ export class Milestones {
   }
 
   private _shouldExemptAllIssueMilestones(): boolean {
-    if (this._options.exemptAllIssueMilestones === true) {
+    if (this._options.exemptAllIssueMilestones) {
       this._issueLogger.info(
         `The option ${this._issueLogger.createOptionLink(
           Option.ExemptAllIssueMilestones
@@ -233,23 +233,19 @@ export class Milestones {
       );
 
       return true;
-    } else if (this._options.exemptAllIssueMilestones === false) {
-      this._issueLogger.info(
-        `The option ${this._issueLogger.createOptionLink(
-          Option.ExemptAllIssueMilestones
-        )} is disabled. Only some specific milestones on this $$type will skip the stale process`
-      );
-
-      return false;
     }
 
-    this._logExemptAllMilestonesOption();
+    this._issueLogger.info(
+      `The option ${this._issueLogger.createOptionLink(
+        Option.ExemptAllIssueMilestones
+      )} is disabled. Only some specific milestones on this $$type will skip the stale process`
+    );
 
-    return this._options.exemptAllMilestones;
+    return false;
   }
 
   private _shouldExemptAllPullRequestMilestones(): boolean {
-    if (this._options.exemptAllPrMilestones === true) {
+    if (this._options.exemptAllPrMilestones) {
       this._issueLogger.info(
         `The option ${this._issueLogger.createOptionLink(
           Option.ExemptAllPrMilestones
@@ -257,35 +253,15 @@ export class Milestones {
       );
 
       return true;
-    } else if (this._options.exemptAllPrMilestones === false) {
-      this._issueLogger.info(
-        `The option ${this._issueLogger.createOptionLink(
-          Option.ExemptAllPrMilestones
-        )} is disabled. Only some specific milestones on this $$type will skip the stale process`
-      );
-
-      return false;
     }
 
-    this._logExemptAllMilestonesOption();
+    this._issueLogger.info(
+      `The option ${this._issueLogger.createOptionLink(
+        Option.ExemptAllPrMilestones
+      )} is disabled. Only some specific milestones on this $$type will skip the stale process`
+    );
 
-    return this._options.exemptAllMilestones;
-  }
-
-  private _logExemptAllMilestonesOption(): void {
-    if (this._options.exemptAllMilestones) {
-      this._issueLogger.info(
-        `The option ${this._issueLogger.createOptionLink(
-          Option.ExemptAllMilestones
-        )} is enabled. Any milestone on this $$type will skip the stale process`
-      );
-    } else {
-      this._issueLogger.info(
-        `The option ${this._issueLogger.createOptionLink(
-          Option.ExemptAllMilestones
-        )} is disabled. Only some specific milestones on this $$type will skip the stale process`
-      );
-    }
+    return false;
   }
 
   private _logSkip(): void {

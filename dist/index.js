@@ -1315,36 +1315,20 @@ class Milestones {
         return false;
     }
     _shouldExemptAllIssueMilestones() {
-        if (this._options.exemptAllIssueMilestones === true) {
+        if (this._options.exemptAllIssueMilestones) {
             this._issueLogger.info(`The option ${this._issueLogger.createOptionLink(option_1.Option.ExemptAllIssueMilestones)} is enabled. Any milestone on this $$type will skip the stale process`);
             return true;
         }
-        else if (this._options.exemptAllIssueMilestones === false) {
-            this._issueLogger.info(`The option ${this._issueLogger.createOptionLink(option_1.Option.ExemptAllIssueMilestones)} is disabled. Only some specific milestones on this $$type will skip the stale process`);
-            return false;
-        }
-        this._logExemptAllMilestonesOption();
-        return this._options.exemptAllMilestones;
+        this._issueLogger.info(`The option ${this._issueLogger.createOptionLink(option_1.Option.ExemptAllIssueMilestones)} is disabled. Only some specific milestones on this $$type will skip the stale process`);
+        return false;
     }
     _shouldExemptAllPullRequestMilestones() {
-        if (this._options.exemptAllPrMilestones === true) {
+        if (this._options.exemptAllPrMilestones) {
             this._issueLogger.info(`The option ${this._issueLogger.createOptionLink(option_1.Option.ExemptAllPrMilestones)} is enabled. Any milestone on this $$type will skip the stale process`);
             return true;
         }
-        else if (this._options.exemptAllPrMilestones === false) {
-            this._issueLogger.info(`The option ${this._issueLogger.createOptionLink(option_1.Option.ExemptAllPrMilestones)} is disabled. Only some specific milestones on this $$type will skip the stale process`);
-            return false;
-        }
-        this._logExemptAllMilestonesOption();
-        return this._options.exemptAllMilestones;
-    }
-    _logExemptAllMilestonesOption() {
-        if (this._options.exemptAllMilestones) {
-            this._issueLogger.info(`The option ${this._issueLogger.createOptionLink(option_1.Option.ExemptAllMilestones)} is enabled. Any milestone on this $$type will skip the stale process`);
-        }
-        else {
-            this._issueLogger.info(`The option ${this._issueLogger.createOptionLink(option_1.Option.ExemptAllMilestones)} is disabled. Only some specific milestones on this $$type will skip the stale process`);
-        }
+        this._issueLogger.info(`The option ${this._issueLogger.createOptionLink(option_1.Option.ExemptAllPrMilestones)} is disabled. Only some specific milestones on this $$type will skip the stale process`);
+        return false;
     }
     _logSkip() {
         this._issueLogger.info(logger_service_1.LoggerService.white('└──'), 'Skip the milestones checks');
@@ -1814,7 +1798,6 @@ var Option;
     Option["ExemptMilestones"] = "exempt-milestones";
     Option["ExemptIssueMilestones"] = "exempt-issue-milestones";
     Option["ExemptPrMilestones"] = "exempt-pr-milestones";
-    Option["ExemptAllMilestones"] = "exempt-all-milestones";
     Option["ExemptAllIssueMilestones"] = "exempt-all-issue-milestones";
     Option["ExemptAllPrMilestones"] = "exempt-all-pr-milestones";
     Option["ExemptIssueAssignees"] = "exempt-issue-assignees";
@@ -2122,9 +2105,8 @@ function _getAndValidateArgs() {
         exemptMilestones: core.getInput('exempt-milestones'),
         exemptIssueMilestones: core.getInput('exempt-issue-milestones'),
         exemptPrMilestones: core.getInput('exempt-pr-milestones'),
-        exemptAllMilestones: core.getInput('exempt-all-milestones') === 'true',
-        exemptAllIssueMilestones: _toOptionalBoolean('exempt-all-issue-milestones'),
-        exemptAllPrMilestones: _toOptionalBoolean('exempt-all-pr-milestones'),
+        exemptAllIssueMilestones: core.getInput('exempt-all-issue-milestones') === 'true',
+        exemptAllPrMilestones: core.getInput('exempt-all-pr-milestones') === 'true',
         exemptIssueAssignees: core.getInput('exempt-issue-assignees'),
         exemptPrAssignees: core.getInput('exempt-pr-assignees'),
         exemptAllIssueAssignees: core.getInput('exempt-all-issue-assignees') === 'true',

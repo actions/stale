@@ -28,7 +28,6 @@ export enum Option {
   Ascending = 'ascending',
   DeleteBranch = 'delete-branch',
   StartDate = 'start-date',
-  ExemptMilestones = 'exempt-milestones',
   ExemptIssueMilestones = 'exempt-issue-milestones',
   ExemptPrMilestones = 'exempt-pr-milestones',
   ExemptAllIssueMilestones = 'exempt-all-issue-milestones',

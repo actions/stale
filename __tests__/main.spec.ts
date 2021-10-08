@@ -1689,7 +1689,7 @@ test('an issue without a milestone will be marked as stale', async () => {
 test('an issue without an exempted milestone will be marked as stale', async () => {
   expect.assertions(3);
   const opts = {...DefaultProcessorOptions};
-  opts.exemptMilestones = 'Milestone1';
+  opts.exemptIssueMilestones = 'Milestone1';
   const TestIssueList: Issue[] = [
     generateIssue(
       opts,
@@ -1722,7 +1722,7 @@ test('an issue without an exempted milestone will be marked as stale', async () 
 test('an issue with an exempted milestone will not be marked as stale', async () => {
   expect.assertions(3);
   const opts = {...DefaultProcessorOptions};
-  opts.exemptMilestones = 'Milestone1';
+  opts.exemptIssueMilestones = 'Milestone1';
   const TestIssueList: Issue[] = [
     generateIssue(
       opts,
@@ -1755,7 +1755,7 @@ test('an issue with an exempted milestone will not be marked as stale', async ()
 test('an issue with an exempted milestone will not be marked as stale (multi milestones with spaces)', async () => {
   expect.assertions(3);
   const opts = {...DefaultProcessorOptions};
-  opts.exemptMilestones = 'Milestone1, Milestone2';
+  opts.exemptIssueMilestones = 'Milestone1, Milestone2';
   const TestIssueList: Issue[] = [
     generateIssue(
       opts,
@@ -1788,7 +1788,7 @@ test('an issue with an exempted milestone will not be marked as stale (multi mil
 test('an issue with an exempted milestone will not be marked as stale (multi milestones without spaces)', async () => {
   expect.assertions(3);
   const opts = {...DefaultProcessorOptions};
-  opts.exemptMilestones = 'Milestone1,Milestone2';
+  opts.exemptIssueMilestones = 'Milestone1,Milestone2';
   const TestIssueList: Issue[] = [
     generateIssue(
       opts,
@@ -1801,108 +1801,6 @@ test('an issue with an exempted milestone will not be marked as stale (multi mil
       undefined,
       undefined,
       'Milestone2'
-    )
-  ];
-  const processor = new IssuesProcessorMock(
-    opts,
-    async p => (p === 1 ? TestIssueList : []),
-    async () => [],
-    async () => new Date().toDateString()
-  );
-
-  // process our fake issue list
-  await processor.processIssues(1);
-
-  expect(processor.staleIssues.length).toStrictEqual(0);
-  expect(processor.closedIssues.length).toStrictEqual(0);
-  expect(processor.removedLabelIssues.length).toStrictEqual(0);
-});
-
-test('an issue with an exempted milestone but without an exempted issue milestone will not be marked as stale', async () => {
-  expect.assertions(3);
-  const opts = {...DefaultProcessorOptions};
-  opts.exemptMilestones = 'Milestone1';
-  opts.exemptIssueMilestones = '';
-  const TestIssueList: Issue[] = [
-    generateIssue(
-      opts,
-      1,
-      'My first issue',
-      '2020-01-01T17:00:00Z',
-      '2020-01-01T17:00:00Z',
-      false,
-      undefined,
-      undefined,
-      undefined,
-      'Milestone1'
-    )
-  ];
-  const processor = new IssuesProcessorMock(
-    opts,
-    async p => (p === 1 ? TestIssueList : []),
-    async () => [],
-    async () => new Date().toDateString()
-  );
-
-  // process our fake issue list
-  await processor.processIssues(1);
-
-  expect(processor.staleIssues.length).toStrictEqual(0);
-  expect(processor.closedIssues.length).toStrictEqual(0);
-  expect(processor.removedLabelIssues.length).toStrictEqual(0);
-});
-
-test('an issue with an exempted milestone but with another exempted issue milestone will be marked as stale', async () => {
-  expect.assertions(3);
-  const opts = {...DefaultProcessorOptions};
-  opts.exemptMilestones = 'Milestone1';
-  opts.exemptIssueMilestones = 'Milestone2';
-  const TestIssueList: Issue[] = [
-    generateIssue(
-      opts,
-      1,
-      'My first issue',
-      '2020-01-01T17:00:00Z',
-      '2020-01-01T17:00:00Z',
-      false,
-      undefined,
-      undefined,
-      undefined,
-      'Milestone1'
-    )
-  ];
-  const processor = new IssuesProcessorMock(
-    opts,
-    async p => (p === 1 ? TestIssueList : []),
-    async () => [],
-    async () => new Date().toDateString()
-  );
-
-  // process our fake issue list
-  await processor.processIssues(1);
-
-  expect(processor.staleIssues.length).toStrictEqual(1);
-  expect(processor.closedIssues.length).toStrictEqual(0);
-  expect(processor.removedLabelIssues.length).toStrictEqual(0);
-});
-
-test('an issue with an exempted milestone and with an exempted issue milestone will not be marked as stale', async () => {
-  expect.assertions(3);
-  const opts = {...DefaultProcessorOptions};
-  opts.exemptMilestones = 'Milestone1';
-  opts.exemptIssueMilestones = 'Milestone1';
-  const TestIssueList: Issue[] = [
-    generateIssue(
-      opts,
-      1,
-      'My first issue',
-      '2020-01-01T17:00:00Z',
-      '2020-01-01T17:00:00Z',
-      false,
-      undefined,
-      undefined,
-      undefined,
-      'Milestone1'
     )
   ];
   const processor = new IssuesProcessorMock(

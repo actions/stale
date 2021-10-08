@@ -32,7 +32,6 @@ export interface IIssuesProcessorOptions {
   ascending: boolean;
   deleteBranch: boolean;
   startDate: IsoOrRfcDateString | undefined; // Should be ISO 8601 or RFC 2822
-  exemptMilestones: string;
   exemptIssueMilestones: string;
   exemptPrMilestones: string;
   exemptAllIssueMilestones: boolean;

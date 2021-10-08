@@ -84,19 +84,19 @@ describe('milestones options', (): void => {
       }
     );
 
-    describe('when all the issues and pull requests milestones should exempt a specific milestone', (): void => {
+    describe('when all the issues milestones should exempt a specific milestone', (): void => {
       beforeEach((): void => {
-        opts.exemptMilestones = 'dummy-milestone';
+        opts.exemptIssueMilestones = 'dummy-issue-milestone';
       });
 
       describe.each`
-        isPullRequest | milestone                         | name                                                                            | shouldStale
-        ${false}      | ${''}                             | ${'the issue does not have a milestone'}                                        | ${true}
-        ${false}      | ${'dummy-milestone-not-exempted'} | ${'the issue does have a milestone but not matching the specific exempted one'} | ${true}
-        ${false}      | ${'dummy-milestone'}              | ${'the issue does have a milestone matching the specific exempted one'}         | ${false}
-        ${true}       | ${''}                             | ${'the PR does not have a milestone'}                                           | ${true}
-        ${true}       | ${'dummy-milestone-not-exempted'} | ${'the PR does have a milestone but not matching the specific exempted one'}    | ${true}
-        ${true}       | ${'dummy-milestone'}              | ${'the PR does have a milestone matching the specific exempted one'}            | ${false}
+        isPullRequest | milestone                         | name                                                                                  | shouldStale
+        ${false}      | ${''}                             | ${'the issue does not have a milestone'}                                              | ${true}
+        ${false}      | ${'dummy-milestone-not-exempted'} | ${'the issue does have a milestone but not matching the specific issue exempted one'} | ${true}
+        ${false}      | ${'dummy-issue-milestone'}        | ${'the issue does have a milestone matching the specific issue exempted one'}         | ${false}
+        ${true}       | ${''}                             | ${'the PR does not have a milestone'}                                                 | ${true}
+        ${true}       | ${'dummy-milestone-not-exempted'} | ${'the PR does have a milestone but not matching the specific issue exempted one'}    | ${true}
+        ${true}       | ${'dummy-issue-milestone'}        | ${'the PR does have a milestone matching the specific issue exempted one'}            | ${true}
       `(
         'when $name',
         ({isPullRequest, milestone, shouldStale}: ITestData): void => {
@@ -120,101 +120,21 @@ describe('milestones options', (): void => {
           });
         }
       );
-
-      describe('when all the issues milestones should exempt a specific milestone', (): void => {
-        beforeEach((): void => {
-          opts.exemptIssueMilestones = 'dummy-issue-milestone';
-        });
-
-        describe.each`
-          isPullRequest | milestone                         | name                                                                                  | shouldStale
-          ${false}      | ${''}                             | ${'the issue does not have a milestone'}                                              | ${true}
-          ${false}      | ${'dummy-milestone-not-exempted'} | ${'the issue does have a milestone but not matching the specific issue exempted one'} | ${true}
-          ${false}      | ${'dummy-issue-milestone'}        | ${'the issue does have a milestone matching the specific issue exempted one'}         | ${false}
-          ${false}      | ${'dummy-milestone'}              | ${'the issue does have a milestone matching the specific exempted one'}               | ${true}
-          ${true}       | ${''}                             | ${'the PR does not have a milestone'}                                                 | ${true}
-          ${true}       | ${'dummy-milestone-not-exempted'} | ${'the PR does have a milestone but not matching the specific issue exempted one'}    | ${true}
-          ${true}       | ${'dummy-issue-milestone'}        | ${'the PR does have a milestone matching the specific issue exempted one'}            | ${true}
-          ${true}       | ${'dummy-milestone'}              | ${'the PR does have a milestone matching the specific exempted one'}                  | ${false}
-        `(
-          'when $name',
-          ({isPullRequest, milestone, shouldStale}: ITestData): void => {
-            beforeEach((): void => {
-              setTestIssueList(isPullRequest, milestone);
-              setProcessor();
-            });
-
-            test(`should${
-              shouldStale ? '' : ' not'
-            } be marked as stale`, async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(
-                shouldStale ? 1 : 0
-              );
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          }
-        );
-      });
-
-      describe('when all the pull requests milestones should exempt a specific milestone', (): void => {
-        beforeEach((): void => {
-          opts.exemptPrMilestones = 'dummy-pull-request-milestone';
-        });
-
-        describe.each`
-          isPullRequest | milestone                         | name                                                                                         | shouldStale
-          ${false}      | ${''}                             | ${'the issue does not have a milestone'}                                                     | ${true}
-          ${false}      | ${'dummy-milestone-not-exempted'} | ${'the issue does have a milestone but not matching the specific pull request exempted one'} | ${true}
-          ${false}      | ${'dummy-pull-request-milestone'} | ${'the issue does have a milestone matching the specific pull request exempted one'}         | ${true}
-          ${false}      | ${'dummy-milestone'}              | ${'the issue does have a milestone matching the specific exempted one'}                      | ${false}
-          ${true}       | ${''}                             | ${'the PR does not have a milestone'}                                                        | ${true}
-          ${true}       | ${'dummy-milestone-not-exempted'} | ${'the PR does have a milestone but not matching the specific pull request exempted one'}    | ${true}
-          ${true}       | ${'dummy-pull-request-milestone'} | ${'the PR does have a milestone matching the specific pull request exempted one'}            | ${false}
-          ${true}       | ${'dummy-milestone'}              | ${'the PR does have a milestone matching the specific exempted one'}                         | ${true}
-        `(
-          'when $name',
-          ({isPullRequest, milestone, shouldStale}: ITestData): void => {
-            beforeEach((): void => {
-              setTestIssueList(isPullRequest, milestone);
-              setProcessor();
-            });
-
-            test(`should${
-              shouldStale ? '' : ' not'
-            } be marked as stale`, async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(
-                shouldStale ? 1 : 0
-              );
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          }
-        );
-      });
     });
 
-    describe('when all the issues and pull requests milestones should exempt some milestones', (): void => {
+    describe('when all the pull requests milestones should exempt a specific milestone', (): void => {
       beforeEach((): void => {
-        opts.exemptMilestones = 'dummy-milestone1, dummy-milestone2';
+        opts.exemptPrMilestones = 'dummy-pull-request-milestone';
       });
 
       describe.each`
-        isPullRequest | milestone                         | name                                                                            | shouldStale
-        ${false}      | ${''}                             | ${'the issue does not have a milestone'}                                        | ${true}
-        ${false}      | ${'dummy-milestone-not-exempted'} | ${'the issue does have a milestone but not matching the specific exempted one'} | ${true}
-        ${false}      | ${'dummy-milestone2'}             | ${'the issue does have a milestone matching the specific exempted one'}         | ${false}
-        ${true}       | ${''}                             | ${'the PR does not have a milestone'}                                           | ${true}
-        ${true}       | ${'dummy-milestone-not-exempted'} | ${'the PR does have a milestone but not matching the specific exempted one'}    | ${true}
-        ${true}       | ${'dummy-milestone2'}             | ${'the PR does have a milestone matching the specific exempted one'}            | ${false}
+        isPullRequest | milestone                         | name                                                                                         | shouldStale
+        ${false}      | ${''}                             | ${'the issue does not have a milestone'}                                                     | ${true}
+        ${false}      | ${'dummy-milestone-not-exempted'} | ${'the issue does have a milestone but not matching the specific pull request exempted one'} | ${true}
+        ${false}      | ${'dummy-pull-request-milestone'} | ${'the issue does have a milestone matching the specific pull request exempted one'}         | ${true}
+        ${true}       | ${''}                             | ${'the PR does not have a milestone'}                                                        | ${true}
+        ${true}       | ${'dummy-milestone-not-exempted'} | ${'the PR does have a milestone but not matching the specific pull request exempted one'}    | ${true}
+        ${true}       | ${'dummy-pull-request-milestone'} | ${'the PR does have a milestone matching the specific pull request exempted one'}            | ${false}
       `(
         'when $name',
         ({isPullRequest, milestone, shouldStale}: ITestData): void => {
@@ -238,88 +158,84 @@ describe('milestones options', (): void => {
           });
         }
       );
+    });
 
-      describe('when all the issues milestones should exempt a specific milestone', (): void => {
-        beforeEach((): void => {
-          opts.exemptIssueMilestones =
-            'dummy-issue-milestone1, dummy-issue-milestone2';
-        });
-
-        describe.each`
-          isPullRequest | milestone                         | name                                                                                  | shouldStale
-          ${false}      | ${''}                             | ${'the issue does not have a milestone'}                                              | ${true}
-          ${false}      | ${'dummy-milestone-not-exempted'} | ${'the issue does have a milestone but not matching the specific issue exempted one'} | ${true}
-          ${false}      | ${'dummy-issue-milestone2'}       | ${'the issue does have a milestone matching the specific issue exempted one'}         | ${false}
-          ${false}      | ${'dummy-milestone2'}             | ${'the issue does have a milestone matching the specific exempted one'}               | ${true}
-          ${true}       | ${''}                             | ${'the PR does not have a milestone'}                                                 | ${true}
-          ${true}       | ${'dummy-milestone-not-exempted'} | ${'the PR does have a milestone but not matching the specific issue exempted one'}    | ${true}
-          ${true}       | ${'dummy-issue-milestone2'}       | ${'the PR does have a milestone matching the specific issue exempted one'}            | ${true}
-          ${true}       | ${'dummy-milestone2'}             | ${'the PR does have a milestone matching the specific exempted one'}                  | ${false}
-        `(
-          'when $name',
-          ({isPullRequest, milestone, shouldStale}: ITestData): void => {
-            beforeEach((): void => {
-              setTestIssueList(isPullRequest, milestone);
-              setProcessor();
-            });
-
-            test(`should${
-              shouldStale ? '' : ' not'
-            } be marked as stale`, async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(
-                shouldStale ? 1 : 0
-              );
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          }
-        );
+    describe('when all the issues milestones should exempt a specific milestone', (): void => {
+      beforeEach((): void => {
+        opts.exemptIssueMilestones =
+          'dummy-issue-milestone1, dummy-issue-milestone2';
       });
 
-      describe('when all the pull requests milestones should exempt a specific milestone', (): void => {
-        beforeEach((): void => {
-          opts.exemptPrMilestones =
-            'dummy-pull-request-milestone1, dummy-pull-request-milestone2';
-        });
+      describe.each`
+        isPullRequest | milestone                         | name                                                                                  | shouldStale
+        ${false}      | ${''}                             | ${'the issue does not have a milestone'}                                              | ${true}
+        ${false}      | ${'dummy-milestone-not-exempted'} | ${'the issue does have a milestone but not matching the specific issue exempted one'} | ${true}
+        ${false}      | ${'dummy-issue-milestone2'}       | ${'the issue does have a milestone matching the specific issue exempted one'}         | ${false}
+        ${true}       | ${''}                             | ${'the PR does not have a milestone'}                                                 | ${true}
+        ${true}       | ${'dummy-milestone-not-exempted'} | ${'the PR does have a milestone but not matching the specific issue exempted one'}    | ${true}
+        ${true}       | ${'dummy-issue-milestone2'}       | ${'the PR does have a milestone matching the specific issue exempted one'}            | ${true}
+      `(
+        'when $name',
+        ({isPullRequest, milestone, shouldStale}: ITestData): void => {
+          beforeEach((): void => {
+            setTestIssueList(isPullRequest, milestone);
+            setProcessor();
+          });
 
-        describe.each`
-          isPullRequest | milestone                          | name                                                                                         | shouldStale
-          ${false}      | ${''}                              | ${'the issue does not have a milestone'}                                                     | ${true}
-          ${false}      | ${'dummy-milestone-not-exempted'}  | ${'the issue does have a milestone but not matching the specific pull request exempted one'} | ${true}
-          ${false}      | ${'dummy-pull-request-milestone2'} | ${'the issue does have a milestone matching the specific pull request exempted one'}         | ${true}
-          ${false}      | ${'dummy-milestone2'}              | ${'the issue does have a milestone matching the specific exempted one'}                      | ${false}
-          ${true}       | ${''}                              | ${'the PR does not have a milestone'}                                                        | ${true}
-          ${true}       | ${'dummy-milestone-not-exempted'}  | ${'the PR does have a milestone but not matching the specific pull request exempted one'}    | ${true}
-          ${true}       | ${'dummy-pull-request-milestone2'} | ${'the PR does have a milestone matching the specific pull request exempted one'}            | ${false}
-          ${true}       | ${'dummy-milestone2'}              | ${'the PR does have a milestone matching the specific exempted one'}                         | ${true}
-        `(
-          'when $name',
-          ({isPullRequest, milestone, shouldStale}: ITestData): void => {
-            beforeEach((): void => {
-              setTestIssueList(isPullRequest, milestone);
-              setProcessor();
-            });
+          test(`should${
+            shouldStale ? '' : ' not'
+          } be marked as stale`, async () => {
+            expect.assertions(3);
 
-            test(`should${
-              shouldStale ? '' : ' not'
-            } be marked as stale`, async () => {
-              expect.assertions(3);
+            await processor.processIssues(1);
 
-              await processor.processIssues(1);
+            expect(processor.staleIssues.length).toStrictEqual(
+              shouldStale ? 1 : 0
+            );
+            expect(processor.closedIssues.length).toStrictEqual(0);
+            expect(processor.removedLabelIssues.length).toStrictEqual(0);
+          });
+        }
+      );
+    });
 
-              expect(processor.staleIssues.length).toStrictEqual(
-                shouldStale ? 1 : 0
-              );
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          }
-        );
+    describe('when all the pull requests milestones should exempt a specific milestone', (): void => {
+      beforeEach((): void => {
+        opts.exemptPrMilestones =
+          'dummy-pull-request-milestone1, dummy-pull-request-milestone2';
       });
+
+      describe.each`
+        isPullRequest | milestone                          | name                                                                                         | shouldStale
+        ${false}      | ${''}                              | ${'the issue does not have a milestone'}                                                     | ${true}
+        ${false}      | ${'dummy-milestone-not-exempted'}  | ${'the issue does have a milestone but not matching the specific pull request exempted one'} | ${true}
+        ${false}      | ${'dummy-pull-request-milestone2'} | ${'the issue does have a milestone matching the specific pull request exempted one'}         | ${true}
+        ${true}       | ${''}                              | ${'the PR does not have a milestone'}                                                        | ${true}
+        ${true}       | ${'dummy-milestone-not-exempted'}  | ${'the PR does have a milestone but not matching the specific pull request exempted one'}    | ${true}
+        ${true}       | ${'dummy-pull-request-milestone2'} | ${'the PR does have a milestone matching the specific pull request exempted one'}            | ${false}
+      `(
+        'when $name',
+        ({isPullRequest, milestone, shouldStale}: ITestData): void => {
+          beforeEach((): void => {
+            setTestIssueList(isPullRequest, milestone);
+            setProcessor();
+          });
+
+          test(`should${
+            shouldStale ? '' : ' not'
+          } be marked as stale`, async () => {
+            expect.assertions(3);
+
+            await processor.processIssues(1);
+
+            expect(processor.staleIssues.length).toStrictEqual(
+              shouldStale ? 1 : 0
+            );
+            expect(processor.closedIssues.length).toStrictEqual(0);
+            expect(processor.removedLabelIssues.length).toStrictEqual(0);
+          });
+        }
+      );
     });
   });
 
@@ -358,19 +274,19 @@ describe('milestones options', (): void => {
       }
     );
 
-    describe('when all the issues and pull requests milestones should exempt a specific milestone', (): void => {
+    describe('when all the issues milestones should exempt a specific milestone', (): void => {
       beforeEach((): void => {
-        opts.exemptMilestones = 'dummy-milestone';
+        opts.exemptIssueMilestones = 'dummy-issue-milestone';
       });
 
       describe.each`
-        isPullRequest | milestone                         | name                                                                            | shouldStale
-        ${false}      | ${''}                             | ${'the issue does not have a milestone'}                                        | ${true}
-        ${false}      | ${'dummy-milestone-not-exempted'} | ${'the issue does have a milestone but not matching the specific exempted one'} | ${false}
-        ${false}      | ${'dummy-milestone'}              | ${'the issue does have a milestone matching the specific exempted one'}         | ${false}
-        ${true}       | ${''}                             | ${'the PR does not have a milestone'}                                           | ${true}
-        ${true}       | ${'dummy-milestone-not-exempted'} | ${'the PR does have a milestone but not matching the specific exempted one'}    | ${true}
-        ${true}       | ${'dummy-milestone'}              | ${'the PR does have a milestone matching the specific exempted one'}            | ${false}
+        isPullRequest | milestone                         | name                                                                                  | shouldStale
+        ${false}      | ${''}                             | ${'the issue does not have a milestone'}                                              | ${true}
+        ${false}      | ${'dummy-milestone-not-exempted'} | ${'the issue does have a milestone but not matching the specific issue exempted one'} | ${false}
+        ${false}      | ${'dummy-issue-milestone'}        | ${'the issue does have a milestone matching the specific issue exempted one'}         | ${false}
+        ${true}       | ${''}                             | ${'the PR does not have a milestone'}                                                 | ${true}
+        ${true}       | ${'dummy-milestone-not-exempted'} | ${'the PR does have a milestone but not matching the specific issue exempted one'}    | ${true}
+        ${true}       | ${'dummy-issue-milestone'}        | ${'the PR does have a milestone matching the specific issue exempted one'}            | ${true}
       `(
         'when $name',
         ({isPullRequest, milestone, shouldStale}: ITestData): void => {
@@ -394,101 +310,21 @@ describe('milestones options', (): void => {
           });
         }
       );
-
-      describe('when all the issues milestones should exempt a specific milestone', (): void => {
-        beforeEach((): void => {
-          opts.exemptIssueMilestones = 'dummy-issue-milestone';
-        });
-
-        describe.each`
-          isPullRequest | milestone                         | name                                                                                  | shouldStale
-          ${false}      | ${''}                             | ${'the issue does not have a milestone'}                                              | ${true}
-          ${false}      | ${'dummy-milestone-not-exempted'} | ${'the issue does have a milestone but not matching the specific issue exempted one'} | ${false}
-          ${false}      | ${'dummy-issue-milestone'}        | ${'the issue does have a milestone matching the specific issue exempted one'}         | ${false}
-          ${false}      | ${'dummy-milestone'}              | ${'the issue does have a milestone matching the specific exempted one'}               | ${false}
-          ${true}       | ${''}                             | ${'the PR does not have a milestone'}                                                 | ${true}
-          ${true}       | ${'dummy-milestone-not-exempted'} | ${'the PR does have a milestone but not matching the specific issue exempted one'}    | ${true}
-          ${true}       | ${'dummy-issue-milestone'}        | ${'the PR does have a milestone matching the specific issue exempted one'}            | ${true}
-          ${true}       | ${'dummy-milestone'}              | ${'the PR does have a milestone matching the specific exempted one'}                  | ${false}
-        `(
-          'when $name',
-          ({isPullRequest, milestone, shouldStale}: ITestData): void => {
-            beforeEach((): void => {
-              setTestIssueList(isPullRequest, milestone);
-              setProcessor();
-            });
-
-            test(`should${
-              shouldStale ? '' : ' not'
-            } be marked as stale`, async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(
-                shouldStale ? 1 : 0
-              );
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          }
-        );
-      });
-
-      describe('when all the pull requests milestones should exempt a specific milestone', (): void => {
-        beforeEach((): void => {
-          opts.exemptPrMilestones = 'dummy-pull-request-milestone';
-        });
-
-        describe.each`
-          isPullRequest | milestone                         | name                                                                                         | shouldStale
-          ${false}      | ${''}                             | ${'the issue does not have a milestone'}                                                     | ${true}
-          ${false}      | ${'dummy-milestone-not-exempted'} | ${'the issue does have a milestone but not matching the specific pull request exempted one'} | ${false}
-          ${false}      | ${'dummy-pull-request-milestone'} | ${'the issue does have a milestone matching the specific pull request exempted one'}         | ${false}
-          ${false}      | ${'dummy-milestone'}              | ${'the issue does have a milestone matching the specific exempted one'}                      | ${false}
-          ${true}       | ${''}                             | ${'the PR does not have a milestone'}                                                        | ${true}
-          ${true}       | ${'dummy-milestone-not-exempted'} | ${'the PR does have a milestone but not matching the specific pull request exempted one'}    | ${true}
-          ${true}       | ${'dummy-pull-request-milestone'} | ${'the PR does have a milestone matching the specific pull request exempted one'}            | ${false}
-          ${true}       | ${'dummy-milestone'}              | ${'the PR does have a milestone matching the specific exempted one'}                         | ${true}
-        `(
-          'when $name',
-          ({isPullRequest, milestone, shouldStale}: ITestData): void => {
-            beforeEach((): void => {
-              setTestIssueList(isPullRequest, milestone);
-              setProcessor();
-            });
-
-            test(`should${
-              shouldStale ? '' : ' not'
-            } be marked as stale`, async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(
-                shouldStale ? 1 : 0
-              );
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          }
-        );
-      });
     });
 
-    describe('when all the issues and pull requests milestones should exempt some milestones', (): void => {
+    describe('when all the pull requests milestones should exempt a specific milestone', (): void => {
       beforeEach((): void => {
-        opts.exemptMilestones = 'dummy-milestone1, dummy-milestone2';
+        opts.exemptPrMilestones = 'dummy-pull-request-milestone';
       });
 
       describe.each`
-        isPullRequest | milestone                         | name                                                                            | shouldStale
-        ${false}      | ${''}                             | ${'the issue does not have a milestone'}                                        | ${true}
-        ${false}      | ${'dummy-milestone-not-exempted'} | ${'the issue does have a milestone but not matching the specific exempted one'} | ${false}
-        ${false}      | ${'dummy-milestone2'}             | ${'the issue does have a milestone matching the specific exempted one'}         | ${false}
-        ${true}       | ${''}                             | ${'the PR does not have a milestone'}                                           | ${true}
-        ${true}       | ${'dummy-milestone-not-exempted'} | ${'the PR does have a milestone but not matching the specific exempted one'}    | ${true}
-        ${true}       | ${'dummy-milestone2'}             | ${'the PR does have a milestone matching the specific exempted one'}            | ${false}
+        isPullRequest | milestone                         | name                                                                                         | shouldStale
+        ${false}      | ${''}                             | ${'the issue does not have a milestone'}                                                     | ${true}
+        ${false}      | ${'dummy-milestone-not-exempted'} | ${'the issue does have a milestone but not matching the specific pull request exempted one'} | ${false}
+        ${false}      | ${'dummy-pull-request-milestone'} | ${'the issue does have a milestone matching the specific pull request exempted one'}         | ${false}
+        ${true}       | ${''}                             | ${'the PR does not have a milestone'}                                                        | ${true}
+        ${true}       | ${'dummy-milestone-not-exempted'} | ${'the PR does have a milestone but not matching the specific pull request exempted one'}    | ${true}
+        ${true}       | ${'dummy-pull-request-milestone'} | ${'the PR does have a milestone matching the specific pull request exempted one'}            | ${false}
       `(
         'when $name',
         ({isPullRequest, milestone, shouldStale}: ITestData): void => {
@@ -512,88 +348,84 @@ describe('milestones options', (): void => {
           });
         }
       );
+    });
 
-      describe('when all the issues milestones should exempt a specific milestone', (): void => {
-        beforeEach((): void => {
-          opts.exemptIssueMilestones =
-            'dummy-issue-milestone1, dummy-issue-milestone2';
-        });
-
-        describe.each`
-          isPullRequest | milestone                         | name                                                                                  | shouldStale
-          ${false}      | ${''}                             | ${'the issue does not have a milestone'}                                              | ${true}
-          ${false}      | ${'dummy-milestone-not-exempted'} | ${'the issue does have a milestone but not matching the specific issue exempted one'} | ${false}
-          ${false}      | ${'dummy-issue-milestone2'}       | ${'the issue does have a milestone matching the specific issue exempted one'}         | ${false}
-          ${false}      | ${'dummy-milestone2'}             | ${'the issue does have a milestone matching the specific exempted one'}               | ${false}
-          ${true}       | ${''}                             | ${'the PR does not have a milestone'}                                                 | ${true}
-          ${true}       | ${'dummy-milestone-not-exempted'} | ${'the PR does have a milestone but not matching the specific issue exempted one'}    | ${true}
-          ${true}       | ${'dummy-issue-milestone2'}       | ${'the PR does have a milestone matching the specific issue exempted one'}            | ${true}
-          ${true}       | ${'dummy-milestone2'}             | ${'the PR does have a milestone matching the specific exempted one'}                  | ${false}
-        `(
-          'when $name',
-          ({isPullRequest, milestone, shouldStale}: ITestData): void => {
-            beforeEach((): void => {
-              setTestIssueList(isPullRequest, milestone);
-              setProcessor();
-            });
-
-            test(`should${
-              shouldStale ? '' : ' not'
-            } be marked as stale`, async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(
-                shouldStale ? 1 : 0
-              );
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          }
-        );
+    describe('when all the issues milestones should exempt a specific milestone', (): void => {
+      beforeEach((): void => {
+        opts.exemptIssueMilestones =
+          'dummy-issue-milestone1, dummy-issue-milestone2';
       });
 
-      describe('when all the pull requests milestones should exempt a specific milestone', (): void => {
-        beforeEach((): void => {
-          opts.exemptPrMilestones =
-            'dummy-pull-request-milestone1, dummy-pull-request-milestone2';
-        });
+      describe.each`
+        isPullRequest | milestone                         | name                                                                                  | shouldStale
+        ${false}      | ${''}                             | ${'the issue does not have a milestone'}                                              | ${true}
+        ${false}      | ${'dummy-milestone-not-exempted'} | ${'the issue does have a milestone but not matching the specific issue exempted one'} | ${false}
+        ${false}      | ${'dummy-issue-milestone2'}       | ${'the issue does have a milestone matching the specific issue exempted one'}         | ${false}
+        ${true}       | ${''}                             | ${'the PR does not have a milestone'}                                                 | ${true}
+        ${true}       | ${'dummy-milestone-not-exempted'} | ${'the PR does have a milestone but not matching the specific issue exempted one'}    | ${true}
+        ${true}       | ${'dummy-issue-milestone2'}       | ${'the PR does have a milestone matching the specific issue exempted one'}            | ${true}
+      `(
+        'when $name',
+        ({isPullRequest, milestone, shouldStale}: ITestData): void => {
+          beforeEach((): void => {
+            setTestIssueList(isPullRequest, milestone);
+            setProcessor();
+          });
 
-        describe.each`
-          isPullRequest | milestone                          | name                                                                                         | shouldStale
-          ${false}      | ${''}                              | ${'the issue does not have a milestone'}                                                     | ${true}
-          ${false}      | ${'dummy-milestone-not-exempted'}  | ${'the issue does have a milestone but not matching the specific pull request exempted one'} | ${false}
-          ${false}      | ${'dummy-pull-request-milestone2'} | ${'the issue does have a milestone matching the specific pull request exempted one'}         | ${false}
-          ${false}      | ${'dummy-milestone2'}              | ${'the issue does have a milestone matching the specific exempted one'}                      | ${false}
-          ${true}       | ${''}                              | ${'the PR does not have a milestone'}                                                        | ${true}
-          ${true}       | ${'dummy-milestone-not-exempted'}  | ${'the PR does have a milestone but not matching the specific pull request exempted one'}    | ${true}
-          ${true}       | ${'dummy-pull-request-milestone2'} | ${'the PR does have a milestone matching the specific pull request exempted one'}            | ${false}
-          ${true}       | ${'dummy-milestone2'}              | ${'the PR does have a milestone matching the specific exempted one'}                         | ${true}
-        `(
-          'when $name',
-          ({isPullRequest, milestone, shouldStale}: ITestData): void => {
-            beforeEach((): void => {
-              setTestIssueList(isPullRequest, milestone);
-              setProcessor();
-            });
+          test(`should${
+            shouldStale ? '' : ' not'
+          } be marked as stale`, async () => {
+            expect.assertions(3);
 
-            test(`should${
-              shouldStale ? '' : ' not'
-            } be marked as stale`, async () => {
-              expect.assertions(3);
+            await processor.processIssues(1);
 
-              await processor.processIssues(1);
+            expect(processor.staleIssues.length).toStrictEqual(
+              shouldStale ? 1 : 0
+            );
+            expect(processor.closedIssues.length).toStrictEqual(0);
+            expect(processor.removedLabelIssues.length).toStrictEqual(0);
+          });
+        }
+      );
+    });
 
-              expect(processor.staleIssues.length).toStrictEqual(
-                shouldStale ? 1 : 0
-              );
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          }
-        );
+    describe('when all the pull requests milestones should exempt a specific milestone', (): void => {
+      beforeEach((): void => {
+        opts.exemptPrMilestones =
+          'dummy-pull-request-milestone1, dummy-pull-request-milestone2';
       });
+
+      describe.each`
+        isPullRequest | milestone                          | name                                                                                         | shouldStale
+        ${false}      | ${''}                              | ${'the issue does not have a milestone'}                                                     | ${true}
+        ${false}      | ${'dummy-milestone-not-exempted'}  | ${'the issue does have a milestone but not matching the specific pull request exempted one'} | ${false}
+        ${false}      | ${'dummy-pull-request-milestone2'} | ${'the issue does have a milestone matching the specific pull request exempted one'}         | ${false}
+        ${true}       | ${''}                              | ${'the PR does not have a milestone'}                                                        | ${true}
+        ${true}       | ${'dummy-milestone-not-exempted'}  | ${'the PR does have a milestone but not matching the specific pull request exempted one'}    | ${true}
+        ${true}       | ${'dummy-pull-request-milestone2'} | ${'the PR does have a milestone matching the specific pull request exempted one'}            | ${false}
+      `(
+        'when $name',
+        ({isPullRequest, milestone, shouldStale}: ITestData): void => {
+          beforeEach((): void => {
+            setTestIssueList(isPullRequest, milestone);
+            setProcessor();
+          });
+
+          test(`should${
+            shouldStale ? '' : ' not'
+          } be marked as stale`, async () => {
+            expect.assertions(3);
+
+            await processor.processIssues(1);
+
+            expect(processor.staleIssues.length).toStrictEqual(
+              shouldStale ? 1 : 0
+            );
+            expect(processor.closedIssues.length).toStrictEqual(0);
+            expect(processor.removedLabelIssues.length).toStrictEqual(0);
+          });
+        }
+      );
     });
   });
 
@@ -632,19 +464,19 @@ describe('milestones options', (): void => {
       }
     );
 
-    describe('when all the issues and pull requests milestones should exempt a specific milestone', (): void => {
+    describe('when all the issues milestones should exempt a specific milestone', (): void => {
       beforeEach((): void => {
-        opts.exemptMilestones = 'dummy-milestone';
+        opts.exemptIssueMilestones = 'dummy-issue-milestone';
       });
 
       describe.each`
-        isPullRequest | milestone                         | name                                                                            | shouldStale
-        ${false}      | ${''}                             | ${'the issue does not have a milestone'}                                        | ${true}
-        ${false}      | ${'dummy-milestone-not-exempted'} | ${'the issue does have a milestone but not matching the specific exempted one'} | ${true}
-        ${false}      | ${'dummy-milestone'}              | ${'the issue does have a milestone matching the specific exempted one'}         | ${false}
-        ${true}       | ${''}                             | ${'the PR does not have a milestone'}                                           | ${true}
-        ${true}       | ${'dummy-milestone-not-exempted'} | ${'the PR does have a milestone but not matching the specific exempted one'}    | ${true}
-        ${true}       | ${'dummy-milestone'}              | ${'the PR does have a milestone matching the specific exempted one'}            | ${false}
+        isPullRequest | milestone                         | name                                                                                  | shouldStale
+        ${false}      | ${''}                             | ${'the issue does not have a milestone'}                                              | ${true}
+        ${false}      | ${'dummy-milestone-not-exempted'} | ${'the issue does have a milestone but not matching the specific issue exempted one'} | ${true}
+        ${false}      | ${'dummy-issue-milestone'}        | ${'the issue does have a milestone matching the specific issue exempted one'}         | ${false}
+        ${true}       | ${''}                             | ${'the PR does not have a milestone'}                                                 | ${true}
+        ${true}       | ${'dummy-milestone-not-exempted'} | ${'the PR does have a milestone but not matching the specific issue exempted one'}    | ${true}
+        ${true}       | ${'dummy-issue-milestone'}        | ${'the PR does have a milestone matching the specific issue exempted one'}            | ${true}
       `(
         'when $name',
         ({isPullRequest, milestone, shouldStale}: ITestData): void => {
@@ -668,101 +500,21 @@ describe('milestones options', (): void => {
           });
         }
       );
-
-      describe('when all the issues milestones should exempt a specific milestone', (): void => {
-        beforeEach((): void => {
-          opts.exemptIssueMilestones = 'dummy-issue-milestone';
-        });
-
-        describe.each`
-          isPullRequest | milestone                         | name                                                                                  | shouldStale
-          ${false}      | ${''}                             | ${'the issue does not have a milestone'}                                              | ${true}
-          ${false}      | ${'dummy-milestone-not-exempted'} | ${'the issue does have a milestone but not matching the specific issue exempted one'} | ${true}
-          ${false}      | ${'dummy-issue-milestone'}        | ${'the issue does have a milestone matching the specific issue exempted one'}         | ${false}
-          ${false}      | ${'dummy-milestone'}              | ${'the issue does have a milestone matching the specific exempted one'}               | ${true}
-          ${true}       | ${''}                             | ${'the PR does not have a milestone'}                                                 | ${true}
-          ${true}       | ${'dummy-milestone-not-exempted'} | ${'the PR does have a milestone but not matching the specific issue exempted one'}    | ${true}
-          ${true}       | ${'dummy-issue-milestone'}        | ${'the PR does have a milestone matching the specific issue exempted one'}            | ${true}
-          ${true}       | ${'dummy-milestone'}              | ${'the PR does have a milestone matching the specific exempted one'}                  | ${false}
-        `(
-          'when $name',
-          ({isPullRequest, milestone, shouldStale}: ITestData): void => {
-            beforeEach((): void => {
-              setTestIssueList(isPullRequest, milestone);
-              setProcessor();
-            });
-
-            test(`should${
-              shouldStale ? '' : ' not'
-            } be marked as stale`, async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(
-                shouldStale ? 1 : 0
-              );
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          }
-        );
-      });
-
-      describe('when all the pull requests milestones should exempt a specific milestone', (): void => {
-        beforeEach((): void => {
-          opts.exemptPrMilestones = 'dummy-pull-request-milestone';
-        });
-
-        describe.each`
-          isPullRequest | milestone                         | name                                                                                         | shouldStale
-          ${false}      | ${''}                             | ${'the issue does not have a milestone'}                                                     | ${true}
-          ${false}      | ${'dummy-milestone-not-exempted'} | ${'the issue does have a milestone but not matching the specific pull request exempted one'} | ${true}
-          ${false}      | ${'dummy-pull-request-milestone'} | ${'the issue does have a milestone matching the specific pull request exempted one'}         | ${true}
-          ${false}      | ${'dummy-milestone'}              | ${'the issue does have a milestone matching the specific exempted one'}                      | ${false}
-          ${true}       | ${''}                             | ${'the PR does not have a milestone'}                                                        | ${true}
-          ${true}       | ${'dummy-milestone-not-exempted'} | ${'the PR does have a milestone but not matching the specific pull request exempted one'}    | ${true}
-          ${true}       | ${'dummy-pull-request-milestone'} | ${'the PR does have a milestone matching the specific pull request exempted one'}            | ${false}
-          ${true}       | ${'dummy-milestone'}              | ${'the PR does have a milestone matching the specific exempted one'}                         | ${true}
-        `(
-          'when $name',
-          ({isPullRequest, milestone, shouldStale}: ITestData): void => {
-            beforeEach((): void => {
-              setTestIssueList(isPullRequest, milestone);
-              setProcessor();
-            });
-
-            test(`should${
-              shouldStale ? '' : ' not'
-            } be marked as stale`, async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(
-                shouldStale ? 1 : 0
-              );
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          }
-        );
-      });
     });
 
-    describe('when all the issues and pull requests milestones should exempt some milestones', (): void => {
+    describe('when all the pull requests milestones should exempt a specific milestone', (): void => {
       beforeEach((): void => {
-        opts.exemptMilestones = 'dummy-milestone1, dummy-milestone2';
+        opts.exemptPrMilestones = 'dummy-pull-request-milestone';
       });
 
       describe.each`
-        isPullRequest | milestone                         | name                                                                            | shouldStale
-        ${false}      | ${''}                             | ${'the issue does not have a milestone'}                                        | ${true}
-        ${false}      | ${'dummy-milestone-not-exempted'} | ${'the issue does have a milestone but not matching the specific exempted one'} | ${true}
-        ${false}      | ${'dummy-milestone2'}             | ${'the issue does have a milestone matching the specific exempted one'}         | ${false}
-        ${true}       | ${''}                             | ${'the PR does not have a milestone'}                                           | ${true}
-        ${true}       | ${'dummy-milestone-not-exempted'} | ${'the PR does have a milestone but not matching the specific exempted one'}    | ${true}
-        ${true}       | ${'dummy-milestone2'}             | ${'the PR does have a milestone matching the specific exempted one'}            | ${false}
+        isPullRequest | milestone                         | name                                                                                         | shouldStale
+        ${false}      | ${''}                             | ${'the issue does not have a milestone'}                                                     | ${true}
+        ${false}      | ${'dummy-milestone-not-exempted'} | ${'the issue does have a milestone but not matching the specific pull request exempted one'} | ${true}
+        ${false}      | ${'dummy-pull-request-milestone'} | ${'the issue does have a milestone matching the specific pull request exempted one'}         | ${true}
+        ${true}       | ${''}                             | ${'the PR does not have a milestone'}                                                        | ${true}
+        ${true}       | ${'dummy-milestone-not-exempted'} | ${'the PR does have a milestone but not matching the specific pull request exempted one'}    | ${true}
+        ${true}       | ${'dummy-pull-request-milestone'} | ${'the PR does have a milestone matching the specific pull request exempted one'}            | ${false}
       `(
         'when $name',
         ({isPullRequest, milestone, shouldStale}: ITestData): void => {
@@ -786,88 +538,84 @@ describe('milestones options', (): void => {
           });
         }
       );
+    });
 
-      describe('when all the issues milestones should exempt a specific milestone', (): void => {
-        beforeEach((): void => {
-          opts.exemptIssueMilestones =
-            'dummy-issue-milestone1, dummy-issue-milestone2';
-        });
-
-        describe.each`
-          isPullRequest | milestone                         | name                                                                                  | shouldStale
-          ${false}      | ${''}                             | ${'the issue does not have a milestone'}                                              | ${true}
-          ${false}      | ${'dummy-milestone-not-exempted'} | ${'the issue does have a milestone but not matching the specific issue exempted one'} | ${true}
-          ${false}      | ${'dummy-issue-milestone2'}       | ${'the issue does have a milestone matching the specific issue exempted one'}         | ${false}
-          ${false}      | ${'dummy-milestone2'}             | ${'the issue does have a milestone matching the specific exempted one'}               | ${true}
-          ${true}       | ${''}                             | ${'the PR does not have a milestone'}                                                 | ${true}
-          ${true}       | ${'dummy-milestone-not-exempted'} | ${'the PR does have a milestone but not matching the specific issue exempted one'}    | ${true}
-          ${true}       | ${'dummy-issue-milestone2'}       | ${'the PR does have a milestone matching the specific issue exempted one'}            | ${true}
-          ${true}       | ${'dummy-milestone2'}             | ${'the PR does have a milestone matching the specific exempted one'}                  | ${false}
-        `(
-          'when $name',
-          ({isPullRequest, milestone, shouldStale}: ITestData): void => {
-            beforeEach((): void => {
-              setTestIssueList(isPullRequest, milestone);
-              setProcessor();
-            });
-
-            test(`should${
-              shouldStale ? '' : ' not'
-            } be marked as stale`, async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(
-                shouldStale ? 1 : 0
-              );
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          }
-        );
+    describe('when all the issues milestones should exempt a specific milestone', (): void => {
+      beforeEach((): void => {
+        opts.exemptIssueMilestones =
+          'dummy-issue-milestone1, dummy-issue-milestone2';
       });
 
-      describe('when all the pull requests milestones should exempt a specific milestone', (): void => {
-        beforeEach((): void => {
-          opts.exemptPrMilestones =
-            'dummy-pull-request-milestone1, dummy-pull-request-milestone2';
-        });
+      describe.each`
+        isPullRequest | milestone                         | name                                                                                  | shouldStale
+        ${false}      | ${''}                             | ${'the issue does not have a milestone'}                                              | ${true}
+        ${false}      | ${'dummy-milestone-not-exempted'} | ${'the issue does have a milestone but not matching the specific issue exempted one'} | ${true}
+        ${false}      | ${'dummy-issue-milestone2'}       | ${'the issue does have a milestone matching the specific issue exempted one'}         | ${false}
+        ${true}       | ${''}                             | ${'the PR does not have a milestone'}                                                 | ${true}
+        ${true}       | ${'dummy-milestone-not-exempted'} | ${'the PR does have a milestone but not matching the specific issue exempted one'}    | ${true}
+        ${true}       | ${'dummy-issue-milestone2'}       | ${'the PR does have a milestone matching the specific issue exempted one'}            | ${true}
+      `(
+        'when $name',
+        ({isPullRequest, milestone, shouldStale}: ITestData): void => {
+          beforeEach((): void => {
+            setTestIssueList(isPullRequest, milestone);
+            setProcessor();
+          });
 
-        describe.each`
-          isPullRequest | milestone                          | name                                                                                         | shouldStale
-          ${false}      | ${''}                              | ${'the issue does not have a milestone'}                                                     | ${true}
-          ${false}      | ${'dummy-milestone-not-exempted'}  | ${'the issue does have a milestone but not matching the specific pull request exempted one'} | ${true}
-          ${false}      | ${'dummy-pull-request-milestone2'} | ${'the issue does have a milestone matching the specific pull request exempted one'}         | ${true}
-          ${false}      | ${'dummy-milestone2'}              | ${'the issue does have a milestone matching the specific exempted one'}                      | ${false}
-          ${true}       | ${''}                              | ${'the PR does not have a milestone'}                                                        | ${true}
-          ${true}       | ${'dummy-milestone-not-exempted'}  | ${'the PR does have a milestone but not matching the specific pull request exempted one'}    | ${true}
-          ${true}       | ${'dummy-pull-request-milestone2'} | ${'the PR does have a milestone matching the specific pull request exempted one'}            | ${false}
-          ${true}       | ${'dummy-milestone2'}              | ${'the PR does have a milestone matching the specific exempted one'}                         | ${true}
-        `(
-          'when $name',
-          ({isPullRequest, milestone, shouldStale}: ITestData): void => {
-            beforeEach((): void => {
-              setTestIssueList(isPullRequest, milestone);
-              setProcessor();
-            });
+          test(`should${
+            shouldStale ? '' : ' not'
+          } be marked as stale`, async () => {
+            expect.assertions(3);
 
-            test(`should${
-              shouldStale ? '' : ' not'
-            } be marked as stale`, async () => {
-              expect.assertions(3);
+            await processor.processIssues(1);
 
-              await processor.processIssues(1);
+            expect(processor.staleIssues.length).toStrictEqual(
+              shouldStale ? 1 : 0
+            );
+            expect(processor.closedIssues.length).toStrictEqual(0);
+            expect(processor.removedLabelIssues.length).toStrictEqual(0);
+          });
+        }
+      );
+    });
 
-              expect(processor.staleIssues.length).toStrictEqual(
-                shouldStale ? 1 : 0
-              );
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          }
-        );
+    describe('when all the pull requests milestones should exempt a specific milestone', (): void => {
+      beforeEach((): void => {
+        opts.exemptPrMilestones =
+          'dummy-pull-request-milestone1, dummy-pull-request-milestone2';
       });
+
+      describe.each`
+        isPullRequest | milestone                          | name                                                                                         | shouldStale
+        ${false}      | ${''}                              | ${'the issue does not have a milestone'}                                                     | ${true}
+        ${false}      | ${'dummy-milestone-not-exempted'}  | ${'the issue does have a milestone but not matching the specific pull request exempted one'} | ${true}
+        ${false}      | ${'dummy-pull-request-milestone2'} | ${'the issue does have a milestone matching the specific pull request exempted one'}         | ${true}
+        ${true}       | ${''}                              | ${'the PR does not have a milestone'}                                                        | ${true}
+        ${true}       | ${'dummy-milestone-not-exempted'}  | ${'the PR does have a milestone but not matching the specific pull request exempted one'}    | ${true}
+        ${true}       | ${'dummy-pull-request-milestone2'} | ${'the PR does have a milestone matching the specific pull request exempted one'}            | ${false}
+      `(
+        'when $name',
+        ({isPullRequest, milestone, shouldStale}: ITestData): void => {
+          beforeEach((): void => {
+            setTestIssueList(isPullRequest, milestone);
+            setProcessor();
+          });
+
+          test(`should${
+            shouldStale ? '' : ' not'
+          } be marked as stale`, async () => {
+            expect.assertions(3);
+
+            await processor.processIssues(1);
+
+            expect(processor.staleIssues.length).toStrictEqual(
+              shouldStale ? 1 : 0
+            );
+            expect(processor.closedIssues.length).toStrictEqual(0);
+            expect(processor.removedLabelIssues.length).toStrictEqual(0);
+          });
+        }
+      );
     });
   });
 
@@ -906,19 +654,19 @@ describe('milestones options', (): void => {
       }
     );
 
-    describe('when all the issues and pull requests milestones should exempt a specific milestone', (): void => {
+    describe('when all the issues milestones should exempt a specific milestone', (): void => {
       beforeEach((): void => {
-        opts.exemptMilestones = 'dummy-milestone';
+        opts.exemptIssueMilestones = 'dummy-issue-milestone';
       });
 
       describe.each`
-        isPullRequest | milestone                         | name                                                                            | shouldStale
-        ${false}      | ${''}                             | ${'the issue does not have a milestone'}                                        | ${true}
-        ${false}      | ${'dummy-milestone-not-exempted'} | ${'the issue does have a milestone but not matching the specific exempted one'} | ${true}
-        ${false}      | ${'dummy-milestone'}              | ${'the issue does have a milestone matching the specific exempted one'}         | ${false}
-        ${true}       | ${''}                             | ${'the PR does not have a milestone'}                                           | ${true}
-        ${true}       | ${'dummy-milestone-not-exempted'} | ${'the PR does have a milestone but not matching the specific exempted one'}    | ${false}
-        ${true}       | ${'dummy-milestone'}              | ${'the PR does have a milestone matching the specific exempted one'}            | ${false}
+        isPullRequest | milestone                         | name                                                                                  | shouldStale
+        ${false}      | ${''}                             | ${'the issue does not have a milestone'}                                              | ${true}
+        ${false}      | ${'dummy-milestone-not-exempted'} | ${'the issue does have a milestone but not matching the specific issue exempted one'} | ${true}
+        ${false}      | ${'dummy-issue-milestone'}        | ${'the issue does have a milestone matching the specific issue exempted one'}         | ${false}
+        ${true}       | ${''}                             | ${'the PR does not have a milestone'}                                                 | ${true}
+        ${true}       | ${'dummy-milestone-not-exempted'} | ${'the PR does have a milestone but not matching the specific issue exempted one'}    | ${false}
+        ${true}       | ${'dummy-issue-milestone'}        | ${'the PR does have a milestone matching the specific issue exempted one'}            | ${false}
       `(
         'when $name',
         ({isPullRequest, milestone, shouldStale}: ITestData): void => {
@@ -942,101 +690,21 @@ describe('milestones options', (): void => {
           });
         }
       );
-
-      describe('when all the issues milestones should exempt a specific milestone', (): void => {
-        beforeEach((): void => {
-          opts.exemptIssueMilestones = 'dummy-issue-milestone';
-        });
-
-        describe.each`
-          isPullRequest | milestone                         | name                                                                                  | shouldStale
-          ${false}      | ${''}                             | ${'the issue does not have a milestone'}                                              | ${true}
-          ${false}      | ${'dummy-milestone-not-exempted'} | ${'the issue does have a milestone but not matching the specific issue exempted one'} | ${true}
-          ${false}      | ${'dummy-issue-milestone'}        | ${'the issue does have a milestone matching the specific issue exempted one'}         | ${false}
-          ${false}      | ${'dummy-milestone'}              | ${'the issue does have a milestone matching the specific exempted one'}               | ${true}
-          ${true}       | ${''}                             | ${'the PR does not have a milestone'}                                                 | ${true}
-          ${true}       | ${'dummy-milestone-not-exempted'} | ${'the PR does have a milestone but not matching the specific issue exempted one'}    | ${false}
-          ${true}       | ${'dummy-issue-milestone'}        | ${'the PR does have a milestone matching the specific issue exempted one'}            | ${false}
-          ${true}       | ${'dummy-milestone'}              | ${'the PR does have a milestone matching the specific exempted one'}                  | ${false}
-        `(
-          'when $name',
-          ({isPullRequest, milestone, shouldStale}: ITestData): void => {
-            beforeEach((): void => {
-              setTestIssueList(isPullRequest, milestone);
-              setProcessor();
-            });
-
-            test(`should${
-              shouldStale ? '' : ' not'
-            } be marked as stale`, async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(
-                shouldStale ? 1 : 0
-              );
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          }
-        );
-      });
-
-      describe('when all the pull requests milestones should exempt a specific milestone', (): void => {
-        beforeEach((): void => {
-          opts.exemptPrMilestones = 'dummy-pull-request-milestone';
-        });
-
-        describe.each`
-          isPullRequest | milestone                         | name                                                                                         | shouldStale
-          ${false}      | ${''}                             | ${'the issue does not have a milestone'}                                                     | ${true}
-          ${false}      | ${'dummy-milestone-not-exempted'} | ${'the issue does have a milestone but not matching the specific pull request exempted one'} | ${true}
-          ${false}      | ${'dummy-pull-request-milestone'} | ${'the issue does have a milestone matching the specific pull request exempted one'}         | ${true}
-          ${false}      | ${'dummy-milestone'}              | ${'the issue does have a milestone matching the specific exempted one'}                      | ${false}
-          ${true}       | ${''}                             | ${'the PR does not have a milestone'}                                                        | ${true}
-          ${true}       | ${'dummy-milestone-not-exempted'} | ${'the PR does have a milestone but not matching the specific pull request exempted one'}    | ${false}
-          ${true}       | ${'dummy-pull-request-milestone'} | ${'the PR does have a milestone matching the specific pull request exempted one'}            | ${false}
-          ${true}       | ${'dummy-milestone'}              | ${'the PR does have a milestone matching the specific exempted one'}                         | ${false}
-        `(
-          'when $name',
-          ({isPullRequest, milestone, shouldStale}: ITestData): void => {
-            beforeEach((): void => {
-              setTestIssueList(isPullRequest, milestone);
-              setProcessor();
-            });
-
-            test(`should${
-              shouldStale ? '' : ' not'
-            } be marked as stale`, async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(
-                shouldStale ? 1 : 0
-              );
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          }
-        );
-      });
     });
 
-    describe('when all the issues and pull requests milestones should exempt some milestones', (): void => {
+    describe('when all the pull requests milestones should exempt a specific milestone', (): void => {
       beforeEach((): void => {
-        opts.exemptMilestones = 'dummy-milestone1, dummy-milestone2';
+        opts.exemptPrMilestones = 'dummy-pull-request-milestone';
       });
 
       describe.each`
-        isPullRequest | milestone                         | name                                                                            | shouldStale
-        ${false}      | ${''}                             | ${'the issue does not have a milestone'}                                        | ${true}
-        ${false}      | ${'dummy-milestone-not-exempted'} | ${'the issue does have a milestone but not matching the specific exempted one'} | ${true}
-        ${false}      | ${'dummy-milestone2'}             | ${'the issue does have a milestone matching the specific exempted one'}         | ${false}
-        ${true}       | ${''}                             | ${'the PR does not have a milestone'}                                           | ${true}
-        ${true}       | ${'dummy-milestone-not-exempted'} | ${'the PR does have a milestone but not matching the specific exempted one'}    | ${false}
-        ${true}       | ${'dummy-milestone2'}             | ${'the PR does have a milestone matching the specific exempted one'}            | ${false}
+        isPullRequest | milestone                         | name                                                                                         | shouldStale
+        ${false}      | ${''}                             | ${'the issue does not have a milestone'}                                                     | ${true}
+        ${false}      | ${'dummy-milestone-not-exempted'} | ${'the issue does have a milestone but not matching the specific pull request exempted one'} | ${true}
+        ${false}      | ${'dummy-pull-request-milestone'} | ${'the issue does have a milestone matching the specific pull request exempted one'}         | ${true}
+        ${true}       | ${''}                             | ${'the PR does not have a milestone'}                                                        | ${true}
+        ${true}       | ${'dummy-milestone-not-exempted'} | ${'the PR does have a milestone but not matching the specific pull request exempted one'}    | ${false}
+        ${true}       | ${'dummy-pull-request-milestone'} | ${'the PR does have a milestone matching the specific pull request exempted one'}            | ${false}
       `(
         'when $name',
         ({isPullRequest, milestone, shouldStale}: ITestData): void => {
@@ -1060,88 +728,84 @@ describe('milestones options', (): void => {
           });
         }
       );
+    });
 
-      describe('when all the issues milestones should exempt a specific milestone', (): void => {
-        beforeEach((): void => {
-          opts.exemptIssueMilestones =
-            'dummy-issue-milestone1, dummy-issue-milestone2';
-        });
-
-        describe.each`
-          isPullRequest | milestone                         | name                                                                                  | shouldStale
-          ${false}      | ${''}                             | ${'the issue does not have a milestone'}                                              | ${true}
-          ${false}      | ${'dummy-milestone-not-exempted'} | ${'the issue does have a milestone but not matching the specific issue exempted one'} | ${true}
-          ${false}      | ${'dummy-issue-milestone2'}       | ${'the issue does have a milestone matching the specific issue exempted one'}         | ${false}
-          ${false}      | ${'dummy-milestone2'}             | ${'the issue does have a milestone matching the specific exempted one'}               | ${true}
-          ${true}       | ${''}                             | ${'the PR does not have a milestone'}                                                 | ${true}
-          ${true}       | ${'dummy-milestone-not-exempted'} | ${'the PR does have a milestone but not matching the specific issue exempted one'}    | ${false}
-          ${true}       | ${'dummy-issue-milestone2'}       | ${'the PR does have a milestone matching the specific issue exempted one'}            | ${false}
-          ${true}       | ${'dummy-milestone2'}             | ${'the PR does have a milestone matching the specific exempted one'}                  | ${false}
-        `(
-          'when $name',
-          ({isPullRequest, milestone, shouldStale}: ITestData): void => {
-            beforeEach((): void => {
-              setTestIssueList(isPullRequest, milestone);
-              setProcessor();
-            });
-
-            test(`should${
-              shouldStale ? '' : ' not'
-            } be marked as stale`, async () => {
-              expect.assertions(3);
-
-              await processor.processIssues(1);
-
-              expect(processor.staleIssues.length).toStrictEqual(
-                shouldStale ? 1 : 0
-              );
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          }
-        );
+    describe('when all the issues milestones should exempt a specific milestone', (): void => {
+      beforeEach((): void => {
+        opts.exemptIssueMilestones =
+          'dummy-issue-milestone1, dummy-issue-milestone2';
       });
 
-      describe('when all the pull requests milestones should exempt a specific milestone', (): void => {
-        beforeEach((): void => {
-          opts.exemptPrMilestones =
-            'dummy-pull-request-milestone1, dummy-pull-request-milestone2';
-        });
+      describe.each`
+        isPullRequest | milestone                         | name                                                                                  | shouldStale
+        ${false}      | ${''}                             | ${'the issue does not have a milestone'}                                              | ${true}
+        ${false}      | ${'dummy-milestone-not-exempted'} | ${'the issue does have a milestone but not matching the specific issue exempted one'} | ${true}
+        ${false}      | ${'dummy-issue-milestone2'}       | ${'the issue does have a milestone matching the specific issue exempted one'}         | ${false}
+        ${true}       | ${''}                             | ${'the PR does not have a milestone'}                                                 | ${true}
+        ${true}       | ${'dummy-milestone-not-exempted'} | ${'the PR does have a milestone but not matching the specific issue exempted one'}    | ${false}
+        ${true}       | ${'dummy-issue-milestone2'}       | ${'the PR does have a milestone matching the specific issue exempted one'}            | ${false}
+      `(
+        'when $name',
+        ({isPullRequest, milestone, shouldStale}: ITestData): void => {
+          beforeEach((): void => {
+            setTestIssueList(isPullRequest, milestone);
+            setProcessor();
+          });
 
-        describe.each`
-          isPullRequest | milestone                          | name                                                                                         | shouldStale
-          ${false}      | ${''}                              | ${'the issue does not have a milestone'}                                                     | ${true}
-          ${false}      | ${'dummy-milestone-not-exempted'}  | ${'the issue does have a milestone but not matching the specific pull request exempted one'} | ${true}
-          ${false}      | ${'dummy-pull-request-milestone2'} | ${'the issue does have a milestone matching the specific pull request exempted one'}         | ${true}
-          ${false}      | ${'dummy-milestone2'}              | ${'the issue does have a milestone matching the specific exempted one'}                      | ${false}
-          ${true}       | ${''}                              | ${'the PR does not have a milestone'}                                                        | ${true}
-          ${true}       | ${'dummy-milestone-not-exempted'}  | ${'the PR does have a milestone but not matching the specific pull request exempted one'}    | ${false}
-          ${true}       | ${'dummy-pull-request-milestone2'} | ${'the PR does have a milestone matching the specific pull request exempted one'}            | ${false}
-          ${true}       | ${'dummy-milestone2'}              | ${'the PR does have a milestone matching the specific exempted one'}                         | ${false}
-        `(
-          'when $name',
-          ({isPullRequest, milestone, shouldStale}: ITestData): void => {
-            beforeEach((): void => {
-              setTestIssueList(isPullRequest, milestone);
-              setProcessor();
-            });
+          test(`should${
+            shouldStale ? '' : ' not'
+          } be marked as stale`, async () => {
+            expect.assertions(3);
 
-            test(`should${
-              shouldStale ? '' : ' not'
-            } be marked as stale`, async () => {
-              expect.assertions(3);
+            await processor.processIssues(1);
 
-              await processor.processIssues(1);
+            expect(processor.staleIssues.length).toStrictEqual(
+              shouldStale ? 1 : 0
+            );
+            expect(processor.closedIssues.length).toStrictEqual(0);
+            expect(processor.removedLabelIssues.length).toStrictEqual(0);
+          });
+        }
+      );
+    });
 
-              expect(processor.staleIssues.length).toStrictEqual(
-                shouldStale ? 1 : 0
-              );
-              expect(processor.closedIssues.length).toStrictEqual(0);
-              expect(processor.removedLabelIssues.length).toStrictEqual(0);
-            });
-          }
-        );
+    describe('when all the pull requests milestones should exempt a specific milestone', (): void => {
+      beforeEach((): void => {
+        opts.exemptPrMilestones =
+          'dummy-pull-request-milestone1, dummy-pull-request-milestone2';
       });
+
+      describe.each`
+        isPullRequest | milestone                          | name                                                                                         | shouldStale
+        ${false}      | ${''}                              | ${'the issue does not have a milestone'}                                                     | ${true}
+        ${false}      | ${'dummy-milestone-not-exempted'}  | ${'the issue does have a milestone but not matching the specific pull request exempted one'} | ${true}
+        ${false}      | ${'dummy-pull-request-milestone2'} | ${'the issue does have a milestone matching the specific pull request exempted one'}         | ${true}
+        ${true}       | ${''}                              | ${'the PR does not have a milestone'}                                                        | ${true}
+        ${true}       | ${'dummy-milestone-not-exempted'}  | ${'the PR does have a milestone but not matching the specific pull request exempted one'}    | ${false}
+        ${true}       | ${'dummy-pull-request-milestone2'} | ${'the PR does have a milestone matching the specific pull request exempted one'}            | ${false}
+      `(
+        'when $name',
+        ({isPullRequest, milestone, shouldStale}: ITestData): void => {
+          beforeEach((): void => {
+            setTestIssueList(isPullRequest, milestone);
+            setProcessor();
+          });
+
+          test(`should${
+            shouldStale ? '' : ' not'
+          } be marked as stale`, async () => {
+            expect.assertions(3);
+
+            await processor.processIssues(1);
+
+            expect(processor.staleIssues.length).toStrictEqual(
+              shouldStale ? 1 : 0
+            );
+            expect(processor.closedIssues.length).toStrictEqual(0);
+            expect(processor.removedLabelIssues.length).toStrictEqual(0);
+          });
+        }
+      );
     });
   });
 });

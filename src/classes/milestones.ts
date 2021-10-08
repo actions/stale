@@ -95,31 +95,7 @@ export class Milestones {
         )} is disabled. No specific milestone can skip the stale process for this $$type`
       );
 
-      if (this._options.exemptMilestones === '') {
-        this._issueLogger.info(
-          LoggerService.white('├──'),
-          `The option ${this._issueLogger.createOptionLink(
-            Option.ExemptMilestones
-          )} is disabled. No specific milestone can skip the stale process for this $$type`
-        );
-
-        return [];
-      }
-
-      const exemptMilestones: string[] = wordsToList(
-        this._options.exemptMilestones
-      );
-
-      this._issueLogger.info(
-        LoggerService.white('├──'),
-        `The option ${this._issueLogger.createOptionLink(
-          Option.ExemptMilestones
-        )} is set. ${LoggerService.cyan(exemptMilestones.length)} milestone${
-          exemptMilestones.length === 1 ? '' : 's'
-        } can skip the stale process for this $$type`
-      );
-
-      return exemptMilestones;
+      return [];
     }
 
     const exemptMilestones: string[] = wordsToList(
@@ -147,31 +123,7 @@ export class Milestones {
         )} is disabled. No specific milestone can skip the stale process for this $$type`
       );
 
-      if (this._options.exemptMilestones === '') {
-        this._issueLogger.info(
-          LoggerService.white('├──'),
-          `The option ${this._issueLogger.createOptionLink(
-            Option.ExemptMilestones
-          )} is disabled. No specific milestone can skip the stale process for this $$type`
-        );
-
-        return [];
-      }
-
-      const exemptMilestones: string[] = wordsToList(
-        this._options.exemptMilestones
-      );
-
-      this._issueLogger.info(
-        LoggerService.white('├──'),
-        `The option ${this._issueLogger.createOptionLink(
-          Option.ExemptMilestones
-        )} is set. ${LoggerService.cyan(exemptMilestones.length)} milestone${
-          exemptMilestones.length === 1 ? '' : 's'
-        } can skip the stale process for this $$type`
-      );
-
-      return exemptMilestones;
+      return [];
     }
 
     const exemptMilestones: string[] = wordsToList(

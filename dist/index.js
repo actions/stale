@@ -1267,13 +1267,7 @@ class Milestones {
     _getExemptIssueMilestones() {
         if (this._options.exemptIssueMilestones === '') {
             this._issueLogger.info(logger_service_1.LoggerService.white('├──'), `The option ${this._issueLogger.createOptionLink(option_1.Option.ExemptIssueMilestones)} is disabled. No specific milestone can skip the stale process for this $$type`);
-            if (this._options.exemptMilestones === '') {
-                this._issueLogger.info(logger_service_1.LoggerService.white('├──'), `The option ${this._issueLogger.createOptionLink(option_1.Option.ExemptMilestones)} is disabled. No specific milestone can skip the stale process for this $$type`);
-                return [];
-            }
-            const exemptMilestones = words_to_list_1.wordsToList(this._options.exemptMilestones);
-            this._issueLogger.info(logger_service_1.LoggerService.white('├──'), `The option ${this._issueLogger.createOptionLink(option_1.Option.ExemptMilestones)} is set. ${logger_service_1.LoggerService.cyan(exemptMilestones.length)} milestone${exemptMilestones.length === 1 ? '' : 's'} can skip the stale process for this $$type`);
-            return exemptMilestones;
+            return [];
         }
         const exemptMilestones = words_to_list_1.wordsToList(this._options.exemptIssueMilestones);
         this._issueLogger.info(logger_service_1.LoggerService.white('├──'), `The option ${this._issueLogger.createOptionLink(option_1.Option.ExemptIssueMilestones)} is set. ${logger_service_1.LoggerService.cyan(exemptMilestones.length)} milestone${exemptMilestones.length === 1 ? '' : 's'} can skip the stale process for this $$type`);
@@ -1282,13 +1276,7 @@ class Milestones {
     _getExemptPullRequestMilestones() {
         if (this._options.exemptPrMilestones === '') {
             this._issueLogger.info(logger_service_1.LoggerService.white('├──'), `The option ${this._issueLogger.createOptionLink(option_1.Option.ExemptPrMilestones)} is disabled. No specific milestone can skip the stale process for this $$type`);
-            if (this._options.exemptMilestones === '') {
-                this._issueLogger.info(logger_service_1.LoggerService.white('├──'), `The option ${this._issueLogger.createOptionLink(option_1.Option.ExemptMilestones)} is disabled. No specific milestone can skip the stale process for this $$type`);
-                return [];
-            }
-            const exemptMilestones = words_to_list_1.wordsToList(this._options.exemptMilestones);
-            this._issueLogger.info(logger_service_1.LoggerService.white('├──'), `The option ${this._issueLogger.createOptionLink(option_1.Option.ExemptMilestones)} is set. ${logger_service_1.LoggerService.cyan(exemptMilestones.length)} milestone${exemptMilestones.length === 1 ? '' : 's'} can skip the stale process for this $$type`);
-            return exemptMilestones;
+            return [];
         }
         const exemptMilestones = words_to_list_1.wordsToList(this._options.exemptPrMilestones);
         this._issueLogger.info(logger_service_1.LoggerService.white('├──'), `The option ${this._issueLogger.createOptionLink(option_1.Option.ExemptPrMilestones)} is set. ${logger_service_1.LoggerService.cyan(exemptMilestones.length)} milestone${exemptMilestones.length === 1 ? '' : 's'} can skip the stale process for this $$type`);
@@ -1795,7 +1783,6 @@ var Option;
     Option["Ascending"] = "ascending";
     Option["DeleteBranch"] = "delete-branch";
     Option["StartDate"] = "start-date";
-    Option["ExemptMilestones"] = "exempt-milestones";
     Option["ExemptIssueMilestones"] = "exempt-issue-milestones";
     Option["ExemptPrMilestones"] = "exempt-pr-milestones";
     Option["ExemptAllIssueMilestones"] = "exempt-all-issue-milestones";
@@ -2102,7 +2089,6 @@ function _getAndValidateArgs() {
         startDate: core.getInput('start-date') !== ''
             ? core.getInput('start-date')
             : undefined,
-        exemptMilestones: core.getInput('exempt-milestones'),
         exemptIssueMilestones: core.getInput('exempt-issue-milestones'),
         exemptPrMilestones: core.getInput('exempt-pr-milestones'),
         exemptAllIssueMilestones: core.getInput('exempt-all-issue-milestones') === 'true',

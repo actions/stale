@@ -29,7 +29,7 @@ You can find more information about the required permissions under the correspon
 Every argument is optional.
 
 | Input                                                               | Description                                                             | Default               |
-| ------------------------------------------------------------------- | ----------------------------------------------------------------------- | --------------------- | ------- |
+| ------------------------------------------------------------------- | ----------------------------------------------------------------------- | --------------------- |
 | [repo-token](#repo-token)                                           | PAT for GitHub API authentication                                       | `${{ github.token }}` |
 | [days-before-stale](#days-before-stale)                             | Idle number of days before marking issues/PRs stale                     | `60`                  |
 | [days-before-issue-stale](#days-before-issue-stale)                 | Override [days-before-stale](#days-before-stale) for issues only        |                       |
@@ -63,11 +63,10 @@ Every argument is optional.
 | [ascending](#ascending)                                             | Order to get issues/PRs                                                 | `false`               |
 | [start-date](#start-date)                                           | Skip stale action for issues/PRs created before it                      |                       |
 | [delete-branch](#delete-branch)                                     | Delete branch after closing a stale PR                                  | `false`               |
-| [exempt-milestones](#exempt-milestones)                             | Milestones on issues/PRs exempted from stale                            |                       |
-| [exempt-issue-milestones](#exempt-issue-milestones)                 | Override [exempt-milestones](#exempt-milestones) for issues only        |                       |
-| [exempt-pr-milestones](#exempt-pr-milestones)                       | Override [exempt-milestones](#exempt-milestones) for PRs only           |                       |
-| [exempt-all-issue-milestones](#exempt-all-issue-milestones)         | Exempt all issues with milestones from stale                            |                       | `false` |
-| [exempt-all-pr-milestones](#exempt-all-pr-milestones)               | Exempt all PRs with milestones from stale                               |                       | `false` |
+| [exempt-issue-milestones](#exempt-issue-milestones)                 | Milestones on issues exempted from stale                                |                       |
+| [exempt-pr-milestones](#exempt-pr-milestones)                       | Milestones on PRs exempted from stale                                   |                       |
+| [exempt-all-issue-milestones](#exempt-all-issue-milestones)         | Exempt all issues with milestones from stale                            | `false`               |
+| [exempt-all-pr-milestones](#exempt-all-pr-milestones)               | Exempt all PRs with milestones from stale                               | `false`               |
 | [exempt-issue-assignees](#exempt-issue-assignees)                   | Assignees on issues exempted from stale                                 |                       |
 | [exempt-pr-assignees](#exempt-pr-assignees)                         | Assignees on PRs exempted from stale                                    |                       |
 | [exempt-all-issue-assignees](#exempt-all-issue-assignees)           | Exempt all issues with assignees from stale                             | `false`               |
@@ -120,7 +119,8 @@ You can fine tune which issues or pull requests should be marked as stale based 
 - [only-labels](#only-labels)
 - [any-of-labels](#any-of-labels)
 - [start-date](#start-date)
-- [exempt-milestones](#exempt-milestones)
+- [exempt-issue-milestones](#exempt-issue-milestones)
+- [exempt-pr-milestones](#exempt-pr-milestones)
 - [exempt-all-issue-milestones](#exempt-all-issue-milestones)
 - [exempt-all-pr-milestones](#exempt-all-pr-milestones)
 - [exempt-issue-assignees](#exempt-issue-assignees)
@@ -391,24 +391,21 @@ If set to `true`, the stale workflow will automatically delete the GitHub branch
 Default value: `false`  
 Required Permission: `pull-requests: write`
 
-#### exempt-milestones
+#### exempt-issue-milestones
 
-A white-list of milestone(s) to only process the issues or the pull requests that does not contain one of these milestone(s).  
+A white-list of milestone(s) to only process the issues that does not contain one of these milestone(s).  
 It can be a comma separated list of milestones (e.g: `V1,next`).
 
 If unset (or an empty string), this option will not alter the stale workflow.
 
 Default value: unset
 
-#### exempt-issue-milestones
-
-Override [exempt-milestones](#exempt-milestones) but only to process the issues that does not contain one of these milestone(s).
-
-Default value: unset
-
 #### exempt-pr-milestones
 
-Override [exempt-milestones](#exempt-milestones) but only to process the pull requests that does not contain one of these milestone(s).
+A white-list of milestone(s) to only process the pull requests that does not contain one of these milestone(s).  
+It can be a comma separated list of milestones (e.g: `V1,next`).
+
+If unset (or an empty string), this option will not alter the stale workflow.
 
 Default value: unset
 
@@ -416,7 +413,7 @@ Default value: unset
 
 If set to `true`, the issues with a milestone will not be marked as stale automatically.
 
-Priority over [exempt-milestones](#exempt-milestones).
+Priority over [exempt-issue-milestones](#exempt-issue-milestones).
 
 Default value: `false`
 
@@ -424,7 +421,7 @@ Default value: `false`
 
 If set to `true`, the pull requests with a milestone will not be marked as stale automatically.
 
-Priority over [exempt-milestones](#exempt-milestones).
+Priority over [exempt-pr-milestones](#exempt-pr-milestones).
 
 Default value: `false`
 

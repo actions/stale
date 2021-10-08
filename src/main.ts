@@ -69,7 +69,6 @@ function _getAndValidateArgs(): IIssuesProcessorOptions {
       core.getInput('start-date') !== ''
         ? core.getInput('start-date')
         : undefined,
-    exemptMilestones: core.getInput('exempt-milestones'),
     exemptIssueMilestones: core.getInput('exempt-issue-milestones'),
     exemptPrMilestones: core.getInput('exempt-pr-milestones'),
     exemptAllIssueMilestones:

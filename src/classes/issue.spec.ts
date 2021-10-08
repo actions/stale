@@ -43,7 +43,6 @@ describe('Issue', (): void => {
       startDate: undefined,
       stalePrLabel: 'dummy-stale-pr-label',
       staleIssueLabel: 'dummy-stale-issue-label',
-      exemptMilestones: '',
       exemptIssueMilestones: '',
       exemptPrMilestones: '',
       exemptAllIssueMilestones: false,

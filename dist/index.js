@@ -482,7 +482,7 @@ class IssuesProcessor {
             }
             const anyOfLabels = words_to_list_1.wordsToList(this._getAnyOfLabels(issue));
             if (anyOfLabels.length > 0) {
-                issueLogger.info(`The option ${issueLogger.createOptionLink(option_1.Option.AnyOfLabels)} was specified to only process the issues and pull requests with one of those labels (${logger_service_1.LoggerService.cyan(anyOfLabels.length)})`);
+                issueLogger.info(`The option ${issueLogger.createOptionLink(issue.isPullRequest ? option_1.Option.AnyOfPrLabels : option_1.Option.AnyOfIssueLabels)} was specified to only process the issues and pull requests with one of those labels (${logger_service_1.LoggerService.cyan(anyOfLabels.length)})`);
                 const hasOneOfWhitelistedLabels = anyOfLabels.some((label) => {
                     return is_labeled_1.isLabeled(issue, label);
                 });
@@ -497,7 +497,7 @@ class IssuesProcessor {
                 }
             }
             else {
-                issueLogger.info(`The option ${issueLogger.createOptionLink(option_1.Option.AnyOfLabels)} was not specified`);
+                issueLogger.info(`The option ${issueLogger.createOptionLink(issue.isPullRequest ? option_1.Option.AnyOfPrLabels : option_1.Option.AnyOfIssueLabels)} was not specified`);
                 issueLogger.info(logger_service_1.LoggerService.white('└──'), `Continuing the process for this $$type`);
             }
             const milestones = new milestones_1.Milestones(this.options, issue);
@@ -925,16 +925,9 @@ class IssuesProcessor {
     }
     _getAnyOfLabels(issue) {
         if (issue.isPullRequest) {
-            if (this.options.anyOfPrLabels !== '') {
-                return this.options.anyOfPrLabels;
-            }
+            return this.options.anyOfPrLabels;
         }
-        else {
-            if (this.options.anyOfIssueLabels !== '') {
-                return this.options.anyOfIssueLabels;
-            }
-        }
-        return this.options.anyOfLabels;
+        return this.options.anyOfIssueLabels;
     }
     _shouldRemoveStaleWhenUpdated(issue) {
         if (issue.isPullRequest) {
@@ -1774,7 +1767,8 @@ var Option;
     Option["OnlyLabels"] = "only-labels";
     Option["OnlyIssueLabels"] = "only-issue-labels";
     Option["OnlyPrLabels"] = "only-pr-labels";
-    Option["AnyOfLabels"] = "any-of-labels";
+    Option["AnyOfIssueLabels"] = "any-of-issue-labels";
+    Option["AnyOfPrLabels"] = "any-of-pr-labels";
     Option["OperationsPerRun"] = "operations-per-run";
     Option["RemoveStaleWhenUpdated"] = "remove-stale-when-updated";
     Option["RemoveIssueStaleWhenUpdated"] = "remove-issue-stale-when-updated";
@@ -2076,7 +2070,6 @@ function _getAndValidateArgs() {
         onlyLabels: core.getInput('only-labels'),
         onlyIssueLabels: core.getInput('only-issue-labels'),
         onlyPrLabels: core.getInput('only-pr-labels'),
-        anyOfLabels: core.getInput('any-of-labels'),
         anyOfIssueLabels: core.getInput('any-of-issue-labels'),
         anyOfPrLabels: core.getInput('any-of-pr-labels'),
         operationsPerRun: parseInt(core.getInput('operations-per-run', { required: true })),

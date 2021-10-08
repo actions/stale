@@ -345,7 +345,7 @@ export class IssuesProcessor {
     if (anyOfLabels.length > 0) {
       issueLogger.info(
         `The option ${issueLogger.createOptionLink(
-          Option.AnyOfLabels
+          issue.isPullRequest ? Option.AnyOfPrLabels : Option.AnyOfIssueLabels
         )} was specified to only process the issues and pull requests with one of those labels (${LoggerService.cyan(
           anyOfLabels.length
         )})`
@@ -377,7 +377,7 @@ export class IssuesProcessor {
     } else {
       issueLogger.info(
         `The option ${issueLogger.createOptionLink(
-          Option.AnyOfLabels
+          issue.isPullRequest ? Option.AnyOfPrLabels : Option.AnyOfIssueLabels
         )} was not specified`
       );
       issueLogger.info(
@@ -997,16 +997,10 @@ export class IssuesProcessor {
 
   private _getAnyOfLabels(issue: Issue): string {
     if (issue.isPullRequest) {
-      if (this.options.anyOfPrLabels !== '') {
-        return this.options.anyOfPrLabels;
-      }
-    } else {
-      if (this.options.anyOfIssueLabels !== '') {
-        return this.options.anyOfIssueLabels;
-      }
+      return this.options.anyOfPrLabels;
     }
 
-    return this.options.anyOfLabels;
+    return this.options.anyOfIssueLabels;
   }
 
   private _shouldRemoveStaleWhenUpdated(issue: Issue): boolean {

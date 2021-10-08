@@ -50,9 +50,8 @@ Every argument is optional.
 | [only-labels](#only-labels)                                         | Only issues/PRs with ALL these labels are checked                       |                       |
 | [only-issue-labels](#only-issue-labels)                             | Override [only-labels](#only-labels) for issues only                    |                       |
 | [only-pr-labels](#only-pr-labels)                                   | Override [only-labels](#only-labels) for PRs only                       |                       |
-| [any-of-labels](#any-of-labels)                                     | Only issues/PRs with ANY of these labels are checked                    |                       |
-| [any-of-issue-labels](#any-of-issue-labels)                         | Override [any-of-labels](#any-of-labels) for issues only                |                       |
-| [any-of-pr-labels](#any-of-pr-labels)                               | Override [any-of-labels](#any-of-labels) for PRs only                   |                       |
+| [any-of-issue-labels](#any-of-issue-labels)                         | Only issues with ANY of these labels are checked                        |                       |
+| [any-of-pr-labels](#any-of-pr-labels)                               | Only PRs with ANY of these labels are checked                           |                       |
 | [operations-per-run](#operations-per-run)                           | Max number of operations per run                                        | `30`                  |
 | [remove-stale-when-updated](#remove-stale-when-updated)             | Remove stale label from issues/PRs on updates                           | `true`                |
 | [remove-issue-stale-when-updated](#remove-issue-stale-when-updated) | Remove stale label from issues on updates/comments                      |                       |
@@ -117,7 +116,8 @@ You can fine tune which issues or pull requests should be marked as stale based 
 - [exempt-issue-labels](#exempt-issue-labels)
 - [exempt-pr-labels](#exempt-pr-labels)
 - [only-labels](#only-labels)
-- [any-of-labels](#any-of-labels)
+- [any-of-issue-labels](#any-of-issue-labels)
+- [any-of-pr-labels](#any-of-pr-labels)
 - [start-date](#start-date)
 - [exempt-issue-milestones](#exempt-issue-milestones)
 - [exempt-pr-milestones](#exempt-pr-milestones)
@@ -260,7 +260,7 @@ It can be a comma separated list of labels (e.g: `answered,needs-rebase`).
 
 If unset (or an empty string), this option will not alter the stale workflow.
 
-If you wish to only check that the issues or the pull requests contain one of these label(s), use instead [any-of-labels](#any-of-labels).
+If you wish to only check that the issues or the pull requests contain one of these label(s), use instead [any-of-issue-labels](#any-of-issue-labels) and [any-of-pr-labels](#any-of-pr-labels).
 
 Default value: unset
 
@@ -276,9 +276,9 @@ Override [only-labels](#only-labels) but only to process the pull requests that 
 
 Default value: unset
 
-#### any-of-labels
+#### any-of-issue-labels
 
-An allow-list of label(s) to only process the issues or the pull requests that contain one of these label(s).  
+An allow-list of label(s) to only process the issues that contain one of these label(s).  
 It can be a comma separated list of labels (e.g: `answered,needs-rebase`).
 
 If unset (or an empty string), this option will not alter the stale workflow.
@@ -287,15 +287,14 @@ If you wish to only check that the issues or the pull requests contain all these
 
 Default value: unset
 
-#### any-of-issue-labels
-
-Override [any-of-labels](#any-of-labels) but only to process the issues that contain one of these label(s).
-
-Default value: unset
-
 #### any-of-pr-labels
 
-Override [any-of-labels](#any-of-labels) but only to process the pull requests that contain one of these label(s).
+An allow-list of label(s) to only process the pull requests that contain one of these label(s).  
+It can be a comma separated list of labels (e.g: `answered,needs-rebase`).
+
+If unset (or an empty string), this option will not alter the stale workflow.
+
+If you wish to only check that the issues or the pull requests contain all these label(s), use instead [only-labels](#only-labels).
 
 Default value: unset
 
@@ -667,7 +666,8 @@ jobs:
     steps:
       - uses: actions/stale@v4
         with:
-          any-of-labels: 'needs-more-info,needs-demo'
+          any-of-issue-labels: 'needs-more-info,needs-demo'
+          any-of-pr-labels: 'needs-more-info,needs-demo'
           # You can opt for 'only-labels' instead if your use-case requires all labels
           # to be present in the issue/PR
 ```

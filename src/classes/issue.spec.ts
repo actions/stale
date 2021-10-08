@@ -30,7 +30,6 @@ describe('Issue', (): void => {
       onlyLabels: '',
       onlyIssueLabels: '',
       onlyPrLabels: '',
-      anyOfLabels: '',
       anyOfIssueLabels: '',
       anyOfPrLabels: '',
       operationsPerRun: 0,

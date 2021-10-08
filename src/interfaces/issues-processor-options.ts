@@ -21,7 +21,6 @@ export interface IIssuesProcessorOptions {
   onlyLabels: string;
   onlyIssueLabels: string;
   onlyPrLabels: string;
-  anyOfLabels: string;
   anyOfIssueLabels: string;
   anyOfPrLabels: string;
   operationsPerRun: number;

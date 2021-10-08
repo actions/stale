@@ -19,7 +19,6 @@ export enum Option {
   AnyOfIssueLabels = 'any-of-issue-labels',
   AnyOfPrLabels = 'any-of-pr-labels',
   OperationsPerRun = 'operations-per-run',
-  RemoveStaleWhenUpdated = 'remove-stale-when-updated',
   RemoveIssueStaleWhenUpdated = 'remove-issue-stale-when-updated',
   RemovePrStaleWhenUpdated = 'remove-pr-stale-when-updated',
   DebugOnly = 'debug-only',

@@ -50,9 +50,8 @@ Every argument is optional.
 | [any-of-issue-labels](#any-of-issue-labels)                         | Only issues with ANY of these labels are checked                        |                       |
 | [any-of-pr-labels](#any-of-pr-labels)                               | Only PRs with ANY of these labels are checked                           |                       |
 | [operations-per-run](#operations-per-run)                           | Max number of operations per run                                        | `30`                  |
-| [remove-stale-when-updated](#remove-stale-when-updated)             | Remove stale label from issues/PRs on updates                           | `true`                |
-| [remove-issue-stale-when-updated](#remove-issue-stale-when-updated) | Remove stale label from issues on updates/comments                      |                       |
-| [remove-pr-stale-when-updated](#remove-pr-stale-when-updated)       | Remove stale label from PRs on updates/comments                         |                       |
+| [remove-issue-stale-when-updated](#remove-issue-stale-when-updated) | Remove stale label from issues on updates/comments                      | `true`                |
+| [remove-pr-stale-when-updated](#remove-pr-stale-when-updated)       | Remove stale label from PRs on updates/comments                         | `true`                |
 | [labels-to-add-when-unstale](#labels-to-add-when-unstale)           | Add specified labels from issues/PRs when they become unstale           |                       |
 | [labels-to-remove-when-unstale](#labels-to-remove-when-unstale)     | Remove specified labels from issues/PRs when they become unstale        |                       |
 | [debug-only](#debug-only)                                           | Dry-run                                                                 | `false`               |
@@ -315,25 +314,19 @@ Only the [actor](#repo-token) and the batch of issues (100 per batch) will consu
 
 Default value: `30`
 
-#### remove-stale-when-updated
-
-Automatically remove the stale label when the issues or the pull requests are updated (based on [GitHub issue](https://docs.github.com/en/rest/reference/issues) field `updated_at`) or commented.
-
-Default value: `true`  
-Required Permission: `issues: write` and `pull-requests: write`
-
 #### remove-issue-stale-when-updated
 
-Override [remove-stale-when-updated](#remove-stale-when-updated) but only to automatically remove the stale label when the issues are updated (based on [GitHub issue](https://docs.github.com/en/rest/reference/issues) field `updated_at`) or commented.
+Automatically remove the stale label when the issues are updated (based on [GitHub issue](https://docs.github.com/en/rest/reference/issues) field `updated_at`) or commented.
 
-Default value: unset  
+Default value: `true`  
 Required Permission: `issues: write`
 
 #### remove-pr-stale-when-updated
 
-Override [remove-stale-when-updated](#remove-stale-when-updated) but only to automatically remove the stale label when the pull requests are updated (based on [GitHub issue](https://docs.github.com/en/rest/reference/issues) field `updated_at`) or commented.
+Automatically remove the stale label when the pull requests are updated (based on [GitHub issue](https://docs.github.com/en/rest/reference/issues) field `updated_at`) or commented.
 
-Default value: unset
+Default value: `true`  
+Required Permission: `pull-requests: write`
 
 #### labels-to-add-when-unstale
 

@@ -53,14 +53,11 @@ function _getAndValidateArgs(): IIssuesProcessorOptions {
     operationsPerRun: parseInt(
       core.getInput('operations-per-run', {required: true})
     ),
-    removeStaleWhenUpdated: !(
-      core.getInput('remove-stale-when-updated') === 'false'
+    removeIssueStaleWhenUpdated: !(
+      core.getInput('remove-issue-stale-when-updated') === 'false'
     ),
-    removeIssueStaleWhenUpdated: _toOptionalBoolean(
-      'remove-issue-stale-when-updated'
-    ),
-    removePrStaleWhenUpdated: _toOptionalBoolean(
-      'remove-pr-stale-when-updated'
+    removePrStaleWhenUpdated: !(
+      core.getInput('remove-pr-stale-when-updated') === 'false'
     ),
     debugOnly: core.getInput('debug-only') === 'true',
     ascending: core.getInput('ascending') === 'true',
@@ -121,31 +118,6 @@ async function processOutput(
 ): Promise<void> {
   core.setOutput('staled-issues-prs', JSON.stringify(staledIssues));
   core.setOutput('closed-issues-prs', JSON.stringify(closedIssues));
-}
-
-/**
- * @description
- * From an argument name, get the value as an optional boolean
- * This is very useful for all the arguments that override others
- * It will allow us to easily use the original one when the return value is `undefined`
- * Which is different from `true` or `false` that consider the argument as set
- *
- * @param {Readonly<string>} argumentName The name of the argument to check
- *
- * @returns {boolean | undefined} The value matching the given argument name
- */
-function _toOptionalBoolean(
-  argumentName: Readonly<string>
-): boolean | undefined {
-  const argument: string = core.getInput(argumentName);
-
-  if (argument === 'true') {
-    return true;
-  } else if (argument === 'false') {
-    return false;
-  }
-
-  return undefined;
 }
 
 void _run();

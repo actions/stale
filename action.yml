@@ -92,17 +92,13 @@ inputs:
     description: 'The maximum number of operations per run, used to control rate limiting (GitHub API CRUD related).'
     default: '30'
     required: false
-  remove-stale-when-updated:
-    description: 'Remove stale labels from issues and pull requests when they are updated or commented on.'
+  remove-issue-stale-when-updated:
+    description: 'Remove stale labels from issues when they are updated or commented on.'
     default: 'true'
     required: false
-  remove-issue-stale-when-updated:
-    description: 'Remove stale labels from issues when they are updated or commented on. Override "remove-stale-when-updated" option regarding only the issues.'
-    default: ''
-    required: false
   remove-pr-stale-when-updated:
-    description: 'Remove stale labels from pull requests when they are updated or commented on. Override "remove-stale-when-updated" option regarding only the pull requests.'
-    default: ''
+    description: 'Remove stale labels from pull requests when they are updated or commented on.'
+    default: 'true'
     required: false
   debug-only:
     description: 'Run the processor in debug mode without actually performing any operations on live issues.'

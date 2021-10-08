@@ -7,7 +7,6 @@ import {cleanLabel} from '../functions/clean-label';
 import {getHumanizedDate} from '../functions/dates/get-humanized-date';
 import {isDateMoreRecentThan} from '../functions/dates/is-date-more-recent-than';
 import {isValidDate} from '../functions/dates/is-valid-date';
-import {isBoolean} from '../functions/is-boolean';
 import {isLabeled} from '../functions/is-labeled';
 import {shouldMarkWhenStale} from '../functions/should-mark-when-stale';
 import {wordsToList} from '../functions/words-to-list';
@@ -660,7 +659,7 @@ export class IssuesProcessor {
 
     issueLogger.info(
       `The option ${issueLogger.createOptionLink(
-        this._getRemoveStaleWhenUpdatedUsedOptionName(issue)
+        IssuesProcessor._getRemoveStaleWhenUpdatedUsedOptionName(issue)
       )} is: ${LoggerService.cyan(shouldRemoveStaleWhenUpdated)}`
     );
 
@@ -974,19 +973,9 @@ export class IssuesProcessor {
   }
 
   private _shouldRemoveStaleWhenUpdated(issue: Issue): boolean {
-    if (issue.isPullRequest) {
-      if (isBoolean(this.options.removePrStaleWhenUpdated)) {
-        return this.options.removePrStaleWhenUpdated;
-      }
-
-      return this.options.removeStaleWhenUpdated;
-    }
-
-    if (isBoolean(this.options.removeIssueStaleWhenUpdated)) {
-      return this.options.removeIssueStaleWhenUpdated;
-    }
-
-    return this.options.removeStaleWhenUpdated;
+    return issue.isPullRequest
+      ? this.options.removePrStaleWhenUpdated
+      : this.options.removeIssueStaleWhenUpdated;
   }
 
   private async _removeLabelsWhenUnstale(
@@ -1113,29 +1102,16 @@ export class IssuesProcessor {
       : Option.DaysBeforeIssueStale;
   }
 
+  private static _getRemoveStaleWhenUpdatedUsedOptionName(
+    issue: Readonly<Issue>
+  ): Option.RemovePrStaleWhenUpdated | Option.RemoveIssueStaleWhenUpdated {
+    return issue.isPullRequest
+      ? Option.RemovePrStaleWhenUpdated
+      : Option.RemoveIssueStaleWhenUpdated;
+  }
+
   private _consumeIssueOperation(issue: Readonly<Issue>): void {
     this.operations.consumeOperation();
     issue.operations.consumeOperation();
-  }
-
-  private _getRemoveStaleWhenUpdatedUsedOptionName(
-    issue: Readonly<Issue>
-  ):
-    | Option.RemovePrStaleWhenUpdated
-    | Option.RemoveStaleWhenUpdated
-    | Option.RemoveIssueStaleWhenUpdated {
-    if (issue.isPullRequest) {
-      if (isBoolean(this.options.removePrStaleWhenUpdated)) {
-        return Option.RemovePrStaleWhenUpdated;
-      }
-
-      return Option.RemoveStaleWhenUpdated;
-    }
-
-    if (isBoolean(this.options.removeIssueStaleWhenUpdated)) {
-      return Option.RemoveIssueStaleWhenUpdated;
-    }
-
-    return Option.RemoveStaleWhenUpdated;
   }
 }

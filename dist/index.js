@@ -297,7 +297,6 @@ const clean_label_1 = __nccwpck_require__(7752);
 const get_humanized_date_1 = __nccwpck_require__(965);
 const is_date_more_recent_than_1 = __nccwpck_require__(1473);
 const is_valid_date_1 = __nccwpck_require__(891);
-const is_boolean_1 = __nccwpck_require__(8236);
 const is_labeled_1 = __nccwpck_require__(6792);
 const should_mark_when_stale_1 = __nccwpck_require__(2461);
 const words_to_list_1 = __nccwpck_require__(1883);
@@ -675,7 +674,7 @@ class IssuesProcessor {
             const issueHasUpdate = IssuesProcessor._updatedSince(issue.updated_at, daysBeforeClose);
             issueLogger.info(`$$type has been updated: ${logger_service_1.LoggerService.cyan(issueHasUpdate)}`);
             const shouldRemoveStaleWhenUpdated = this._shouldRemoveStaleWhenUpdated(issue);
-            issueLogger.info(`The option ${issueLogger.createOptionLink(this._getRemoveStaleWhenUpdatedUsedOptionName(issue))} is: ${logger_service_1.LoggerService.cyan(shouldRemoveStaleWhenUpdated)}`);
+            issueLogger.info(`The option ${issueLogger.createOptionLink(IssuesProcessor._getRemoveStaleWhenUpdatedUsedOptionName(issue))} is: ${logger_service_1.LoggerService.cyan(shouldRemoveStaleWhenUpdated)}`);
             if (shouldRemoveStaleWhenUpdated) {
                 issueLogger.info(`The stale label should not be removed`);
             }
@@ -903,16 +902,9 @@ class IssuesProcessor {
         return this.options.anyOfIssueLabels;
     }
     _shouldRemoveStaleWhenUpdated(issue) {
-        if (issue.isPullRequest) {
-            if (is_boolean_1.isBoolean(this.options.removePrStaleWhenUpdated)) {
-                return this.options.removePrStaleWhenUpdated;
-            }
-            return this.options.removeStaleWhenUpdated;
-        }
-        if (is_boolean_1.isBoolean(this.options.removeIssueStaleWhenUpdated)) {
-            return this.options.removeIssueStaleWhenUpdated;
-        }
-        return this.options.removeStaleWhenUpdated;
+        return issue.isPullRequest
+            ? this.options.removePrStaleWhenUpdated
+            : this.options.removeIssueStaleWhenUpdated;
     }
     _removeLabelsWhenUnstale(issue, removeLabels) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -987,21 +979,14 @@ class IssuesProcessor {
             ? option_1.Option.DaysBeforePrStale
             : option_1.Option.DaysBeforeIssueStale;
     }
+    static _getRemoveStaleWhenUpdatedUsedOptionName(issue) {
+        return issue.isPullRequest
+            ? option_1.Option.RemovePrStaleWhenUpdated
+            : option_1.Option.RemoveIssueStaleWhenUpdated;
+    }
     _consumeIssueOperation(issue) {
         this.operations.consumeOperation();
         issue.operations.consumeOperation();
-    }
-    _getRemoveStaleWhenUpdatedUsedOptionName(issue) {
-        if (issue.isPullRequest) {
-            if (is_boolean_1.isBoolean(this.options.removePrStaleWhenUpdated)) {
-                return option_1.Option.RemovePrStaleWhenUpdated;
-            }
-            return option_1.Option.RemoveStaleWhenUpdated;
-        }
-        if (is_boolean_1.isBoolean(this.options.removeIssueStaleWhenUpdated)) {
-            return option_1.Option.RemoveIssueStaleWhenUpdated;
-        }
-        return option_1.Option.RemoveStaleWhenUpdated;
     }
 }
 exports.IssuesProcessor = IssuesProcessor;
@@ -1730,7 +1715,6 @@ var Option;
     Option["AnyOfIssueLabels"] = "any-of-issue-labels";
     Option["AnyOfPrLabels"] = "any-of-pr-labels";
     Option["OperationsPerRun"] = "operations-per-run";
-    Option["RemoveStaleWhenUpdated"] = "remove-stale-when-updated";
     Option["RemoveIssueStaleWhenUpdated"] = "remove-issue-stale-when-updated";
     Option["RemovePrStaleWhenUpdated"] = "remove-pr-stale-when-updated";
     Option["DebugOnly"] = "debug-only";
@@ -1847,21 +1831,6 @@ function isValidDate(date) {
     return false;
 }
 exports.isValidDate = isValidDate;
-
-
-/***/ }),
-
-/***/ 8236:
-/***/ ((__unused_webpack_module, exports) => {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.isBoolean = void 0;
-function isBoolean(value) {
-    return value === true || value === false;
-}
-exports.isBoolean = isBoolean;
 
 
 /***/ }),
@@ -2030,9 +1999,8 @@ function _getAndValidateArgs() {
         anyOfIssueLabels: core.getInput('any-of-issue-labels'),
         anyOfPrLabels: core.getInput('any-of-pr-labels'),
         operationsPerRun: parseInt(core.getInput('operations-per-run', { required: true })),
-        removeStaleWhenUpdated: !(core.getInput('remove-stale-when-updated') === 'false'),
-        removeIssueStaleWhenUpdated: _toOptionalBoolean('remove-issue-stale-when-updated'),
-        removePrStaleWhenUpdated: _toOptionalBoolean('remove-pr-stale-when-updated'),
+        removeIssueStaleWhenUpdated: !(core.getInput('remove-issue-stale-when-updated') === 'false'),
+        removePrStaleWhenUpdated: !(core.getInput('remove-pr-stale-when-updated') === 'false'),
         debugOnly: core.getInput('debug-only') === 'true',
         ascending: core.getInput('ascending') === 'true',
         deleteBranch: core.getInput('delete-branch') === 'true',
@@ -2084,27 +2052,6 @@ function processOutput(staledIssues, closedIssues) {
         core.setOutput('staled-issues-prs', JSON.stringify(staledIssues));
         core.setOutput('closed-issues-prs', JSON.stringify(closedIssues));
     });
-}
-/**
- * @description
- * From an argument name, get the value as an optional boolean
- * This is very useful for all the arguments that override others
- * It will allow us to easily use the original one when the return value is `undefined`
- * Which is different from `true` or `false` that consider the argument as set
- *
- * @param {Readonly<string>} argumentName The name of the argument to check
- *
- * @returns {boolean | undefined} The value matching the given argument name
- */
-function _toOptionalBoolean(argumentName) {
-    const argument = core.getInput(argumentName);
-    if (argument === 'true') {
-        return true;
-    }
-    else if (argument === 'false') {
-        return false;
-    }
-    return undefined;
 }
 void _run();
 

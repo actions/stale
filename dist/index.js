@@ -103,36 +103,20 @@ class Assignees {
             : this._shouldExemptAllIssueAssignees();
     }
     _shouldExemptAllIssueAssignees() {
-        if (this._options.exemptAllIssueAssignees === true) {
+        if (this._options.exemptAllIssueAssignees) {
             this._issueLogger.info(`The option ${this._issueLogger.createOptionLink(option_1.Option.ExemptAllIssueAssignees)} is enabled. Any assignee on this $$type will skip the stale process`);
             return true;
         }
-        else if (this._options.exemptAllIssueAssignees === false) {
-            this._issueLogger.info(`The option ${this._issueLogger.createOptionLink(option_1.Option.ExemptAllIssueAssignees)} is disabled. Only some specific assignees on this $$type will skip the stale process`);
-            return false;
-        }
-        this._logExemptAllAssigneesOption();
-        return this._options.exemptAllAssignees;
+        this._issueLogger.info(`The option ${this._issueLogger.createOptionLink(option_1.Option.ExemptAllIssueAssignees)} is disabled. Only some specific assignees on this $$type will skip the stale process`);
+        return false;
     }
     _shouldExemptAllPullRequestAssignees() {
-        if (this._options.exemptAllPrAssignees === true) {
+        if (this._options.exemptAllPrAssignees) {
             this._issueLogger.info(`The option ${this._issueLogger.createOptionLink(option_1.Option.ExemptAllPrAssignees)} is enabled. Any assignee on this $$type will skip the stale process`);
             return true;
         }
-        else if (this._options.exemptAllPrAssignees === false) {
-            this._issueLogger.info(`The option ${this._issueLogger.createOptionLink(option_1.Option.ExemptAllPrAssignees)} is disabled. Only some specific assignees on this $$type will skip the stale process`);
-            return false;
-        }
-        this._logExemptAllAssigneesOption();
-        return this._options.exemptAllAssignees;
-    }
-    _logExemptAllAssigneesOption() {
-        if (this._options.exemptAllAssignees) {
-            this._issueLogger.info(`The option ${this._issueLogger.createOptionLink(option_1.Option.ExemptAllAssignees)} is enabled. Any assignee on this $$type will skip the stale process`);
-        }
-        else {
-            this._issueLogger.info(`The option ${this._issueLogger.createOptionLink(option_1.Option.ExemptAllAssignees)} is disabled. Only some specific assignees on this $$type will skip the stale process`);
-        }
+        this._issueLogger.info(`The option ${this._issueLogger.createOptionLink(option_1.Option.ExemptAllPrAssignees)} is disabled. Only some specific assignees on this $$type will skip the stale process`);
+        return false;
     }
     _logSkip() {
         this._issueLogger.info(logger_service_1.LoggerService.white('└──'), 'Skip the assignees checks');
@@ -216,36 +200,20 @@ class IgnoreUpdates {
             : this._shouldIgnoreIssueUpdates();
     }
     _shouldIgnorePullRequestUpdates() {
-        if (this._options.ignorePrUpdates === true) {
+        if (this._options.ignorePrUpdates) {
             this._issueLogger.info(`The option ${this._issueLogger.createOptionLink(option_1.Option.IgnorePrUpdates)} is enabled. The stale counter will ignore any updates or comments on this $$type and will use the creation date as a reference ignoring any kind of update`);
             return true;
         }
-        else if (this._options.ignorePrUpdates === false) {
-            this._issueLogger.info(`The option ${this._issueLogger.createOptionLink(option_1.Option.IgnorePrUpdates)} is disabled. The stale counter will take into account updates and comments on this $$type to avoid to stale when there is some update`);
-            return false;
-        }
-        this._logIgnoreUpdates();
-        return this._options.ignoreUpdates;
+        this._issueLogger.info(`The option ${this._issueLogger.createOptionLink(option_1.Option.IgnorePrUpdates)} is disabled. The stale counter will take into account updates and comments on this $$type to avoid to stale when there is some update`);
+        return false;
     }
     _shouldIgnoreIssueUpdates() {
-        if (this._options.ignoreIssueUpdates === true) {
+        if (this._options.ignoreIssueUpdates) {
             this._issueLogger.info(`The option ${this._issueLogger.createOptionLink(option_1.Option.IgnoreIssueUpdates)} is enabled. The stale counter will ignore any updates or comments on this $$type and will use the creation date as a reference ignoring any kind of update`);
             return true;
         }
-        else if (this._options.ignoreIssueUpdates === false) {
-            this._issueLogger.info(`The option ${this._issueLogger.createOptionLink(option_1.Option.IgnoreIssueUpdates)} is disabled. The stale counter will take into account updates and comments on this $$type to avoid to stale when there is some update`);
-            return false;
-        }
-        this._logIgnoreUpdates();
-        return this._options.ignoreUpdates;
-    }
-    _logIgnoreUpdates() {
-        if (this._options.ignoreUpdates) {
-            this._issueLogger.info(`The option ${this._issueLogger.createOptionLink(option_1.Option.IgnoreUpdates)} is enabled. The stale counter will ignore any updates or comments on this $$type and will use the creation date as a reference ignoring any kind of update`);
-        }
-        else {
-            this._issueLogger.info(`The option ${this._issueLogger.createOptionLink(option_1.Option.IgnoreUpdates)} is disabled. The stale counter will take into account updates and comments on this $$type to avoid to stale when there is some update`);
-        }
+        this._issueLogger.info(`The option ${this._issueLogger.createOptionLink(option_1.Option.IgnoreIssueUpdates)} is disabled. The stale counter will take into account updates and comments on this $$type to avoid to stale when there is some update`);
+        return false;
     }
 }
 exports.IgnoreUpdates = IgnoreUpdates;
@@ -1864,13 +1832,11 @@ var Option;
     Option["ExemptAssignees"] = "exempt-assignees";
     Option["ExemptIssueAssignees"] = "exempt-issue-assignees";
     Option["ExemptPrAssignees"] = "exempt-pr-assignees";
-    Option["ExemptAllAssignees"] = "exempt-all-assignees";
     Option["ExemptAllIssueAssignees"] = "exempt-all-issue-assignees";
     Option["ExemptAllPrAssignees"] = "exempt-all-pr-assignees";
     Option["EnableStatistics"] = "enable-statistics";
     Option["LabelsToRemoveWhenUnstale"] = "labels-to-remove-when-unstale";
     Option["LabelsToAddWhenUnstale"] = "labels-to-add-when-unstale";
-    Option["IgnoreUpdates"] = "ignore-updates";
     Option["IgnoreIssueUpdates"] = "ignore-issue-updates";
     Option["IgnorePrUpdates"] = "ignore-pr-updates";
     Option["ExemptDraftPr"] = "exempt-draft-pr";
@@ -2175,15 +2141,13 @@ function _getAndValidateArgs() {
         exemptAssignees: core.getInput('exempt-assignees'),
         exemptIssueAssignees: core.getInput('exempt-issue-assignees'),
         exemptPrAssignees: core.getInput('exempt-pr-assignees'),
-        exemptAllAssignees: core.getInput('exempt-all-assignees') === 'true',
-        exemptAllIssueAssignees: _toOptionalBoolean('exempt-all-issue-assignees'),
-        exemptAllPrAssignees: _toOptionalBoolean('exempt-all-pr-assignees'),
+        exemptAllIssueAssignees: core.getInput('exempt-all-issue-assignees') === 'true',
+        exemptAllPrAssignees: core.getInput('exempt-all-pr-assignees') === 'true',
         enableStatistics: core.getInput('enable-statistics') === 'true',
         labelsToRemoveWhenUnstale: core.getInput('labels-to-remove-when-unstale'),
         labelsToAddWhenUnstale: core.getInput('labels-to-add-when-unstale'),
-        ignoreUpdates: core.getInput('ignore-updates') === 'true',
-        ignoreIssueUpdates: _toOptionalBoolean('ignore-issue-updates'),
-        ignorePrUpdates: _toOptionalBoolean('ignore-pr-updates'),
+        ignoreIssueUpdates: core.getInput('ignore-issue-updates') === 'true',
+        ignorePrUpdates: core.getInput('ignore-pr-updates') === 'true',
         exemptDraftPr: core.getInput('exempt-draft-pr') === 'true'
     };
     for (const numberInput of [

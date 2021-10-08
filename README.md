@@ -72,13 +72,12 @@ Every argument is optional.
 | [exempt-assignees](#exempt-assignees)                               | Assignees on issues/PRs exempted from stale                              |                       |
 | [exempt-issue-assignees](#exempt-issue-assignees)                   | Override [exempt-assignees](#exempt-assignees) for issues only           |                       |
 | [exempt-pr-assignees](#exempt-pr-assignees)                         | Override [exempt-assignees](#exempt-assignees) for PRs only              |                       |
-| [exempt-all-assignees](#exempt-all-assignees)                       | Exempt all issues/PRs with assignees from stale                          | `false`               |
-| [exempt-all-issue-assignees](#exempt-all-issue-assignees)           | Override [exempt-all-assignees](#exempt-all-assignees) for issues only   |                       |
-| [exempt-all-pr-assignees](#exempt-all-pr-assignees)                 | Override [exempt-all-assignees](#exempt-all-assignees) for PRs only      |                       |
+| [exempt-all-issue-assignees](#exempt-all-issue-assignees)           | Exempt all issues with assignees from stale                              | `false`               |
+| [exempt-all-pr-assignees](#exempt-all-pr-assignees)                 | Exempt all PRs with assignees from stale                                 | `false`               |
 | [exempt-draft-pr](#exempt-draft-pr)                                 | Skip the stale action for draft PRs                                      | `false`               |
 | [enable-statistics](#enable-statistics)                             | Display statistics in the logs                                           | `true`                |
-| [ignore-issue-updates](#ignore-issue-updates)                       | Any update (update/comment) can reset the stale idle time on the issues  |                       |
-| [ignore-pr-updates](#ignore-pr-updates)                             | Any update (update/comment) can reset the stale idle time on the PRs     |                       |
+| [ignore-issue-updates](#ignore-issue-updates)                       | Any update (update/comment) can reset the stale idle time on the issues  | `false`               |
+| [ignore-pr-updates](#ignore-pr-updates)                             | Any update (update/comment) can reset the stale idle time on the PRs     | `false`               |
 
 ### List of output options
 
@@ -126,7 +125,8 @@ You can fine tune which issues or pull requests should be marked as stale based 
 - [exempt-milestones](#exempt-milestones)
 - [exempt-all-milestones](#exempt-all-milestones)
 - [exempt-assignees](#exempt-assignees)
-- [exempt-all-assignees](#exempt-all-assignees)
+- [exempt-all-issue-assignees](#exempt-all-issue-assignees)
+- [exempt-all-pr-assignees](#exempt-all-pr-assignees)
 - [ignore-issue-updates](#ignore-issue-updates)
 - [ignore-pr-updates](#ignore-pr-updates)
 
@@ -453,25 +453,21 @@ Override [exempt-assignees](#exempt-assignees) but only to process the pull requ
 
 Default value: unset
 
-#### exempt-all-assignees
+#### exempt-all-issue-assignees
 
-If set to `true`, the issues or the pull requests with an assignee will not be marked as stale automatically.
+If set to `true`, the issues with an assignee will not be marked as stale automatically.
 
 Priority over [exempt-assignees](#exempt-assignees).
 
 Default value: `false`
 
-#### exempt-all-issue-assignees
-
-Override [exempt-all-assignees](#exempt-all-assignees) but only to exempt the issues with an assignee to be marked as stale automatically.
-
-Default value: unset
-
 #### exempt-all-pr-assignees
 
-Override [exempt-all-assignees](#exempt-all-assignees) but only to exempt the pull requests with an assignee to be marked as stale automatically.
+If set to `true`, the pull requests with an assignee will not be marked as stale automatically.
 
-Default value: unset
+Priority over [exempt-assignees](#exempt-assignees).
+
+Default value: `false`
 
 #### exempt-draft-pr
 

@@ -14,7 +14,8 @@ describe('Assignees', (): void => {
   beforeEach((): void => {
     optionsInterface = {
       ...DefaultProcessorOptions,
-      exemptAllAssignees: false
+      exemptAllIssueAssignees: false,
+      exemptAllPrAssignees: false
     };
     issueInterface = generateIIssue();
   });
@@ -316,9 +317,9 @@ describe('Assignees', (): void => {
         });
       });
 
-      describe('when the given options are configured to exempt all assignees', (): void => {
+      describe('when the given options are not configured to exempt all issue assignees', (): void => {
         beforeEach((): void => {
-          optionsInterface.exemptAllAssignees = true;
+          optionsInterface.exemptAllIssueAssignees = false;
         });
 
         describe('when the given issue does not have an assignee', (): void => {
@@ -347,6 +348,49 @@ describe('Assignees', (): void => {
             ];
           });
 
+          it('should return false', (): void => {
+            expect.assertions(1);
+            issue = new Issue(optionsInterface, issueInterface);
+            assignees = new Assignees(optionsInterface, issue);
+
+            const result = assignees.shouldExemptAssignees();
+
+            expect(result).toStrictEqual(false);
+          });
+        });
+      });
+
+      describe('when the given options are configured to exempt all issue assignees', (): void => {
+        beforeEach((): void => {
+          optionsInterface.exemptAllIssueAssignees = true;
+        });
+
+        describe('when the given issue does not have an assignee', (): void => {
+          beforeEach((): void => {
+            issueInterface.assignees = [];
+          });
+
+          it('should return false', (): void => {
+            expect.assertions(1);
+            issue = new Issue(optionsInterface, issueInterface);
+            assignees = new Assignees(optionsInterface, issue);
+
+            const result = assignees.shouldExemptAssignees();
+
+            expect(result).toStrictEqual(false);
+          });
+        });
+
+        describe('when the given issue does have an assignee', (): void => {
+          beforeEach((): void => {
+            issueInterface.assignees = [
+              {
+                login: 'dummy-exempt-issue-assignee',
+                type: 'User'
+              }
+            ];
+          });
+
           it('should return true', (): void => {
             expect.assertions(1);
             issue = new Issue(optionsInterface, issueInterface);
@@ -355,92 +399,6 @@ describe('Assignees', (): void => {
             const result = assignees.shouldExemptAssignees();
 
             expect(result).toStrictEqual(true);
-          });
-        });
-
-        describe('when the given options are not configured to exempt all issue assignees', (): void => {
-          beforeEach((): void => {
-            optionsInterface.exemptAllIssueAssignees = false;
-          });
-
-          describe('when the given issue does not have an assignee', (): void => {
-            beforeEach((): void => {
-              issueInterface.assignees = [];
-            });
-
-            it('should return false', (): void => {
-              expect.assertions(1);
-              issue = new Issue(optionsInterface, issueInterface);
-              assignees = new Assignees(optionsInterface, issue);
-
-              const result = assignees.shouldExemptAssignees();
-
-              expect(result).toStrictEqual(false);
-            });
-          });
-
-          describe('when the given issue does have an assignee', (): void => {
-            beforeEach((): void => {
-              issueInterface.assignees = [
-                {
-                  login: 'dummy-exempt-assignee',
-                  type: 'User'
-                }
-              ];
-            });
-
-            it('should return false', (): void => {
-              expect.assertions(1);
-              issue = new Issue(optionsInterface, issueInterface);
-              assignees = new Assignees(optionsInterface, issue);
-
-              const result = assignees.shouldExemptAssignees();
-
-              expect(result).toStrictEqual(false);
-            });
-          });
-        });
-
-        describe('when the given options are configured to exempt all issue assignees', (): void => {
-          beforeEach((): void => {
-            optionsInterface.exemptAllIssueAssignees = true;
-          });
-
-          describe('when the given issue does not have an assignee', (): void => {
-            beforeEach((): void => {
-              issueInterface.assignees = [];
-            });
-
-            it('should return false', (): void => {
-              expect.assertions(1);
-              issue = new Issue(optionsInterface, issueInterface);
-              assignees = new Assignees(optionsInterface, issue);
-
-              const result = assignees.shouldExemptAssignees();
-
-              expect(result).toStrictEqual(false);
-            });
-          });
-
-          describe('when the given issue does have an assignee', (): void => {
-            beforeEach((): void => {
-              issueInterface.assignees = [
-                {
-                  login: 'dummy-exempt-issue-assignee',
-                  type: 'User'
-                }
-              ];
-            });
-
-            it('should return true', (): void => {
-              expect.assertions(1);
-              issue = new Issue(optionsInterface, issueInterface);
-              assignees = new Assignees(optionsInterface, issue);
-
-              const result = assignees.shouldExemptAssignees();
-
-              expect(result).toStrictEqual(true);
-            });
           });
         });
       });
@@ -740,9 +698,9 @@ describe('Assignees', (): void => {
         });
       });
 
-      describe('when the given options are configured to exempt all assignees', (): void => {
+      describe('when the given options are not configured to exempt all pull request assignees', (): void => {
         beforeEach((): void => {
-          optionsInterface.exemptAllAssignees = true;
+          optionsInterface.exemptAllPrAssignees = false;
         });
 
         describe('when the given pull request does not have an assignee', (): void => {
@@ -771,6 +729,49 @@ describe('Assignees', (): void => {
             ];
           });
 
+          it('should return false', (): void => {
+            expect.assertions(1);
+            issue = new Issue(optionsInterface, issueInterface);
+            assignees = new Assignees(optionsInterface, issue);
+
+            const result = assignees.shouldExemptAssignees();
+
+            expect(result).toStrictEqual(false);
+          });
+        });
+      });
+
+      describe('when the given options are configured to exempt all pull request assignees', (): void => {
+        beforeEach((): void => {
+          optionsInterface.exemptAllPrAssignees = true;
+        });
+
+        describe('when the given pull request does not have an assignee', (): void => {
+          beforeEach((): void => {
+            issueInterface.assignees = [];
+          });
+
+          it('should return false', (): void => {
+            expect.assertions(1);
+            issue = new Issue(optionsInterface, issueInterface);
+            assignees = new Assignees(optionsInterface, issue);
+
+            const result = assignees.shouldExemptAssignees();
+
+            expect(result).toStrictEqual(false);
+          });
+        });
+
+        describe('when the given pull request does have an assignee', (): void => {
+          beforeEach((): void => {
+            issueInterface.assignees = [
+              {
+                login: 'dummy-exempt-issue-assignee',
+                type: 'User'
+              }
+            ];
+          });
+
           it('should return true', (): void => {
             expect.assertions(1);
             issue = new Issue(optionsInterface, issueInterface);
@@ -779,92 +780,6 @@ describe('Assignees', (): void => {
             const result = assignees.shouldExemptAssignees();
 
             expect(result).toStrictEqual(true);
-          });
-        });
-
-        describe('when the given options are not configured to exempt all pull request assignees', (): void => {
-          beforeEach((): void => {
-            optionsInterface.exemptAllPrAssignees = false;
-          });
-
-          describe('when the given pull request does not have an assignee', (): void => {
-            beforeEach((): void => {
-              issueInterface.assignees = [];
-            });
-
-            it('should return false', (): void => {
-              expect.assertions(1);
-              issue = new Issue(optionsInterface, issueInterface);
-              assignees = new Assignees(optionsInterface, issue);
-
-              const result = assignees.shouldExemptAssignees();
-
-              expect(result).toStrictEqual(false);
-            });
-          });
-
-          describe('when the given pull request does have an assignee', (): void => {
-            beforeEach((): void => {
-              issueInterface.assignees = [
-                {
-                  login: 'dummy-exempt-assignee',
-                  type: 'User'
-                }
-              ];
-            });
-
-            it('should return false', (): void => {
-              expect.assertions(1);
-              issue = new Issue(optionsInterface, issueInterface);
-              assignees = new Assignees(optionsInterface, issue);
-
-              const result = assignees.shouldExemptAssignees();
-
-              expect(result).toStrictEqual(false);
-            });
-          });
-        });
-
-        describe('when the given options are configured to exempt all pull request assignees', (): void => {
-          beforeEach((): void => {
-            optionsInterface.exemptAllPrAssignees = true;
-          });
-
-          describe('when the given pull request does not have an assignee', (): void => {
-            beforeEach((): void => {
-              issueInterface.assignees = [];
-            });
-
-            it('should return false', (): void => {
-              expect.assertions(1);
-              issue = new Issue(optionsInterface, issueInterface);
-              assignees = new Assignees(optionsInterface, issue);
-
-              const result = assignees.shouldExemptAssignees();
-
-              expect(result).toStrictEqual(false);
-            });
-          });
-
-          describe('when the given pull request does have an assignee', (): void => {
-            beforeEach((): void => {
-              issueInterface.assignees = [
-                {
-                  login: 'dummy-exempt-issue-assignee',
-                  type: 'User'
-                }
-              ];
-            });
-
-            it('should return true', (): void => {
-              expect.assertions(1);
-              issue = new Issue(optionsInterface, issueInterface);
-              assignees = new Assignees(optionsInterface, issue);
-
-              const result = assignees.shouldExemptAssignees();
-
-              expect(result).toStrictEqual(true);
-            });
           });
         });
       });

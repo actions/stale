@@ -37,7 +37,6 @@ export enum Option {
   ExemptAssignees = 'exempt-assignees',
   ExemptIssueAssignees = 'exempt-issue-assignees',
   ExemptPrAssignees = 'exempt-pr-assignees',
-  ExemptAllAssignees = 'exempt-all-assignees',
   ExemptAllIssueAssignees = 'exempt-all-issue-assignees',
   ExemptAllPrAssignees = 'exempt-all-pr-assignees',
   EnableStatistics = 'enable-statistics',

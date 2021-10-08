@@ -152,17 +152,13 @@ inputs:
     description: 'The assignees which exempt a pull request from being marked as stale. Separate multiple assignees with commas (eg. "user1,user2"). Override "exempt-assignees" option regarding only the pull requests.'
     default: ''
     required: false
-  exempt-all-assignees:
-    description: 'Exempt all issues and pull requests with assignees from being marked as stale. Default to false.'
+  exempt-all-issue-assignees:
+    description: 'Exempt all issues with assignees from being marked as stale. Default to false.'
     default: 'false'
     required: false
-  exempt-all-issue-assignees:
-    description: 'Exempt all issues with assignees from being marked as stale. Override "exempt-all-assignees" option regarding only the issues.'
-    default: ''
-    required: false
   exempt-all-pr-assignees:
-    description: 'Exempt all pull requests with assignees from being marked as stale. Override "exempt-all-assignees" option regarding only the pull requests.'
-    default: ''
+    description: 'Exempt all pull requests with assignees from being marked as stale. Default to false.'
+    default: 'false'
     required: false
   exempt-draft-pr:
     description: 'Exempt draft pull requests from being marked as stale. Default to false.'

@@ -69,9 +69,8 @@ Every argument is optional.
 | [exempt-all-milestones](#exempt-all-milestones)                     | Exempt all issues/PRs with milestones from stale                         | `false`               |
 | [exempt-all-issue-milestones](#exempt-all-issue-milestones)         | Override [exempt-all-milestones](#exempt-all-milestones) for issues only |                       |
 | [exempt-all-pr-milestones](#exempt-all-pr-milestones)               | Override [exempt-all-milestones](#exempt-all-milestones) for PRs only    |                       |
-| [exempt-assignees](#exempt-assignees)                               | Assignees on issues/PRs exempted from stale                              |                       |
-| [exempt-issue-assignees](#exempt-issue-assignees)                   | Override [exempt-assignees](#exempt-assignees) for issues only           |                       |
-| [exempt-pr-assignees](#exempt-pr-assignees)                         | Override [exempt-assignees](#exempt-assignees) for PRs only              |                       |
+| [exempt-issue-assignees](#exempt-issue-assignees)                   | Assignees on issues exempted from stale                                  |                       |
+| [exempt-pr-assignees](#exempt-pr-assignees)                         | Assignees on PRs exempted from stale                                     |                       |
 | [exempt-all-issue-assignees](#exempt-all-issue-assignees)           | Exempt all issues with assignees from stale                              | `false`               |
 | [exempt-all-pr-assignees](#exempt-all-pr-assignees)                 | Exempt all PRs with assignees from stale                                 | `false`               |
 | [exempt-draft-pr](#exempt-draft-pr)                                 | Skip the stale action for draft PRs                                      | `false`               |
@@ -124,7 +123,8 @@ You can fine tune which issues or pull requests should be marked as stale based 
 - [start-date](#start-date)
 - [exempt-milestones](#exempt-milestones)
 - [exempt-all-milestones](#exempt-all-milestones)
-- [exempt-assignees](#exempt-assignees)
+- [exempt-issue-assignees](#exempt-issue-assignees)
+- [exempt-pr-assignees](#exempt-pr-assignees)
 - [exempt-all-issue-assignees](#exempt-all-issue-assignees)
 - [exempt-all-pr-assignees](#exempt-all-pr-assignees)
 - [ignore-issue-updates](#ignore-issue-updates)
@@ -432,24 +432,21 @@ Override [exempt-all-milestones](#exempt-all-milestones) but only to exempt the 
 
 Default value: unset
 
-#### exempt-assignees
+#### exempt-issue-assignees
 
-An allow-list of assignee(s) to only process the issues or the pull requests that does not contain one of these assignee(s).  
+An allow-list of assignee(s) to only process the issues that does not contain one of these assignee(s).  
 It can be a comma separated list of assignees (e.g: `marco,polo`).
 
 If unset (or an empty string), this option will not alter the stale workflow.
 
 Default value: unset
 
-#### exempt-issue-assignees
-
-Override [exempt-assignees](#exempt-assignees) but only to process the issues that does not contain one of these assignee(s).
-
-Default value: unset
-
 #### exempt-pr-assignees
 
-Override [exempt-assignees](#exempt-assignees) but only to process the pull requests that does not contain one of these assignee(s).
+An allow-list of assignee(s) to only process the pull requests that does not contain one of these assignee(s).  
+It can be a comma separated list of assignees (e.g: `marco,polo`).
+
+If unset (or an empty string), this option will not alter the stale workflow.
 
 Default value: unset
 
@@ -457,7 +454,7 @@ Default value: unset
 
 If set to `true`, the issues with an assignee will not be marked as stale automatically.
 
-Priority over [exempt-assignees](#exempt-assignees).
+Priority over [exempt-issue-assignees](#exempt-issue-assignees).
 
 Default value: `false`
 
@@ -465,7 +462,7 @@ Default value: `false`
 
 If set to `true`, the pull requests with an assignee will not be marked as stale automatically.
 
-Priority over [exempt-assignees](#exempt-assignees).
+Priority over [exempt-pr-assignees](#exempt-pr-assignees).
 
 Default value: `false`
 

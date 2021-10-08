@@ -34,7 +34,6 @@ export enum Option {
   ExemptAllMilestones = 'exempt-all-milestones',
   ExemptAllIssueMilestones = 'exempt-all-issue-milestones',
   ExemptAllPrMilestones = 'exempt-all-pr-milestones',
-  ExemptAssignees = 'exempt-assignees',
   ExemptIssueAssignees = 'exempt-issue-assignees',
   ExemptPrAssignees = 'exempt-pr-assignees',
   ExemptAllIssueAssignees = 'exempt-all-issue-assignees',

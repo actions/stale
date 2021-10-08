@@ -140,16 +140,12 @@ inputs:
     description: 'The date used to skip the stale action on issue/pull request created before it (ISO 8601 or RFC 2822).'
     default: ''
     required: false
-  exempt-assignees:
-    description: 'The assignees which exempt an issue or a pull request from being marked as stale. Separate multiple assignees with commas (eg. "user1,user2").'
-    default: ''
-    required: false
   exempt-issue-assignees:
-    description: 'The assignees which exempt an issue from being marked as stale. Separate multiple assignees with commas (eg. "user1,user2"). Override "exempt-assignees" option regarding only the issues.'
+    description: 'The assignees which exempt an issue from being marked as stale. Separate multiple assignees with commas (eg. "user1,user2").'
     default: ''
     required: false
   exempt-pr-assignees:
-    description: 'The assignees which exempt a pull request from being marked as stale. Separate multiple assignees with commas (eg. "user1,user2"). Override "exempt-assignees" option regarding only the pull requests.'
+    description: 'The assignees which exempt a pull request from being marked as stale. Separate multiple assignees with commas (eg. "user1,user2").'
     default: ''
     required: false
   exempt-all-issue-assignees:

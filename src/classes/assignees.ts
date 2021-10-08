@@ -96,31 +96,7 @@ export class Assignees {
         )} is disabled. No specific assignee can skip the stale process for this $$type`
       );
 
-      if (this._options.exemptAssignees === '') {
-        this._issueLogger.info(
-          LoggerService.white('├──'),
-          `The option ${this._issueLogger.createOptionLink(
-            Option.ExemptAssignees
-          )} is disabled. No specific assignee can skip the stale process for this $$type`
-        );
-
-        return [];
-      }
-
-      const exemptAssignees: string[] = wordsToList(
-        this._options.exemptAssignees
-      );
-
-      this._issueLogger.info(
-        LoggerService.white('├──'),
-        `The option ${this._issueLogger.createOptionLink(
-          Option.ExemptAssignees
-        )} is set. ${LoggerService.cyan(exemptAssignees.length)} assignee${
-          exemptAssignees.length === 1 ? '' : 's'
-        } can skip the stale process for this $$type`
-      );
-
-      return exemptAssignees;
+      return [];
     }
 
     const exemptAssignees: string[] = wordsToList(
@@ -148,31 +124,7 @@ export class Assignees {
         )} is disabled. No specific assignee can skip the stale process for this $$type`
       );
 
-      if (this._options.exemptAssignees === '') {
-        this._issueLogger.info(
-          LoggerService.white('├──'),
-          `The option ${this._issueLogger.createOptionLink(
-            Option.ExemptAssignees
-          )} is disabled. No specific assignee can skip the stale process for this $$type`
-        );
-
-        return [];
-      }
-
-      const exemptAssignees: string[] = wordsToList(
-        this._options.exemptAssignees
-      );
-
-      this._issueLogger.info(
-        LoggerService.white('├──'),
-        `The option ${this._issueLogger.createOptionLink(
-          Option.ExemptAssignees
-        )} is set. ${LoggerService.cyan(exemptAssignees.length)} assignee${
-          exemptAssignees.length === 1 ? '' : 's'
-        } can skip the stale process for this $$type`
-      );
-
-      return exemptAssignees;
+      return [];
     }
 
     const exemptAssignees: string[] = wordsToList(

@@ -60,13 +60,7 @@ class Assignees {
     _getExemptIssueAssignees() {
         if (this._options.exemptIssueAssignees === '') {
             this._issueLogger.info(logger_service_1.LoggerService.white('├──'), `The option ${this._issueLogger.createOptionLink(option_1.Option.ExemptIssueAssignees)} is disabled. No specific assignee can skip the stale process for this $$type`);
-            if (this._options.exemptAssignees === '') {
-                this._issueLogger.info(logger_service_1.LoggerService.white('├──'), `The option ${this._issueLogger.createOptionLink(option_1.Option.ExemptAssignees)} is disabled. No specific assignee can skip the stale process for this $$type`);
-                return [];
-            }
-            const exemptAssignees = words_to_list_1.wordsToList(this._options.exemptAssignees);
-            this._issueLogger.info(logger_service_1.LoggerService.white('├──'), `The option ${this._issueLogger.createOptionLink(option_1.Option.ExemptAssignees)} is set. ${logger_service_1.LoggerService.cyan(exemptAssignees.length)} assignee${exemptAssignees.length === 1 ? '' : 's'} can skip the stale process for this $$type`);
-            return exemptAssignees;
+            return [];
         }
         const exemptAssignees = words_to_list_1.wordsToList(this._options.exemptIssueAssignees);
         this._issueLogger.info(logger_service_1.LoggerService.white('├──'), `The option ${this._issueLogger.createOptionLink(option_1.Option.ExemptIssueAssignees)} is set. ${logger_service_1.LoggerService.cyan(exemptAssignees.length)} assignee${exemptAssignees.length === 1 ? '' : 's'} can skip the stale process for this $$type`);
@@ -75,13 +69,7 @@ class Assignees {
     _getExemptPullRequestAssignees() {
         if (this._options.exemptPrAssignees === '') {
             this._issueLogger.info(logger_service_1.LoggerService.white('├──'), `The option ${this._issueLogger.createOptionLink(option_1.Option.ExemptPrAssignees)} is disabled. No specific assignee can skip the stale process for this $$type`);
-            if (this._options.exemptAssignees === '') {
-                this._issueLogger.info(logger_service_1.LoggerService.white('├──'), `The option ${this._issueLogger.createOptionLink(option_1.Option.ExemptAssignees)} is disabled. No specific assignee can skip the stale process for this $$type`);
-                return [];
-            }
-            const exemptAssignees = words_to_list_1.wordsToList(this._options.exemptAssignees);
-            this._issueLogger.info(logger_service_1.LoggerService.white('├──'), `The option ${this._issueLogger.createOptionLink(option_1.Option.ExemptAssignees)} is set. ${logger_service_1.LoggerService.cyan(exemptAssignees.length)} assignee${exemptAssignees.length === 1 ? '' : 's'} can skip the stale process for this $$type`);
-            return exemptAssignees;
+            return [];
         }
         const exemptAssignees = words_to_list_1.wordsToList(this._options.exemptPrAssignees);
         this._issueLogger.info(logger_service_1.LoggerService.white('├──'), `The option ${this._issueLogger.createOptionLink(option_1.Option.ExemptPrAssignees)} is set. ${logger_service_1.LoggerService.cyan(exemptAssignees.length)} assignee${exemptAssignees.length === 1 ? '' : 's'} can skip the stale process for this $$type`);
@@ -1829,7 +1817,6 @@ var Option;
     Option["ExemptAllMilestones"] = "exempt-all-milestones";
     Option["ExemptAllIssueMilestones"] = "exempt-all-issue-milestones";
     Option["ExemptAllPrMilestones"] = "exempt-all-pr-milestones";
-    Option["ExemptAssignees"] = "exempt-assignees";
     Option["ExemptIssueAssignees"] = "exempt-issue-assignees";
     Option["ExemptPrAssignees"] = "exempt-pr-assignees";
     Option["ExemptAllIssueAssignees"] = "exempt-all-issue-assignees";
@@ -2138,7 +2125,6 @@ function _getAndValidateArgs() {
         exemptAllMilestones: core.getInput('exempt-all-milestones') === 'true',
         exemptAllIssueMilestones: _toOptionalBoolean('exempt-all-issue-milestones'),
         exemptAllPrMilestones: _toOptionalBoolean('exempt-all-pr-milestones'),
-        exemptAssignees: core.getInput('exempt-assignees'),
         exemptIssueAssignees: core.getInput('exempt-issue-assignees'),
         exemptPrAssignees: core.getInput('exempt-pr-assignees'),
         exemptAllIssueAssignees: core.getInput('exempt-all-issue-assignees') === 'true',

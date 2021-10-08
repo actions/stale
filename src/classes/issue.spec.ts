@@ -49,7 +49,6 @@ describe('Issue', (): void => {
       exemptAllMilestones: false,
       exemptAllIssueMilestones: undefined,
       exemptAllPrMilestones: undefined,
-      exemptAssignees: '',
       exemptIssueAssignees: '',
       exemptPrAssignees: '',
       exemptAllIssueAssignees: false,

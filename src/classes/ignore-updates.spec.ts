@@ -25,111 +25,67 @@ describe('IgnoreUpdates', (): void => {
         issueInterface.pull_request = undefined;
       });
 
-      describe('when the given options are configured to reset the stale on updates', (): void => {
+      describe('when the given options are configured to reset the issue stale on updates', (): void => {
         beforeEach((): void => {
-          optionsInterface.ignoreUpdates = false;
+          optionsInterface.ignoreIssueUpdates = false;
         });
 
-        describe('when the given options are not configured to reset the issue stale on updates', (): void => {
-          beforeEach((): void => {
-            delete optionsInterface.ignoreIssueUpdates;
-          });
+        it('should return false', (): void => {
+          expect.assertions(1);
+          issue = new Issue(optionsInterface, issueInterface);
+          ignoreUpdates = new IgnoreUpdates(optionsInterface, issue);
 
-          it('should return false', (): void => {
-            expect.assertions(1);
-            issue = new Issue(optionsInterface, issueInterface);
-            ignoreUpdates = new IgnoreUpdates(optionsInterface, issue);
+          const result = ignoreUpdates.shouldIgnoreUpdates();
 
-            const result = ignoreUpdates.shouldIgnoreUpdates();
-
-            expect(result).toStrictEqual(false);
-          });
-        });
-
-        describe('when the given options are configured to reset the issue stale on updates', (): void => {
-          beforeEach((): void => {
-            optionsInterface.ignoreIssueUpdates = false;
-          });
-
-          it('should return false', (): void => {
-            expect.assertions(1);
-            issue = new Issue(optionsInterface, issueInterface);
-            ignoreUpdates = new IgnoreUpdates(optionsInterface, issue);
-
-            const result = ignoreUpdates.shouldIgnoreUpdates();
-
-            expect(result).toStrictEqual(false);
-          });
-        });
-
-        describe('when the given options are configured to not reset the issue stale on updates', (): void => {
-          beforeEach((): void => {
-            optionsInterface.ignoreIssueUpdates = true;
-          });
-
-          it('should return true', (): void => {
-            expect.assertions(1);
-            issue = new Issue(optionsInterface, issueInterface);
-            ignoreUpdates = new IgnoreUpdates(optionsInterface, issue);
-
-            const result = ignoreUpdates.shouldIgnoreUpdates();
-
-            expect(result).toStrictEqual(true);
-          });
+          expect(result).toStrictEqual(false);
         });
       });
 
-      describe('when the given options are configured to reset the stale on updates', (): void => {
+      describe('when the given options are configured to not reset the issue stale on updates', (): void => {
         beforeEach((): void => {
-          optionsInterface.ignoreUpdates = true;
+          optionsInterface.ignoreIssueUpdates = true;
         });
 
-        describe('when the given options are not configured to reset the issue stale on updates', (): void => {
-          beforeEach((): void => {
-            delete optionsInterface.ignoreIssueUpdates;
-          });
+        it('should return true', (): void => {
+          expect.assertions(1);
+          issue = new Issue(optionsInterface, issueInterface);
+          ignoreUpdates = new IgnoreUpdates(optionsInterface, issue);
 
-          it('should return true', (): void => {
-            expect.assertions(1);
-            issue = new Issue(optionsInterface, issueInterface);
-            ignoreUpdates = new IgnoreUpdates(optionsInterface, issue);
+          const result = ignoreUpdates.shouldIgnoreUpdates();
 
-            const result = ignoreUpdates.shouldIgnoreUpdates();
+          expect(result).toStrictEqual(true);
+        });
+      });
 
-            expect(result).toStrictEqual(true);
-          });
+      describe('when the given options are configured to reset the issue stale on updates', (): void => {
+        beforeEach((): void => {
+          optionsInterface.ignoreIssueUpdates = false;
         });
 
-        describe('when the given options are configured to reset the issue stale on updates', (): void => {
-          beforeEach((): void => {
-            optionsInterface.ignoreIssueUpdates = false;
-          });
+        it('should return false', (): void => {
+          expect.assertions(1);
+          issue = new Issue(optionsInterface, issueInterface);
+          ignoreUpdates = new IgnoreUpdates(optionsInterface, issue);
 
-          it('should return false', (): void => {
-            expect.assertions(1);
-            issue = new Issue(optionsInterface, issueInterface);
-            ignoreUpdates = new IgnoreUpdates(optionsInterface, issue);
+          const result = ignoreUpdates.shouldIgnoreUpdates();
 
-            const result = ignoreUpdates.shouldIgnoreUpdates();
+          expect(result).toStrictEqual(false);
+        });
+      });
 
-            expect(result).toStrictEqual(false);
-          });
+      describe('when the given options are configured to not reset the issue stale on updates', (): void => {
+        beforeEach((): void => {
+          optionsInterface.ignoreIssueUpdates = true;
         });
 
-        describe('when the given options are configured to not reset the issue stale on updates', (): void => {
-          beforeEach((): void => {
-            optionsInterface.ignoreIssueUpdates = true;
-          });
+        it('should return true', (): void => {
+          expect.assertions(1);
+          issue = new Issue(optionsInterface, issueInterface);
+          ignoreUpdates = new IgnoreUpdates(optionsInterface, issue);
 
-          it('should return true', (): void => {
-            expect.assertions(1);
-            issue = new Issue(optionsInterface, issueInterface);
-            ignoreUpdates = new IgnoreUpdates(optionsInterface, issue);
+          const result = ignoreUpdates.shouldIgnoreUpdates();
 
-            const result = ignoreUpdates.shouldIgnoreUpdates();
-
-            expect(result).toStrictEqual(true);
-          });
+          expect(result).toStrictEqual(true);
         });
       });
     });
@@ -139,111 +95,67 @@ describe('IgnoreUpdates', (): void => {
         issueInterface.pull_request = {};
       });
 
-      describe('when the given options are configured to reset the stale on updates', (): void => {
+      describe('when the given options are configured to reset the pull request stale on updates', (): void => {
         beforeEach((): void => {
-          optionsInterface.ignoreUpdates = false;
+          optionsInterface.ignorePrUpdates = false;
         });
 
-        describe('when the given options are not configured to reset the pull request stale on updates', (): void => {
-          beforeEach((): void => {
-            delete optionsInterface.ignorePrUpdates;
-          });
+        it('should return false', (): void => {
+          expect.assertions(1);
+          issue = new Issue(optionsInterface, issueInterface);
+          ignoreUpdates = new IgnoreUpdates(optionsInterface, issue);
 
-          it('should return false', (): void => {
-            expect.assertions(1);
-            issue = new Issue(optionsInterface, issueInterface);
-            ignoreUpdates = new IgnoreUpdates(optionsInterface, issue);
+          const result = ignoreUpdates.shouldIgnoreUpdates();
 
-            const result = ignoreUpdates.shouldIgnoreUpdates();
-
-            expect(result).toStrictEqual(false);
-          });
-        });
-
-        describe('when the given options are configured to reset the pull request stale on updates', (): void => {
-          beforeEach((): void => {
-            optionsInterface.ignorePrUpdates = false;
-          });
-
-          it('should return false', (): void => {
-            expect.assertions(1);
-            issue = new Issue(optionsInterface, issueInterface);
-            ignoreUpdates = new IgnoreUpdates(optionsInterface, issue);
-
-            const result = ignoreUpdates.shouldIgnoreUpdates();
-
-            expect(result).toStrictEqual(false);
-          });
-        });
-
-        describe('when the given options are configured to not reset the pull request stale on updates', (): void => {
-          beforeEach((): void => {
-            optionsInterface.ignorePrUpdates = true;
-          });
-
-          it('should return true', (): void => {
-            expect.assertions(1);
-            issue = new Issue(optionsInterface, issueInterface);
-            ignoreUpdates = new IgnoreUpdates(optionsInterface, issue);
-
-            const result = ignoreUpdates.shouldIgnoreUpdates();
-
-            expect(result).toStrictEqual(true);
-          });
+          expect(result).toStrictEqual(false);
         });
       });
 
-      describe('when the given options are configured to not reset the stale on updates', (): void => {
+      describe('when the given options are configured to not reset the pull request stale on updates', (): void => {
         beforeEach((): void => {
-          optionsInterface.ignoreUpdates = true;
+          optionsInterface.ignorePrUpdates = true;
         });
 
-        describe('when the given options are not configured to reset the pull request stale on updates', (): void => {
-          beforeEach((): void => {
-            delete optionsInterface.ignorePrUpdates;
-          });
+        it('should return true', (): void => {
+          expect.assertions(1);
+          issue = new Issue(optionsInterface, issueInterface);
+          ignoreUpdates = new IgnoreUpdates(optionsInterface, issue);
 
-          it('should return true', (): void => {
-            expect.assertions(1);
-            issue = new Issue(optionsInterface, issueInterface);
-            ignoreUpdates = new IgnoreUpdates(optionsInterface, issue);
+          const result = ignoreUpdates.shouldIgnoreUpdates();
 
-            const result = ignoreUpdates.shouldIgnoreUpdates();
+          expect(result).toStrictEqual(true);
+        });
+      });
 
-            expect(result).toStrictEqual(true);
-          });
+      describe('when the given options are configured to reset the pull request stale on updates', (): void => {
+        beforeEach((): void => {
+          optionsInterface.ignorePrUpdates = false;
         });
 
-        describe('when the given options are configured to reset the pull request stale on updates', (): void => {
-          beforeEach((): void => {
-            optionsInterface.ignorePrUpdates = false;
-          });
+        it('should return false', (): void => {
+          expect.assertions(1);
+          issue = new Issue(optionsInterface, issueInterface);
+          ignoreUpdates = new IgnoreUpdates(optionsInterface, issue);
 
-          it('should return false', (): void => {
-            expect.assertions(1);
-            issue = new Issue(optionsInterface, issueInterface);
-            ignoreUpdates = new IgnoreUpdates(optionsInterface, issue);
+          const result = ignoreUpdates.shouldIgnoreUpdates();
 
-            const result = ignoreUpdates.shouldIgnoreUpdates();
+          expect(result).toStrictEqual(false);
+        });
+      });
 
-            expect(result).toStrictEqual(false);
-          });
+      describe('when the given options are configured to not reset the pull request stale on updates', (): void => {
+        beforeEach((): void => {
+          optionsInterface.ignorePrUpdates = true;
         });
 
-        describe('when the given options are configured to not reset the pull request stale on updates', (): void => {
-          beforeEach((): void => {
-            optionsInterface.ignorePrUpdates = true;
-          });
+        it('should return true', (): void => {
+          expect.assertions(1);
+          issue = new Issue(optionsInterface, issueInterface);
+          ignoreUpdates = new IgnoreUpdates(optionsInterface, issue);
 
-          it('should return true', (): void => {
-            expect.assertions(1);
-            issue = new Issue(optionsInterface, issueInterface);
-            ignoreUpdates = new IgnoreUpdates(optionsInterface, issue);
+          const result = ignoreUpdates.shouldIgnoreUpdates();
 
-            const result = ignoreUpdates.shouldIgnoreUpdates();
-
-            expect(result).toStrictEqual(true);
-          });
+          expect(result).toStrictEqual(true);
         });
       });
     });

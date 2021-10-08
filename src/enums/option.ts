@@ -43,7 +43,6 @@ export enum Option {
   EnableStatistics = 'enable-statistics',
   LabelsToRemoveWhenUnstale = 'labels-to-remove-when-unstale',
   LabelsToAddWhenUnstale = 'labels-to-add-when-unstale',
-  IgnoreUpdates = 'ignore-updates',
   IgnoreIssueUpdates = 'ignore-issue-updates',
   IgnorePrUpdates = 'ignore-pr-updates',
   ExemptDraftPr = 'exempt-draft-pr'

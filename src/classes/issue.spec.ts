@@ -58,9 +58,8 @@ describe('Issue', (): void => {
       enableStatistics: false,
       labelsToRemoveWhenUnstale: '',
       labelsToAddWhenUnstale: '',
-      ignoreUpdates: false,
-      ignoreIssueUpdates: undefined,
-      ignorePrUpdates: undefined,
+      ignoreIssueUpdates: false,
+      ignorePrUpdates: false,
       exemptDraftPr: false
     };
     issueInterface = {

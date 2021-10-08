@@ -640,8 +640,8 @@ export class IssuesProcessor {
     );
 
     const daysBeforeClose: number = issue.isPullRequest
-      ? this._getDaysBeforePrClose()
-      : this._getDaysBeforeIssueClose();
+      ? this.options.daysBeforePrClose
+      : this.options.daysBeforeIssueClose;
 
     issueLogger.info(
       `Days before $$type close: ${LoggerService.cyan(daysBeforeClose)}`
@@ -967,18 +967,6 @@ export class IssuesProcessor {
     return isNaN(this.options.daysBeforePrStale)
       ? this.options.daysBeforeStale
       : this.options.daysBeforePrStale;
-  }
-
-  private _getDaysBeforeIssueClose(): number {
-    return isNaN(this.options.daysBeforeIssueClose)
-      ? this.options.daysBeforeClose
-      : this.options.daysBeforeIssueClose;
-  }
-
-  private _getDaysBeforePrClose(): number {
-    return isNaN(this.options.daysBeforePrClose)
-      ? this.options.daysBeforeClose
-      : this.options.daysBeforePrClose;
   }
 
   private _getOnlyLabels(issue: Issue): string {

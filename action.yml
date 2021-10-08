@@ -28,15 +28,13 @@ inputs:
   days-before-pr-stale:
     description: 'The number of days old a pull request can be before marking it stale. Set to -1 to never mark pull requests as stale automatically. Override "days-before-stale" option regarding only the pull requests.'
     required: false
-  days-before-close:
-    description: 'The number of days to wait to close an issue or a pull request after it being marked stale. Set to -1 to never close stale issues or pull requests.'
-    required: false
-    default: '7'
   days-before-issue-close:
-    description: 'The number of days to wait to close an issue after it being marked stale. Set to -1 to never close stale issues. Override "days-before-close" option regarding only the issues.'
+    description: 'The number of days to wait to close an issue after it being marked stale. Set to -1 to never close stale issues or pull requests.'
+    default: '7'
     required: false
   days-before-pr-close:
-    description: 'The number of days to wait to close a pull request after it being marked stale. Set to -1 to never close stale pull requests. Override "days-before-close" option regarding only the pull requests.'
+    description: 'The number of days to wait to close a pull request after it being marked stale. Set to -1 to never close stale issues or pull requests.'
+    default: '7'
     required: false
   stale-issue-label:
     description: 'The label to apply when an issue is stale.'

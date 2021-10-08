@@ -34,9 +34,8 @@ Every argument is optional.
 | [days-before-stale](#days-before-stale)                             | Idle number of days before marking issues/PRs stale                     | `60`                  |
 | [days-before-issue-stale](#days-before-issue-stale)                 | Override [days-before-stale](#days-before-stale) for issues only        |                       |
 | [days-before-pr-stale](#days-before-pr-stale)                       | Override [days-before-stale](#days-before-stale) for PRs only           |                       |
-| [days-before-close](#days-before-close)                             | Idle number of days before closing stale issues/PRs                     | `7`                   |
-| [days-before-issue-close](#days-before-issue-close)                 | Override [days-before-close](#days-before-close) for issues only        |                       |
-| [days-before-pr-close](#days-before-pr-close)                       | Override [days-before-close](#days-before-close) for PRs only           |                       |
+| [days-before-issue-close](#days-before-issue-close)                 | Idle number of days before closing stale issues                         | `7`                   |
+| [days-before-pr-close](#days-before-pr-close)                       | Idle number of days before closing stale PRs                            | `7`                   |
 | [stale-issue-message](#stale-issue-message)                         | Comment on the staled issues                                            |                       |
 | [stale-pr-message](#stale-pr-message)                               | Comment on the staled PRs                                               |                       |
 | [close-issue-message](#close-issue-message)                         | Comment on the staled issues while closed                               |                       |
@@ -144,32 +143,29 @@ Useful to override [days-before-stale](#days-before-stale) but only for the idle
 
 Default value: unset
 
-#### days-before-close
+#### days-before-issue-close
 
-The idle number of days before closing the stale issues or the stale pull requests (due to the stale label).  
-The issues or the pull requests will be closed if the last update (based on [GitHub issue](https://docs.github.com/en/rest/reference/issues) field `updated_at`) is older than the idle number of days.  
+The idle number of days before closing the stale issues (due to the stale label).  
+The issues will be closed if the last update (based on [GitHub issue](https://docs.github.com/en/rest/reference/issues) field `updated_at`) is older than the idle number of days.  
 Since adding the stale label will alter the last update date, we can calculate the number of days from this date.
 
-If set to a negative number like `-1`, the issues or the pull requests will never be closed automatically.
+If set to a negative number like `-1`, the issues will never be closed automatically.
 
-The label used to stale is defined by these two options:
-
-- [stale-issue-label](#stale-issue-label)
-- [stale-pr-label](#stale-pr-label)
+The label used to stale is defined by this option: [stale-issue-label](#stale-issue-label)
 
 Default value: `7`
 
-#### days-before-issue-close
-
-Override [days-before-close](#days-before-close) but only for the idle number of days before closing the stale issues.
-
-Default value: unset
-
 #### days-before-pr-close
 
-Override [days-before-close](#days-before-close) but only for the idle number of days before closing the stale pull requests.
+The idle number of days before closing the stale pull requests (due to the stale label).  
+The pull requests will be closed if the last update (based on [GitHub issue](https://docs.github.com/en/rest/reference/issues) field `updated_at`) is older than the idle number of days.  
+Since adding the stale label will alter the last update date, we can calculate the number of days from this date.
 
-Default value: unset
+If set to a negative number like `-1`, the pull requests will never be closed automatically.
+
+The label used to stale is defined by this option: [stale-pr-label](#stale-pr-label)
+
+Default value: `7`
 
 #### stale-issue-message
 
@@ -527,7 +523,8 @@ jobs:
         with:
           stale-issue-message: 'This issue is stale because it has been open 30 days with no activity. Remove stale label or comment or this will be closed in 5 days.'
           days-before-stale: 30
-          days-before-close: 5
+          days-before-issue-close: 5
+          days-before-pr-close: 5
 ```
 
 Configure different stale timeouts but never close a PR:
@@ -548,7 +545,7 @@ jobs:
           stale-pr-message: 'This PR is stale because it has been open 45 days with no activity. Remove stale label or comment or this will be closed in 10 days.'
           close-issue-message: 'This issue was closed because it has been stalled for 5 days with no activity.'
           days-before-stale: 30
-          days-before-close: 5
+          days-before-issue-close: 5
           days-before-pr-close: -1
 ```
 

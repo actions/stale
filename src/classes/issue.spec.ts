@@ -17,7 +17,6 @@ describe('Issue', (): void => {
       closeIssueMessage: '',
       closePrLabel: '',
       closePrMessage: '',
-      daysBeforeClose: 0,
       daysBeforeIssueClose: 0,
       daysBeforeIssueStale: 0,
       daysBeforePrClose: 0,

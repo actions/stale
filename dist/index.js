@@ -669,8 +669,8 @@ class IssuesProcessor {
             const issueHasComments = yield this._hasCommentsSince(issue, markedStaleOn, staleMessage);
             issueLogger.info(`$$type has been commented on: ${logger_service_1.LoggerService.cyan(issueHasComments)}`);
             const daysBeforeClose = issue.isPullRequest
-                ? this._getDaysBeforePrClose()
-                : this._getDaysBeforeIssueClose();
+                ? this.options.daysBeforePrClose
+                : this.options.daysBeforeIssueClose;
             issueLogger.info(`Days before $$type close: ${logger_service_1.LoggerService.cyan(daysBeforeClose)}`);
             const issueHasUpdate = IssuesProcessor._updatedSince(issue.updated_at, daysBeforeClose);
             issueLogger.info(`$$type has been updated: ${logger_service_1.LoggerService.cyan(issueHasUpdate)}`);
@@ -899,16 +899,6 @@ class IssuesProcessor {
         return isNaN(this.options.daysBeforePrStale)
             ? this.options.daysBeforeStale
             : this.options.daysBeforePrStale;
-    }
-    _getDaysBeforeIssueClose() {
-        return isNaN(this.options.daysBeforeIssueClose)
-            ? this.options.daysBeforeClose
-            : this.options.daysBeforeIssueClose;
-    }
-    _getDaysBeforePrClose() {
-        return isNaN(this.options.daysBeforePrClose)
-            ? this.options.daysBeforeClose
-            : this.options.daysBeforePrClose;
     }
     _getOnlyLabels(issue) {
         if (issue.isPullRequest) {
@@ -1748,7 +1738,6 @@ var Option;
     Option["DaysBeforeStale"] = "days-before-stale";
     Option["DaysBeforeIssueStale"] = "days-before-issue-stale";
     Option["DaysBeforePrStale"] = "days-before-pr-stale";
-    Option["DaysBeforeClose"] = "days-before-close";
     Option["DaysBeforeIssueClose"] = "days-before-issue-close";
     Option["DaysBeforePrClose"] = "days-before-pr-close";
     Option["StaleIssueLabel"] = "stale-issue-label";
@@ -2050,9 +2039,8 @@ function _getAndValidateArgs() {
         daysBeforeStale: parseInt(core.getInput('days-before-stale', { required: true })),
         daysBeforeIssueStale: parseInt(core.getInput('days-before-issue-stale')),
         daysBeforePrStale: parseInt(core.getInput('days-before-pr-stale')),
-        daysBeforeClose: parseInt(core.getInput('days-before-close', { required: true })),
-        daysBeforeIssueClose: parseInt(core.getInput('days-before-issue-close')),
-        daysBeforePrClose: parseInt(core.getInput('days-before-pr-close')),
+        daysBeforeIssueClose: parseInt(core.getInput('days-before-issue-close', { required: true })),
+        daysBeforePrClose: parseInt(core.getInput('days-before-pr-close', { required: true })),
         staleIssueLabel: core.getInput('stale-issue-label', { required: true }),
         closeIssueLabel: core.getInput('close-issue-label'),
         exemptIssueLabels: core.getInput('exempt-issue-labels'),
@@ -2090,7 +2078,8 @@ function _getAndValidateArgs() {
     };
     for (const numberInput of [
         'days-before-stale',
-        'days-before-close',
+        'days-before-issue-close',
+        'days-before-pr-close',
         'operations-per-run'
     ]) {
         if (isNaN(parseInt(core.getInput(numberInput)))) {

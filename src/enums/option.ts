@@ -7,7 +7,6 @@ export enum Option {
   DaysBeforeStale = 'days-before-stale',
   DaysBeforeIssueStale = 'days-before-issue-stale',
   DaysBeforePrStale = 'days-before-pr-stale',
-  DaysBeforeClose = 'days-before-close',
   DaysBeforeIssueClose = 'days-before-issue-close',
   DaysBeforePrClose = 'days-before-pr-close',
   StaleIssueLabel = 'stale-issue-label',

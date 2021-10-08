@@ -347,7 +347,7 @@ test('processing an issue with no label will not make it stale if days-before-st
   const opts: IIssuesProcessorOptions = {
     ...DefaultProcessorOptions,
     staleIssueMessage: '',
-    daysBeforeStale: -1
+    daysBeforeIssueStale: -1
   };
   const TestIssueList: Issue[] = [
     generateIssue(opts, 1, 'An issue with no label', '2020-01-01T17:00:00Z')
@@ -370,7 +370,6 @@ test('processing an issue with no label will not make it stale if days-before-st
   const opts: IIssuesProcessorOptions = {
     ...DefaultProcessorOptions,
     staleIssueMessage: '',
-    daysBeforeStale: -1,
     daysBeforeIssueStale: -1
   };
   const TestIssueList: Issue[] = [
@@ -1304,7 +1303,7 @@ test('stale label containing a space should be removed if a comment was added to
 
 test('stale issues should not be closed until after the closed number of days', async () => {
   const opts = {...DefaultProcessorOptions};
-  opts.daysBeforeStale = 5; // stale after 5 days
+  opts.daysBeforeIssueStale = 5; // stale after 5 days
   opts.daysBeforeIssueClose = 1; // closes after 6 days
   const lastUpdate = new Date();
   lastUpdate.setDate(lastUpdate.getDate() - 5);
@@ -1335,7 +1334,7 @@ test('stale issues should not be closed until after the closed number of days', 
 
 test('stale issues should be closed if the closed nubmer of days (additive) is also passed', async () => {
   const opts = {...DefaultProcessorOptions};
-  opts.daysBeforeStale = 5; // stale after 5 days
+  opts.daysBeforeIssueStale = 5; // stale after 5 days
   opts.daysBeforeIssueClose = 1; // closes after 6 days
   const lastUpdate = new Date();
   lastUpdate.setDate(lastUpdate.getDate() - 7);
@@ -1367,7 +1366,7 @@ test('stale issues should be closed if the closed nubmer of days (additive) is a
 
 test('stale issues should not be closed until after the closed number of days (long)', async () => {
   const opts = {...DefaultProcessorOptions};
-  opts.daysBeforeStale = 5; // stale after 5 days
+  opts.daysBeforeIssueStale = 5; // stale after 5 days
   opts.daysBeforeIssueClose = 20; // closes after 25 days
   const lastUpdate = new Date();
   lastUpdate.setDate(lastUpdate.getDate() - 10);
@@ -1398,7 +1397,7 @@ test('stale issues should not be closed until after the closed number of days (l
 
 test('skips stale message on issues when stale-issue-message is empty', async () => {
   const opts = {...DefaultProcessorOptions};
-  opts.daysBeforeStale = 5; // stale after 5 days
+  opts.daysBeforeIssueStale = 5; // stale after 5 days
   opts.daysBeforeIssueClose = 20; // closes after 25 days
   opts.staleIssueMessage = '';
   const lastUpdate = new Date();
@@ -1442,7 +1441,7 @@ test('skips stale message on issues when stale-issue-message is empty', async ()
 
 test('send stale message on issues when stale-issue-message is not empty', async () => {
   const opts = {...DefaultProcessorOptions};
-  opts.daysBeforeStale = 5; // stale after 5 days
+  opts.daysBeforeIssueStale = 5; // stale after 5 days
   opts.daysBeforeIssueClose = 20; // closes after 25 days
   opts.staleIssueMessage = 'dummy issue message';
   const lastUpdate = new Date();
@@ -1486,7 +1485,7 @@ test('send stale message on issues when stale-issue-message is not empty', async
 
 test('skips stale message on prs when stale-pr-message is empty', async () => {
   const opts = {...DefaultProcessorOptions};
-  opts.daysBeforeStale = 5; // stale after 5 days
+  opts.daysBeforeIssueStale = 5; // stale after 5 days
   opts.daysBeforeIssueClose = 20; // closes after 25 days
   opts.stalePrMessage = '';
   const lastUpdate = new Date();
@@ -1530,7 +1529,7 @@ test('skips stale message on prs when stale-pr-message is empty', async () => {
 
 test('send stale message on prs when stale-pr-message is not empty', async () => {
   const opts = {...DefaultProcessorOptions};
-  opts.daysBeforeStale = 5; // stale after 5 days
+  opts.daysBeforeIssueStale = 5; // stale after 5 days
   opts.daysBeforeIssueClose = 20; // closes after 25 days
   opts.stalePrMessage = 'dummy pr message';
   const lastUpdate = new Date();
@@ -1797,7 +1796,6 @@ test('processing an issue opened since 2 days and with the option "daysBeforeIss
   expect.assertions(2);
   const opts: IIssuesProcessorOptions = {
     ...DefaultProcessorOptions,
-    daysBeforeStale: 10,
     daysBeforeIssueStale: 3
   };
   const issueDate = new Date();
@@ -1823,7 +1821,6 @@ test('processing an issue opened since 2 days and with the option "daysBeforeIss
   expect.assertions(2);
   const opts: IIssuesProcessorOptions = {
     ...DefaultProcessorOptions,
-    daysBeforeStale: 10,
     daysBeforeIssueStale: 2
   };
   const issueDate = new Date();
@@ -1849,7 +1846,6 @@ test('processing an issue opened since 2 days and with the option "daysBeforeIss
   expect.assertions(2);
   const opts: IIssuesProcessorOptions = {
     ...DefaultProcessorOptions,
-    daysBeforeStale: 10,
     daysBeforeIssueStale: 1
   };
   const issueDate = new Date();
@@ -1875,7 +1871,7 @@ test('processing a pull request opened since 2 days and with the option "daysBef
   expect.assertions(2);
   const opts: IIssuesProcessorOptions = {
     ...DefaultProcessorOptions,
-    daysBeforeStale: 10,
+    daysBeforeIssueStale: 10,
     daysBeforePrStale: 3
   };
   const issueDate = new Date();
@@ -1908,7 +1904,7 @@ test('processing a pull request opened since 2 days and with the option "daysBef
   expect.assertions(2);
   const opts: IIssuesProcessorOptions = {
     ...DefaultProcessorOptions,
-    daysBeforeStale: 10,
+    daysBeforeIssueStale: 10,
     daysBeforePrStale: 2
   };
   const issueDate = new Date();
@@ -1941,7 +1937,7 @@ test('processing a pull request opened since 2 days and with the option "daysBef
   expect.assertions(2);
   const opts: IIssuesProcessorOptions = {
     ...DefaultProcessorOptions,
-    daysBeforeStale: 10,
+    daysBeforeIssueStale: 10,
     daysBeforePrStale: 1
   };
   const issueDate = new Date();
@@ -2080,7 +2076,7 @@ test('processing an issue stale since less than the daysBeforeStale with a stale
   const opts: IIssuesProcessorOptions = {
     ...DefaultProcessorOptions,
     staleIssueLabel: 'stale-label',
-    daysBeforeStale: 30,
+    daysBeforeIssueStale: 30,
     daysBeforeIssueClose: 7,
     closeIssueMessage: 'close message',
     removeStaleWhenUpdated: false
@@ -2121,7 +2117,7 @@ test('processing an issue stale since less than the daysBeforeStale without a st
   const opts: IIssuesProcessorOptions = {
     ...DefaultProcessorOptions,
     staleIssueLabel: 'stale-label',
-    daysBeforeStale: 30,
+    daysBeforeIssueStale: 30,
     daysBeforeIssueClose: 7,
     closeIssueMessage: 'close message',
     removeStaleWhenUpdated: false
@@ -2161,7 +2157,7 @@ test('processing a pull request to be stale with the "stalePrMessage" option set
   const opts: IIssuesProcessorOptions = {
     ...DefaultProcessorOptions,
     stalePrMessage: 'This PR is stale',
-    daysBeforeStale: 10,
+    daysBeforeIssueStale: 10,
     daysBeforePrStale: 1
   };
   const issueDate = new Date();
@@ -2196,7 +2192,7 @@ test('processing a pull request to be stale with the "stalePrMessage" option set
   const opts: IIssuesProcessorOptions = {
     ...DefaultProcessorOptions,
     stalePrMessage: '',
-    daysBeforeStale: 10,
+    daysBeforeIssueStale: 10,
     daysBeforePrStale: 1
   };
   const issueDate = new Date();

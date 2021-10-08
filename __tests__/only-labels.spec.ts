@@ -455,7 +455,8 @@ describe('only-pr-labels option', (): void => {
 class IssuesProcessorBuilder {
   private _options: IIssuesProcessorOptions = {
     ...DefaultProcessorOptions,
-    daysBeforeStale: 0
+    daysBeforeIssueStale: 0,
+    daysBeforePrStale: 0
   };
   private _issues: Issue[] = [];
 

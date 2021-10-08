@@ -21,7 +21,6 @@ describe('Issue', (): void => {
       daysBeforeIssueStale: 0,
       daysBeforePrClose: 0,
       daysBeforePrStale: 0,
-      daysBeforeStale: 0,
       debugOnly: false,
       deleteBranch: false,
       exemptIssueLabels: '',

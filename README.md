@@ -31,9 +31,8 @@ Every argument is optional.
 | Input                                                               | Description                                                             | Default               |
 | ------------------------------------------------------------------- | ----------------------------------------------------------------------- | --------------------- |
 | [repo-token](#repo-token)                                           | PAT for GitHub API authentication                                       | `${{ github.token }}` |
-| [days-before-stale](#days-before-stale)                             | Idle number of days before marking issues/PRs stale                     | `60`                  |
-| [days-before-issue-stale](#days-before-issue-stale)                 | Override [days-before-stale](#days-before-stale) for issues only        |                       |
-| [days-before-pr-stale](#days-before-pr-stale)                       | Override [days-before-stale](#days-before-stale) for PRs only           |                       |
+| [days-before-issue-stale](#days-before-issue-stale)                 | Idle number of days before marking issues stale                         | `60`                  |
+| [days-before-pr-stale](#days-before-pr-stale)                       | Idle number of days before marking PRs stale                            | `60`                  |
 | [days-before-issue-close](#days-before-issue-close)                 | Idle number of days before closing stale issues                         | `7`                   |
 | [days-before-pr-close](#days-before-pr-close)                       | Idle number of days before closing stale PRs                            | `7`                   |
 | [stale-issue-message](#stale-issue-message)                         | Comment on the staled issues                                            |                       |
@@ -89,59 +88,61 @@ Under the hood, it uses the [@actions/github](https://www.npmjs.com/package/@act
 
 Default value: `${{ github.token }}`
 
-#### days-before-stale
+#### days-before-issue-stale
 
-The idle number of days before marking the issues or the pull requests as stale (by adding a label).  
-The issues or the pull requests will be marked as stale if the last update (based on [GitHub issue](https://docs.github.com/en/rest/reference/issues) field `updated_at`) is older than the idle number of days.  
-It means that any updates made, or any comments added to the issues or to the pull requests will restart the counter of days before marking as stale.  
-However, if you wish to ignore this behaviour so that the creation date (based on [GitHub issue](https://docs.github.com/en/rest/reference/issues) field `created_at`) only matters, you can disable the [ignore-issue-updates](#ignore-issue-updates) and [ignore-pr-updates](#ignore-pr-updates) options.
+The idle number of days before marking the issues as stale (by adding a label).  
+The issues will be marked as stale if the last update (based on [GitHub issue](https://docs.github.com/en/rest/reference/issues) field `updated_at`) is older than the idle number of days.  
+It means that any updates made, or any comments added to the issues will restart the counter of days before marking as stale.  
+However, if you wish to ignore this behaviour so that the creation date (based on [GitHub issue](https://docs.github.com/en/rest/reference/issues) field `created_at`) only matters, you can disable the [ignore-issue-updates](#ignore-issue-updates) option.
 
-If set to a negative number like `-1`, no issues or pull requests will be marked as stale automatically.  
+If set to a negative number like `-1`, no issues will be marked as stale automatically.  
 In that case, you can still add the stale label manually to mark as stale.
 
-The label used to stale is defined by these two options:
+The label used to stale is defined by this option: [stale-pr-label](#stale-pr-label)
 
-- [stale-issue-label](#stale-issue-label)
-- [stale-pr-label](#stale-pr-label)
+A comment can also be added to notify about the stale and is defined by this option: [stale-pr-message](#stale-pr-message)
 
-A comment can also be added to notify about the stale and is defined by these two options:
-
-- [stale-issue-message](#stale-issue-message)
-- [stale-pr-message](#stale-pr-message)
-
-You can fine tune which issues or pull requests should be marked as stale based on the milestones, the assignees, the creation date and the missing/present labels from these options:
+You can fine tune which issues should be marked as stale based on the milestones, the assignees, the creation date and the missing/present labels from these options:
 
 - [exempt-issue-labels](#exempt-issue-labels)
-- [exempt-pr-labels](#exempt-pr-labels)
 - [only-issue-labels](#only-issue-labels)
-- [only-pr-labels](#only-pr-labels)
 - [any-of-issue-labels](#any-of-issue-labels)
-- [any-of-pr-labels](#any-of-pr-labels)
 - [start-date](#start-date)
 - [exempt-issue-milestones](#exempt-issue-milestones)
-- [exempt-pr-milestones](#exempt-pr-milestones)
 - [exempt-all-issue-milestones](#exempt-all-issue-milestones)
-- [exempt-all-pr-milestones](#exempt-all-pr-milestones)
 - [exempt-issue-assignees](#exempt-issue-assignees)
-- [exempt-pr-assignees](#exempt-pr-assignees)
 - [exempt-all-issue-assignees](#exempt-all-issue-assignees)
-- [exempt-all-pr-assignees](#exempt-all-pr-assignees)
 - [ignore-issue-updates](#ignore-issue-updates)
-- [ignore-pr-updates](#ignore-pr-updates)
 
 Default value: `60`
 
-#### days-before-issue-stale
-
-Useful to override [days-before-stale](#days-before-stale) but only for the idle number of days before marking the issues as stale.
-
-Default value: unset
-
 #### days-before-pr-stale
 
-Useful to override [days-before-stale](#days-before-stale) but only for the idle number of days before marking the pull requests as stale.
+The idle number of days before marking the pull requests as stale (by adding a label).  
+The pull requests will be marked as stale if the last update (based on [GitHub issue](https://docs.github.com/en/rest/reference/issues) field `updated_at`) is older than the idle number of days.  
+It means that any updates made, or any comments added to the pull requests will restart the counter of days before marking as stale.  
+However, if you wish to ignore this behaviour so that the creation date (based on [GitHub issue](https://docs.github.com/en/rest/reference/issues) field `created_at`) only matters, you can disable the [ignore-pr-updates](#ignore-pr-updates) option.
 
-Default value: unset
+If set to a negative number like `-1`, no pull requests will be marked as stale automatically.  
+In that case, you can still add the stale label manually to mark as stale.
+
+The label used to stale is defined by this option: [stale-pr-label](#stale-pr-label)
+
+A comment can also be added to notify about the stale and is defined by this option: [stale-pr-message](#stale-pr-message)
+
+You can fine tune which pull requests should be marked as stale based on the milestones, the assignees, the creation date and the missing/present labels from these options:
+
+- [exempt-pr-labels](#exempt-pr-labels)
+- [only-pr-labels](#only-pr-labels)
+- [any-of-pr-labels](#any-of-pr-labels)
+- [start-date](#start-date)
+- [exempt-pr-milestones](#exempt-pr-milestones)
+- [exempt-all-pr-milestones](#exempt-all-pr-milestones)
+- [exempt-pr-assignees](#exempt-pr-assignees)
+- [exempt-all-pr-assignees](#exempt-all-pr-assignees)
+- [ignore-pr-updates](#ignore-pr-updates)
+
+Default value: `60`
 
 #### days-before-issue-close
 

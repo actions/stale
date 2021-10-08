@@ -4,7 +4,6 @@ export enum Option {
   StalePrMessage = 'stale-pr-message',
   CloseIssueMessage = 'close-issue-message',
   ClosePrMessage = 'close-pr-message',
-  DaysBeforeStale = 'days-before-stale',
   DaysBeforeIssueStale = 'days-before-issue-stale',
   DaysBeforePrStale = 'days-before-pr-stale',
   DaysBeforeIssueClose = 'days-before-issue-close',

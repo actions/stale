@@ -28,11 +28,12 @@ function _getAndValidateArgs(): IIssuesProcessorOptions {
     stalePrMessage: core.getInput('stale-pr-message'),
     closeIssueMessage: core.getInput('close-issue-message'),
     closePrMessage: core.getInput('close-pr-message'),
-    daysBeforeStale: parseInt(
-      core.getInput('days-before-stale', {required: true})
+    daysBeforeIssueStale: parseInt(
+      core.getInput('days-before-issue-stale', {required: true})
     ),
-    daysBeforeIssueStale: parseInt(core.getInput('days-before-issue-stale')),
-    daysBeforePrStale: parseInt(core.getInput('days-before-pr-stale')),
+    daysBeforePrStale: parseInt(
+      core.getInput('days-before-pr-stale', {required: true})
+    ),
     daysBeforeIssueClose: parseInt(
       core.getInput('days-before-issue-close', {required: true})
     ),
@@ -87,7 +88,8 @@ function _getAndValidateArgs(): IIssuesProcessorOptions {
   };
 
   for (const numberInput of [
-    'days-before-stale',
+    'days-before-issue-stale',
+    'days-before-pr-stale',
     'days-before-issue-close',
     'days-before-pr-close',
     'operations-per-run'

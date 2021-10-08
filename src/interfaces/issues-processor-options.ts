@@ -6,9 +6,8 @@ export interface IIssuesProcessorOptions {
   stalePrMessage: string;
   closeIssueMessage: string;
   closePrMessage: string;
-  daysBeforeStale: number;
-  daysBeforeIssueStale: number; // Could be NaN
-  daysBeforePrStale: number; // Could be NaN
+  daysBeforeIssueStale: number;
+  daysBeforePrStale: number;
   daysBeforeIssueClose: number;
   daysBeforePrClose: number;
   staleIssueLabel: string;

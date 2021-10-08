@@ -409,8 +409,8 @@ class IssuesProcessor {
                 ? this.options.stalePrMessage.length === 0
                 : this.options.staleIssueMessage.length === 0;
             const daysBeforeStale = issue.isPullRequest
-                ? this._getDaysBeforePrStale()
-                : this._getDaysBeforeIssueStale();
+                ? this.options.daysBeforePrStale
+                : this.options.daysBeforeIssueStale;
             if (issue.state === 'closed') {
                 issueLogger.info(`Skipping this $$type because it is closed`);
                 IssuesProcessor._endIssueProcessing(issue);
@@ -542,13 +542,13 @@ class IssuesProcessor {
                         issueLogger.info(`This $$type should be stale based on the last update date the ${get_humanized_date_1.getHumanizedDate(new Date(issue.updated_at))} (${logger_service_1.LoggerService.cyan(issue.updated_at)})`);
                     }
                     if (shouldMarkAsStale) {
-                        issueLogger.info(`This $$type should be marked as stale based on the option ${issueLogger.createOptionLink(this._getDaysBeforeStaleUsedOptionName(issue))} (${logger_service_1.LoggerService.cyan(daysBeforeStale)})`);
+                        issueLogger.info(`This $$type should be marked as stale based on the option ${issueLogger.createOptionLink(IssuesProcessor._getDaysBeforeStaleUsedOptionName(issue))} (${logger_service_1.LoggerService.cyan(daysBeforeStale)})`);
                         yield this._markStale(issue, staleMessage, staleLabel, skipMessage);
                         issue.isStale = true; // This issue is now considered stale
                         issueLogger.info(`This $$type is now stale`);
                     }
                     else {
-                        issueLogger.info(`This $$type should not be marked as stale based on the option ${issueLogger.createOptionLink(this._getDaysBeforeStaleUsedOptionName(issue))} (${logger_service_1.LoggerService.cyan(daysBeforeStale)})`);
+                        issueLogger.info(`This $$type should not be marked as stale based on the option ${issueLogger.createOptionLink(IssuesProcessor._getDaysBeforeStaleUsedOptionName(issue))} (${logger_service_1.LoggerService.cyan(daysBeforeStale)})`);
                     }
                 }
                 else {
@@ -890,16 +890,6 @@ class IssuesProcessor {
             }
         });
     }
-    _getDaysBeforeIssueStale() {
-        return isNaN(this.options.daysBeforeIssueStale)
-            ? this.options.daysBeforeStale
-            : this.options.daysBeforeIssueStale;
-    }
-    _getDaysBeforePrStale() {
-        return isNaN(this.options.daysBeforePrStale)
-            ? this.options.daysBeforeStale
-            : this.options.daysBeforePrStale;
-    }
     _getOnlyLabels(issue) {
         if (issue.isPullRequest) {
             return this.options.onlyPrLabels;
@@ -992,24 +982,14 @@ class IssuesProcessor {
             }
         });
     }
+    static _getDaysBeforeStaleUsedOptionName(issue) {
+        return issue.isPullRequest
+            ? option_1.Option.DaysBeforePrStale
+            : option_1.Option.DaysBeforeIssueStale;
+    }
     _consumeIssueOperation(issue) {
         this.operations.consumeOperation();
         issue.operations.consumeOperation();
-    }
-    _getDaysBeforeStaleUsedOptionName(issue) {
-        return issue.isPullRequest
-            ? this._getDaysBeforePrStaleUsedOptionName()
-            : this._getDaysBeforeIssueStaleUsedOptionName();
-    }
-    _getDaysBeforeIssueStaleUsedOptionName() {
-        return isNaN(this.options.daysBeforeIssueStale)
-            ? option_1.Option.DaysBeforeStale
-            : option_1.Option.DaysBeforeIssueStale;
-    }
-    _getDaysBeforePrStaleUsedOptionName() {
-        return isNaN(this.options.daysBeforePrStale)
-            ? option_1.Option.DaysBeforeStale
-            : option_1.Option.DaysBeforePrStale;
     }
     _getRemoveStaleWhenUpdatedUsedOptionName(issue) {
         if (issue.isPullRequest) {
@@ -1735,7 +1715,6 @@ var Option;
     Option["StalePrMessage"] = "stale-pr-message";
     Option["CloseIssueMessage"] = "close-issue-message";
     Option["ClosePrMessage"] = "close-pr-message";
-    Option["DaysBeforeStale"] = "days-before-stale";
     Option["DaysBeforeIssueStale"] = "days-before-issue-stale";
     Option["DaysBeforePrStale"] = "days-before-pr-stale";
     Option["DaysBeforeIssueClose"] = "days-before-issue-close";
@@ -2036,9 +2015,8 @@ function _getAndValidateArgs() {
         stalePrMessage: core.getInput('stale-pr-message'),
         closeIssueMessage: core.getInput('close-issue-message'),
         closePrMessage: core.getInput('close-pr-message'),
-        daysBeforeStale: parseInt(core.getInput('days-before-stale', { required: true })),
-        daysBeforeIssueStale: parseInt(core.getInput('days-before-issue-stale')),
-        daysBeforePrStale: parseInt(core.getInput('days-before-pr-stale')),
+        daysBeforeIssueStale: parseInt(core.getInput('days-before-issue-stale', { required: true })),
+        daysBeforePrStale: parseInt(core.getInput('days-before-pr-stale', { required: true })),
         daysBeforeIssueClose: parseInt(core.getInput('days-before-issue-close', { required: true })),
         daysBeforePrClose: parseInt(core.getInput('days-before-pr-close', { required: true })),
         staleIssueLabel: core.getInput('stale-issue-label', { required: true }),
@@ -2077,7 +2055,8 @@ function _getAndValidateArgs() {
         exemptDraftPr: core.getInput('exempt-draft-pr') === 'true'
     };
     for (const numberInput of [
-        'days-before-stale',
+        'days-before-issue-stale',
+        'days-before-pr-stale',
         'days-before-issue-close',
         'days-before-pr-close',
         'operations-per-run'

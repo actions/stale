@@ -3,29 +3,29 @@ import {context, getOctokit} from '@actions/github';
 import {GitHub} from '@actions/github/lib/utils';
 import {GetResponseTypeFromEndpointMethod} from '@octokit/types';
 import {Option} from '../enums/option';
+import {cleanLabel} from '../functions/clean-label';
 import {getHumanizedDate} from '../functions/dates/get-humanized-date';
 import {isDateMoreRecentThan} from '../functions/dates/is-date-more-recent-than';
 import {isValidDate} from '../functions/dates/is-valid-date';
 import {isBoolean} from '../functions/is-boolean';
 import {isLabeled} from '../functions/is-labeled';
-import {cleanLabel} from '../functions/clean-label';
 import {shouldMarkWhenStale} from '../functions/should-mark-when-stale';
 import {wordsToList} from '../functions/words-to-list';
 import {IComment} from '../interfaces/comment';
+import {IIssue} from '../interfaces/issue';
 import {IIssueEvent} from '../interfaces/issue-event';
 import {IIssuesProcessorOptions} from '../interfaces/issues-processor-options';
 import {IPullRequest} from '../interfaces/pull-request';
+import {LoggerService} from '../services/logger.service';
 import {Assignees} from './assignees';
-import {IgnoreUpdates} from './ignore-updates';
 import {ExemptDraftPullRequest} from './exempt-draft-pull-request';
+import {IgnoreUpdates} from './ignore-updates';
 import {Issue} from './issue';
 import {IssueLogger} from './loggers/issue-logger';
 import {Logger} from './loggers/logger';
 import {Milestones} from './milestones';
 import {StaleOperations} from './stale-operations';
 import {Statistics} from './statistics';
-import {LoggerService} from '../services/logger.service';
-import {IIssue} from '../interfaces/issue';
 
 /***
  * Handle processing of issues for staleness/closure.
@@ -227,7 +227,7 @@ export class IssuesProcessor {
     if (onlyLabels.length > 0) {
       issueLogger.info(
         `The option ${issueLogger.createOptionLink(
-          Option.OnlyLabels
+          issue.isPullRequest ? Option.OnlyPrLabels : Option.OnlyIssueLabels
         )} was specified to only process issues and pull requests with all those labels (${LoggerService.cyan(
           onlyLabels.length
         )})`
@@ -260,7 +260,7 @@ export class IssuesProcessor {
     } else {
       issueLogger.info(
         `The option ${issueLogger.createOptionLink(
-          Option.OnlyLabels
+          issue.isPullRequest ? Option.OnlyPrLabels : Option.OnlyIssueLabels
         )} was not specified`
       );
       issueLogger.info(
@@ -983,16 +983,10 @@ export class IssuesProcessor {
 
   private _getOnlyLabels(issue: Issue): string {
     if (issue.isPullRequest) {
-      if (this.options.onlyPrLabels !== '') {
-        return this.options.onlyPrLabels;
-      }
-    } else {
-      if (this.options.onlyIssueLabels !== '') {
-        return this.options.onlyIssueLabels;
-      }
+      return this.options.onlyPrLabels;
     }
 
-    return this.options.onlyLabels;
+    return this.options.onlyIssueLabels;
   }
 
   private _getAnyOfLabels(issue: Issue): string {

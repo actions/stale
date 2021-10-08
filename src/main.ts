@@ -44,7 +44,6 @@ function _getAndValidateArgs(): IIssuesProcessorOptions {
     stalePrLabel: core.getInput('stale-pr-label', {required: true}),
     closePrLabel: core.getInput('close-pr-label'),
     exemptPrLabels: core.getInput('exempt-pr-labels'),
-    onlyLabels: core.getInput('only-labels'),
     onlyIssueLabels: core.getInput('only-issue-labels'),
     onlyPrLabels: core.getInput('only-pr-labels'),
     anyOfIssueLabels: core.getInput('any-of-issue-labels'),

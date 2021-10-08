@@ -27,7 +27,6 @@ describe('Issue', (): void => {
       deleteBranch: false,
       exemptIssueLabels: '',
       exemptPrLabels: '',
-      onlyLabels: '',
       onlyIssueLabels: '',
       onlyPrLabels: '',
       anyOfIssueLabels: '',

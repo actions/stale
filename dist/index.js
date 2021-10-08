@@ -293,24 +293,24 @@ exports.IssuesProcessor = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const github_1 = __nccwpck_require__(5438);
 const option_1 = __nccwpck_require__(5931);
+const clean_label_1 = __nccwpck_require__(7752);
 const get_humanized_date_1 = __nccwpck_require__(965);
 const is_date_more_recent_than_1 = __nccwpck_require__(1473);
 const is_valid_date_1 = __nccwpck_require__(891);
 const is_boolean_1 = __nccwpck_require__(8236);
 const is_labeled_1 = __nccwpck_require__(6792);
-const clean_label_1 = __nccwpck_require__(7752);
 const should_mark_when_stale_1 = __nccwpck_require__(2461);
 const words_to_list_1 = __nccwpck_require__(1883);
+const logger_service_1 = __nccwpck_require__(1973);
 const assignees_1 = __nccwpck_require__(7236);
-const ignore_updates_1 = __nccwpck_require__(2935);
 const exempt_draft_pull_request_1 = __nccwpck_require__(854);
+const ignore_updates_1 = __nccwpck_require__(2935);
 const issue_1 = __nccwpck_require__(4783);
 const issue_logger_1 = __nccwpck_require__(2984);
 const logger_1 = __nccwpck_require__(6212);
 const milestones_1 = __nccwpck_require__(4601);
 const stale_operations_1 = __nccwpck_require__(5080);
 const statistics_1 = __nccwpck_require__(3334);
-const logger_service_1 = __nccwpck_require__(1973);
 /***
  * Handle processing of issues for staleness/closure.
  */
@@ -423,7 +423,7 @@ class IssuesProcessor {
             }
             const onlyLabels = words_to_list_1.wordsToList(this._getOnlyLabels(issue));
             if (onlyLabels.length > 0) {
-                issueLogger.info(`The option ${issueLogger.createOptionLink(option_1.Option.OnlyLabels)} was specified to only process issues and pull requests with all those labels (${logger_service_1.LoggerService.cyan(onlyLabels.length)})`);
+                issueLogger.info(`The option ${issueLogger.createOptionLink(issue.isPullRequest ? option_1.Option.OnlyPrLabels : option_1.Option.OnlyIssueLabels)} was specified to only process issues and pull requests with all those labels (${logger_service_1.LoggerService.cyan(onlyLabels.length)})`);
                 const hasAllWhitelistedLabels = onlyLabels.every((label) => {
                     return is_labeled_1.isLabeled(issue, label);
                 });
@@ -438,7 +438,7 @@ class IssuesProcessor {
                 }
             }
             else {
-                issueLogger.info(`The option ${issueLogger.createOptionLink(option_1.Option.OnlyLabels)} was not specified`);
+                issueLogger.info(`The option ${issueLogger.createOptionLink(issue.isPullRequest ? option_1.Option.OnlyPrLabels : option_1.Option.OnlyIssueLabels)} was not specified`);
                 issueLogger.info(logger_service_1.LoggerService.white('└──'), `Continuing the process for this $$type`);
             }
             issueLogger.info(`Days before $$type stale: ${logger_service_1.LoggerService.cyan(daysBeforeStale)}`);
@@ -912,16 +912,9 @@ class IssuesProcessor {
     }
     _getOnlyLabels(issue) {
         if (issue.isPullRequest) {
-            if (this.options.onlyPrLabels !== '') {
-                return this.options.onlyPrLabels;
-            }
+            return this.options.onlyPrLabels;
         }
-        else {
-            if (this.options.onlyIssueLabels !== '') {
-                return this.options.onlyIssueLabels;
-            }
-        }
-        return this.options.onlyLabels;
+        return this.options.onlyIssueLabels;
     }
     _getAnyOfLabels(issue) {
         if (issue.isPullRequest) {
@@ -1764,7 +1757,6 @@ var Option;
     Option["StalePrLabel"] = "stale-pr-label";
     Option["ClosePrLabel"] = "close-pr-label";
     Option["ExemptPrLabels"] = "exempt-pr-labels";
-    Option["OnlyLabels"] = "only-labels";
     Option["OnlyIssueLabels"] = "only-issue-labels";
     Option["OnlyPrLabels"] = "only-pr-labels";
     Option["AnyOfIssueLabels"] = "any-of-issue-labels";
@@ -2067,7 +2059,6 @@ function _getAndValidateArgs() {
         stalePrLabel: core.getInput('stale-pr-label', { required: true }),
         closePrLabel: core.getInput('close-pr-label'),
         exemptPrLabels: core.getInput('exempt-pr-labels'),
-        onlyLabels: core.getInput('only-labels'),
         onlyIssueLabels: core.getInput('only-issue-labels'),
         onlyPrLabels: core.getInput('only-pr-labels'),
         anyOfIssueLabels: core.getInput('any-of-issue-labels'),

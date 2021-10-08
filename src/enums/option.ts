@@ -16,7 +16,6 @@ export enum Option {
   StalePrLabel = 'stale-pr-label',
   ClosePrLabel = 'close-pr-label',
   ExemptPrLabels = 'exempt-pr-labels',
-  OnlyLabels = 'only-labels',
   OnlyIssueLabels = 'only-issue-labels',
   OnlyPrLabels = 'only-pr-labels',
   AnyOfIssueLabels = 'any-of-issue-labels',

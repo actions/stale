@@ -18,7 +18,6 @@ export interface IIssuesProcessorOptions {
   stalePrLabel: string;
   closePrLabel: string;
   exemptPrLabels: string;
-  onlyLabels: string;
   onlyIssueLabels: string;
   onlyPrLabels: string;
   anyOfIssueLabels: string;

@@ -53,7 +53,7 @@
     "@vercel/ncc": "^0.28.6",
     "ansi-styles": "5.2.0",
     "eslint": "^7.28.0",
-    "eslint-plugin-github": "^4.1.2",
+    "eslint-plugin-github": "^4.3.2",
     "eslint-plugin-jest": "^24.4.2",
     "jest": "^27.2.5",
     "jest-circus": "^27.2.0",

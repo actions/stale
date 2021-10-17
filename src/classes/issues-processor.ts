@@ -3,7 +3,6 @@ import {context, getOctokit} from '@actions/github';
 import {GitHub} from '@actions/github/lib/utils';
 import {GetResponseTypeFromEndpointMethod} from '@octokit/types';
 import {Option} from '../enums/option';
-import {getHumanizedDate} from '../functions/dates/get-humanized-date';
 import {isDateMoreRecentThan} from '../functions/dates/is-date-more-recent-than';
 import {isValidDate} from '../functions/dates/is-valid-date';
 import {isBoolean} from '../functions/is-boolean';
@@ -283,9 +282,9 @@ export class IssuesProcessor {
       const createdAt: Date = new Date(issue.created_at);
 
       issueLogger.info(
-        `A start date was specified for the ${getHumanizedDate(
-          startDate
-        )} (${LoggerService.cyan(this.options.startDate)})`
+        `A start date was specified for the ${LoggerService.cyan(
+          this.options.startDate
+        )}`
       );
 
       // Expecting that GitHub will always set a creation date on the issues and PRs
@@ -298,9 +297,7 @@ export class IssuesProcessor {
       }
 
       issueLogger.info(
-        `$$type created the ${getHumanizedDate(
-          createdAt
-        )} (${LoggerService.cyan(issue.created_at)})`
+        `$$type created the ${LoggerService.cyan(issue.created_at)}`
       );
 
       if (!isDateMoreRecentThan(createdAt, startDate)) {
@@ -446,15 +443,15 @@ export class IssuesProcessor {
       if (shouldBeStale) {
         if (shouldIgnoreUpdates) {
           issueLogger.info(
-            `This $$type should be stale based on the creation date the ${getHumanizedDate(
-              new Date(issue.created_at)
-            )} (${LoggerService.cyan(issue.created_at)})`
+            `This $$type should be stale based on the creation date the ${LoggerService.cyan(
+              issue.created_at
+            )}`
           );
         } else {
           issueLogger.info(
-            `This $$type should be stale based on the last update date the ${getHumanizedDate(
-              new Date(issue.updated_at)
-            )} (${LoggerService.cyan(issue.updated_at)})`
+            `This $$type should be stale based on the last update date the ${LoggerService.cyan(
+              issue.updated_at
+            )}`
           );
         }
 
@@ -477,15 +474,15 @@ export class IssuesProcessor {
       } else {
         if (shouldIgnoreUpdates) {
           issueLogger.info(
-            `This $$type should not be stale based on the creation date the ${getHumanizedDate(
-              new Date(issue.created_at)
-            )} (${LoggerService.cyan(issue.created_at)})`
+            `This $$type should not be stale based on the creation date the ${LoggerService.cyan(
+              issue.created_at
+            )}`
           );
         } else {
           issueLogger.info(
-            `This $$type should not be stale based on the last update date the ${getHumanizedDate(
-              new Date(issue.updated_at)
-            )} (${LoggerService.cyan(issue.updated_at)})`
+            `This $$type should not be stale based on the last update date the ${LoggerService.cyan(
+              issue.updated_at
+            )}`
           );
         }
       }
@@ -624,10 +621,28 @@ export class IssuesProcessor {
     closeLabel?: string
   ) {
     const issueLogger: IssueLogger = new IssueLogger(issue);
-    const markedStaleOn: string =
-      (await this.getLabelCreationDate(issue, staleLabel)) || issue.updated_at;
+    issueLogger.info('Defining the stale date...');
+    const labelCreationDate: string | undefined =
+      await this.getLabelCreationDate(issue, staleLabel);
+    let markedStaleOn: string;
+
+    if (labelCreationDate === undefined) {
+      markedStaleOn = issue.updated_at;
+      issueLogger.info(
+        LoggerService.white('├──'),
+        'Could not find the stale label creation date; using instead the "updated_at" field'
+      );
+    } else {
+      markedStaleOn = labelCreationDate;
+      issueLogger.info(
+        LoggerService.white('├──'),
+        'The stale label creation date was successfully fetched'
+      );
+    }
+
     issueLogger.info(
-      `$$type marked stale on: ${LoggerService.cyan(markedStaleOn)}`
+      LoggerService.white('└──'),
+      `This $$type was marked as stale on: ${LoggerService.cyan(markedStaleOn)}`
     );
 
     const issueHasComments: boolean = await this._hasCommentsSince(
@@ -646,13 +661,15 @@ export class IssuesProcessor {
     issueLogger.info(
       `Days before $$type close: ${LoggerService.cyan(daysBeforeClose)}`
     );
+    issueLogger.info('Checking if this $$type has been updated...');
 
     const issueHasUpdate: boolean = IssuesProcessor._updatedSince(
       issue.updated_at,
       daysBeforeClose
     );
     issueLogger.info(
-      `$$type has been updated: ${LoggerService.cyan(issueHasUpdate)}`
+      LoggerService.white('└──'),
+      `This $$type has been updated on: ${LoggerService.cyan(issueHasUpdate)}`
     );
 
     const shouldRemoveStaleWhenUpdated: boolean =
@@ -690,6 +707,16 @@ export class IssuesProcessor {
 
     // Now start closing logic
     if (daysBeforeClose < 0) {
+      issueLogger.info(
+        `The option ${issueLogger.createOptionLink(
+          Option.DaysBeforeClose
+        )} is lower than 0 (${LoggerService.cyan(daysBeforeClose)})`
+      );
+      issueLogger.info(
+        LoggerService.white('└──'),
+        `Skipping the closing process`
+      );
+
       return; // Nothing to do because we aren't closing stale issues
     }
 
@@ -874,11 +901,7 @@ export class IssuesProcessor {
   private async _deleteBranch(issue: Issue): Promise<void> {
     const issueLogger: IssueLogger = new IssueLogger(issue);
 
-    issueLogger.info(`Delete
-    branch from closed $
-    $type
-    -
-    ${issue.title}`);
+    issueLogger.info(`Delete branch from closed $$type - ${issue.title}`);
 
     const pullRequest: IPullRequest | undefined | void =
       await this.getPullRequest(issue);

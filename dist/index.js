@@ -337,7 +337,6 @@ exports.IssuesProcessor = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const github_1 = __nccwpck_require__(5438);
 const option_1 = __nccwpck_require__(5931);
-const get_humanized_date_1 = __nccwpck_require__(965);
 const is_date_more_recent_than_1 = __nccwpck_require__(1473);
 const is_valid_date_1 = __nccwpck_require__(891);
 const is_boolean_1 = __nccwpck_require__(8236);
@@ -492,14 +491,14 @@ class IssuesProcessor {
             if (this.options.startDate) {
                 const startDate = new Date(this.options.startDate);
                 const createdAt = new Date(issue.created_at);
-                issueLogger.info(`A start date was specified for the ${get_humanized_date_1.getHumanizedDate(startDate)} (${logger_service_1.LoggerService.cyan(this.options.startDate)})`);
+                issueLogger.info(`A start date was specified for the ${logger_service_1.LoggerService.cyan(this.options.startDate)}`);
                 // Expecting that GitHub will always set a creation date on the issues and PRs
                 // But you never know!
                 if (!is_valid_date_1.isValidDate(createdAt)) {
                     IssuesProcessor._endIssueProcessing(issue);
                     core.setFailed(new Error(`Invalid issue field: "created_at". Expected a valid date`));
                 }
-                issueLogger.info(`$$type created the ${get_humanized_date_1.getHumanizedDate(createdAt)} (${logger_service_1.LoggerService.cyan(issue.created_at)})`);
+                issueLogger.info(`$$type created the ${logger_service_1.LoggerService.cyan(issue.created_at)}`);
                 if (!is_date_more_recent_than_1.isDateMoreRecentThan(createdAt, startDate)) {
                     issueLogger.info(`Skipping this $$type because it was created before the specified start date`);
                     IssuesProcessor._endIssueProcessing(issue);
@@ -580,10 +579,10 @@ class IssuesProcessor {
                 }
                 if (shouldBeStale) {
                     if (shouldIgnoreUpdates) {
-                        issueLogger.info(`This $$type should be stale based on the creation date the ${get_humanized_date_1.getHumanizedDate(new Date(issue.created_at))} (${logger_service_1.LoggerService.cyan(issue.created_at)})`);
+                        issueLogger.info(`This $$type should be stale based on the creation date the ${logger_service_1.LoggerService.cyan(issue.created_at)}`);
                     }
                     else {
-                        issueLogger.info(`This $$type should be stale based on the last update date the ${get_humanized_date_1.getHumanizedDate(new Date(issue.updated_at))} (${logger_service_1.LoggerService.cyan(issue.updated_at)})`);
+                        issueLogger.info(`This $$type should be stale based on the last update date the ${logger_service_1.LoggerService.cyan(issue.updated_at)}`);
                     }
                     if (shouldMarkAsStale) {
                         issueLogger.info(`This $$type should be marked as stale based on the option ${issueLogger.createOptionLink(this._getDaysBeforeStaleUsedOptionName(issue))} (${logger_service_1.LoggerService.cyan(daysBeforeStale)})`);
@@ -597,10 +596,10 @@ class IssuesProcessor {
                 }
                 else {
                     if (shouldIgnoreUpdates) {
-                        issueLogger.info(`This $$type should not be stale based on the creation date the ${get_humanized_date_1.getHumanizedDate(new Date(issue.created_at))} (${logger_service_1.LoggerService.cyan(issue.created_at)})`);
+                        issueLogger.info(`This $$type should not be stale based on the creation date the ${logger_service_1.LoggerService.cyan(issue.created_at)}`);
                     }
                     else {
-                        issueLogger.info(`This $$type should not be stale based on the last update date the ${get_humanized_date_1.getHumanizedDate(new Date(issue.updated_at))} (${logger_service_1.LoggerService.cyan(issue.updated_at)})`);
+                        issueLogger.info(`This $$type should not be stale based on the last update date the ${logger_service_1.LoggerService.cyan(issue.updated_at)}`);
                     }
                 }
             }
@@ -708,16 +707,27 @@ class IssuesProcessor {
     _processStaleIssue(issue, staleLabel, staleMessage, labelsToAddWhenUnstale, labelsToRemoveWhenUnstale, closeMessage, closeLabel) {
         return __awaiter(this, void 0, void 0, function* () {
             const issueLogger = new issue_logger_1.IssueLogger(issue);
-            const markedStaleOn = (yield this.getLabelCreationDate(issue, staleLabel)) || issue.updated_at;
-            issueLogger.info(`$$type marked stale on: ${logger_service_1.LoggerService.cyan(markedStaleOn)}`);
+            issueLogger.info('Defining the stale date...');
+            const labelCreationDate = yield this.getLabelCreationDate(issue, staleLabel);
+            let markedStaleOn;
+            if (labelCreationDate === undefined) {
+                markedStaleOn = issue.updated_at;
+                issueLogger.info(logger_service_1.LoggerService.white('├──'), 'Could not find the stale label creation date; using instead the "updated_at" field');
+            }
+            else {
+                markedStaleOn = labelCreationDate;
+                issueLogger.info(logger_service_1.LoggerService.white('├──'), 'The stale label creation date was successfully fetched');
+            }
+            issueLogger.info(logger_service_1.LoggerService.white('└──'), `This $$type was marked as stale on: ${logger_service_1.LoggerService.cyan(markedStaleOn)}`);
             const issueHasComments = yield this._hasCommentsSince(issue, markedStaleOn, staleMessage);
             issueLogger.info(`$$type has been commented on: ${logger_service_1.LoggerService.cyan(issueHasComments)}`);
             const daysBeforeClose = issue.isPullRequest
                 ? this._getDaysBeforePrClose()
                 : this._getDaysBeforeIssueClose();
             issueLogger.info(`Days before $$type close: ${logger_service_1.LoggerService.cyan(daysBeforeClose)}`);
+            issueLogger.info('Checking if this $$type has been updated...');
             const issueHasUpdate = IssuesProcessor._updatedSince(issue.updated_at, daysBeforeClose);
-            issueLogger.info(`$$type has been updated: ${logger_service_1.LoggerService.cyan(issueHasUpdate)}`);
+            issueLogger.info(logger_service_1.LoggerService.white('└──'), `This $$type has been updated on: ${logger_service_1.LoggerService.cyan(issueHasUpdate)}`);
             const shouldRemoveStaleWhenUpdated = this._shouldRemoveStaleWhenUpdated(issue);
             issueLogger.info(`The option ${issueLogger.createOptionLink(this._getRemoveStaleWhenUpdatedUsedOptionName(issue))} is: ${logger_service_1.LoggerService.cyan(shouldRemoveStaleWhenUpdated)}`);
             if (shouldRemoveStaleWhenUpdated) {
@@ -738,6 +748,8 @@ class IssuesProcessor {
             }
             // Now start closing logic
             if (daysBeforeClose < 0) {
+                issueLogger.info(`The option ${issueLogger.createOptionLink(option_1.Option.DaysBeforeClose)} is lower than 0 (${logger_service_1.LoggerService.cyan(daysBeforeClose)})`);
+                issueLogger.info(logger_service_1.LoggerService.white('└──'), `Skipping the closing process`);
                 return; // Nothing to do because we aren't closing stale issues
             }
             if (!issueHasComments && !issueHasUpdate) {
@@ -881,11 +893,7 @@ class IssuesProcessor {
         var _a;
         return __awaiter(this, void 0, void 0, function* () {
             const issueLogger = new issue_logger_1.IssueLogger(issue);
-            issueLogger.info(`Delete
-    branch from closed $
-    $type
-    -
-    ${issue.title}`);
+            issueLogger.info(`Delete branch from closed $$type - ${issue.title}`);
             const pullRequest = yield this.getPullRequest(issue);
             if (!pullRequest) {
                 issueLogger.info(`Not deleting this branch as no pull request was found for this $$type`);
@@ -1902,30 +1910,6 @@ function cleanLabel(label) {
     return lodash_deburr_1.default(label.toLowerCase());
 }
 exports.cleanLabel = cleanLabel;
-
-
-/***/ }),
-
-/***/ 965:
-/***/ ((__unused_webpack_module, exports) => {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getHumanizedDate = void 0;
-function getHumanizedDate(date) {
-    const year = date.getFullYear();
-    let month = `${date.getMonth() + 1}`;
-    let day = `${date.getDate()}`;
-    if (month.length < 2) {
-        month = `0${month}`;
-    }
-    if (day.length < 2) {
-        day = `0${day}`;
-    }
-    return [day, month, year].join('-');
-}
-exports.getHumanizedDate = getHumanizedDate;
 
 
 /***/ }),

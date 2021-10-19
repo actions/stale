@@ -6,49 +6,39 @@ export interface IIssuesProcessorOptions {
   stalePrMessage: string;
   closeIssueMessage: string;
   closePrMessage: string;
-  daysBeforeStale: number;
-  daysBeforeIssueStale: number; // Could be NaN
-  daysBeforePrStale: number; // Could be NaN
-  daysBeforeClose: number;
-  daysBeforeIssueClose: number; // Could be NaN
-  daysBeforePrClose: number; // Could be NaN
+  daysBeforeIssueStale: number;
+  daysBeforePrStale: number;
+  daysBeforeIssueClose: number;
+  daysBeforePrClose: number;
   staleIssueLabel: string;
   closeIssueLabel: string;
   exemptIssueLabels: string;
   stalePrLabel: string;
   closePrLabel: string;
   exemptPrLabels: string;
-  onlyLabels: string;
   onlyIssueLabels: string;
   onlyPrLabels: string;
-  anyOfLabels: string;
   anyOfIssueLabels: string;
   anyOfPrLabels: string;
   operationsPerRun: number;
-  removeStaleWhenUpdated: boolean;
-  removeIssueStaleWhenUpdated: boolean | undefined;
-  removePrStaleWhenUpdated: boolean | undefined;
+  removeIssueStaleWhenUpdated: boolean;
+  removePrStaleWhenUpdated: boolean;
   debugOnly: boolean;
   ascending: boolean;
   deleteBranch: boolean;
   startDate: IsoOrRfcDateString | undefined; // Should be ISO 8601 or RFC 2822
-  exemptMilestones: string;
   exemptIssueMilestones: string;
   exemptPrMilestones: string;
-  exemptAllMilestones: boolean;
-  exemptAllIssueMilestones: boolean | undefined;
-  exemptAllPrMilestones: boolean | undefined;
-  exemptAssignees: string;
+  exemptAllIssueMilestones: boolean;
+  exemptAllPrMilestones: boolean;
   exemptIssueAssignees: string;
   exemptPrAssignees: string;
-  exemptAllAssignees: boolean;
-  exemptAllIssueAssignees: boolean | undefined;
-  exemptAllPrAssignees: boolean | undefined;
+  exemptAllIssueAssignees: boolean;
+  exemptAllPrAssignees: boolean;
   enableStatistics: boolean;
   labelsToRemoveWhenUnstale: string;
   labelsToAddWhenUnstale: string;
-  ignoreUpdates: boolean;
-  ignoreIssueUpdates: boolean | undefined;
-  ignorePrUpdates: boolean | undefined;
+  ignoreIssueUpdates: boolean;
+  ignorePrUpdates: boolean;
   exemptDraftPr: boolean;
 }

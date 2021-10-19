@@ -13,14 +13,14 @@ let issuesProcessor: IssuesProcessorMock;
  * @description
  * Assuming there is a comment on the issue
  */
-describe('remove-stale-when-updated option', (): void => {
+describe('remove-issue-stale-when-updated option', (): void => {
   beforeEach((): void => {
     issuesProcessorBuilder = new IssuesProcessorBuilder();
   });
 
-  describe('when the option "remove-stale-when-updated" is disabled', (): void => {
+  describe('when the option "remove-issue-stale-when-updated" is disabled', (): void => {
     beforeEach((): void => {
-      issuesProcessorBuilder.keepStaleWhenUpdated();
+      issuesProcessorBuilder.keepIssueStaleWhenUpdated();
     });
 
     test('should not remove the stale label on the issue', async (): Promise<void> => {
@@ -32,19 +32,19 @@ describe('remove-stale-when-updated option', (): void => {
       expect(issuesProcessor.removedLabelIssues).toHaveLength(0);
     });
 
-    test('should not remove the stale label on the pull request', async (): Promise<void> => {
+    test('should remove the stale label on the pull request', async (): Promise<void> => {
       expect.assertions(1);
       issuesProcessor = issuesProcessorBuilder.stalePrs([{}]).build();
 
       await issuesProcessor.processIssues();
 
-      expect(issuesProcessor.removedLabelIssues).toHaveLength(0);
+      expect(issuesProcessor.removedLabelIssues).toHaveLength(1);
     });
   });
 
-  describe('when the option "remove-stale-when-updated" is enabled', (): void => {
+  describe('when the option "remove-issue-stale-when-updated" is enabled', (): void => {
     beforeEach((): void => {
-      issuesProcessorBuilder.removeStaleWhenUpdated();
+      issuesProcessorBuilder.removeIssueStaleWhenUpdated();
     });
 
     test('should remove the stale label on the issue', async (): Promise<void> => {
@@ -67,353 +67,67 @@ describe('remove-stale-when-updated option', (): void => {
   });
 });
 
-describe('remove-issue-stale-when-updated option', (): void => {
-  beforeEach((): void => {
-    issuesProcessorBuilder = new IssuesProcessorBuilder();
-  });
-
-  describe('when the option "remove-stale-when-updated" is disabled', (): void => {
-    beforeEach((): void => {
-      issuesProcessorBuilder.keepStaleWhenUpdated();
-    });
-
-    describe('when the option "remove-issue-stale-when-updated" is unset', (): void => {
-      beforeEach((): void => {
-        issuesProcessorBuilder.unsetIssueStaleWhenUpdated();
-      });
-
-      test('should not remove the stale label on the issue', async (): Promise<void> => {
-        expect.assertions(1);
-        issuesProcessor = issuesProcessorBuilder.staleIssues([{}]).build();
-
-        await issuesProcessor.processIssues();
-
-        expect(issuesProcessor.removedLabelIssues).toHaveLength(0);
-      });
-
-      test('should not remove the stale label on the pull request', async (): Promise<void> => {
-        expect.assertions(1);
-        issuesProcessor = issuesProcessorBuilder.stalePrs([{}]).build();
-
-        await issuesProcessor.processIssues();
-
-        expect(issuesProcessor.removedLabelIssues).toHaveLength(0);
-      });
-    });
-
-    describe('when the option "remove-issue-stale-when-updated" is disabled', (): void => {
-      beforeEach((): void => {
-        issuesProcessorBuilder.keepIssueStaleWhenUpdated();
-      });
-
-      test('should not remove the stale label on the issue', async (): Promise<void> => {
-        expect.assertions(1);
-        issuesProcessor = issuesProcessorBuilder.staleIssues([{}]).build();
-
-        await issuesProcessor.processIssues();
-
-        expect(issuesProcessor.removedLabelIssues).toHaveLength(0);
-      });
-
-      test('should not remove the stale label on the pull request', async (): Promise<void> => {
-        expect.assertions(1);
-        issuesProcessor = issuesProcessorBuilder.stalePrs([{}]).build();
-
-        await issuesProcessor.processIssues();
-
-        expect(issuesProcessor.removedLabelIssues).toHaveLength(0);
-      });
-    });
-
-    describe('when the option "remove-issue-stale-when-updated" is enabled', (): void => {
-      beforeEach((): void => {
-        issuesProcessorBuilder.removeIssueStaleWhenUpdated();
-      });
-
-      test('should remove the stale label on the issue', async (): Promise<void> => {
-        expect.assertions(1);
-        issuesProcessor = issuesProcessorBuilder.staleIssues([{}]).build();
-
-        await issuesProcessor.processIssues();
-
-        expect(issuesProcessor.removedLabelIssues).toHaveLength(1);
-      });
-
-      test('should not remove the stale label on the pull request', async (): Promise<void> => {
-        expect.assertions(1);
-        issuesProcessor = issuesProcessorBuilder.stalePrs([{}]).build();
-
-        await issuesProcessor.processIssues();
-
-        expect(issuesProcessor.removedLabelIssues).toHaveLength(0);
-      });
-    });
-  });
-
-  describe('when the option "remove-stale-when-updated" is enabled', (): void => {
-    beforeEach((): void => {
-      issuesProcessorBuilder.removeStaleWhenUpdated();
-    });
-
-    describe('when the option "remove-issue-stale-when-updated" is unset', (): void => {
-      beforeEach((): void => {
-        issuesProcessorBuilder.unsetIssueStaleWhenUpdated();
-      });
-
-      test('should remove the stale label on the issue', async (): Promise<void> => {
-        expect.assertions(1);
-        issuesProcessor = issuesProcessorBuilder.staleIssues([{}]).build();
-
-        await issuesProcessor.processIssues();
-
-        expect(issuesProcessor.removedLabelIssues).toHaveLength(1);
-      });
-
-      test('should remove the stale label on the pull request', async (): Promise<void> => {
-        expect.assertions(1);
-        issuesProcessor = issuesProcessorBuilder.stalePrs([{}]).build();
-
-        await issuesProcessor.processIssues();
-
-        expect(issuesProcessor.removedLabelIssues).toHaveLength(1);
-      });
-    });
-
-    describe('when the option "remove-issue-stale-when-updated" is disabled', (): void => {
-      beforeEach((): void => {
-        issuesProcessorBuilder.keepIssueStaleWhenUpdated();
-      });
-
-      test('should not remove the stale label on the issue', async (): Promise<void> => {
-        expect.assertions(1);
-        issuesProcessor = issuesProcessorBuilder.staleIssues([{}]).build();
-
-        await issuesProcessor.processIssues();
-
-        expect(issuesProcessor.removedLabelIssues).toHaveLength(0);
-      });
-
-      test('should remove the stale label on the pull request', async (): Promise<void> => {
-        expect.assertions(1);
-        issuesProcessor = issuesProcessorBuilder.stalePrs([{}]).build();
-
-        await issuesProcessor.processIssues();
-
-        expect(issuesProcessor.removedLabelIssues).toHaveLength(1);
-      });
-    });
-
-    describe('when the option "remove-issue-stale-when-updated" is enabled', (): void => {
-      beforeEach((): void => {
-        issuesProcessorBuilder.removeIssueStaleWhenUpdated();
-      });
-
-      test('should remove the stale label on the issue', async (): Promise<void> => {
-        expect.assertions(1);
-        issuesProcessor = issuesProcessorBuilder.staleIssues([{}]).build();
-
-        await issuesProcessor.processIssues();
-
-        expect(issuesProcessor.removedLabelIssues).toHaveLength(1);
-      });
-
-      test('should remove the stale label on the pull request', async (): Promise<void> => {
-        expect.assertions(1);
-        issuesProcessor = issuesProcessorBuilder.stalePrs([{}]).build();
-
-        await issuesProcessor.processIssues();
-
-        expect(issuesProcessor.removedLabelIssues).toHaveLength(1);
-      });
-    });
-  });
-});
-
 describe('remove-pr-stale-when-updated option', (): void => {
   beforeEach((): void => {
     issuesProcessorBuilder = new IssuesProcessorBuilder();
   });
 
-  describe('when the option "remove-stale-when-updated" is disabled', (): void => {
+  describe('when the option "remove-pr-stale-when-updated" is disabled', (): void => {
     beforeEach((): void => {
-      issuesProcessorBuilder.keepStaleWhenUpdated();
+      issuesProcessorBuilder.keepPrStaleWhenUpdated();
     });
 
-    describe('when the option "remove-pr-stale-when-updated" is unset', (): void => {
-      beforeEach((): void => {
-        issuesProcessorBuilder.unsetPrStaleWhenUpdated();
-      });
+    test('should remove the stale label on the issue', async (): Promise<void> => {
+      expect.assertions(1);
+      issuesProcessor = issuesProcessorBuilder.staleIssues([{}]).build();
 
-      test('should not remove the stale label on the issue', async (): Promise<void> => {
-        expect.assertions(1);
-        issuesProcessor = issuesProcessorBuilder.staleIssues([{}]).build();
+      await issuesProcessor.processIssues();
 
-        await issuesProcessor.processIssues();
-
-        expect(issuesProcessor.removedLabelIssues).toHaveLength(0);
-      });
-
-      test('should not remove the stale label on the pull request', async (): Promise<void> => {
-        expect.assertions(1);
-        issuesProcessor = issuesProcessorBuilder.stalePrs([{}]).build();
-
-        await issuesProcessor.processIssues();
-
-        expect(issuesProcessor.removedLabelIssues).toHaveLength(0);
-      });
+      expect(issuesProcessor.removedLabelIssues).toHaveLength(1);
     });
 
-    describe('when the option "remove-pr-stale-when-updated" is disabled', (): void => {
-      beforeEach((): void => {
-        issuesProcessorBuilder.keepPrStaleWhenUpdated();
-      });
+    test('should not remove the stale label on the pull request', async (): Promise<void> => {
+      expect.assertions(1);
+      issuesProcessor = issuesProcessorBuilder.stalePrs([{}]).build();
 
-      test('should not remove the stale label on the issue', async (): Promise<void> => {
-        expect.assertions(1);
-        issuesProcessor = issuesProcessorBuilder.staleIssues([{}]).build();
+      await issuesProcessor.processIssues();
 
-        await issuesProcessor.processIssues();
-
-        expect(issuesProcessor.removedLabelIssues).toHaveLength(0);
-      });
-
-      test('should not remove the stale label on the pull request', async (): Promise<void> => {
-        expect.assertions(1);
-        issuesProcessor = issuesProcessorBuilder.stalePrs([{}]).build();
-
-        await issuesProcessor.processIssues();
-
-        expect(issuesProcessor.removedLabelIssues).toHaveLength(0);
-      });
-    });
-
-    describe('when the option "remove-pr-stale-when-updated" is enabled', (): void => {
-      beforeEach((): void => {
-        issuesProcessorBuilder.removePrStaleWhenUpdated();
-      });
-
-      test('should not remove the stale label on the issue', async (): Promise<void> => {
-        expect.assertions(1);
-        issuesProcessor = issuesProcessorBuilder.staleIssues([{}]).build();
-
-        await issuesProcessor.processIssues();
-
-        expect(issuesProcessor.removedLabelIssues).toHaveLength(0);
-      });
-
-      test('should remove the stale label on the pull request', async (): Promise<void> => {
-        expect.assertions(1);
-        issuesProcessor = issuesProcessorBuilder.stalePrs([{}]).build();
-
-        await issuesProcessor.processIssues();
-
-        expect(issuesProcessor.removedLabelIssues).toHaveLength(1);
-      });
+      expect(issuesProcessor.removedLabelIssues).toHaveLength(0);
     });
   });
 
-  describe('when the option "remove-stale-when-updated" is enabled', (): void => {
+  describe('when the option "remove-pr-stale-when-updated" is enabled', (): void => {
     beforeEach((): void => {
-      issuesProcessorBuilder.removeStaleWhenUpdated();
+      issuesProcessorBuilder.removePrStaleWhenUpdated();
     });
 
-    describe('when the option "remove-pr-stale-when-updated" is unset', (): void => {
-      beforeEach((): void => {
-        issuesProcessorBuilder.unsetPrStaleWhenUpdated();
-      });
+    test('should remove the stale label on the issue', async (): Promise<void> => {
+      expect.assertions(1);
+      issuesProcessor = issuesProcessorBuilder.staleIssues([{}]).build();
 
-      test('should remove the stale label on the issue', async (): Promise<void> => {
-        expect.assertions(1);
-        issuesProcessor = issuesProcessorBuilder.staleIssues([{}]).build();
+      await issuesProcessor.processIssues();
 
-        await issuesProcessor.processIssues();
-
-        expect(issuesProcessor.removedLabelIssues).toHaveLength(1);
-      });
-
-      test('should remove the stale label on the pull request', async (): Promise<void> => {
-        expect.assertions(1);
-        issuesProcessor = issuesProcessorBuilder.stalePrs([{}]).build();
-
-        await issuesProcessor.processIssues();
-
-        expect(issuesProcessor.removedLabelIssues).toHaveLength(1);
-      });
+      expect(issuesProcessor.removedLabelIssues).toHaveLength(1);
     });
 
-    describe('when the option "remove-pr-stale-when-updated" is disabled', (): void => {
-      beforeEach((): void => {
-        issuesProcessorBuilder.keepPrStaleWhenUpdated();
-      });
+    test('should remove the stale label on the pull request', async (): Promise<void> => {
+      expect.assertions(1);
+      issuesProcessor = issuesProcessorBuilder.stalePrs([{}]).build();
 
-      test('should remove the stale label on the issue', async (): Promise<void> => {
-        expect.assertions(1);
-        issuesProcessor = issuesProcessorBuilder.staleIssues([{}]).build();
+      await issuesProcessor.processIssues();
 
-        await issuesProcessor.processIssues();
-
-        expect(issuesProcessor.removedLabelIssues).toHaveLength(1);
-      });
-
-      test('should not remove the stale label on the pull request', async (): Promise<void> => {
-        expect.assertions(1);
-        issuesProcessor = issuesProcessorBuilder.stalePrs([{}]).build();
-
-        await issuesProcessor.processIssues();
-
-        expect(issuesProcessor.removedLabelIssues).toHaveLength(0);
-      });
-    });
-
-    describe('when the option "remove-pr-stale-when-updated" is enabled', (): void => {
-      beforeEach((): void => {
-        issuesProcessorBuilder.removePrStaleWhenUpdated();
-      });
-
-      test('should remove the stale label on the issue', async (): Promise<void> => {
-        expect.assertions(1);
-        issuesProcessor = issuesProcessorBuilder.staleIssues([{}]).build();
-
-        await issuesProcessor.processIssues();
-
-        expect(issuesProcessor.removedLabelIssues).toHaveLength(1);
-      });
-
-      test('should remove the stale label on the pull request', async (): Promise<void> => {
-        expect.assertions(1);
-        issuesProcessor = issuesProcessorBuilder.stalePrs([{}]).build();
-
-        await issuesProcessor.processIssues();
-
-        expect(issuesProcessor.removedLabelIssues).toHaveLength(1);
-      });
+      expect(issuesProcessor.removedLabelIssues).toHaveLength(1);
     });
   });
 });
 
 class IssuesProcessorBuilder {
   private _options: IIssuesProcessorOptions = {
-    ...DefaultProcessorOptions
+    ...DefaultProcessorOptions,
+    removeIssueStaleWhenUpdated: true,
+    removePrStaleWhenUpdated: true
   };
   private _issues: Issue[] = [];
-
-  keepStaleWhenUpdated(): IssuesProcessorBuilder {
-    this._options.removeStaleWhenUpdated = false;
-
-    return this;
-  }
-
-  removeStaleWhenUpdated(): IssuesProcessorBuilder {
-    this._options.removeStaleWhenUpdated = true;
-
-    return this;
-  }
-
-  unsetIssueStaleWhenUpdated(): IssuesProcessorBuilder {
-    delete this._options.removeIssueStaleWhenUpdated;
-
-    return this;
-  }
 
   keepIssueStaleWhenUpdated(): IssuesProcessorBuilder {
     this._options.removeIssueStaleWhenUpdated = false;
@@ -423,12 +137,6 @@ class IssuesProcessorBuilder {
 
   removeIssueStaleWhenUpdated(): IssuesProcessorBuilder {
     this._options.removeIssueStaleWhenUpdated = true;
-
-    return this;
-  }
-
-  unsetPrStaleWhenUpdated(): IssuesProcessorBuilder {
-    delete this._options.removePrStaleWhenUpdated;
 
     return this;
   }

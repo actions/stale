@@ -3,29 +3,28 @@ import {context, getOctokit} from '@actions/github';
 import {GitHub} from '@actions/github/lib/utils';
 import {GetResponseTypeFromEndpointMethod} from '@octokit/types';
 import {Option} from '../enums/option';
+import {cleanLabel} from '../functions/clean-label';
 import {getHumanizedDate} from '../functions/dates/get-humanized-date';
 import {isDateMoreRecentThan} from '../functions/dates/is-date-more-recent-than';
 import {isValidDate} from '../functions/dates/is-valid-date';
-import {isBoolean} from '../functions/is-boolean';
 import {isLabeled} from '../functions/is-labeled';
-import {cleanLabel} from '../functions/clean-label';
 import {shouldMarkWhenStale} from '../functions/should-mark-when-stale';
 import {wordsToList} from '../functions/words-to-list';
 import {IComment} from '../interfaces/comment';
+import {IIssue} from '../interfaces/issue';
 import {IIssueEvent} from '../interfaces/issue-event';
 import {IIssuesProcessorOptions} from '../interfaces/issues-processor-options';
 import {IPullRequest} from '../interfaces/pull-request';
+import {LoggerService} from '../services/logger.service';
 import {Assignees} from './assignees';
-import {IgnoreUpdates} from './ignore-updates';
 import {ExemptDraftPullRequest} from './exempt-draft-pull-request';
+import {IgnoreUpdates} from './ignore-updates';
 import {Issue} from './issue';
 import {IssueLogger} from './loggers/issue-logger';
 import {Logger} from './loggers/logger';
 import {Milestones} from './milestones';
 import {StaleOperations} from './stale-operations';
 import {Statistics} from './statistics';
-import {LoggerService} from '../services/logger.service';
-import {IIssue} from '../interfaces/issue';
 
 /***
  * Handle processing of issues for staleness/closure.
@@ -207,8 +206,8 @@ export class IssuesProcessor {
       ? this.options.stalePrMessage.length === 0
       : this.options.staleIssueMessage.length === 0;
     const daysBeforeStale: number = issue.isPullRequest
-      ? this._getDaysBeforePrStale()
-      : this._getDaysBeforeIssueStale();
+      ? this.options.daysBeforePrStale
+      : this.options.daysBeforeIssueStale;
 
     if (issue.state === 'closed') {
       issueLogger.info(`Skipping this $$type because it is closed`);
@@ -227,7 +226,7 @@ export class IssuesProcessor {
     if (onlyLabels.length > 0) {
       issueLogger.info(
         `The option ${issueLogger.createOptionLink(
-          Option.OnlyLabels
+          issue.isPullRequest ? Option.OnlyPrLabels : Option.OnlyIssueLabels
         )} was specified to only process issues and pull requests with all those labels (${LoggerService.cyan(
           onlyLabels.length
         )})`
@@ -260,7 +259,7 @@ export class IssuesProcessor {
     } else {
       issueLogger.info(
         `The option ${issueLogger.createOptionLink(
-          Option.OnlyLabels
+          issue.isPullRequest ? Option.OnlyPrLabels : Option.OnlyIssueLabels
         )} was not specified`
       );
       issueLogger.info(
@@ -345,7 +344,7 @@ export class IssuesProcessor {
     if (anyOfLabels.length > 0) {
       issueLogger.info(
         `The option ${issueLogger.createOptionLink(
-          Option.AnyOfLabels
+          issue.isPullRequest ? Option.AnyOfPrLabels : Option.AnyOfIssueLabels
         )} was specified to only process the issues and pull requests with one of those labels (${LoggerService.cyan(
           anyOfLabels.length
         )})`
@@ -377,7 +376,7 @@ export class IssuesProcessor {
     } else {
       issueLogger.info(
         `The option ${issueLogger.createOptionLink(
-          Option.AnyOfLabels
+          issue.isPullRequest ? Option.AnyOfPrLabels : Option.AnyOfIssueLabels
         )} was not specified`
       );
       issueLogger.info(
@@ -461,7 +460,7 @@ export class IssuesProcessor {
         if (shouldMarkAsStale) {
           issueLogger.info(
             `This $$type should be marked as stale based on the option ${issueLogger.createOptionLink(
-              this._getDaysBeforeStaleUsedOptionName(issue)
+              IssuesProcessor._getDaysBeforeStaleUsedOptionName(issue)
             )} (${LoggerService.cyan(daysBeforeStale)})`
           );
           await this._markStale(issue, staleMessage, staleLabel, skipMessage);
@@ -470,7 +469,7 @@ export class IssuesProcessor {
         } else {
           issueLogger.info(
             `This $$type should not be marked as stale based on the option ${issueLogger.createOptionLink(
-              this._getDaysBeforeStaleUsedOptionName(issue)
+              IssuesProcessor._getDaysBeforeStaleUsedOptionName(issue)
             )} (${LoggerService.cyan(daysBeforeStale)})`
           );
         }
@@ -640,8 +639,8 @@ export class IssuesProcessor {
     );
 
     const daysBeforeClose: number = issue.isPullRequest
-      ? this._getDaysBeforePrClose()
-      : this._getDaysBeforeIssueClose();
+      ? this.options.daysBeforePrClose
+      : this.options.daysBeforeIssueClose;
 
     issueLogger.info(
       `Days before $$type close: ${LoggerService.cyan(daysBeforeClose)}`
@@ -660,7 +659,7 @@ export class IssuesProcessor {
 
     issueLogger.info(
       `The option ${issueLogger.createOptionLink(
-        this._getRemoveStaleWhenUpdatedUsedOptionName(issue)
+        IssuesProcessor._getRemoveStaleWhenUpdatedUsedOptionName(issue)
       )} is: ${LoggerService.cyan(shouldRemoveStaleWhenUpdated)}`
     );
 
@@ -957,72 +956,26 @@ export class IssuesProcessor {
     }
   }
 
-  private _getDaysBeforeIssueStale(): number {
-    return isNaN(this.options.daysBeforeIssueStale)
-      ? this.options.daysBeforeStale
-      : this.options.daysBeforeIssueStale;
-  }
-
-  private _getDaysBeforePrStale(): number {
-    return isNaN(this.options.daysBeforePrStale)
-      ? this.options.daysBeforeStale
-      : this.options.daysBeforePrStale;
-  }
-
-  private _getDaysBeforeIssueClose(): number {
-    return isNaN(this.options.daysBeforeIssueClose)
-      ? this.options.daysBeforeClose
-      : this.options.daysBeforeIssueClose;
-  }
-
-  private _getDaysBeforePrClose(): number {
-    return isNaN(this.options.daysBeforePrClose)
-      ? this.options.daysBeforeClose
-      : this.options.daysBeforePrClose;
-  }
-
   private _getOnlyLabels(issue: Issue): string {
     if (issue.isPullRequest) {
-      if (this.options.onlyPrLabels !== '') {
-        return this.options.onlyPrLabels;
-      }
-    } else {
-      if (this.options.onlyIssueLabels !== '') {
-        return this.options.onlyIssueLabels;
-      }
+      return this.options.onlyPrLabels;
     }
 
-    return this.options.onlyLabels;
+    return this.options.onlyIssueLabels;
   }
 
   private _getAnyOfLabels(issue: Issue): string {
     if (issue.isPullRequest) {
-      if (this.options.anyOfPrLabels !== '') {
-        return this.options.anyOfPrLabels;
-      }
-    } else {
-      if (this.options.anyOfIssueLabels !== '') {
-        return this.options.anyOfIssueLabels;
-      }
+      return this.options.anyOfPrLabels;
     }
 
-    return this.options.anyOfLabels;
+    return this.options.anyOfIssueLabels;
   }
 
   private _shouldRemoveStaleWhenUpdated(issue: Issue): boolean {
-    if (issue.isPullRequest) {
-      if (isBoolean(this.options.removePrStaleWhenUpdated)) {
-        return this.options.removePrStaleWhenUpdated;
-      }
-
-      return this.options.removeStaleWhenUpdated;
-    }
-
-    if (isBoolean(this.options.removeIssueStaleWhenUpdated)) {
-      return this.options.removeIssueStaleWhenUpdated;
-    }
-
-    return this.options.removeStaleWhenUpdated;
+    return issue.isPullRequest
+      ? this.options.removePrStaleWhenUpdated
+      : this.options.removeIssueStaleWhenUpdated;
   }
 
   private async _removeLabelsWhenUnstale(
@@ -1141,56 +1094,24 @@ export class IssuesProcessor {
     }
   }
 
-  private _consumeIssueOperation(issue: Readonly<Issue>): void {
-    this.operations.consumeOperation();
-    issue.operations.consumeOperation();
-  }
-
-  private _getDaysBeforeStaleUsedOptionName(
+  private static _getDaysBeforeStaleUsedOptionName(
     issue: Readonly<Issue>
-  ):
-    | Option.DaysBeforeStale
-    | Option.DaysBeforeIssueStale
-    | Option.DaysBeforePrStale {
+  ): Option.DaysBeforeIssueStale | Option.DaysBeforePrStale {
     return issue.isPullRequest
-      ? this._getDaysBeforePrStaleUsedOptionName()
-      : this._getDaysBeforeIssueStaleUsedOptionName();
-  }
-
-  private _getDaysBeforeIssueStaleUsedOptionName():
-    | Option.DaysBeforeStale
-    | Option.DaysBeforeIssueStale {
-    return isNaN(this.options.daysBeforeIssueStale)
-      ? Option.DaysBeforeStale
+      ? Option.DaysBeforePrStale
       : Option.DaysBeforeIssueStale;
   }
 
-  private _getDaysBeforePrStaleUsedOptionName():
-    | Option.DaysBeforeStale
-    | Option.DaysBeforePrStale {
-    return isNaN(this.options.daysBeforePrStale)
-      ? Option.DaysBeforeStale
-      : Option.DaysBeforePrStale;
+  private static _getRemoveStaleWhenUpdatedUsedOptionName(
+    issue: Readonly<Issue>
+  ): Option.RemovePrStaleWhenUpdated | Option.RemoveIssueStaleWhenUpdated {
+    return issue.isPullRequest
+      ? Option.RemovePrStaleWhenUpdated
+      : Option.RemoveIssueStaleWhenUpdated;
   }
 
-  private _getRemoveStaleWhenUpdatedUsedOptionName(
-    issue: Readonly<Issue>
-  ):
-    | Option.RemovePrStaleWhenUpdated
-    | Option.RemoveStaleWhenUpdated
-    | Option.RemoveIssueStaleWhenUpdated {
-    if (issue.isPullRequest) {
-      if (isBoolean(this.options.removePrStaleWhenUpdated)) {
-        return Option.RemovePrStaleWhenUpdated;
-      }
-
-      return Option.RemoveStaleWhenUpdated;
-    }
-
-    if (isBoolean(this.options.removeIssueStaleWhenUpdated)) {
-      return Option.RemoveIssueStaleWhenUpdated;
-    }
-
-    return Option.RemoveStaleWhenUpdated;
+  private _consumeIssueOperation(issue: Readonly<Issue>): void {
+    this.operations.consumeOperation();
+    issue.operations.consumeOperation();
   }
 }

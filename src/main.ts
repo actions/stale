@@ -28,39 +28,36 @@ function _getAndValidateArgs(): IIssuesProcessorOptions {
     stalePrMessage: core.getInput('stale-pr-message'),
     closeIssueMessage: core.getInput('close-issue-message'),
     closePrMessage: core.getInput('close-pr-message'),
-    daysBeforeStale: parseInt(
-      core.getInput('days-before-stale', {required: true})
+    daysBeforeIssueStale: parseInt(
+      core.getInput('days-before-issue-stale', {required: true})
     ),
-    daysBeforeIssueStale: parseInt(core.getInput('days-before-issue-stale')),
-    daysBeforePrStale: parseInt(core.getInput('days-before-pr-stale')),
-    daysBeforeClose: parseInt(
-      core.getInput('days-before-close', {required: true})
+    daysBeforePrStale: parseInt(
+      core.getInput('days-before-pr-stale', {required: true})
     ),
-    daysBeforeIssueClose: parseInt(core.getInput('days-before-issue-close')),
-    daysBeforePrClose: parseInt(core.getInput('days-before-pr-close')),
+    daysBeforeIssueClose: parseInt(
+      core.getInput('days-before-issue-close', {required: true})
+    ),
+    daysBeforePrClose: parseInt(
+      core.getInput('days-before-pr-close', {required: true})
+    ),
     staleIssueLabel: core.getInput('stale-issue-label', {required: true}),
     closeIssueLabel: core.getInput('close-issue-label'),
     exemptIssueLabels: core.getInput('exempt-issue-labels'),
     stalePrLabel: core.getInput('stale-pr-label', {required: true}),
     closePrLabel: core.getInput('close-pr-label'),
     exemptPrLabels: core.getInput('exempt-pr-labels'),
-    onlyLabels: core.getInput('only-labels'),
     onlyIssueLabels: core.getInput('only-issue-labels'),
     onlyPrLabels: core.getInput('only-pr-labels'),
-    anyOfLabels: core.getInput('any-of-labels'),
     anyOfIssueLabels: core.getInput('any-of-issue-labels'),
     anyOfPrLabels: core.getInput('any-of-pr-labels'),
     operationsPerRun: parseInt(
       core.getInput('operations-per-run', {required: true})
     ),
-    removeStaleWhenUpdated: !(
-      core.getInput('remove-stale-when-updated') === 'false'
+    removeIssueStaleWhenUpdated: !(
+      core.getInput('remove-issue-stale-when-updated') === 'false'
     ),
-    removeIssueStaleWhenUpdated: _toOptionalBoolean(
-      'remove-issue-stale-when-updated'
-    ),
-    removePrStaleWhenUpdated: _toOptionalBoolean(
-      'remove-pr-stale-when-updated'
+    removePrStaleWhenUpdated: !(
+      core.getInput('remove-pr-stale-when-updated') === 'false'
     ),
     debugOnly: core.getInput('debug-only') === 'true',
     ascending: core.getInput('ascending') === 'true',
@@ -69,30 +66,29 @@ function _getAndValidateArgs(): IIssuesProcessorOptions {
       core.getInput('start-date') !== ''
         ? core.getInput('start-date')
         : undefined,
-    exemptMilestones: core.getInput('exempt-milestones'),
     exemptIssueMilestones: core.getInput('exempt-issue-milestones'),
     exemptPrMilestones: core.getInput('exempt-pr-milestones'),
-    exemptAllMilestones: core.getInput('exempt-all-milestones') === 'true',
-    exemptAllIssueMilestones: _toOptionalBoolean('exempt-all-issue-milestones'),
-    exemptAllPrMilestones: _toOptionalBoolean('exempt-all-pr-milestones'),
-    exemptAssignees: core.getInput('exempt-assignees'),
+    exemptAllIssueMilestones:
+      core.getInput('exempt-all-issue-milestones') === 'true',
+    exemptAllPrMilestones: core.getInput('exempt-all-pr-milestones') === 'true',
     exemptIssueAssignees: core.getInput('exempt-issue-assignees'),
     exemptPrAssignees: core.getInput('exempt-pr-assignees'),
-    exemptAllAssignees: core.getInput('exempt-all-assignees') === 'true',
-    exemptAllIssueAssignees: _toOptionalBoolean('exempt-all-issue-assignees'),
-    exemptAllPrAssignees: _toOptionalBoolean('exempt-all-pr-assignees'),
+    exemptAllIssueAssignees:
+      core.getInput('exempt-all-issue-assignees') === 'true',
+    exemptAllPrAssignees: core.getInput('exempt-all-pr-assignees') === 'true',
     enableStatistics: core.getInput('enable-statistics') === 'true',
     labelsToRemoveWhenUnstale: core.getInput('labels-to-remove-when-unstale'),
     labelsToAddWhenUnstale: core.getInput('labels-to-add-when-unstale'),
-    ignoreUpdates: core.getInput('ignore-updates') === 'true',
-    ignoreIssueUpdates: _toOptionalBoolean('ignore-issue-updates'),
-    ignorePrUpdates: _toOptionalBoolean('ignore-pr-updates'),
+    ignoreIssueUpdates: core.getInput('ignore-issue-updates') === 'true',
+    ignorePrUpdates: core.getInput('ignore-pr-updates') === 'true',
     exemptDraftPr: core.getInput('exempt-draft-pr') === 'true'
   };
 
   for (const numberInput of [
-    'days-before-stale',
-    'days-before-close',
+    'days-before-issue-stale',
+    'days-before-pr-stale',
+    'days-before-issue-close',
+    'days-before-pr-close',
     'operations-per-run'
   ]) {
     if (isNaN(parseInt(core.getInput(numberInput)))) {
@@ -122,31 +118,6 @@ async function processOutput(
 ): Promise<void> {
   core.setOutput('staled-issues-prs', JSON.stringify(staledIssues));
   core.setOutput('closed-issues-prs', JSON.stringify(closedIssues));
-}
-
-/**
- * @description
- * From an argument name, get the value as an optional boolean
- * This is very useful for all the arguments that override others
- * It will allow us to easily use the original one when the return value is `undefined`
- * Which is different from `true` or `false` that consider the argument as set
- *
- * @param {Readonly<string>} argumentName The name of the argument to check
- *
- * @returns {boolean | undefined} The value matching the given argument name
- */
-function _toOptionalBoolean(
-  argumentName: Readonly<string>
-): boolean | undefined {
-  const argument: string = core.getInput(argumentName);
-
-  if (argument === 'true') {
-    return true;
-  } else if (argument === 'false') {
-    return false;
-  }
-
-  return undefined;
 }
 
 void _run();

@@ -96,7 +96,31 @@ export class Assignees {
         )} is disabled. No specific assignee can skip the stale process for this $$type`
       );
 
-      return [];
+      if (this._options.exemptAssignees === '') {
+        this._issueLogger.info(
+          LoggerService.white('├──'),
+          `The option ${this._issueLogger.createOptionLink(
+            Option.ExemptAssignees
+          )} is disabled. No specific assignee can skip the stale process for this $$type`
+        );
+
+        return [];
+      }
+
+      const exemptAssignees: string[] = wordsToList(
+        this._options.exemptAssignees
+      );
+
+      this._issueLogger.info(
+        LoggerService.white('├──'),
+        `The option ${this._issueLogger.createOptionLink(
+          Option.ExemptAssignees
+        )} is set. ${LoggerService.cyan(exemptAssignees.length)} assignee${
+          exemptAssignees.length === 1 ? '' : 's'
+        } can skip the stale process for this $$type`
+      );
+
+      return exemptAssignees;
     }
 
     const exemptAssignees: string[] = wordsToList(
@@ -124,7 +148,31 @@ export class Assignees {
         )} is disabled. No specific assignee can skip the stale process for this $$type`
       );
 
-      return [];
+      if (this._options.exemptAssignees === '') {
+        this._issueLogger.info(
+          LoggerService.white('├──'),
+          `The option ${this._issueLogger.createOptionLink(
+            Option.ExemptAssignees
+          )} is disabled. No specific assignee can skip the stale process for this $$type`
+        );
+
+        return [];
+      }
+
+      const exemptAssignees: string[] = wordsToList(
+        this._options.exemptAssignees
+      );
+
+      this._issueLogger.info(
+        LoggerService.white('├──'),
+        `The option ${this._issueLogger.createOptionLink(
+          Option.ExemptAssignees
+        )} is set. ${LoggerService.cyan(exemptAssignees.length)} assignee${
+          exemptAssignees.length === 1 ? '' : 's'
+        } can skip the stale process for this $$type`
+      );
+
+      return exemptAssignees;
     }
 
     const exemptAssignees: string[] = wordsToList(
@@ -170,7 +218,7 @@ export class Assignees {
   }
 
   private _shouldExemptAllIssueAssignees(): boolean {
-    if (this._options.exemptAllIssueAssignees) {
+    if (this._options.exemptAllIssueAssignees === true) {
       this._issueLogger.info(
         `The option ${this._issueLogger.createOptionLink(
           Option.ExemptAllIssueAssignees
@@ -178,19 +226,23 @@ export class Assignees {
       );
 
       return true;
+    } else if (this._options.exemptAllIssueAssignees === false) {
+      this._issueLogger.info(
+        `The option ${this._issueLogger.createOptionLink(
+          Option.ExemptAllIssueAssignees
+        )} is disabled. Only some specific assignees on this $$type will skip the stale process`
+      );
+
+      return false;
     }
 
-    this._issueLogger.info(
-      `The option ${this._issueLogger.createOptionLink(
-        Option.ExemptAllIssueAssignees
-      )} is disabled. Only some specific assignees on this $$type will skip the stale process`
-    );
+    this._logExemptAllAssigneesOption();
 
-    return false;
+    return this._options.exemptAllAssignees;
   }
 
   private _shouldExemptAllPullRequestAssignees(): boolean {
-    if (this._options.exemptAllPrAssignees) {
+    if (this._options.exemptAllPrAssignees === true) {
       this._issueLogger.info(
         `The option ${this._issueLogger.createOptionLink(
           Option.ExemptAllPrAssignees
@@ -198,15 +250,35 @@ export class Assignees {
       );
 
       return true;
+    } else if (this._options.exemptAllPrAssignees === false) {
+      this._issueLogger.info(
+        `The option ${this._issueLogger.createOptionLink(
+          Option.ExemptAllPrAssignees
+        )} is disabled. Only some specific assignees on this $$type will skip the stale process`
+      );
+
+      return false;
     }
 
-    this._issueLogger.info(
-      `The option ${this._issueLogger.createOptionLink(
-        Option.ExemptAllPrAssignees
-      )} is disabled. Only some specific assignees on this $$type will skip the stale process`
-    );
+    this._logExemptAllAssigneesOption();
 
-    return false;
+    return this._options.exemptAllAssignees;
+  }
+
+  private _logExemptAllAssigneesOption(): void {
+    if (this._options.exemptAllAssignees) {
+      this._issueLogger.info(
+        `The option ${this._issueLogger.createOptionLink(
+          Option.ExemptAllAssignees
+        )} is enabled. Any assignee on this $$type will skip the stale process`
+      );
+    } else {
+      this._issueLogger.info(
+        `The option ${this._issueLogger.createOptionLink(
+          Option.ExemptAllAssignees
+        )} is disabled. Only some specific assignees on this $$type will skip the stale process`
+      );
+    }
   }
 
   private _logSkip(): void {

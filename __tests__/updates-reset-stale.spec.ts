@@ -17,25 +17,9 @@ describe('ignore-updates options', (): void => {
       sut.toIssue().staleIn(10).created(20).updated(5);
     });
 
-    describe('when the ignore issue updates option is enabled', (): void => {
+    describe('when the ignore updates option is disabled', (): void => {
       beforeEach((): void => {
-        sut.ignoreIssueUpdates();
-      });
-
-      it('should stale the issue', async () => {
-        expect.assertions(3);
-
-        await sut.test();
-
-        expect(sut.processor.staleIssues).toHaveLength(1);
-        expect(sut.processor.closedIssues).toHaveLength(0);
-        expect(sut.processor.removedLabelIssues).toHaveLength(0);
-      });
-    });
-
-    describe('when the ignore issue updates option is disabled', (): void => {
-      beforeEach((): void => {
-        sut.staleOnIssueUpdates();
+        sut.staleOnUpdates();
       });
 
       it('should not stale the issue', async () => {
@@ -47,11 +31,59 @@ describe('ignore-updates options', (): void => {
         expect(sut.processor.closedIssues).toHaveLength(0);
         expect(sut.processor.removedLabelIssues).toHaveLength(0);
       });
+
+      describe('when the ignore issue updates option is enabled', (): void => {
+        beforeEach((): void => {
+          sut.ignoreIssueUpdates();
+        });
+
+        it('should stale the issue', async () => {
+          expect.assertions(3);
+
+          await sut.test();
+
+          expect(sut.processor.staleIssues).toHaveLength(1);
+          expect(sut.processor.closedIssues).toHaveLength(0);
+          expect(sut.processor.removedLabelIssues).toHaveLength(0);
+        });
+      });
+
+      describe('when the ignore issue updates option is disabled', (): void => {
+        beforeEach((): void => {
+          sut.staleOnIssueUpdates();
+        });
+
+        it('should not stale the issue', async () => {
+          expect.assertions(3);
+
+          await sut.test();
+
+          expect(sut.processor.staleIssues).toHaveLength(0);
+          expect(sut.processor.closedIssues).toHaveLength(0);
+          expect(sut.processor.removedLabelIssues).toHaveLength(0);
+        });
+      });
+
+      describe('when the ignore issue updates option is unset', (): void => {
+        beforeEach((): void => {
+          sut.unsetIgnoreIssueUpdates();
+        });
+
+        it('should not stale the issue', async () => {
+          expect.assertions(3);
+
+          await sut.test();
+
+          expect(sut.processor.staleIssues).toHaveLength(0);
+          expect(sut.processor.closedIssues).toHaveLength(0);
+          expect(sut.processor.removedLabelIssues).toHaveLength(0);
+        });
+      });
     });
 
-    describe('when the ignore issue updates option is enabled', (): void => {
+    describe('when the ignore updates option is enabled', (): void => {
       beforeEach((): void => {
-        sut.ignoreIssueUpdates();
+        sut.ignoreUpdates();
       });
 
       it('should stale the issue', async () => {
@@ -63,21 +95,53 @@ describe('ignore-updates options', (): void => {
         expect(sut.processor.closedIssues).toHaveLength(0);
         expect(sut.processor.removedLabelIssues).toHaveLength(0);
       });
-    });
 
-    describe('when the ignore issue updates option is disabled', (): void => {
-      beforeEach((): void => {
-        sut.staleOnIssueUpdates();
+      describe('when the ignore issue updates option is enabled', (): void => {
+        beforeEach((): void => {
+          sut.ignoreIssueUpdates();
+        });
+
+        it('should stale the issue', async () => {
+          expect.assertions(3);
+
+          await sut.test();
+
+          expect(sut.processor.staleIssues).toHaveLength(1);
+          expect(sut.processor.closedIssues).toHaveLength(0);
+          expect(sut.processor.removedLabelIssues).toHaveLength(0);
+        });
       });
 
-      it('should not stale the issue', async () => {
-        expect.assertions(3);
+      describe('when the ignore issue updates option is disabled', (): void => {
+        beforeEach((): void => {
+          sut.staleOnIssueUpdates();
+        });
 
-        await sut.test();
+        it('should not stale the issue', async () => {
+          expect.assertions(3);
 
-        expect(sut.processor.staleIssues).toHaveLength(0);
-        expect(sut.processor.closedIssues).toHaveLength(0);
-        expect(sut.processor.removedLabelIssues).toHaveLength(0);
+          await sut.test();
+
+          expect(sut.processor.staleIssues).toHaveLength(0);
+          expect(sut.processor.closedIssues).toHaveLength(0);
+          expect(sut.processor.removedLabelIssues).toHaveLength(0);
+        });
+      });
+
+      describe('when the ignore issue updates option is unset', (): void => {
+        beforeEach((): void => {
+          sut.unsetIgnoreIssueUpdates();
+        });
+
+        it('should stale the issue', async () => {
+          expect.assertions(3);
+
+          await sut.test();
+
+          expect(sut.processor.staleIssues).toHaveLength(1);
+          expect(sut.processor.closedIssues).toHaveLength(0);
+          expect(sut.processor.removedLabelIssues).toHaveLength(0);
+        });
       });
     });
   });
@@ -87,9 +151,9 @@ describe('ignore-updates options', (): void => {
       sut.toIssue().staleIn(10).created(20).updated(15);
     });
 
-    describe('when the ignore issue updates option is enabled', (): void => {
+    describe('when the ignore updates option is disabled', (): void => {
       beforeEach((): void => {
-        sut.ignoreIssueUpdates();
+        sut.staleOnUpdates();
       });
 
       it('should stale the issue', async () => {
@@ -100,12 +164,60 @@ describe('ignore-updates options', (): void => {
         expect(sut.processor.staleIssues).toHaveLength(1);
         expect(sut.processor.closedIssues).toHaveLength(0);
         expect(sut.processor.removedLabelIssues).toHaveLength(0);
+      });
+
+      describe('when the ignore issue updates option is enabled', (): void => {
+        beforeEach((): void => {
+          sut.ignoreIssueUpdates();
+        });
+
+        it('should stale the issue', async () => {
+          expect.assertions(3);
+
+          await sut.test();
+
+          expect(sut.processor.staleIssues).toHaveLength(1);
+          expect(sut.processor.closedIssues).toHaveLength(0);
+          expect(sut.processor.removedLabelIssues).toHaveLength(0);
+        });
+      });
+
+      describe('when the ignore issue updates option is disabled', (): void => {
+        beforeEach((): void => {
+          sut.staleOnIssueUpdates();
+        });
+
+        it('should stale the issue', async () => {
+          expect.assertions(3);
+
+          await sut.test();
+
+          expect(sut.processor.staleIssues).toHaveLength(1);
+          expect(sut.processor.closedIssues).toHaveLength(0);
+          expect(sut.processor.removedLabelIssues).toHaveLength(0);
+        });
+      });
+
+      describe('when the ignore issue updates option is unset', (): void => {
+        beforeEach((): void => {
+          sut.unsetIgnoreIssueUpdates();
+        });
+
+        it('should stale the issue', async () => {
+          expect.assertions(3);
+
+          await sut.test();
+
+          expect(sut.processor.staleIssues).toHaveLength(1);
+          expect(sut.processor.closedIssues).toHaveLength(0);
+          expect(sut.processor.removedLabelIssues).toHaveLength(0);
+        });
       });
     });
 
-    describe('when the ignore issue updates option is disabled', (): void => {
+    describe('when the ignore updates option is enabled', (): void => {
       beforeEach((): void => {
-        sut.staleOnIssueUpdates();
+        sut.ignoreUpdates();
       });
 
       it('should stale the issue', async () => {
@@ -117,37 +229,53 @@ describe('ignore-updates options', (): void => {
         expect(sut.processor.closedIssues).toHaveLength(0);
         expect(sut.processor.removedLabelIssues).toHaveLength(0);
       });
-    });
 
-    describe('when the ignore issue updates option is enabled', (): void => {
-      beforeEach((): void => {
-        sut.ignoreIssueUpdates();
+      describe('when the ignore issue updates option is enabled', (): void => {
+        beforeEach((): void => {
+          sut.ignoreIssueUpdates();
+        });
+
+        it('should stale the issue', async () => {
+          expect.assertions(3);
+
+          await sut.test();
+
+          expect(sut.processor.staleIssues).toHaveLength(1);
+          expect(sut.processor.closedIssues).toHaveLength(0);
+          expect(sut.processor.removedLabelIssues).toHaveLength(0);
+        });
       });
 
-      it('should stale the issue', async () => {
-        expect.assertions(3);
+      describe('when the ignore issue updates option is disabled', (): void => {
+        beforeEach((): void => {
+          sut.staleOnIssueUpdates();
+        });
 
-        await sut.test();
+        it('should stale the issue', async () => {
+          expect.assertions(3);
 
-        expect(sut.processor.staleIssues).toHaveLength(1);
-        expect(sut.processor.closedIssues).toHaveLength(0);
-        expect(sut.processor.removedLabelIssues).toHaveLength(0);
+          await sut.test();
+
+          expect(sut.processor.staleIssues).toHaveLength(1);
+          expect(sut.processor.closedIssues).toHaveLength(0);
+          expect(sut.processor.removedLabelIssues).toHaveLength(0);
+        });
       });
-    });
 
-    describe('when the ignore issue updates option is disabled', (): void => {
-      beforeEach((): void => {
-        sut.staleOnIssueUpdates();
-      });
+      describe('when the ignore issue updates option is unset', (): void => {
+        beforeEach((): void => {
+          sut.unsetIgnoreIssueUpdates();
+        });
 
-      it('should stale the issue', async () => {
-        expect.assertions(3);
+        it('should stale the issue', async () => {
+          expect.assertions(3);
 
-        await sut.test();
+          await sut.test();
 
-        expect(sut.processor.staleIssues).toHaveLength(1);
-        expect(sut.processor.closedIssues).toHaveLength(0);
-        expect(sut.processor.removedLabelIssues).toHaveLength(0);
+          expect(sut.processor.staleIssues).toHaveLength(1);
+          expect(sut.processor.closedIssues).toHaveLength(0);
+          expect(sut.processor.removedLabelIssues).toHaveLength(0);
+        });
       });
     });
   });
@@ -157,25 +285,9 @@ describe('ignore-updates options', (): void => {
       sut.toPullRequest().staleIn(10).created(20).updated(5);
     });
 
-    describe('when the ignore pull request updates option is enabled', (): void => {
+    describe('when the ignore updates option is disabled', (): void => {
       beforeEach((): void => {
-        sut.ignorePullRequestUpdates();
-      });
-
-      it('should stale the pull request', async () => {
-        expect.assertions(3);
-
-        await sut.test();
-
-        expect(sut.processor.staleIssues).toHaveLength(1);
-        expect(sut.processor.closedIssues).toHaveLength(0);
-        expect(sut.processor.removedLabelIssues).toHaveLength(0);
-      });
-    });
-
-    describe('when the ignore pull request updates option is disabled', (): void => {
-      beforeEach((): void => {
-        sut.staleOnPullRequestUpdates();
+        sut.staleOnUpdates();
       });
 
       it('should not stale the pull request', async () => {
@@ -187,11 +299,59 @@ describe('ignore-updates options', (): void => {
         expect(sut.processor.closedIssues).toHaveLength(0);
         expect(sut.processor.removedLabelIssues).toHaveLength(0);
       });
+
+      describe('when the ignore pull request updates option is enabled', (): void => {
+        beforeEach((): void => {
+          sut.ignorePullRequestUpdates();
+        });
+
+        it('should stale the pull request', async () => {
+          expect.assertions(3);
+
+          await sut.test();
+
+          expect(sut.processor.staleIssues).toHaveLength(1);
+          expect(sut.processor.closedIssues).toHaveLength(0);
+          expect(sut.processor.removedLabelIssues).toHaveLength(0);
+        });
+      });
+
+      describe('when the ignore pull request updates option is disabled', (): void => {
+        beforeEach((): void => {
+          sut.staleOnPullRequestUpdates();
+        });
+
+        it('should not stale the pull request', async () => {
+          expect.assertions(3);
+
+          await sut.test();
+
+          expect(sut.processor.staleIssues).toHaveLength(0);
+          expect(sut.processor.closedIssues).toHaveLength(0);
+          expect(sut.processor.removedLabelIssues).toHaveLength(0);
+        });
+      });
+
+      describe('when the ignore pull request updates option is unset', (): void => {
+        beforeEach((): void => {
+          sut.unsetIgnorePullRequestUpdates();
+        });
+
+        it('should not stale the pull request', async () => {
+          expect.assertions(3);
+
+          await sut.test();
+
+          expect(sut.processor.staleIssues).toHaveLength(0);
+          expect(sut.processor.closedIssues).toHaveLength(0);
+          expect(sut.processor.removedLabelIssues).toHaveLength(0);
+        });
+      });
     });
 
-    describe('when the ignore pull request updates option is enabled', (): void => {
+    describe('when the ignore updates option is enabled', (): void => {
       beforeEach((): void => {
-        sut.ignorePullRequestUpdates();
+        sut.ignoreUpdates();
       });
 
       it('should stale the pull request', async () => {
@@ -203,21 +363,53 @@ describe('ignore-updates options', (): void => {
         expect(sut.processor.closedIssues).toHaveLength(0);
         expect(sut.processor.removedLabelIssues).toHaveLength(0);
       });
-    });
 
-    describe('when the ignore pull request updates option is disabled', (): void => {
-      beforeEach((): void => {
-        sut.staleOnPullRequestUpdates();
+      describe('when the ignore pull request updates option is enabled', (): void => {
+        beforeEach((): void => {
+          sut.ignorePullRequestUpdates();
+        });
+
+        it('should stale the pull request', async () => {
+          expect.assertions(3);
+
+          await sut.test();
+
+          expect(sut.processor.staleIssues).toHaveLength(1);
+          expect(sut.processor.closedIssues).toHaveLength(0);
+          expect(sut.processor.removedLabelIssues).toHaveLength(0);
+        });
       });
 
-      it('should not stale the pull request', async () => {
-        expect.assertions(3);
+      describe('when the ignore pull request updates option is disabled', (): void => {
+        beforeEach((): void => {
+          sut.staleOnPullRequestUpdates();
+        });
 
-        await sut.test();
+        it('should not stale the pull request', async () => {
+          expect.assertions(3);
 
-        expect(sut.processor.staleIssues).toHaveLength(0);
-        expect(sut.processor.closedIssues).toHaveLength(0);
-        expect(sut.processor.removedLabelIssues).toHaveLength(0);
+          await sut.test();
+
+          expect(sut.processor.staleIssues).toHaveLength(0);
+          expect(sut.processor.closedIssues).toHaveLength(0);
+          expect(sut.processor.removedLabelIssues).toHaveLength(0);
+        });
+      });
+
+      describe('when the ignore pull request updates option is unset', (): void => {
+        beforeEach((): void => {
+          sut.unsetIgnorePullRequestUpdates();
+        });
+
+        it('should stale the pull request', async () => {
+          expect.assertions(3);
+
+          await sut.test();
+
+          expect(sut.processor.staleIssues).toHaveLength(1);
+          expect(sut.processor.closedIssues).toHaveLength(0);
+          expect(sut.processor.removedLabelIssues).toHaveLength(0);
+        });
       });
     });
   });
@@ -227,9 +419,9 @@ describe('ignore-updates options', (): void => {
       sut.toPullRequest().staleIn(10).created(20).updated(15);
     });
 
-    describe('when the ignore pull request updates option is enabled', (): void => {
+    describe('when the ignore updates option is disabled', (): void => {
       beforeEach((): void => {
-        sut.ignorePullRequestUpdates();
+        sut.staleOnUpdates();
       });
 
       it('should stale the pull request', async () => {
@@ -240,12 +432,60 @@ describe('ignore-updates options', (): void => {
         expect(sut.processor.staleIssues).toHaveLength(1);
         expect(sut.processor.closedIssues).toHaveLength(0);
         expect(sut.processor.removedLabelIssues).toHaveLength(0);
+      });
+
+      describe('when the ignore pull request updates option is enabled', (): void => {
+        beforeEach((): void => {
+          sut.ignorePullRequestUpdates();
+        });
+
+        it('should stale the pull request', async () => {
+          expect.assertions(3);
+
+          await sut.test();
+
+          expect(sut.processor.staleIssues).toHaveLength(1);
+          expect(sut.processor.closedIssues).toHaveLength(0);
+          expect(sut.processor.removedLabelIssues).toHaveLength(0);
+        });
+      });
+
+      describe('when the ignore pull request updates option is disabled', (): void => {
+        beforeEach((): void => {
+          sut.staleOnPullRequestUpdates();
+        });
+
+        it('should stale the pull request', async () => {
+          expect.assertions(3);
+
+          await sut.test();
+
+          expect(sut.processor.staleIssues).toHaveLength(1);
+          expect(sut.processor.closedIssues).toHaveLength(0);
+          expect(sut.processor.removedLabelIssues).toHaveLength(0);
+        });
+      });
+
+      describe('when the ignore pull request updates option is unset', (): void => {
+        beforeEach((): void => {
+          sut.unsetIgnorePullRequestUpdates();
+        });
+
+        it('should stale the pull request', async () => {
+          expect.assertions(3);
+
+          await sut.test();
+
+          expect(sut.processor.staleIssues).toHaveLength(1);
+          expect(sut.processor.closedIssues).toHaveLength(0);
+          expect(sut.processor.removedLabelIssues).toHaveLength(0);
+        });
       });
     });
 
-    describe('when the ignore pull request updates option is disabled', (): void => {
+    describe('when the ignore updates option is enabled', (): void => {
       beforeEach((): void => {
-        sut.staleOnPullRequestUpdates();
+        sut.ignoreUpdates();
       });
 
       it('should stale the pull request', async () => {
@@ -257,37 +497,53 @@ describe('ignore-updates options', (): void => {
         expect(sut.processor.closedIssues).toHaveLength(0);
         expect(sut.processor.removedLabelIssues).toHaveLength(0);
       });
-    });
 
-    describe('when the ignore pull request updates option is enabled', (): void => {
-      beforeEach((): void => {
-        sut.ignorePullRequestUpdates();
+      describe('when the ignore pull request updates option is enabled', (): void => {
+        beforeEach((): void => {
+          sut.ignorePullRequestUpdates();
+        });
+
+        it('should stale the pull request', async () => {
+          expect.assertions(3);
+
+          await sut.test();
+
+          expect(sut.processor.staleIssues).toHaveLength(1);
+          expect(sut.processor.closedIssues).toHaveLength(0);
+          expect(sut.processor.removedLabelIssues).toHaveLength(0);
+        });
       });
 
-      it('should stale the pull request', async () => {
-        expect.assertions(3);
+      describe('when the ignore pull request updates option is disabled', (): void => {
+        beforeEach((): void => {
+          sut.staleOnPullRequestUpdates();
+        });
 
-        await sut.test();
+        it('should stale the pull request', async () => {
+          expect.assertions(3);
 
-        expect(sut.processor.staleIssues).toHaveLength(1);
-        expect(sut.processor.closedIssues).toHaveLength(0);
-        expect(sut.processor.removedLabelIssues).toHaveLength(0);
+          await sut.test();
+
+          expect(sut.processor.staleIssues).toHaveLength(1);
+          expect(sut.processor.closedIssues).toHaveLength(0);
+          expect(sut.processor.removedLabelIssues).toHaveLength(0);
+        });
       });
-    });
 
-    describe('when the ignore pull request updates option is disabled', (): void => {
-      beforeEach((): void => {
-        sut.staleOnPullRequestUpdates();
-      });
+      describe('when the ignore pull request updates option is unset', (): void => {
+        beforeEach((): void => {
+          sut.unsetIgnorePullRequestUpdates();
+        });
 
-      it('should stale the pull request', async () => {
-        expect.assertions(3);
+        it('should stale the pull request', async () => {
+          expect.assertions(3);
 
-        await sut.test();
+          await sut.test();
 
-        expect(sut.processor.staleIssues).toHaveLength(1);
-        expect(sut.processor.closedIssues).toHaveLength(0);
-        expect(sut.processor.removedLabelIssues).toHaveLength(0);
+          expect(sut.processor.staleIssues).toHaveLength(1);
+          expect(sut.processor.closedIssues).toHaveLength(0);
+          expect(sut.processor.removedLabelIssues).toHaveLength(0);
+        });
       });
     });
   });
@@ -338,6 +594,22 @@ class SUT {
     return this;
   }
 
+  ignoreUpdates(): SUT {
+    this._updateOptions({
+      ignoreUpdates: true
+    });
+
+    return this;
+  }
+
+  staleOnUpdates(): SUT {
+    this._updateOptions({
+      ignoreUpdates: false
+    });
+
+    return this;
+  }
+
   ignoreIssueUpdates(): SUT {
     this._updateOptions({
       ignoreIssueUpdates: true
@@ -354,6 +626,14 @@ class SUT {
     return this;
   }
 
+  unsetIgnoreIssueUpdates(): SUT {
+    this._updateOptions({
+      ignoreIssueUpdates: undefined
+    });
+
+    return this;
+  }
+
   ignorePullRequestUpdates(): SUT {
     this._updateOptions({
       ignorePrUpdates: true
@@ -365,6 +645,14 @@ class SUT {
   staleOnPullRequestUpdates(): SUT {
     this._updateOptions({
       ignorePrUpdates: false
+    });
+
+    return this;
+  }
+
+  unsetIgnorePullRequestUpdates(): SUT {
+    this._updateOptions({
+      ignorePrUpdates: undefined
     });
 
     return this;

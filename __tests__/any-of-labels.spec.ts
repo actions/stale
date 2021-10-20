@@ -16,7 +16,7 @@ describe('any-of-labels options', (): void => {
   test('should stale when not set even if the issue has no label', async (): Promise<void> => {
     expect.assertions(1);
     issuesProcessor = issuesProcessorBuilder
-      .emptyAnyOfIssueLabels()
+      .emptyAnyOfLabels()
       .issuesOrPrs([{labels: []}])
       .build();
 
@@ -28,7 +28,7 @@ describe('any-of-labels options', (): void => {
   test('should stale when not set even if the issue has a label', async (): Promise<void> => {
     expect.assertions(1);
     issuesProcessor = issuesProcessorBuilder
-      .emptyAnyOfIssueLabels()
+      .emptyAnyOfLabels()
       .issuesOrPrs([{labels: [{name: 'label'}]}])
       .build();
 
@@ -40,7 +40,7 @@ describe('any-of-labels options', (): void => {
   test('should not stale when set and the issue has no label', async (): Promise<void> => {
     expect.assertions(1);
     issuesProcessor = issuesProcessorBuilder
-      .anyOfIssueLabels('dummy-label')
+      .anyOfLabels('dummy-label')
       .issuesOrPrs([{labels: []}])
       .build();
 
@@ -52,7 +52,7 @@ describe('any-of-labels options', (): void => {
   test('should not stale when set and the issue has a different label', async (): Promise<void> => {
     expect.assertions(1);
     issuesProcessor = issuesProcessorBuilder
-      .anyOfIssueLabels('dummy-label')
+      .anyOfLabels('dummy-label')
       .issuesOrPrs([
         {
           labels: [
@@ -72,7 +72,7 @@ describe('any-of-labels options', (): void => {
   test('should not stale when set and the issue has different labels', async (): Promise<void> => {
     expect.assertions(1);
     issuesProcessor = issuesProcessorBuilder
-      .anyOfIssueLabels('dummy-label')
+      .anyOfLabels('dummy-label')
       .issuesOrPrs([
         {
           labels: [
@@ -95,7 +95,7 @@ describe('any-of-labels options', (): void => {
   test('should stale when set and the issue has the same label', async (): Promise<void> => {
     expect.assertions(1);
     issuesProcessor = issuesProcessorBuilder
-      .anyOfIssueLabels('dummy-label')
+      .anyOfLabels('dummy-label')
       .issuesOrPrs([
         {
           labels: [
@@ -115,7 +115,7 @@ describe('any-of-labels options', (): void => {
   test('should stale when set and the issue has only one of the same label', async (): Promise<void> => {
     expect.assertions(1);
     issuesProcessor = issuesProcessorBuilder
-      .anyOfIssueLabels('dummy-label-1,dummy-label-2')
+      .anyOfLabels('dummy-label-1,dummy-label-2')
       .issuesOrPrs([
         {
           labels: [
@@ -135,7 +135,7 @@ describe('any-of-labels options', (): void => {
   test('should stale when set and the issue has all the same labels', async (): Promise<void> => {
     expect.assertions(1);
     issuesProcessor = issuesProcessorBuilder
-      .anyOfIssueLabels('dummy-label-1,dummy-label-2')
+      .anyOfLabels('dummy-label-1,dummy-label-2')
       .issuesOrPrs([
         {
           labels: [
@@ -161,146 +161,448 @@ describe('any-of-issue-labels option', (): void => {
     issuesProcessorBuilder = new IssuesProcessorBuilder();
   });
 
-  test('should stale when not set even if the issue has no label', async (): Promise<void> => {
-    expect.assertions(1);
-    issuesProcessor = issuesProcessorBuilder
-      .emptyAnyOfIssueLabels()
-      .issues([{labels: []}])
-      .build();
+  describe('when the any-of-labels options is not set', (): void => {
+    beforeEach((): void => {
+      issuesProcessorBuilder.emptyAnyOfLabels();
+    });
 
-    await issuesProcessor.processIssues();
+    test('should stale when not set even if the issue has no label', async (): Promise<void> => {
+      expect.assertions(1);
+      issuesProcessor = issuesProcessorBuilder
+        .emptyAnyOfIssueLabels()
+        .issues([{labels: []}])
+        .build();
 
-    expect(issuesProcessor.staleIssues).toHaveLength(1);
+      await issuesProcessor.processIssues();
+
+      expect(issuesProcessor.staleIssues).toHaveLength(1);
+    });
+
+    test('should stale when not set even if the issue has a label', async (): Promise<void> => {
+      expect.assertions(1);
+      issuesProcessor = issuesProcessorBuilder
+        .emptyAnyOfIssueLabels()
+        .issues([{labels: [{name: 'dummy-label'}]}])
+        .build();
+
+      await issuesProcessor.processIssues();
+
+      expect(issuesProcessor.staleIssues).toHaveLength(1);
+    });
+
+    test('should not stale when set and the issue has no label', async (): Promise<void> => {
+      expect.assertions(1);
+      issuesProcessor = issuesProcessorBuilder
+        .anyOfIssueLabels('dummy-label')
+        .issues([{labels: []}])
+        .build();
+
+      await issuesProcessor.processIssues();
+
+      expect(issuesProcessor.staleIssues).toHaveLength(0);
+    });
+
+    test('should not stale when set and the issue has a different label', async (): Promise<void> => {
+      expect.assertions(1);
+      issuesProcessor = issuesProcessorBuilder
+        .anyOfIssueLabels('dummy-label')
+        .issues([
+          {
+            labels: [
+              {
+                name: 'label'
+              }
+            ]
+          }
+        ])
+        .build();
+
+      await issuesProcessor.processIssues();
+
+      expect(issuesProcessor.staleIssues).toHaveLength(0);
+    });
+
+    test('should not stale when set and the issue has different labels', async (): Promise<void> => {
+      expect.assertions(1);
+      issuesProcessor = issuesProcessorBuilder
+        .anyOfIssueLabels('dummy-label')
+        .issues([
+          {
+            labels: [
+              {
+                name: 'label-1'
+              },
+              {
+                name: 'label-2'
+              }
+            ]
+          }
+        ])
+        .build();
+
+      await issuesProcessor.processIssues();
+
+      expect(issuesProcessor.staleIssues).toHaveLength(0);
+    });
+
+    test('should stale when set and the issue has the same label', async (): Promise<void> => {
+      expect.assertions(1);
+      issuesProcessor = issuesProcessorBuilder
+        .anyOfIssueLabels('dummy-label')
+        .issues([
+          {
+            labels: [
+              {
+                name: 'dummy-label'
+              }
+            ]
+          }
+        ])
+        .build();
+
+      await issuesProcessor.processIssues();
+
+      expect(issuesProcessor.staleIssues).toHaveLength(1);
+    });
+
+    test('should stale when set and the issue has only one of the same label', async (): Promise<void> => {
+      expect.assertions(1);
+      issuesProcessor = issuesProcessorBuilder
+        .anyOfIssueLabels('dummy-label-1,dummy-label-2')
+        .issues([
+          {
+            labels: [
+              {
+                name: 'dummy-label-1'
+              }
+            ]
+          }
+        ])
+        .build();
+
+      await issuesProcessor.processIssues();
+
+      expect(issuesProcessor.staleIssues).toHaveLength(1);
+    });
+
+    test('should stale when set and the issue has all the same labels', async (): Promise<void> => {
+      expect.assertions(1);
+      issuesProcessor = issuesProcessorBuilder
+        .anyOfIssueLabels('dummy-label-1,dummy-label-2')
+        .issues([
+          {
+            labels: [
+              {
+                name: 'dummy-label-1'
+              },
+              {
+                name: 'dummy-label-2'
+              }
+            ]
+          }
+        ])
+        .build();
+
+      await issuesProcessor.processIssues();
+
+      expect(issuesProcessor.staleIssues).toHaveLength(1);
+    });
   });
 
-  test('should stale when not set even if the issue has a label', async (): Promise<void> => {
-    expect.assertions(1);
-    issuesProcessor = issuesProcessorBuilder
-      .emptyAnyOfIssueLabels()
-      .issues([{labels: [{name: 'dummy-label'}]}])
-      .build();
+  describe('when the any-of-labels options is set (same as any-of-issue-labels)', (): void => {
+    beforeEach((): void => {
+      issuesProcessorBuilder.anyOfLabels('dummy-label');
+    });
 
-    await issuesProcessor.processIssues();
+    test('should not stale when not set even if the issue has no label', async (): Promise<void> => {
+      expect.assertions(1);
+      issuesProcessor = issuesProcessorBuilder
+        .emptyAnyOfIssueLabels()
+        .issues([{labels: []}])
+        .build();
 
-    expect(issuesProcessor.staleIssues).toHaveLength(1);
+      await issuesProcessor.processIssues();
+
+      expect(issuesProcessor.staleIssues).toHaveLength(0);
+    });
+
+    test('should not stale when not set even if the issue has a label', async (): Promise<void> => {
+      expect.assertions(1);
+      issuesProcessor = issuesProcessorBuilder
+        .emptyAnyOfIssueLabels()
+        .issues([{labels: [{name: 'label'}]}])
+        .build();
+
+      await issuesProcessor.processIssues();
+
+      expect(issuesProcessor.staleIssues).toHaveLength(0);
+    });
+
+    test('should not stale when set and the issue has no label', async (): Promise<void> => {
+      expect.assertions(1);
+      issuesProcessor = issuesProcessorBuilder
+        .anyOfIssueLabels('dummy-label')
+        .issues([{labels: []}])
+        .build();
+
+      await issuesProcessor.processIssues();
+
+      expect(issuesProcessor.staleIssues).toHaveLength(0);
+    });
+
+    test('should not stale when set and the issue has a different label', async (): Promise<void> => {
+      expect.assertions(1);
+      issuesProcessor = issuesProcessorBuilder
+        .anyOfIssueLabels('dummy-label')
+        .issues([
+          {
+            labels: [
+              {
+                name: 'label'
+              }
+            ]
+          }
+        ])
+        .build();
+
+      await issuesProcessor.processIssues();
+
+      expect(issuesProcessor.staleIssues).toHaveLength(0);
+    });
+
+    test('should not stale when set and the issue has different labels', async (): Promise<void> => {
+      expect.assertions(1);
+      issuesProcessor = issuesProcessorBuilder
+        .anyOfIssueLabels('dummy-label')
+        .issues([
+          {
+            labels: [
+              {
+                name: 'label-1'
+              },
+              {
+                name: 'label-2'
+              }
+            ]
+          }
+        ])
+        .build();
+
+      await issuesProcessor.processIssues();
+
+      expect(issuesProcessor.staleIssues).toHaveLength(0);
+    });
+
+    test('should stale when set and the issue has the same label', async (): Promise<void> => {
+      expect.assertions(1);
+      issuesProcessor = issuesProcessorBuilder
+        .anyOfIssueLabels('dummy-label')
+        .issues([
+          {
+            labels: [
+              {
+                name: 'dummy-label'
+              }
+            ]
+          }
+        ])
+        .build();
+
+      await issuesProcessor.processIssues();
+
+      expect(issuesProcessor.staleIssues).toHaveLength(1);
+    });
+
+    test('should stale when set and the issue has only one of the same label', async (): Promise<void> => {
+      expect.assertions(1);
+      issuesProcessor = issuesProcessorBuilder
+        .anyOfIssueLabels('dummy-label-1,dummy-label-2')
+        .issues([
+          {
+            labels: [
+              {
+                name: 'dummy-label-1'
+              }
+            ]
+          }
+        ])
+        .build();
+
+      await issuesProcessor.processIssues();
+
+      expect(issuesProcessor.staleIssues).toHaveLength(1);
+    });
+
+    test('should stale when set and the issue has all the same labels', async (): Promise<void> => {
+      expect.assertions(1);
+      issuesProcessor = issuesProcessorBuilder
+        .anyOfIssueLabels('dummy-label-1,dummy-label-2')
+        .issues([
+          {
+            labels: [
+              {
+                name: 'dummy-label-1'
+              },
+              {
+                name: 'dummy-label-2'
+              }
+            ]
+          }
+        ])
+        .build();
+
+      await issuesProcessor.processIssues();
+
+      expect(issuesProcessor.staleIssues).toHaveLength(1);
+    });
   });
 
-  test('should not stale when set and the issue has no label', async (): Promise<void> => {
-    expect.assertions(1);
-    issuesProcessor = issuesProcessorBuilder
-      .anyOfIssueLabels('dummy-label')
-      .issues([{labels: []}])
-      .build();
+  describe('when the any-of-labels options is set (different than any-of-issue-labels)', (): void => {
+    beforeEach((): void => {
+      issuesProcessorBuilder.anyOfLabels('dummy-any-of-label');
+    });
 
-    await issuesProcessor.processIssues();
+    test('should not stale when not set even if the issue has no label', async (): Promise<void> => {
+      expect.assertions(1);
+      issuesProcessor = issuesProcessorBuilder
+        .emptyAnyOfIssueLabels()
+        .issues([{labels: []}])
+        .build();
 
-    expect(issuesProcessor.staleIssues).toHaveLength(0);
-  });
+      await issuesProcessor.processIssues();
 
-  test('should not stale when set and the issue has a different label', async (): Promise<void> => {
-    expect.assertions(1);
-    issuesProcessor = issuesProcessorBuilder
-      .anyOfIssueLabels('dummy-label')
-      .issues([
-        {
-          labels: [
-            {
-              name: 'label'
-            }
-          ]
-        }
-      ])
-      .build();
+      expect(issuesProcessor.staleIssues).toHaveLength(0);
+    });
 
-    await issuesProcessor.processIssues();
+    test('should not stale when not set even if the issue has a label', async (): Promise<void> => {
+      expect.assertions(1);
+      issuesProcessor = issuesProcessorBuilder
+        .emptyAnyOfIssueLabels()
+        .issues([{labels: [{name: 'label'}]}])
+        .build();
 
-    expect(issuesProcessor.staleIssues).toHaveLength(0);
-  });
+      await issuesProcessor.processIssues();
 
-  test('should not stale when set and the issue has different labels', async (): Promise<void> => {
-    expect.assertions(1);
-    issuesProcessor = issuesProcessorBuilder
-      .anyOfIssueLabels('dummy-label')
-      .issues([
-        {
-          labels: [
-            {
-              name: 'label-1'
-            },
-            {
-              name: 'label-2'
-            }
-          ]
-        }
-      ])
-      .build();
+      expect(issuesProcessor.staleIssues).toHaveLength(0);
+    });
 
-    await issuesProcessor.processIssues();
+    test('should not stale when set and the issue has no label', async (): Promise<void> => {
+      expect.assertions(1);
+      issuesProcessor = issuesProcessorBuilder
+        .anyOfIssueLabels('dummy-label')
+        .issues([{labels: []}])
+        .build();
 
-    expect(issuesProcessor.staleIssues).toHaveLength(0);
-  });
+      await issuesProcessor.processIssues();
 
-  test('should stale when set and the issue has the same label', async (): Promise<void> => {
-    expect.assertions(1);
-    issuesProcessor = issuesProcessorBuilder
-      .anyOfIssueLabels('dummy-label')
-      .issues([
-        {
-          labels: [
-            {
-              name: 'dummy-label'
-            }
-          ]
-        }
-      ])
-      .build();
+      expect(issuesProcessor.staleIssues).toHaveLength(0);
+    });
 
-    await issuesProcessor.processIssues();
+    test('should not stale when set and the issue has a different label', async (): Promise<void> => {
+      expect.assertions(1);
+      issuesProcessor = issuesProcessorBuilder
+        .anyOfIssueLabels('dummy-label')
+        .issues([
+          {
+            labels: [
+              {
+                name: 'label'
+              }
+            ]
+          }
+        ])
+        .build();
 
-    expect(issuesProcessor.staleIssues).toHaveLength(1);
-  });
+      await issuesProcessor.processIssues();
 
-  test('should stale when set and the issue has only one of the same label', async (): Promise<void> => {
-    expect.assertions(1);
-    issuesProcessor = issuesProcessorBuilder
-      .anyOfIssueLabels('dummy-label-1,dummy-label-2')
-      .issues([
-        {
-          labels: [
-            {
-              name: 'dummy-label-1'
-            }
-          ]
-        }
-      ])
-      .build();
+      expect(issuesProcessor.staleIssues).toHaveLength(0);
+    });
 
-    await issuesProcessor.processIssues();
+    test('should not stale when set and the issue has different labels', async (): Promise<void> => {
+      expect.assertions(1);
+      issuesProcessor = issuesProcessorBuilder
+        .anyOfIssueLabels('dummy-label')
+        .issues([
+          {
+            labels: [
+              {
+                name: 'label-1'
+              },
+              {
+                name: 'label-2'
+              }
+            ]
+          }
+        ])
+        .build();
 
-    expect(issuesProcessor.staleIssues).toHaveLength(1);
-  });
+      await issuesProcessor.processIssues();
 
-  test('should stale when set and the issue has all the same labels', async (): Promise<void> => {
-    expect.assertions(1);
-    issuesProcessor = issuesProcessorBuilder
-      .anyOfIssueLabels('dummy-label-1,dummy-label-2')
-      .issues([
-        {
-          labels: [
-            {
-              name: 'dummy-label-1'
-            },
-            {
-              name: 'dummy-label-2'
-            }
-          ]
-        }
-      ])
-      .build();
+      expect(issuesProcessor.staleIssues).toHaveLength(0);
+    });
 
-    await issuesProcessor.processIssues();
+    test('should stale when set and the issue has the same label', async (): Promise<void> => {
+      expect.assertions(1);
+      issuesProcessor = issuesProcessorBuilder
+        .anyOfIssueLabels('dummy-label')
+        .issues([
+          {
+            labels: [
+              {
+                name: 'dummy-label'
+              }
+            ]
+          }
+        ])
+        .build();
 
-    expect(issuesProcessor.staleIssues).toHaveLength(1);
+      await issuesProcessor.processIssues();
+
+      expect(issuesProcessor.staleIssues).toHaveLength(1);
+    });
+
+    test('should stale when set and the issue has only one of the same label', async (): Promise<void> => {
+      expect.assertions(1);
+      issuesProcessor = issuesProcessorBuilder
+        .anyOfIssueLabels('dummy-label-1,dummy-label-2')
+        .issues([
+          {
+            labels: [
+              {
+                name: 'dummy-label-1'
+              }
+            ]
+          }
+        ])
+        .build();
+
+      await issuesProcessor.processIssues();
+
+      expect(issuesProcessor.staleIssues).toHaveLength(1);
+    });
+
+    test('should stale when set and the issue has all the same labels', async (): Promise<void> => {
+      expect.assertions(1);
+      issuesProcessor = issuesProcessorBuilder
+        .anyOfIssueLabels('dummy-label-1,dummy-label-2')
+        .issues([
+          {
+            labels: [
+              {
+                name: 'dummy-label-1'
+              },
+              {
+                name: 'dummy-label-2'
+              }
+            ]
+          }
+        ])
+        .build();
+
+      await issuesProcessor.processIssues();
+
+      expect(issuesProcessor.staleIssues).toHaveLength(1);
+    });
   });
 });
 
@@ -309,156 +611,463 @@ describe('any-of-pr-labels option', (): void => {
     issuesProcessorBuilder = new IssuesProcessorBuilder();
   });
 
-  test('should stale when not set even if the pr has no label', async (): Promise<void> => {
-    expect.assertions(1);
-    issuesProcessor = issuesProcessorBuilder
-      .emptyAnyOfPrLabels()
-      .prs([{labels: []}])
-      .build();
+  describe('when the any-of-labels options is not set', (): void => {
+    beforeEach((): void => {
+      issuesProcessorBuilder.emptyAnyOfLabels();
+    });
 
-    await issuesProcessor.processIssues();
+    test('should stale when not set even if the pr has no label', async (): Promise<void> => {
+      expect.assertions(1);
+      issuesProcessor = issuesProcessorBuilder
+        .emptyAnyOfPrLabels()
+        .prs([{labels: []}])
+        .build();
 
-    expect(issuesProcessor.staleIssues).toHaveLength(1);
+      await issuesProcessor.processIssues();
+
+      expect(issuesProcessor.staleIssues).toHaveLength(1);
+    });
+
+    test('should stale when not set even if the pr has a label', async (): Promise<void> => {
+      expect.assertions(1);
+      issuesProcessor = issuesProcessorBuilder
+        .emptyAnyOfPrLabels()
+        .prs([{labels: [{name: 'dummy-label'}]}])
+        .build();
+
+      await issuesProcessor.processIssues();
+
+      expect(issuesProcessor.staleIssues).toHaveLength(1);
+    });
+
+    test('should not stale when set and the pr has no label', async (): Promise<void> => {
+      expect.assertions(1);
+      issuesProcessor = issuesProcessorBuilder
+        .anyOfPrLabels('dummy-label')
+        .prs([{labels: []}])
+        .build();
+
+      await issuesProcessor.processIssues();
+
+      expect(issuesProcessor.staleIssues).toHaveLength(0);
+    });
+
+    test('should not stale when set and the pr has a different label', async (): Promise<void> => {
+      expect.assertions(1);
+      issuesProcessor = issuesProcessorBuilder
+        .anyOfPrLabels('dummy-label')
+        .prs([
+          {
+            labels: [
+              {
+                name: 'label'
+              }
+            ]
+          }
+        ])
+        .build();
+
+      await issuesProcessor.processIssues();
+
+      expect(issuesProcessor.staleIssues).toHaveLength(0);
+    });
+
+    test('should not stale when set and the pr has different labels', async (): Promise<void> => {
+      expect.assertions(1);
+      issuesProcessor = issuesProcessorBuilder
+        .anyOfPrLabels('dummy-label')
+        .prs([
+          {
+            labels: [
+              {
+                name: 'label-1'
+              },
+              {
+                name: 'label-2'
+              }
+            ]
+          }
+        ])
+        .build();
+
+      await issuesProcessor.processIssues();
+
+      expect(issuesProcessor.staleIssues).toHaveLength(0);
+    });
+
+    test('should stale when set and the pr has the same label', async (): Promise<void> => {
+      expect.assertions(1);
+      issuesProcessor = issuesProcessorBuilder
+        .anyOfPrLabels('dummy-label')
+        .prs([
+          {
+            labels: [
+              {
+                name: 'dummy-label'
+              }
+            ]
+          }
+        ])
+        .build();
+
+      await issuesProcessor.processIssues();
+
+      expect(issuesProcessor.staleIssues).toHaveLength(1);
+    });
+
+    test('should stale when set and the pr has only one of the same label', async (): Promise<void> => {
+      expect.assertions(1);
+      issuesProcessor = issuesProcessorBuilder
+        .anyOfPrLabels('dummy-label-1,dummy-label-2')
+        .prs([
+          {
+            labels: [
+              {
+                name: 'dummy-label-1'
+              }
+            ]
+          }
+        ])
+        .build();
+
+      await issuesProcessor.processIssues();
+
+      expect(issuesProcessor.staleIssues).toHaveLength(1);
+    });
+
+    test('should stale when set and the pr has all the same labels', async (): Promise<void> => {
+      expect.assertions(1);
+      issuesProcessor = issuesProcessorBuilder
+        .anyOfPrLabels('dummy-label-1,dummy-label-2')
+        .prs([
+          {
+            labels: [
+              {
+                name: 'dummy-label-1'
+              },
+              {
+                name: 'dummy-label-2'
+              }
+            ]
+          }
+        ])
+        .build();
+
+      await issuesProcessor.processIssues();
+
+      expect(issuesProcessor.staleIssues).toHaveLength(1);
+    });
   });
 
-  test('should stale when not set even if the pr has a label', async (): Promise<void> => {
-    expect.assertions(1);
-    issuesProcessor = issuesProcessorBuilder
-      .emptyAnyOfPrLabels()
-      .prs([{labels: [{name: 'dummy-label'}]}])
-      .build();
+  describe('when the any-of-labels options is set (same as any-of-pr-labels)', (): void => {
+    beforeEach((): void => {
+      issuesProcessorBuilder.anyOfLabels('dummy-label');
+    });
 
-    await issuesProcessor.processIssues();
+    test('should not stale when not set even if the pr has no label', async (): Promise<void> => {
+      expect.assertions(1);
+      issuesProcessor = issuesProcessorBuilder
+        .emptyAnyOfPrLabels()
+        .prs([{labels: []}])
+        .build();
 
-    expect(issuesProcessor.staleIssues).toHaveLength(1);
+      await issuesProcessor.processIssues();
+
+      expect(issuesProcessor.staleIssues).toHaveLength(0);
+    });
+
+    test('should not stale when not set even if the pr has a label', async (): Promise<void> => {
+      expect.assertions(1);
+      issuesProcessor = issuesProcessorBuilder
+        .emptyAnyOfPrLabels()
+        .prs([{labels: [{name: 'label'}]}])
+        .build();
+
+      await issuesProcessor.processIssues();
+
+      expect(issuesProcessor.staleIssues).toHaveLength(0);
+    });
+
+    test('should not stale when set and the pr has no label', async (): Promise<void> => {
+      expect.assertions(1);
+      issuesProcessor = issuesProcessorBuilder
+        .anyOfPrLabels('dummy-label')
+        .prs([{labels: []}])
+        .build();
+
+      await issuesProcessor.processIssues();
+
+      expect(issuesProcessor.staleIssues).toHaveLength(0);
+    });
+
+    test('should not stale when set and the pr has a different label', async (): Promise<void> => {
+      expect.assertions(1);
+      issuesProcessor = issuesProcessorBuilder
+        .anyOfPrLabels('dummy-label')
+        .prs([
+          {
+            labels: [
+              {
+                name: 'label'
+              }
+            ]
+          }
+        ])
+        .build();
+
+      await issuesProcessor.processIssues();
+
+      expect(issuesProcessor.staleIssues).toHaveLength(0);
+    });
+
+    test('should not stale when set and the pr has different labels', async (): Promise<void> => {
+      expect.assertions(1);
+      issuesProcessor = issuesProcessorBuilder
+        .anyOfPrLabels('dummy-label')
+        .prs([
+          {
+            labels: [
+              {
+                name: 'label-1'
+              },
+              {
+                name: 'label-2'
+              }
+            ]
+          }
+        ])
+        .build();
+
+      await issuesProcessor.processIssues();
+
+      expect(issuesProcessor.staleIssues).toHaveLength(0);
+    });
+
+    test('should stale when set and the pr has the same label', async (): Promise<void> => {
+      expect.assertions(1);
+      issuesProcessor = issuesProcessorBuilder
+        .anyOfPrLabels('dummy-label')
+        .prs([
+          {
+            labels: [
+              {
+                name: 'dummy-label'
+              }
+            ]
+          }
+        ])
+        .build();
+
+      await issuesProcessor.processIssues();
+
+      expect(issuesProcessor.staleIssues).toHaveLength(1);
+    });
+
+    test('should stale when set and the pr has only one of the same label', async (): Promise<void> => {
+      expect.assertions(1);
+      issuesProcessor = issuesProcessorBuilder
+        .anyOfPrLabels('dummy-label-1,dummy-label-2')
+        .prs([
+          {
+            labels: [
+              {
+                name: 'dummy-label-1'
+              }
+            ]
+          }
+        ])
+        .build();
+
+      await issuesProcessor.processIssues();
+
+      expect(issuesProcessor.staleIssues).toHaveLength(1);
+    });
+
+    test('should stale when set and the pr has all the same labels', async (): Promise<void> => {
+      expect.assertions(1);
+      issuesProcessor = issuesProcessorBuilder
+        .anyOfPrLabels('dummy-label-1,dummy-label-2')
+        .prs([
+          {
+            labels: [
+              {
+                name: 'dummy-label-1'
+              },
+              {
+                name: 'dummy-label-2'
+              }
+            ]
+          }
+        ])
+        .build();
+
+      await issuesProcessor.processIssues();
+
+      expect(issuesProcessor.staleIssues).toHaveLength(1);
+    });
   });
 
-  test('should not stale when set and the pr has no label', async (): Promise<void> => {
-    expect.assertions(1);
-    issuesProcessor = issuesProcessorBuilder
-      .anyOfPrLabels('dummy-label')
-      .prs([{labels: []}])
-      .build();
+  describe('when the any-of-labels options is set (different than any-of-pr-labels)', (): void => {
+    beforeEach((): void => {
+      issuesProcessorBuilder.anyOfLabels('dummy-any-of-label');
+    });
 
-    await issuesProcessor.processIssues();
+    test('should not stale when not set even if the pr has no label', async (): Promise<void> => {
+      expect.assertions(1);
+      issuesProcessor = issuesProcessorBuilder
+        .emptyAnyOfPrLabels()
+        .prs([{labels: []}])
+        .build();
 
-    expect(issuesProcessor.staleIssues).toHaveLength(0);
-  });
+      await issuesProcessor.processIssues();
 
-  test('should not stale when set and the pr has a different label', async (): Promise<void> => {
-    expect.assertions(1);
-    issuesProcessor = issuesProcessorBuilder
-      .anyOfPrLabels('dummy-label')
-      .prs([
-        {
-          labels: [
-            {
-              name: 'label'
-            }
-          ]
-        }
-      ])
-      .build();
+      expect(issuesProcessor.staleIssues).toHaveLength(0);
+    });
 
-    await issuesProcessor.processIssues();
+    test('should not stale when not set even if the pr has a label', async (): Promise<void> => {
+      expect.assertions(1);
+      issuesProcessor = issuesProcessorBuilder
+        .emptyAnyOfPrLabels()
+        .prs([{labels: [{name: 'label'}]}])
+        .build();
 
-    expect(issuesProcessor.staleIssues).toHaveLength(0);
-  });
+      await issuesProcessor.processIssues();
 
-  test('should not stale when set and the pr has different labels', async (): Promise<void> => {
-    expect.assertions(1);
-    issuesProcessor = issuesProcessorBuilder
-      .anyOfPrLabels('dummy-label')
-      .prs([
-        {
-          labels: [
-            {
-              name: 'label-1'
-            },
-            {
-              name: 'label-2'
-            }
-          ]
-        }
-      ])
-      .build();
+      expect(issuesProcessor.staleIssues).toHaveLength(0);
+    });
 
-    await issuesProcessor.processIssues();
+    test('should not stale when set and the pr has no label', async (): Promise<void> => {
+      expect.assertions(1);
+      issuesProcessor = issuesProcessorBuilder
+        .anyOfPrLabels('dummy-label')
+        .prs([{labels: []}])
+        .build();
 
-    expect(issuesProcessor.staleIssues).toHaveLength(0);
-  });
+      await issuesProcessor.processIssues();
 
-  test('should stale when set and the pr has the same label', async (): Promise<void> => {
-    expect.assertions(1);
-    issuesProcessor = issuesProcessorBuilder
-      .anyOfPrLabels('dummy-label')
-      .prs([
-        {
-          labels: [
-            {
-              name: 'dummy-label'
-            }
-          ]
-        }
-      ])
-      .build();
+      expect(issuesProcessor.staleIssues).toHaveLength(0);
+    });
 
-    await issuesProcessor.processIssues();
+    test('should not stale when set and the pr has a different label', async (): Promise<void> => {
+      expect.assertions(1);
+      issuesProcessor = issuesProcessorBuilder
+        .anyOfPrLabels('dummy-label')
+        .prs([
+          {
+            labels: [
+              {
+                name: 'label'
+              }
+            ]
+          }
+        ])
+        .build();
 
-    expect(issuesProcessor.staleIssues).toHaveLength(1);
-  });
+      await issuesProcessor.processIssues();
 
-  test('should stale when set and the pr has only one of the same label', async (): Promise<void> => {
-    expect.assertions(1);
-    issuesProcessor = issuesProcessorBuilder
-      .anyOfPrLabels('dummy-label-1,dummy-label-2')
-      .prs([
-        {
-          labels: [
-            {
-              name: 'dummy-label-1'
-            }
-          ]
-        }
-      ])
-      .build();
+      expect(issuesProcessor.staleIssues).toHaveLength(0);
+    });
 
-    await issuesProcessor.processIssues();
+    test('should not stale when set and the pr has different labels', async (): Promise<void> => {
+      expect.assertions(1);
+      issuesProcessor = issuesProcessorBuilder
+        .anyOfPrLabels('dummy-label')
+        .prs([
+          {
+            labels: [
+              {
+                name: 'label-1'
+              },
+              {
+                name: 'label-2'
+              }
+            ]
+          }
+        ])
+        .build();
 
-    expect(issuesProcessor.staleIssues).toHaveLength(1);
-  });
+      await issuesProcessor.processIssues();
 
-  test('should stale when set and the pr has all the same labels', async (): Promise<void> => {
-    expect.assertions(1);
-    issuesProcessor = issuesProcessorBuilder
-      .anyOfPrLabels('dummy-label-1,dummy-label-2')
-      .prs([
-        {
-          labels: [
-            {
-              name: 'dummy-label-1'
-            },
-            {
-              name: 'dummy-label-2'
-            }
-          ]
-        }
-      ])
-      .build();
+      expect(issuesProcessor.staleIssues).toHaveLength(0);
+    });
 
-    await issuesProcessor.processIssues();
+    test('should stale when set and the pr has the same label', async (): Promise<void> => {
+      expect.assertions(1);
+      issuesProcessor = issuesProcessorBuilder
+        .anyOfPrLabels('dummy-label')
+        .prs([
+          {
+            labels: [
+              {
+                name: 'dummy-label'
+              }
+            ]
+          }
+        ])
+        .build();
 
-    expect(issuesProcessor.staleIssues).toHaveLength(1);
+      await issuesProcessor.processIssues();
+
+      expect(issuesProcessor.staleIssues).toHaveLength(1);
+    });
+
+    test('should stale when set and the pr has only one of the same label', async (): Promise<void> => {
+      expect.assertions(1);
+      issuesProcessor = issuesProcessorBuilder
+        .anyOfPrLabels('dummy-label-1,dummy-label-2')
+        .prs([
+          {
+            labels: [
+              {
+                name: 'dummy-label-1'
+              }
+            ]
+          }
+        ])
+        .build();
+
+      await issuesProcessor.processIssues();
+
+      expect(issuesProcessor.staleIssues).toHaveLength(1);
+    });
+
+    test('should stale when set and the pr has all the same labels', async (): Promise<void> => {
+      expect.assertions(1);
+      issuesProcessor = issuesProcessorBuilder
+        .anyOfPrLabels('dummy-label-1,dummy-label-2')
+        .prs([
+          {
+            labels: [
+              {
+                name: 'dummy-label-1'
+              },
+              {
+                name: 'dummy-label-2'
+              }
+            ]
+          }
+        ])
+        .build();
+
+      await issuesProcessor.processIssues();
+
+      expect(issuesProcessor.staleIssues).toHaveLength(1);
+    });
   });
 });
 
 class IssuesProcessorBuilder {
   private _options: IIssuesProcessorOptions = {
     ...DefaultProcessorOptions,
-    daysBeforeIssueStale: 0,
-    daysBeforePrStale: 0
+    daysBeforeStale: 0
   };
   private _issues: Issue[] = [];
+
+  anyOfLabels(labels: string): IssuesProcessorBuilder {
+    this._options.anyOfLabels = labels;
+
+    return this;
+  }
 
   anyOfIssueLabels(labels: string): IssuesProcessorBuilder {
     this._options.anyOfIssueLabels = labels;
@@ -470,6 +1079,10 @@ class IssuesProcessorBuilder {
     this._options.anyOfPrLabels = labels;
 
     return this;
+  }
+
+  emptyAnyOfLabels(): IssuesProcessorBuilder {
+    return this.anyOfLabels('');
   }
 
   emptyAnyOfIssueLabels(): IssuesProcessorBuilder {

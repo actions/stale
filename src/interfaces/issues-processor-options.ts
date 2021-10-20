@@ -6,39 +6,49 @@ export interface IIssuesProcessorOptions {
   stalePrMessage: string;
   closeIssueMessage: string;
   closePrMessage: string;
-  daysBeforeIssueStale: number;
-  daysBeforePrStale: number;
-  daysBeforeIssueClose: number;
-  daysBeforePrClose: number;
+  daysBeforeStale: number;
+  daysBeforeIssueStale: number; // Could be NaN
+  daysBeforePrStale: number; // Could be NaN
+  daysBeforeClose: number;
+  daysBeforeIssueClose: number; // Could be NaN
+  daysBeforePrClose: number; // Could be NaN
   staleIssueLabel: string;
   closeIssueLabel: string;
   exemptIssueLabels: string;
   stalePrLabel: string;
   closePrLabel: string;
   exemptPrLabels: string;
+  onlyLabels: string;
   onlyIssueLabels: string;
   onlyPrLabels: string;
+  anyOfLabels: string;
   anyOfIssueLabels: string;
   anyOfPrLabels: string;
   operationsPerRun: number;
-  removeIssueStaleWhenUpdated: boolean;
-  removePrStaleWhenUpdated: boolean;
+  removeStaleWhenUpdated: boolean;
+  removeIssueStaleWhenUpdated: boolean | undefined;
+  removePrStaleWhenUpdated: boolean | undefined;
   debugOnly: boolean;
   ascending: boolean;
   deleteBranch: boolean;
   startDate: IsoOrRfcDateString | undefined; // Should be ISO 8601 or RFC 2822
+  exemptMilestones: string;
   exemptIssueMilestones: string;
   exemptPrMilestones: string;
-  exemptAllIssueMilestones: boolean;
-  exemptAllPrMilestones: boolean;
+  exemptAllMilestones: boolean;
+  exemptAllIssueMilestones: boolean | undefined;
+  exemptAllPrMilestones: boolean | undefined;
+  exemptAssignees: string;
   exemptIssueAssignees: string;
   exemptPrAssignees: string;
-  exemptAllIssueAssignees: boolean;
-  exemptAllPrAssignees: boolean;
+  exemptAllAssignees: boolean;
+  exemptAllIssueAssignees: boolean | undefined;
+  exemptAllPrAssignees: boolean | undefined;
   enableStatistics: boolean;
   labelsToRemoveWhenUnstale: string;
   labelsToAddWhenUnstale: string;
-  ignoreIssueUpdates: boolean;
-  ignorePrUpdates: boolean;
+  ignoreUpdates: boolean;
+  ignoreIssueUpdates: boolean | undefined;
+  ignorePrUpdates: boolean | undefined;
   exemptDraftPr: boolean;
 }

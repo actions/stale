@@ -6,8 +6,8 @@
   "main": "lib/main.js",
   "scripts": {
     "build": "tsc --project tsconfig.app.json",
-    "format": "prettier --write --ignore-unknown **/*.{md,json,yml,ts}",
-    "format-check": "prettier --check --ignore-unknown **/*.{md,json,yml,ts}",
+    "format": "prettier --write --ignore-unknown **/*.{json,yml,ts}",
+    "format-check": "prettier --check --ignore-unknown **/*.{json,yml,ts}",
     "lint": "eslint src/**/*.ts",
     "lint:fix": "eslint src/**/*.ts --fix",
     "lint:all": "npm run format-check && npm run lint",

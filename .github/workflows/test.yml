@@ -1,0 +1,28 @@
+name: 'Build'
+on: # rebuild any PRs and main branch changes
+  pull_request:
+  push:
+    branches:
+      - main
+      - 'releases/*'
+
+jobs:
+  build: # make sure build/ci work properly
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - run: |
+          npm ci
+          npm run all:ci
+  test: # make sure the action works on a clean machine without building
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: ./
+        id: stale
+        with:
+          stale-issue-message: 'This issue is stale'
+          stale-pr-message: 'This PR is stale'
+          debug-only: true
+      - name: Print outputs
+        run: echo ${{ join(steps.stale.outputs.*, ',') }}

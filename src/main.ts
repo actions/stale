@@ -1,180 +1,152 @@
 import * as core from '@actions/core';
-import * as github from '@actions/github';
-import * as Octokit from '@octokit/rest';
+import {IssuesProcessor} from './classes/issues-processor';
+import {isValidDate} from './functions/dates/is-valid-date';
+import {IIssuesProcessorOptions} from './interfaces/issues-processor-options';
+import {Issue} from './classes/issue';
 
-type Issue = Octokit.IssuesListForRepoResponseItem;
-type IssueLabel = Octokit.IssuesListForRepoResponseItemLabelsItem;
-
-type Args = {
-  repoToken: string;
-  staleIssueMessage: string;
-  stalePrMessage: string;
-  daysBeforeStale: number;
-  daysBeforeClose: number;
-  staleIssueLabel: string;
-  exemptIssueLabel: string;
-  stalePrLabel: string;
-  exemptPrLabel: string;
-  operationsPerRun: number;
-};
-
-async function run() {
+async function _run(): Promise<void> {
   try {
-    const args = getAndValidateArgs();
+    const args = _getAndValidateArgs();
 
-    const client = new github.GitHub(args.repoToken);
-    await processIssues(client, args, args.operationsPerRun);
+    const issueProcessor: IssuesProcessor = new IssuesProcessor(args);
+    await issueProcessor.processIssues();
+
+    await processOutput(
+      issueProcessor.staleIssues,
+      issueProcessor.closedIssues
+    );
   } catch (error) {
     core.error(error);
     core.setFailed(error.message);
   }
 }
 
-async function processIssues(
-  client: github.GitHub,
-  args: Args,
-  operationsLeft: number,
-  page: number = 1
-): Promise<number> {
-  const issues = await client.issues.listForRepo({
-    owner: github.context.repo.owner,
-    repo: github.context.repo.repo,
-    state: 'open',
-    per_page: 100,
-    page: page
-  });
-
-  operationsLeft -= 1;
-
-  if (issues.data.length === 0 || operationsLeft === 0) {
-    return operationsLeft;
-  }
-
-  for (var issue of issues.data.values()) {
-    core.debug(`found issue: ${issue.title} last updated ${issue.updated_at}`);
-    let isPr = !!issue.pull_request;
-
-    let staleMessage = isPr ? args.stalePrMessage : args.staleIssueMessage;
-    if (!staleMessage) {
-      core.debug(`skipping ${isPr ? 'pr' : 'issue'} due to empty message`);
-      continue;
-    }
-
-    let staleLabel = isPr ? args.stalePrLabel : args.staleIssueLabel;
-    let exemptLabel = isPr ? args.exemptPrLabel : args.exemptIssueLabel;
-
-    if (exemptLabel && isLabeled(issue, exemptLabel)) {
-      continue;
-    } else if (isLabeled(issue, staleLabel)) {
-      if (wasLastUpdatedBefore(issue, args.daysBeforeClose)) {
-        operationsLeft -= await closeIssue(client, issue);
-      } else {
-        continue;
-      }
-    } else if (wasLastUpdatedBefore(issue, args.daysBeforeStale)) {
-      operationsLeft -= await markStale(
-        client,
-        issue,
-        staleMessage,
-        staleLabel
-      );
-    }
-
-    if (operationsLeft <= 0) {
-      core.warning(
-        `performed ${args.operationsPerRun} operations, exiting to avoid rate limit`
-      );
-      return 0;
-    }
-  }
-  return await processIssues(client, args, operationsLeft, page + 1);
-}
-
-function isLabeled(issue: Issue, label: string): boolean {
-  const labelComparer: (l: IssueLabel) => boolean = l =>
-    label.localeCompare(l.name, undefined, {sensitivity: 'accent'}) === 0;
-  return issue.labels.filter(labelComparer).length > 0;
-}
-
-function wasLastUpdatedBefore(issue: Issue, num_days: number): boolean {
-  const daysInMillis = 1000 * 60 * 60 * 24 * num_days;
-  const millisSinceLastUpdated =
-    new Date().getTime() - new Date(issue.updated_at).getTime();
-  return millisSinceLastUpdated >= daysInMillis;
-}
-
-async function markStale(
-  client: github.GitHub,
-  issue: Issue,
-  staleMessage: string,
-  staleLabel: string
-): Promise<number> {
-  core.debug(`marking issue${issue.title} as stale`);
-
-  await client.issues.createComment({
-    owner: github.context.repo.owner,
-    repo: github.context.repo.repo,
-    issue_number: issue.number,
-    body: staleMessage
-  });
-
-  await client.issues.addLabels({
-    owner: github.context.repo.owner,
-    repo: github.context.repo.repo,
-    issue_number: issue.number,
-    labels: [staleLabel]
-  });
-
-  return 2; // operations performed
-}
-
-async function closeIssue(
-  client: github.GitHub,
-  issue: Issue
-): Promise<number> {
-  core.debug(`closing issue ${issue.title} for being stale`);
-
-  await client.issues.update({
-    owner: github.context.repo.owner,
-    repo: github.context.repo.repo,
-    issue_number: issue.number,
-    state: 'closed'
-  });
-
-  return 1; // operations performed
-}
-
-function getAndValidateArgs(): Args {
-  const args = {
-    repoToken: core.getInput('repo-token', {required: true}),
+function _getAndValidateArgs(): IIssuesProcessorOptions {
+  const args: IIssuesProcessorOptions = {
+    repoToken: core.getInput('repo-token'),
     staleIssueMessage: core.getInput('stale-issue-message'),
     stalePrMessage: core.getInput('stale-pr-message'),
+    closeIssueMessage: core.getInput('close-issue-message'),
+    closePrMessage: core.getInput('close-pr-message'),
     daysBeforeStale: parseInt(
       core.getInput('days-before-stale', {required: true})
     ),
+    daysBeforeIssueStale: parseInt(core.getInput('days-before-issue-stale')),
+    daysBeforePrStale: parseInt(core.getInput('days-before-pr-stale')),
     daysBeforeClose: parseInt(
       core.getInput('days-before-close', {required: true})
     ),
+    daysBeforeIssueClose: parseInt(core.getInput('days-before-issue-close')),
+    daysBeforePrClose: parseInt(core.getInput('days-before-pr-close')),
     staleIssueLabel: core.getInput('stale-issue-label', {required: true}),
-    exemptIssueLabel: core.getInput('exempt-issue-label'),
+    closeIssueLabel: core.getInput('close-issue-label'),
+    exemptIssueLabels: core.getInput('exempt-issue-labels'),
     stalePrLabel: core.getInput('stale-pr-label', {required: true}),
-    exemptPrLabel: core.getInput('exempt-pr-label'),
+    closePrLabel: core.getInput('close-pr-label'),
+    exemptPrLabels: core.getInput('exempt-pr-labels'),
+    onlyLabels: core.getInput('only-labels'),
+    onlyIssueLabels: core.getInput('only-issue-labels'),
+    onlyPrLabels: core.getInput('only-pr-labels'),
+    anyOfLabels: core.getInput('any-of-labels'),
+    anyOfIssueLabels: core.getInput('any-of-issue-labels'),
+    anyOfPrLabels: core.getInput('any-of-pr-labels'),
     operationsPerRun: parseInt(
       core.getInput('operations-per-run', {required: true})
-    )
+    ),
+    removeStaleWhenUpdated: !(
+      core.getInput('remove-stale-when-updated') === 'false'
+    ),
+    removeIssueStaleWhenUpdated: _toOptionalBoolean(
+      'remove-issue-stale-when-updated'
+    ),
+    removePrStaleWhenUpdated: _toOptionalBoolean(
+      'remove-pr-stale-when-updated'
+    ),
+    debugOnly: core.getInput('debug-only') === 'true',
+    ascending: core.getInput('ascending') === 'true',
+    deleteBranch: core.getInput('delete-branch') === 'true',
+    startDate:
+      core.getInput('start-date') !== ''
+        ? core.getInput('start-date')
+        : undefined,
+    exemptMilestones: core.getInput('exempt-milestones'),
+    exemptIssueMilestones: core.getInput('exempt-issue-milestones'),
+    exemptPrMilestones: core.getInput('exempt-pr-milestones'),
+    exemptAllMilestones: core.getInput('exempt-all-milestones') === 'true',
+    exemptAllIssueMilestones: _toOptionalBoolean('exempt-all-issue-milestones'),
+    exemptAllPrMilestones: _toOptionalBoolean('exempt-all-pr-milestones'),
+    exemptAssignees: core.getInput('exempt-assignees'),
+    exemptIssueAssignees: core.getInput('exempt-issue-assignees'),
+    exemptPrAssignees: core.getInput('exempt-pr-assignees'),
+    exemptAllAssignees: core.getInput('exempt-all-assignees') === 'true',
+    exemptAllIssueAssignees: _toOptionalBoolean('exempt-all-issue-assignees'),
+    exemptAllPrAssignees: _toOptionalBoolean('exempt-all-pr-assignees'),
+    enableStatistics: core.getInput('enable-statistics') === 'true',
+    labelsToRemoveWhenUnstale: core.getInput('labels-to-remove-when-unstale'),
+    labelsToAddWhenUnstale: core.getInput('labels-to-add-when-unstale'),
+    ignoreUpdates: core.getInput('ignore-updates') === 'true',
+    ignoreIssueUpdates: _toOptionalBoolean('ignore-issue-updates'),
+    ignorePrUpdates: _toOptionalBoolean('ignore-pr-updates'),
+    exemptDraftPr: core.getInput('exempt-draft-pr') === 'true'
   };
 
-  for (var numberInput of [
+  for (const numberInput of [
     'days-before-stale',
     'days-before-close',
     'operations-per-run'
   ]) {
     if (isNaN(parseInt(core.getInput(numberInput)))) {
-      throw Error(`input ${numberInput} did not parse to a valid integer`);
+      const errorMessage = `Option "${numberInput}" did not parse to a valid integer`;
+      core.setFailed(errorMessage);
+      throw new Error(errorMessage);
+    }
+  }
+
+  for (const optionalDateInput of ['start-date']) {
+    // Ignore empty dates because it is considered as the right type for a default value (so a valid one)
+    if (core.getInput(optionalDateInput) !== '') {
+      if (!isValidDate(new Date(core.getInput(optionalDateInput)))) {
+        const errorMessage = `Option "${optionalDateInput}" did not parse to a valid date`;
+        core.setFailed(errorMessage);
+        throw new Error(errorMessage);
+      }
     }
   }
 
   return args;
 }
 
-run();
+async function processOutput(
+  staledIssues: Issue[],
+  closedIssues: Issue[]
+): Promise<void> {
+  core.setOutput('staled-issues-prs', JSON.stringify(staledIssues));
+  core.setOutput('closed-issues-prs', JSON.stringify(closedIssues));
+}
+
+/**
+ * @description
+ * From an argument name, get the value as an optional boolean
+ * This is very useful for all the arguments that override others
+ * It will allow us to easily use the original one when the return value is `undefined`
+ * Which is different from `true` or `false` that consider the argument as set
+ *
+ * @param {Readonly<string>} argumentName The name of the argument to check
+ *
+ * @returns {boolean | undefined} The value matching the given argument name
+ */
+function _toOptionalBoolean(
+  argumentName: Readonly<string>
+): boolean | undefined {
+  const argument: string = core.getInput(argumentName);
+
+  if (argument === 'true') {
+    return true;
+  } else if (argument === 'false') {
+    return false;
+  }
+
+  return undefined;
+}
+
+void _run();

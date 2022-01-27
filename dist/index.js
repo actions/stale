@@ -613,17 +613,17 @@ class IssuesProcessor {
         });
     }
     // Grab comments for an issue since a given date
-    listIssueComments(issueNumber, sinceDate) {
+    listIssueComments(issue, sinceDate) {
         var _a;
         return __awaiter(this, void 0, void 0, function* () {
             // Find any comments since date on the given issue
             try {
-                this.operations.consumeOperation();
+                this._consumeIssueOperation(issue);
                 (_a = this.statistics) === null || _a === void 0 ? void 0 : _a.incrementFetchedItemsCommentsCount();
                 const comments = yield this.client.issues.listComments({
                     owner: github_1.context.repo.owner,
                     repo: github_1.context.repo.repo,
-                    issue_number: issueNumber,
+                    issue_number: issue.number,
                     since: sinceDate
                 });
                 return comments.data;
@@ -763,7 +763,7 @@ class IssuesProcessor {
                 return true;
             }
             // find any comments since the date
-            const comments = yield this.listIssueComments(issue.number, sinceDate);
+            const comments = yield this.listIssueComments(issue, sinceDate);
             const filteredComments = comments.filter(comment => comment.user.type === 'User' &&
                 comment.body.toLowerCase() !== staleMessage.toLowerCase());
             issueLogger.info(`Comments that are not the stale comment or another bot: ${logger_service_1.LoggerService.cyan(filteredComments.length)}`);
@@ -1014,7 +1014,7 @@ class IssuesProcessor {
             issueLogger.info(`Adding all the labels specified via the ${this._logger.createOptionLink(option_1.Option.LabelsToAddWhenUnstale)} option.`);
             this.addedLabelIssues.push(issue);
             try {
-                this.operations.consumeOperation();
+                this._consumeIssueOperation(issue);
                 (_a = this.statistics) === null || _a === void 0 ? void 0 : _a.incrementAddedItemsLabel(issue);
                 if (!this.options.debugOnly) {
                     yield this.client.issues.addLabels({

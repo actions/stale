@@ -510,17 +510,17 @@ export class IssuesProcessor {
 
   // Grab comments for an issue since a given date
   async listIssueComments(
-    issueNumber: Readonly<number>,
+    issue: Readonly<Issue>,
     sinceDate: Readonly<string>
   ): Promise<IComment[]> {
     // Find any comments since date on the given issue
     try {
-      this.operations.consumeOperation();
+      this._consumeIssueOperation(issue);
       this.statistics?.incrementFetchedItemsCommentsCount();
       const comments = await this.client.issues.listComments({
         owner: context.repo.owner,
         repo: context.repo.repo,
-        issue_number: issueNumber,
+        issue_number: issue.number,
         since: sinceDate
       });
       return comments.data;
@@ -734,7 +734,7 @@ export class IssuesProcessor {
     }
 
     // find any comments since the date
-    const comments = await this.listIssueComments(issue.number, sinceDate);
+    const comments = await this.listIssueComments(issue, sinceDate);
 
     const filteredComments = comments.filter(
       comment =>
@@ -1065,7 +1065,7 @@ export class IssuesProcessor {
     this.addedLabelIssues.push(issue);
 
     try {
-      this.operations.consumeOperation();
+      this._consumeIssueOperation(issue);
       this.statistics?.incrementAddedItemsLabel(issue);
       if (!this.options.debugOnly) {
         await this.client.issues.addLabels({

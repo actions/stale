@@ -9,7 +9,7 @@ export class IssuesProcessorMock extends IssuesProcessor {
     options: IIssuesProcessorOptions,
     getIssues?: (page: number) => Promise<Issue[]>,
     listIssueComments?: (
-      issueNumber: number,
+      issue: Issue,
       sinceDate: string
     ) => Promise<IComment[]>,
     getLabelCreationDate?: (

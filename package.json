@@ -55,7 +55,7 @@
     "eslint": "^7.28.0",
     "eslint-plugin-github": "^4.1.2",
     "eslint-plugin-jest": "^25.3.2",
-    "jest": "^27.2.5",
+    "jest": "^27.5.0",
     "jest-circus": "^27.4.6",
     "jest-silent-reporter": "^0.5.0",
     "js-yaml": "^4.1.0",

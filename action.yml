@@ -198,5 +198,5 @@ outputs:
   staled-issues-prs:
     description: 'List of all staled issues and pull requests.'
 runs:
-  using: 'node12'
+  using: 'node16'
   main: 'dist/index.js'

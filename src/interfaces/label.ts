@@ -1,3 +1,3 @@
 export interface ILabel {
-  name: string;
+  name?: string;
 }

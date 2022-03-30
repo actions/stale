@@ -1,5 +1,5 @@
 import {IUserAssignee} from '../interfaces/assignee';
-import {IIssue} from '../interfaces/issue';
+import {IIssue, OctokitIssue} from '../interfaces/issue';
 import {IIssuesProcessorOptions} from '../interfaces/issues-processor-options';
 import {ILabel} from '../interfaces/label';
 import {IMilestone} from '../interfaces/milestone';

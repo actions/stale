@@ -1,7 +1,6 @@
 import * as core from '@actions/core';
 import {context, getOctokit} from '@actions/github';
 import {GitHub} from '@actions/github/lib/utils';
-import {GetResponseTypeFromEndpointMethod} from '@octokit/types';
 import {Option} from '../enums/option';
 import {getHumanizedDate} from '../functions/dates/get-humanized-date';
 import {isDateMoreRecentThan} from '../functions/dates/is-date-more-recent-than';
@@ -25,7 +24,7 @@ import {Milestones} from './milestones';
 import {StaleOperations} from './stale-operations';
 import {Statistics} from './statistics';
 import {LoggerService} from '../services/logger.service';
-import {IIssue} from '../interfaces/issue';
+import {OctokitIssue} from '../interfaces/issue';
 
 /***
  * Handle processing of issues for staleness/closure.
@@ -517,7 +516,7 @@ export class IssuesProcessor {
     try {
       this._consumeIssueOperation(issue);
       this.statistics?.incrementFetchedItemsCommentsCount();
-      const comments = await this.client.issues.listComments({
+      const comments = await this.client.rest.issues.listComments({
         owner: context.repo.owner,
         repo: context.repo.repo,
         issue_number: issue.number,
@@ -532,25 +531,20 @@ export class IssuesProcessor {
 
   // grab issues from github in batches of 100
   async getIssues(page: number): Promise<Issue[]> {
-    // generate type for response
-    const endpoint = this.client.issues.listForRepo;
-    type OctoKitIssueList = GetResponseTypeFromEndpointMethod<typeof endpoint>;
-
     try {
       this.operations.consumeOperation();
-      const issueResult: OctoKitIssueList =
-        await this.client.issues.listForRepo({
-          owner: context.repo.owner,
-          repo: context.repo.repo,
-          state: 'open',
-          per_page: 100,
-          direction: this.options.ascending ? 'asc' : 'desc',
-          page
-        });
+      const issueResult = await this.client.rest.issues.listForRepo({
+        owner: context.repo.owner,
+        repo: context.repo.repo,
+        state: 'open',
+        per_page: 100,
+        direction: this.options.ascending ? 'asc' : 'desc',
+        page
+      });
       this.statistics?.incrementFetchedItemsCount(issueResult.data.length);
 
       return issueResult.data.map(
-        (issue: Readonly<IIssue>): Issue => new Issue(this.options, issue)
+        (issue: Readonly<OctokitIssue>): Issue => new Issue(this.options, issue)
       );
     } catch (error) {
       this._logger.error(`Get issues for repo error: ${error.message}`);
@@ -570,7 +564,7 @@ export class IssuesProcessor {
 
     this._consumeIssueOperation(issue);
     this.statistics?.incrementFetchedItemsEventsCount();
-    const options = this.client.issues.listEvents.endpoint.merge({
+    const options = this.client.rest.issues.listEvents.endpoint.merge({
       owner: context.repo.owner,
       repo: context.repo.repo,
       per_page: 100,
@@ -601,7 +595,7 @@ export class IssuesProcessor {
       this._consumeIssueOperation(issue);
       this.statistics?.incrementFetchedPullRequestsCount();
 
-      const pullRequest = await this.client.pulls.get({
+      const pullRequest = await this.client.rest.pulls.get({
         owner: context.repo.owner,
         repo: context.repo.repo,
         pull_number: issue.number
@@ -738,8 +732,8 @@ export class IssuesProcessor {
 
     const filteredComments = comments.filter(
       comment =>
-        comment.user.type === 'User' &&
-        comment.body.toLowerCase() !== staleMessage.toLowerCase()
+        comment.user?.type === 'User' &&
+        comment.body?.toLowerCase() !== staleMessage.toLowerCase()
     );
 
     issueLogger.info(
@@ -775,7 +769,7 @@ export class IssuesProcessor {
         this.statistics?.incrementAddedItemsComment(issue);
 
         if (!this.options.debugOnly) {
-          await this.client.issues.createComment({
+          await this.client.rest.issues.createComment({
             owner: context.repo.owner,
             repo: context.repo.repo,
             issue_number: issue.number,
@@ -793,7 +787,7 @@ export class IssuesProcessor {
       this.statistics?.incrementStaleItemsCount(issue);
 
       if (!this.options.debugOnly) {
-        await this.client.issues.addLabels({
+        await this.client.rest.issues.addLabels({
           owner: context.repo.owner,
           repo: context.repo.repo,
           issue_number: issue.number,
@@ -823,7 +817,7 @@ export class IssuesProcessor {
         this.addedCloseCommentIssues.push(issue);
 
         if (!this.options.debugOnly) {
-          await this.client.issues.createComment({
+          await this.client.rest.issues.createComment({
             owner: context.repo.owner,
             repo: context.repo.repo,
             issue_number: issue.number,
@@ -841,7 +835,7 @@ export class IssuesProcessor {
         this.statistics?.incrementAddedItemsLabel(issue);
 
         if (!this.options.debugOnly) {
-          await this.client.issues.addLabels({
+          await this.client.rest.issues.addLabels({
             owner: context.repo.owner,
             repo: context.repo.repo,
             issue_number: issue.number,
@@ -858,7 +852,7 @@ export class IssuesProcessor {
       this.statistics?.incrementClosedItemsCount(issue);
 
       if (!this.options.debugOnly) {
-        await this.client.issues.update({
+        await this.client.rest.issues.update({
           owner: context.repo.owner,
           repo: context.repo.repo,
           issue_number: issue.number,
@@ -900,7 +894,7 @@ export class IssuesProcessor {
       this.statistics?.incrementDeletedBranchesCount();
 
       if (!this.options.debugOnly) {
-        await this.client.git.deleteRef({
+        await this.client.rest.git.deleteRef({
           owner: context.repo.owner,
           repo: context.repo.repo,
           ref: `heads/${branch}`
@@ -935,7 +929,7 @@ export class IssuesProcessor {
       this.statistics?.incrementDeletedItemsLabelsCount(issue);
 
       if (!this.options.debugOnly) {
-        await this.client.issues.removeLabel({
+        await this.client.rest.issues.removeLabel({
           owner: context.repo.owner,
           repo: context.repo.repo,
           issue_number: issue.number,
@@ -1068,7 +1062,7 @@ export class IssuesProcessor {
       this._consumeIssueOperation(issue);
       this.statistics?.incrementAddedItemsLabel(issue);
       if (!this.options.debugOnly) {
-        await this.client.issues.addLabels({
+        await this.client.rest.issues.addLabels({
           owner: context.repo.owner,
           repo: context.repo.repo,
           issue_number: issue.number,

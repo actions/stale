@@ -1,8 +1,6 @@
 import * as core from '@actions/core';
 import {context, getOctokit} from '@actions/github';
 import {GitHub} from '@actions/github/lib/utils';
-import {components} from '@octokit/openapi-types';
-import {RestEndpointMethodTypes} from '@octokit/plugin-rest-endpoint-methods';
 import {Option} from '../enums/option';
 import {getHumanizedDate} from '../functions/dates/get-humanized-date';
 import {isDateMoreRecentThan} from '../functions/dates/is-date-more-recent-than';
@@ -26,7 +24,7 @@ import {Milestones} from './milestones';
 import {StaleOperations} from './stale-operations';
 import {Statistics} from './statistics';
 import {LoggerService} from '../services/logger.service';
-import {IIssue, OctokitIssue} from '../interfaces/issue';
+import {OctokitIssue} from '../interfaces/issue';
 
 /***
  * Handle processing of issues for staleness/closure.

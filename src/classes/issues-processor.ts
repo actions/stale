@@ -533,14 +533,6 @@ export class IssuesProcessor {
 
   // grab issues from github in batches of 100
   async getIssues(page: number): Promise<Issue[]> {
-    // generate type for response
-    // type Repository = components["schemas"]["full-repository"];
-    // const endpoint = this.client.rest.issues.listForRepo;
-
-    // type OctoKitIssueList = GetResponseTypeFromEndpointMethod<
-    //   typeof RestEndpointMethodTypes.issues.listForRepo
-    // >;
-
     try {
       this.operations.consumeOperation();
       const issueResult = await this.client.rest.issues.listForRepo({

@@ -648,12 +648,6 @@ class IssuesProcessor {
     getIssues(page) {
         var _a;
         return __awaiter(this, void 0, void 0, function* () {
-            // generate type for response
-            // type Repository = components["schemas"]["full-repository"];
-            // const endpoint = this.client.rest.issues.listForRepo;
-            // type OctoKitIssueList = GetResponseTypeFromEndpointMethod<
-            //   typeof RestEndpointMethodTypes.issues.listForRepo
-            // >;
             try {
                 this.operations.consumeOperation();
                 const issueResult = yield this.client.rest.issues.listForRepo({

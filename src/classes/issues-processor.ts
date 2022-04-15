@@ -674,11 +674,11 @@ export class IssuesProcessor {
     // Should we un-stale this issue?
     if (
       shouldRemoveStaleWhenUpdated &&
-      issueHasComments &&
+      (issueHasUpdate || issueHasComments) &&
       !issue.markedStaleThisRun
     ) {
       issueLogger.info(
-        `Remove the stale label since the $$type has a comment and the workflow should remove the stale label when updated`
+        `Remove the stale label since the $$type has been updated and the workflow should remove the stale label when updated`
       );
       await this._removeStaleLabel(issue, staleLabel);
 

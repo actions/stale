@@ -12,3 +12,5 @@ allowed:
 
 reviewed:
   npm:
+- name: Close Stale Issues
+  uses: actions/stale@v5.0.0

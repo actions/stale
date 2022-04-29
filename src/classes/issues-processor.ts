@@ -465,6 +465,7 @@ export class IssuesProcessor {
           );
           await this._markStale(issue, staleMessage, staleLabel, skipMessage);
           issue.isStale = true; // This issue is now considered stale
+          issue.markedStaleThisRun = true;
           issueLogger.info(`This $$type is now stale`);
         } else {
           issueLogger.info(
@@ -666,8 +667,16 @@ export class IssuesProcessor {
       );
     }
 
+    if (issue.markedStaleThisRun) {
+      issueLogger.info(`marked stale this run, so don't check for updates`);
+    }
+
     // Should we un-stale this issue?
-    if (shouldRemoveStaleWhenUpdated && issueHasComments) {
+    if (
+      shouldRemoveStaleWhenUpdated &&
+      issueHasComments &&
+      !issue.markedStaleThisRun
+    ) {
       issueLogger.info(
         `Remove the stale label since the $$type has a comment and the workflow should remove the stale label when updated`
       );

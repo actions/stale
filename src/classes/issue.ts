@@ -20,6 +20,7 @@ export class Issue implements IIssue {
   readonly milestone?: IMilestone | null;
   readonly assignees: Assignee[];
   isStale: boolean;
+  markedStaleThisRun: boolean;
   operations = new Operations();
   private readonly _options: IIssuesProcessorOptions;
 
@@ -39,6 +40,7 @@ export class Issue implements IIssue {
     this.milestone = issue.milestone;
     this.assignees = issue.assignees || [];
     this.isStale = isLabeled(this, this.staleLabel);
+    this.markedStaleThisRun = false;
   }
 
   get isPullRequest(): boolean {

@@ -278,6 +278,7 @@ class Issue {
         this.milestone = issue.milestone;
         this.assignees = issue.assignees || [];
         this.isStale = is_labeled_1.isLabeled(this, this.staleLabel);
+        this.markedStaleThisRun = false;
     }
     get isPullRequest() {
         return is_pull_request_1.isPullRequest(this);
@@ -599,6 +600,7 @@ class IssuesProcessor {
                         issueLogger.info(`This $$type should be marked as stale based on the option ${issueLogger.createOptionLink(this._getDaysBeforeStaleUsedOptionName(issue))} (${logger_service_1.LoggerService.cyan(daysBeforeStale)})`);
                         yield this._markStale(issue, staleMessage, staleLabel, skipMessage);
                         issue.isStale = true; // This issue is now considered stale
+                        issue.markedStaleThisRun = true;
                         issueLogger.info(`This $$type is now stale`);
                     }
                     else {
@@ -734,8 +736,13 @@ class IssuesProcessor {
             else {
                 issueLogger.info(`The stale label should be removed if all conditions met`);
             }
+            if (issue.markedStaleThisRun) {
+                issueLogger.info(`marked stale this run, so don't check for updates`);
+            }
             // Should we un-stale this issue?
-            if (shouldRemoveStaleWhenUpdated && issueHasComments) {
+            if (shouldRemoveStaleWhenUpdated &&
+                issueHasComments &&
+                !issue.markedStaleThisRun) {
                 issueLogger.info(`Remove the stale label since the $$type has a comment and the workflow should remove the stale label when updated`);
                 yield this._removeStaleLabel(issue, staleLabel);
                 // Are there labels to remove or add when an issue is no longer stale?

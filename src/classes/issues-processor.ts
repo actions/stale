@@ -113,11 +113,11 @@ export class IssuesProcessor {
     } else {
       this._logger.info(
         `${LoggerService.yellow(
-          'Processing the batch of issues'
+          'Processing the batch of issues '
         )} ${LoggerService.cyan(`#${page}`)} ${LoggerService.yellow(
-          'containing'
+          ' containing '
         )} ${LoggerService.cyan(issues.length)} ${LoggerService.yellow(
-          `issue${issues.length > 1 ? 's' : ''}...`
+          ` issue${issues.length > 1 ? 's' : ''}...`
         )}`
       );
     }
@@ -151,11 +151,11 @@ export class IssuesProcessor {
       );
       this._logger.warning(
         `${LoggerService.yellowBright(
-          'If you think that not enough issues were processed you could try to increase the quantity related to the'
+          'If you think that not enough issues were processed you could try to increase the quantity related to the '
         )} ${this._logger.createOptionLink(
           Option.OperationsPerRun
         )} ${LoggerService.yellowBright(
-          'option which is currently set to'
+          ' option which is currently set to '
         )} ${LoggerService.cyan(this.options.operationsPerRun)}`
       );
       this.statistics
@@ -166,9 +166,9 @@ export class IssuesProcessor {
     }
 
     this._logger.info(
-      `${LoggerService.green('Batch')} ${LoggerService.cyan(
+      `${LoggerService.green('Batch ')} ${LoggerService.cyan(
         `#${page}`
-      )} ${LoggerService.green('processed.')}`
+      )} ${LoggerService.green(' processed.')}`
     );
 
     // Do the next batch

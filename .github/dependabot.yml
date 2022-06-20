@@ -7,3 +7,8 @@ updates:
     # Check the npm registry for updates once a week (Monday)
     schedule:
       interval: 'weekly'
+
+  - package-ecosystem: 'github-actions'
+    directory: '/'
+    schedule:
+      interval: 'weekly'

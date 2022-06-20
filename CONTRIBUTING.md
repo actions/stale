@@ -47,11 +47,11 @@ $ npm run all
 ```
 
 IMPORTANT:
-Be sure to commit the result of
+Be sure to commit the result of:
 ```bash
 $ npm run pack
 ```
-and commit the result. Otherwise PR checks will fail
+Otherwise PR checks will fail. 
 
 # Release
 

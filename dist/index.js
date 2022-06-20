@@ -741,9 +741,9 @@ class IssuesProcessor {
             }
             // Should we un-stale this issue?
             if (shouldRemoveStaleWhenUpdated &&
-                issueHasComments &&
+                (issueHasUpdate || issueHasComments) &&
                 !issue.markedStaleThisRun) {
-                issueLogger.info(`Remove the stale label since the $$type has a comment and the workflow should remove the stale label when updated`);
+                issueLogger.info(`Remove the stale label since the $$type has been updated and the workflow should remove the stale label when updated`);
                 yield this._removeStaleLabel(issue, staleLabel);
                 // Are there labels to remove or add when an issue is no longer stale?
                 yield this._removeLabelsWhenUnstale(issue, labelsToRemoveWhenUnstale);

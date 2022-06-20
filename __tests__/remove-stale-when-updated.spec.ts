@@ -455,7 +455,7 @@ class IssuesProcessorBuilder {
           issue.updated_at ?? new Date().toDateString(),
           issue.created_at ?? new Date().toDateString(),
           !!issue.pull_request,
-          issue.labels ? issue.labels.map(label => label.name) : []
+          issue.labels ? issue.labels.map(label => label.name || '') : []
         )
     );
 

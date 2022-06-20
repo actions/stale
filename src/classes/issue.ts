@@ -1,7 +1,7 @@
 import {isLabeled} from '../functions/is-labeled';
 import {isPullRequest} from '../functions/is-pull-request';
 import {Assignee} from '../interfaces/assignee';
-import {IIssue} from '../interfaces/issue';
+import {IIssue, OctokitIssue} from '../interfaces/issue';
 import {IIssuesProcessorOptions} from '../interfaces/issues-processor-options';
 import {ILabel} from '../interfaces/label';
 import {IMilestone} from '../interfaces/milestone';
@@ -17,28 +17,30 @@ export class Issue implements IIssue {
   readonly pull_request: Object | null | undefined;
   readonly state: string | 'closed' | 'open';
   readonly locked: boolean;
-  readonly milestone: IMilestone | undefined;
+  readonly milestone?: IMilestone | null;
   readonly assignees: Assignee[];
   isStale: boolean;
+  markedStaleThisRun: boolean;
   operations = new Operations();
   private readonly _options: IIssuesProcessorOptions;
 
   constructor(
     options: Readonly<IIssuesProcessorOptions>,
-    issue: Readonly<IIssue>
+    issue: Readonly<OctokitIssue> | Readonly<IIssue>
   ) {
     this._options = options;
     this.title = issue.title;
     this.number = issue.number;
     this.created_at = issue.created_at;
     this.updated_at = issue.updated_at;
-    this.labels = issue.labels;
+    this.labels = mapLabels(issue.labels);
     this.pull_request = issue.pull_request;
     this.state = issue.state;
     this.locked = issue.locked;
     this.milestone = issue.milestone;
-    this.assignees = issue.assignees;
+    this.assignees = issue.assignees || [];
     this.isStale = isLabeled(this, this.staleLabel);
+    this.markedStaleThisRun = false;
   }
 
   get isPullRequest(): boolean {
@@ -58,4 +60,15 @@ export class Issue implements IIssue {
       ? this._options.stalePrLabel
       : this._options.staleIssueLabel;
   }
+}
+
+function mapLabels(labels: (string | ILabel)[] | ILabel[]): ILabel[] {
+  return labels.map(label => {
+    if (typeof label == 'string') {
+      return {
+        name: label
+      };
+    }
+    return label;
+  });
 }

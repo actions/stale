@@ -9,6 +9,6 @@ import {CleanLabel} from '../types/clean-label';
  *
  * @return {string} A lowercased, deburred version of the passed in label
  */
-export function cleanLabel(label: Readonly<string>): CleanLabel {
-  return deburr(label.toLowerCase());
+export function cleanLabel(label?: Readonly<string>): CleanLabel {
+  return deburr(label?.toLowerCase());
 }

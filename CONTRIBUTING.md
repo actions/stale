@@ -46,6 +46,13 @@ Build, lint, package and test everything.
 $ npm run all
 ```
 
+IMPORTANT:
+Be sure to commit the result of
+```bash
+$ npm run pack
+```
+and commit the result. Otherwise PR checks will fail
+
 # Release
 
 Based on [standard-version](https://github.com/conventional-changelog/standard-version).

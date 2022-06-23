@@ -885,7 +885,10 @@ class IssuesProcessor {
                         owner: github_1.context.repo.owner,
                         repo: github_1.context.repo.repo,
                         issue_number: issue.number,
-                        state: 'closed'
+                        state: 'closed',
+                        state_reason: this.options.closeAsNotPlanned
+                            ? 'not_planned'
+                            : undefined
                     });
                 }
             }
@@ -1892,6 +1895,7 @@ var Option;
     Option["IgnoreIssueUpdates"] = "ignore-issue-updates";
     Option["IgnorePrUpdates"] = "ignore-pr-updates";
     Option["ExemptDraftPr"] = "exempt-draft-pr";
+    Option["CloseAsNotPlanned"] = "close-as-not-planned";
 })(Option = exports.Option || (exports.Option = {}));
 
 
@@ -2202,7 +2206,8 @@ function _getAndValidateArgs() {
         ignoreUpdates: core.getInput('ignore-updates') === 'true',
         ignoreIssueUpdates: _toOptionalBoolean('ignore-issue-updates'),
         ignorePrUpdates: _toOptionalBoolean('ignore-pr-updates'),
-        exemptDraftPr: core.getInput('exempt-draft-pr') === 'true'
+        exemptDraftPr: core.getInput('exempt-draft-pr') === 'true',
+        closeAsNotPlanned: _toOptionalBoolean('close-as-not-planned')
     };
     for (const numberInput of [
         'days-before-stale',

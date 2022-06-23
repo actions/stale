@@ -43,6 +43,7 @@ Every argument is optional.
 | [close-pr-message](#close-pr-message)                               | Comment on the staled PRs while closed                                      |                       |
 | [stale-issue-label](#stale-issue-label)                             | Label to apply on staled issues                                             | `Stale`               |
 | [close-issue-label](#close-issue-label)                             | Label to apply on closed issues                                             |                       |
+| [close-issue-reason](#close-issue-reason)                           | Reason to use when closing issues                                           |                       |
 | [stale-pr-label](#stale-pr-label)                                   | Label to apply on staled PRs                                                | `Stale`               |
 | [close-pr-label](#close-pr-label)                                   | Label to apply on closed PRs                                                |                       |
 | [exempt-issue-labels](#exempt-issue-labels)                         | Labels on issues exempted from stale                                        |                       |
@@ -218,6 +219,12 @@ It will be automatically removed if the issues are no longer closed nor locked.
 
 Default value: unset  
 Required Permission: `issues: write`
+
+#### close-issue-reason
+
+Specify the [reason](https://github.blog/changelog/2022-05-19-the-new-github-issues-may-19th-update/) used when closing issues. Valid values are `completed` and `not_planned`.
+
+Default value: unset
 
 #### stale-pr-label
 

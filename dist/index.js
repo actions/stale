@@ -885,7 +885,8 @@ class IssuesProcessor {
                         owner: github_1.context.repo.owner,
                         repo: github_1.context.repo.repo,
                         issue_number: issue.number,
-                        state: 'closed'
+                        state: 'closed',
+                        state_reason: this.options.closeIssueReason || undefined
                     });
                 }
             }
@@ -1892,6 +1893,7 @@ var Option;
     Option["IgnoreIssueUpdates"] = "ignore-issue-updates";
     Option["IgnorePrUpdates"] = "ignore-pr-updates";
     Option["ExemptDraftPr"] = "exempt-draft-pr";
+    Option["CloseIssueReason"] = "close-issue-reason";
 })(Option = exports.Option || (exports.Option = {}));
 
 
@@ -2202,7 +2204,8 @@ function _getAndValidateArgs() {
         ignoreUpdates: core.getInput('ignore-updates') === 'true',
         ignoreIssueUpdates: _toOptionalBoolean('ignore-issue-updates'),
         ignorePrUpdates: _toOptionalBoolean('ignore-pr-updates'),
-        exemptDraftPr: core.getInput('exempt-draft-pr') === 'true'
+        exemptDraftPr: core.getInput('exempt-draft-pr') === 'true',
+        closeIssueReason: core.getInput('close-issue-reason')
     };
     for (const numberInput of [
         'days-before-stale',
@@ -2224,6 +2227,12 @@ function _getAndValidateArgs() {
                 throw new Error(errorMessage);
             }
         }
+    }
+    const validCloseReasons = ['', 'completed', 'not_planned'];
+    if (!validCloseReasons.includes(args.closeIssueReason)) {
+        const errorMessage = `Unrecognized close-issue-reason "${args.closeIssueReason}", valid values are: ${validCloseReasons.filter(Boolean).join(', ')}`;
+        core.setFailed(errorMessage);
+        throw new Error(errorMessage);
     }
     return args;
 }

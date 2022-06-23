@@ -865,7 +865,8 @@ export class IssuesProcessor {
           owner: context.repo.owner,
           repo: context.repo.repo,
           issue_number: issue.number,
-          state: 'closed'
+          state: 'closed',
+          state_reason: this.options.closeIssueReason || undefined
         });
       }
     } catch (error) {

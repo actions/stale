@@ -87,7 +87,8 @@ function _getAndValidateArgs(): IIssuesProcessorOptions {
     ignoreUpdates: core.getInput('ignore-updates') === 'true',
     ignoreIssueUpdates: _toOptionalBoolean('ignore-issue-updates'),
     ignorePrUpdates: _toOptionalBoolean('ignore-pr-updates'),
-    exemptDraftPr: core.getInput('exempt-draft-pr') === 'true'
+    exemptDraftPr: core.getInput('exempt-draft-pr') === 'true',
+    closeAsNotPlanned: _toOptionalBoolean('close-as-not-planned')
   };
 
   for (const numberInput of [

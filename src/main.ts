@@ -114,10 +114,11 @@ function _getAndValidateArgs(): IIssuesProcessorOptions {
     }
   }
 
-  if (
-    ![undefined, 'completed', 'not_planned'].includes(args.closeIssueReason)
-  ) {
-    const errorMessage = `Unrecognized close-issue-reason "${args.closeIssueReason}"`;
+  const validCloseReasons = ['', 'completed', 'not_planned'];
+  if (!validCloseReasons.includes(args.closeIssueReason)) {
+    const errorMessage = `Unrecognized close-issue-reason "${
+      args.closeIssueReason
+    }", valid values are: ${validCloseReasons.filter(Boolean).join(', ')}`;
     core.setFailed(errorMessage);
     throw new Error(errorMessage);
   }

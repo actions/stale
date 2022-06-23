@@ -866,9 +866,7 @@ export class IssuesProcessor {
           repo: context.repo.repo,
           issue_number: issue.number,
           state: 'closed',
-          state_reason: this.options.closeAsNotPlanned
-            ? 'not_planned'
-            : undefined
+          state_reason: this.options.closeIssueReason || undefined
         });
       }
     } catch (error) {

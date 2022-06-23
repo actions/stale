@@ -62,7 +62,7 @@ describe('Issue', (): void => {
       ignoreIssueUpdates: undefined,
       ignorePrUpdates: undefined,
       exemptDraftPr: false,
-      closeAsNotPlanned: undefined
+      closeIssueReason: undefined
     };
     issueInterface = {
       title: 'dummy-title',

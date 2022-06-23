@@ -88,7 +88,7 @@ function _getAndValidateArgs(): IIssuesProcessorOptions {
     ignoreIssueUpdates: _toOptionalBoolean('ignore-issue-updates'),
     ignorePrUpdates: _toOptionalBoolean('ignore-pr-updates'),
     exemptDraftPr: core.getInput('exempt-draft-pr') === 'true',
-    closeAsNotPlanned: _toOptionalBoolean('close-as-not-planned')
+    closeIssueReason: core.getInput('close-issue-reason')
   };
 
   for (const numberInput of [
@@ -112,6 +112,14 @@ function _getAndValidateArgs(): IIssuesProcessorOptions {
         throw new Error(errorMessage);
       }
     }
+  }
+
+  if (
+    ![undefined, 'completed', 'not_planned'].includes(args.closeIssueReason)
+  ) {
+    const errorMessage = `Unrecognized close-issue-reason "${args.closeIssueReason}"`;
+    core.setFailed(errorMessage);
+    throw new Error(errorMessage);
   }
 
   return args;

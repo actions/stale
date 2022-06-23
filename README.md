@@ -43,6 +43,7 @@ Every argument is optional.
 | [close-pr-message](#close-pr-message)                               | Comment on the staled PRs while closed                                      |                       |
 | [stale-issue-label](#stale-issue-label)                             | Label to apply on staled issues                                             | `Stale`               |
 | [close-issue-label](#close-issue-label)                             | Label to apply on closed issues                                             |                       |
+| [close-issue-reason](#close-issue-reason)                           | Reason to use when closing issues                                           |                       |
 | [stale-pr-label](#stale-pr-label)                                   | Label to apply on staled PRs                                                | `Stale`               |
 | [close-pr-label](#close-pr-label)                                   | Label to apply on closed PRs                                                |                       |
 | [exempt-issue-labels](#exempt-issue-labels)                         | Labels on issues exempted from stale                                        |                       |
@@ -80,7 +81,6 @@ Every argument is optional.
 | [ignore-updates](#ignore-updates)                                   | Any update (update/comment) can reset the stale idle time on the issues/PRs | `false`               |
 | [ignore-issue-updates](#ignore-issue-updates)                       | Override [ignore-updates](#ignore-updates) for issues only                  |                       |
 | [ignore-pr-updates](#ignore-pr-updates)                             | Override [ignore-updates](#ignore-updates) for PRs only                     |                       |
-| [close-as-not-planned](#close-as-not-planned)                       | Close issues as "not planned" instead of "completed"                        |                       |
 
 ### List of output options
 
@@ -510,9 +510,9 @@ Useful to override [ignore-updates](#ignore-updates) but only to ignore the upda
 
 Default value: unset
 
-#### close-as-not-planned
+#### close-issue-reason
 
-When closing issues, close them as ["not planned"](https://github.blog/changelog/2022-05-19-the-new-github-issues-may-19th-update/) instead of "completed".
+Specify the [reason](https://github.blog/changelog/2022-05-19-the-new-github-issues-may-19th-update/) used when closing issues. Valid values are `completed` and `not_planned`.
 
 Default value: unset
 

@@ -80,7 +80,7 @@ Every argument is optional.
 | [ignore-updates](#ignore-updates)                                   | Any update (update/comment) can reset the stale idle time on the issues/PRs | `false`               |
 | [ignore-issue-updates](#ignore-issue-updates)                       | Override [ignore-updates](#ignore-updates) for issues only                  |                       |
 | [ignore-pr-updates](#ignore-pr-updates)                             | Override [ignore-updates](#ignore-updates) for PRs only                     |                       |
-| [close-as-not-planned](#close-as-not-planned)                       | Use the "not planned" close reason for issues                               |                       |
+| [close-as-not-planned](#close-as-not-planned)                       | Close issues as "not planned" instead of "completed"                        |                       |
 
 ### List of output options
 
@@ -512,7 +512,7 @@ Default value: unset
 
 #### close-as-not-planned
 
-When closing issues, close them as ["not planned"](https://github.blog/changelog/2022-05-19-the-new-github-issues-may-19th-update/).
+When closing issues, close them as ["not planned"](https://github.blog/changelog/2022-05-19-the-new-github-issues-may-19th-update/) instead of "completed".
 
 Default value: unset
 

@@ -220,6 +220,12 @@ It will be automatically removed if the issues are no longer closed nor locked.
 Default value: unset  
 Required Permission: `issues: write`
 
+#### close-issue-reason
+
+Specify the [reason](https://github.blog/changelog/2022-05-19-the-new-github-issues-may-19th-update/) used when closing issues. Valid values are `completed` and `not_planned`.
+
+Default value: unset
+
 #### stale-pr-label
 
 The label that will be added to the pull requests when automatically marked as stale.  
@@ -507,12 +513,6 @@ Default value: unset
 #### ignore-pr-updates
 
 Useful to override [ignore-updates](#ignore-updates) but only to ignore the updates for the pull requests.
-
-Default value: unset
-
-#### close-issue-reason
-
-Specify the [reason](https://github.blog/changelog/2022-05-19-the-new-github-issues-may-19th-update/) used when closing issues. Valid values are `completed` and `not_planned`.
 
 Default value: unset
 

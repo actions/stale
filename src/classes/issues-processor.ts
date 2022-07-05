@@ -688,7 +688,7 @@ export class IssuesProcessor {
       await this._removeStaleLabel(issue, staleLabel);
 
       // Are there labels to remove or add when an issue is no longer stale?
-      await this._removeLabelsWhenUnstale(issue, labelsToRemoveWhenUnstale);
+      await this._removeLabels(issue, labelsToRemoveWhenUnstale, Option.LabelsToRemoveWhenUnstale);
       await this._addLabelsWhenUnstale(issue, labelsToAddWhenUnstale);
 
       issueLogger.info(`Skipping the process since the $$type is now un-stale`);
@@ -808,7 +808,7 @@ export class IssuesProcessor {
           issue_number: issue.number,
           labels: [staleLabel]
         });
-        await this._removeLabelsWhenStale(issue, labelsToRemoveWhenStale);
+        await this._removeLabels(issue, labelsToRemoveWhenStale, Option.LabelsToRemoveWhenStale);
       }
     } catch (error) {
       issueLogger.error(`Error when adding a label: ${error.message}`);
@@ -1036,9 +1036,10 @@ export class IssuesProcessor {
     return this.options.removeStaleWhenUpdated;
   }
 
-  private async _removeLabelsWhenUnstale(
+  private async _removeLabels(
     issue: Issue,
-    removeLabels: Readonly<string>[]
+    removeLabels: Readonly<string>[],
+    option: Option
   ): Promise<void> {
     if (!removeLabels.length) {
       return;
@@ -1047,9 +1048,7 @@ export class IssuesProcessor {
     const issueLogger: IssueLogger = new IssueLogger(issue);
 
     issueLogger.info(
-      `Removing all the labels specified via the ${this._logger.createOptionLink(
-        Option.LabelsToRemoveWhenUnstale
-      )} option.`
+      `Removing all the labels specified via the ${this._logger.createOptionLink(option)} option.`
     );
 
     for (const label of removeLabels.values()) {
@@ -1090,27 +1089,6 @@ export class IssuesProcessor {
       this._logger.error(
         `Error when adding labels after updated from stale: ${error.message}`
       );
-    }
-  }
-
-  private async _removeLabelsWhenStale(
-    issue: Issue,
-    removeLabels: Readonly<string>[]
-  ): Promise<void> {
-    if (!removeLabels.length) {
-      return;
-    }
-
-    const issueLogger: IssueLogger = new IssueLogger(issue);
-
-    issueLogger.info(
-      `Removing all the labels specified via the ${this._logger.createOptionLink(
-        Option.LabelsToRemoveWhenStale
-      )} option.`
-    );
-
-    for (const label of removeLabels.values()) {
-      await this._removeLabel(issue, label);
     }
   }
 

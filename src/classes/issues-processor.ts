@@ -1039,7 +1039,7 @@ export class IssuesProcessor {
   private async _removeLabels(
     issue: Issue,
     removeLabels: Readonly<string>[],
-    option: Option
+    option: Readonly<Option>
   ): Promise<void> {
     if (!removeLabels.length) {
       return;

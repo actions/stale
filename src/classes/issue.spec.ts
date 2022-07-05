@@ -58,6 +58,7 @@ describe('Issue', (): void => {
       enableStatistics: false,
       labelsToRemoveWhenUnstale: '',
       labelsToAddWhenUnstale: '',
+      labelsToRemoveWhenStale: '',
       ignoreUpdates: false,
       ignoreIssueUpdates: undefined,
       ignorePrUpdates: undefined,

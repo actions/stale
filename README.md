@@ -60,6 +60,7 @@ Every argument is optional.
 | [remove-pr-stale-when-updated](#remove-pr-stale-when-updated)       | Remove stale label from PRs on updates/comments                             |                       |
 | [labels-to-add-when-unstale](#labels-to-add-when-unstale)           | Add specified labels from issues/PRs when they become unstale               |                       |
 | [labels-to-remove-when-unstale](#labels-to-remove-when-unstale)     | Remove specified labels from issues/PRs when they become unstale            |                       |
+| [labels-to-remove-when-stale](#labels-to-remove-when-stale)         | Remove specified labels from issues/PRs when they become stale              |                       |
 | [debug-only](#debug-only)                                           | Dry-run                                                                     | `false`               |
 | [ascending](#ascending)                                             | Order to get issues/PRs                                                     | `false`               |
 | [start-date](#start-date)                                           | Skip stale action for issues/PRs created before it                          |                       |
@@ -360,6 +361,15 @@ A comma delimited list of labels to remove when a stale issue or pull request re
 Warning: each label results in a unique API call which can drastically consume the limit of [operations-per-run](#operations-per-run).
 
 Default value: unset  
+Required Permission: `pull-requests: write`
+
+#### labels-to-remove-when-stale
+
+A comma delimited list of labels to remove from an issue or pull request when the stale workflow marks it automatically as stale with a label.
+
+Warning: each label results in a unique API call which can drastically consume the limit of [operations-per-run](#operations-per-run).
+
+Default value: unset
 Required Permission: `pull-requests: write`
 
 #### debug-only

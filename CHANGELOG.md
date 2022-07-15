@@ -1,5 +1,12 @@
 # Changelog
 
+# [5.1.0]
+
+[Don't process stale issues right after they're marked stale](https://github.com/actions/stale/issues/696)
+[Add close-issue-reason option][#764](https://github.com/actions/stale/pull/764)[#772](https://github.com/actions/stale/pull/772)
+Various dependabot/dependency updates
+
+
 ## [4.1.0](https://github.com/actions/stale/compare/v3.0.19...v4.1.0) (2021-07-14)
 
 ## Features

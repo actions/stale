@@ -625,13 +625,15 @@ export class IssuesProcessor {
       `$$type marked stale on: ${LoggerService.cyan(markedStaleOn)}`
     );
 
-    const issueHasComments: boolean = await this._hasCommentsSince(
+    const issueHasCommentsSinceStale: boolean = await this._hasCommentsSince(
       issue,
       markedStaleOn,
       staleMessage
     );
     issueLogger.info(
-      `$$type has been commented on: ${LoggerService.cyan(issueHasComments)}`
+      `$$type has been commented on: ${LoggerService.cyan(
+        issueHasCommentsSinceStale
+      )}`
     );
 
     const daysBeforeClose: number = issue.isPullRequest
@@ -640,14 +642,6 @@ export class IssuesProcessor {
 
     issueLogger.info(
       `Days before $$type close: ${LoggerService.cyan(daysBeforeClose)}`
-    );
-
-    const issueHasUpdate: boolean = IssuesProcessor._updatedSince(
-      issue.updated_at,
-      daysBeforeClose
-    );
-    issueLogger.info(
-      `$$type has been updated: ${LoggerService.cyan(issueHasUpdate)}`
     );
 
     const shouldRemoveStaleWhenUpdated: boolean =
@@ -671,10 +665,19 @@ export class IssuesProcessor {
       issueLogger.info(`marked stale this run, so don't check for updates`);
     }
 
+    const issueHasUpdateSinceStale =
+      new Date(issue.updated_at) > new Date(markedStaleOn);
+
+    issueLogger.info(
+      `$$type has been updated since it was marked stale: ${LoggerService.cyan(
+        issueHasUpdateSinceStale
+      )}`
+    );
+
     // Should we un-stale this issue?
     if (
       shouldRemoveStaleWhenUpdated &&
-      (issueHasUpdate || issueHasComments) &&
+      (issueHasUpdateSinceStale || issueHasCommentsSinceStale) &&
       !issue.markedStaleThisRun
     ) {
       issueLogger.info(
@@ -696,7 +699,17 @@ export class IssuesProcessor {
       return; // Nothing to do because we aren't closing stale issues
     }
 
-    if (!issueHasComments && !issueHasUpdate) {
+    const issueHasUpdateInCloseWindow: boolean = IssuesProcessor._updatedSince(
+      issue.updated_at,
+      daysBeforeClose
+    );
+    issueLogger.info(
+      `$$type has been updated in the last ${daysBeforeClose} days: ${LoggerService.cyan(
+        issueHasUpdateInCloseWindow
+      )}`
+    );
+
+    if (!issueHasCommentsSinceStale && !issueHasUpdateInCloseWindow) {
       issueLogger.info(
         `Closing $$type because it was last updated on: ${LoggerService.cyan(
           issue.updated_at
@@ -715,7 +728,7 @@ export class IssuesProcessor {
       }
     } else {
       issueLogger.info(
-        `Stale $$type is not old enough to close yet (hasComments? ${issueHasComments}, hasUpdate? ${issueHasUpdate})`
+        `Stale $$type is not old enough to close yet (hasComments? ${issueHasCommentsSinceStale}, hasUpdate? ${issueHasUpdateInCloseWindow})`
       );
     }
   }

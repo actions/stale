@@ -11,11 +11,12 @@ The configuration must be on the default branch and the default values will:
 ## Recommended permissions
 
 For the execution of this action, it must be able to fetch all issues and pull requests from your repository.  
-In addition, based on the provided configuration, the action could require more permission(s) (e.g.: add label, remove label, comment, close, etc.).  
+In addition, based on the provided configuration, the action could require more permission(s) (e.g.: add label, remove label, comment, close, delete branch, etc.).  
 This can be achieved with the following [configuration in the action](https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions#permissions) if the permissions are restricted:
 
 ```yaml
 permissions:
+  contents: write # only for delete-branch option
   issues: write
   pull-requests: write
 ```
@@ -396,7 +397,7 @@ Default value: unset
 If set to `true`, the stale workflow will automatically delete the GitHub branches related to the pull requests automatically closed by the stale workflow.
 
 Default value: `false`  
-Required Permission: `pull-requests: write`
+Required Permission: `pull-requests: write` and `contents: write`
 
 #### exempt-milestones
 

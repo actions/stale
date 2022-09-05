@@ -51,7 +51,7 @@ inputs:
     required: false
   close-issue-reason:
     description: 'The reason to use when closing an issue.'
-    default: ''
+    default: 'not_planned'
     required: false
   stale-pr-label:
     description: 'The label to apply when a pull request is stale.'

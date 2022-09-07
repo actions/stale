@@ -418,7 +418,7 @@ export class IssuesProcessor {
 
     // Determine if this issue needs to be marked stale first
     if (!issue.isStale) {
-      issueLogger.info(`This $$type is not stale`);
+      issueLogger.info(`This $$type is not stale. Demo message.`);
       const shouldIgnoreUpdates: boolean = new IgnoreUpdates(
         this.options,
         issue

@@ -143,6 +143,24 @@ exports.Assignees = Assignees;
 
 /***/ }),
 
+/***/ 2781:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.areDatesEqual = void 0;
+function areDatesEqual(date, otherDate, toleranceInSeconds) {
+    const timestamp = date.getTime();
+    const otherTimestamp = otherDate.getTime();
+    const deltaInSeconds = Math.abs(timestamp - otherTimestamp) / 1000;
+    return deltaInSeconds <= toleranceInSeconds;
+}
+exports.areDatesEqual = areDatesEqual;
+
+
+/***/ }),
+
 /***/ 854:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
@@ -366,6 +384,7 @@ const milestones_1 = __nccwpck_require__(4601);
 const stale_operations_1 = __nccwpck_require__(5080);
 const statistics_1 = __nccwpck_require__(3334);
 const logger_service_1 = __nccwpck_require__(1973);
+const date_comparison_1 = __nccwpck_require__(2781);
 /***
  * Handle processing of issues for staleness/closure.
  */
@@ -737,7 +756,12 @@ class IssuesProcessor {
             if (issue.markedStaleThisRun) {
                 issueLogger.info(`marked stale this run, so don't check for updates`);
             }
-            const issueHasUpdateSinceStale = new Date(issue.updated_at) > new Date(markedStaleOn);
+            // The issue.updated_at and markedStaleOn are not always exactly in sync (they can be off by a second or 2)
+            // areDatesEqual makes sure they are not the same date within a certain tolerance (15 seconds in this case)
+            const updatedAtDate = new Date(issue.updated_at);
+            const markedStaleOnDate = new Date(markedStaleOn);
+            const issueHasUpdateSinceStale = !date_comparison_1.areDatesEqual(updatedAtDate, markedStaleOnDate, 15) &&
+                updatedAtDate > markedStaleOnDate;
             issueLogger.info(`$$type has been updated since it was marked stale: ${logger_service_1.LoggerService.cyan(issueHasUpdateSinceStale)}`);
             // Should we un-stale this issue?
             if (shouldRemoveStaleWhenUpdated &&

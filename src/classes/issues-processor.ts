@@ -25,6 +25,7 @@ import {StaleOperations} from './stale-operations';
 import {Statistics} from './statistics';
 import {LoggerService} from '../services/logger.service';
 import {OctokitIssue} from '../interfaces/issue';
+import {areDatesEqual} from './date-comparison';
 
 /***
  * Handle processing of issues for staleness/closure.
@@ -665,8 +666,13 @@ export class IssuesProcessor {
       issueLogger.info(`marked stale this run, so don't check for updates`);
     }
 
+    // The issue.updated_at and markedStaleOn are not always exactly in sync (they can be off by a second or 2)
+    // areDatesEqual makes sure they are not the same date within a certain tolerance (15 seconds in this case)
+    const updatedAtDate = new Date(issue.updated_at);
+    const markedStaleOnDate = new Date(markedStaleOn);
     const issueHasUpdateSinceStale =
-      new Date(issue.updated_at) > new Date(markedStaleOn);
+      !areDatesEqual(updatedAtDate, markedStaleOnDate, 15) &&
+      updatedAtDate > markedStaleOnDate;
 
     issueLogger.info(
       `$$type has been updated since it was marked stale: ${LoggerService.cyan(

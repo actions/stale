@@ -667,11 +667,9 @@ export class IssuesProcessor {
 
     // The issue.updated_at and markedStaleOn are not always exactly in sync (they can be off by a second or 2)
     // isDateMoreRecentThan makes sure they are not the same date within a certain tolerance (15 seconds in this case)
-    const updatedAtDate = new Date(issue.updated_at);
-    const markedStaleOnDate = new Date(markedStaleOn);
     const issueHasUpdateSinceStale = isDateMoreRecentThan(
-      updatedAtDate,
-      markedStaleOnDate,
+      new Date(issue.updated_at),
+      new Date(markedStaleOn),
       15
     );
 

@@ -479,7 +479,7 @@ class IssuesProcessor {
             if (this._isIncludeOnlyAssigned(issue)) {
                 issueLogger.info(`Skipping this $$type because it's assignees list is empty`);
                 IssuesProcessor._endIssueProcessing(issue);
-                return; // If the issue has an 'includeOnlyAssigned' option, process only issues with nonempty assignees list
+                return; // If the issue has an 'include-only-assigned' option set, process only issues with nonempty assignees list
             }
             const onlyLabels = words_to_list_1.wordsToList(this._getOnlyLabels(issue));
             if (onlyLabels.length > 0) {

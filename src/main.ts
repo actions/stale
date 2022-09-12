@@ -88,7 +88,8 @@ function _getAndValidateArgs(): IIssuesProcessorOptions {
     ignoreIssueUpdates: _toOptionalBoolean('ignore-issue-updates'),
     ignorePrUpdates: _toOptionalBoolean('ignore-pr-updates'),
     exemptDraftPr: core.getInput('exempt-draft-pr') === 'true',
-    closeIssueReason: core.getInput('close-issue-reason')
+    closeIssueReason: core.getInput('close-issue-reason'),
+    includeOnlyAssigned: core.getInput('include-only-assigned') === 'true'
   };
 
   for (const numberInput of [

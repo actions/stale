@@ -223,7 +223,7 @@ export class IssuesProcessor {
 
     if (this._isIncludeOnlyAssigned(issue)) {
       issueLogger.info(
-        `Skipping this $$type because it's assignees list is empty`
+        `Skipping this $$type because its assignees list is empty`
       );
       IssuesProcessor._endIssueProcessing(issue);
       return; // If the issue has an 'include-only-assigned' option set, process only issues with nonempty assignees list

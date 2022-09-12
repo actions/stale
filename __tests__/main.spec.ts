@@ -2352,3 +2352,69 @@ test('processing a pull request to be stale with the "stalePrMessage" option set
   expect(processor.closedIssues).toHaveLength(0);
   expect(processor.statistics?.addedPullRequestsCommentsCount).toStrictEqual(0);
 });
+
+test('processing an issue with the "includeOnlyAssigned" option and nonempty assignee list will stale the issue', async () => {
+  const issueDate = new Date();
+  issueDate.setDate(issueDate.getDate() - 2);
+
+  const opts: IIssuesProcessorOptions = {
+    ...DefaultProcessorOptions,
+    staleIssueLabel: 'This issue is stale',
+    includeOnlyAssigned: true
+  };
+
+  const TestIssueList: Issue[] = [
+    generateIssue(
+      opts,
+      1,
+      'An issue with no label',
+      issueDate.toDateString(),
+      issueDate.toDateString(),
+      false,
+      [],
+      false,
+      false,
+      undefined,
+      ['assignee1']
+    )
+  ];
+  const processor = new IssuesProcessorMock(
+    opts,
+    async p => (p === 1 ? TestIssueList : []),
+    async () => [],
+    async () => new Date().toDateString()
+  );
+
+  // process our fake issue list
+  await processor.processIssues(1);
+
+  expect(processor.staleIssues).toHaveLength(1);
+  expect(processor.closedIssues).toHaveLength(0);
+});
+
+test('processing an issue with the "includeOnlyAssigned" option set and no assignees will not stale the issue', async () => {
+  const issueDate = new Date();
+  issueDate.setDate(issueDate.getDate() - 2);
+
+  const opts: IIssuesProcessorOptions = {
+    ...DefaultProcessorOptions,
+    staleIssueLabel: 'This issue is stale',
+    includeOnlyAssigned: true
+  };
+
+  const TestIssueList: Issue[] = [
+    generateIssue(opts, 1, 'An issue with no label', issueDate.toDateString())
+  ];
+  const processor = new IssuesProcessorMock(
+    opts,
+    async p => (p === 1 ? TestIssueList : []),
+    async () => [],
+    async () => new Date().toDateString()
+  );
+
+  // process our fake issue list
+  await processor.processIssues(1);
+
+  expect(processor.staleIssues).toHaveLength(0);
+  expect(processor.closedIssues).toHaveLength(0);
+});

@@ -82,6 +82,7 @@ Every argument is optional.
 | [ignore-updates](#ignore-updates)                                   | Any update (update/comment) can reset the stale idle time on the issues/PRs | `false`               |
 | [ignore-issue-updates](#ignore-issue-updates)                       | Override [ignore-updates](#ignore-updates) for issues only                  |                       |
 | [ignore-pr-updates](#ignore-pr-updates)                             | Override [ignore-updates](#ignore-updates) for PRs only                     |                       |
+| [include-only-assigned](#include-only-assigned)                     | Process only assigned issues                                                | `false`               |
 
 ### List of output options
 
@@ -516,6 +517,12 @@ Default value: unset
 Useful to override [ignore-updates](#ignore-updates) but only to ignore the updates for the pull requests.
 
 Default value: unset
+
+#### include-only-assigned
+
+If set to `true`, only the issues or the pull requests with an assignee will be marked as stale automatically.
+
+Default value: `false`
 
 ### Usage
 

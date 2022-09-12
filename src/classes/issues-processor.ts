@@ -221,6 +221,14 @@ export class IssuesProcessor {
       return; // Don't process locked issues
     }
 
+    if (this._isIncludeOnlyAssigned(issue)) {
+      issueLogger.info(
+        `Skipping this $$type because its assignees list is empty`
+      );
+      IssuesProcessor._endIssueProcessing(issue);
+      return; // If the issue has an 'include-only-assigned' option set, process only issues with nonempty assignees list
+    }
+
     const onlyLabels: string[] = wordsToList(this._getOnlyLabels(issue));
 
     if (onlyLabels.length > 0) {
@@ -1010,6 +1018,10 @@ export class IssuesProcessor {
     }
 
     return this.options.onlyLabels;
+  }
+
+  private _isIncludeOnlyAssigned(issue: Issue): boolean {
+    return this.options.includeOnlyAssigned && !issue.hasAssignees;
   }
 
   private _getAnyOfLabels(issue: Issue): string {

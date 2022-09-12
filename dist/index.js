@@ -476,6 +476,11 @@ class IssuesProcessor {
                 IssuesProcessor._endIssueProcessing(issue);
                 return; // Don't process locked issues
             }
+            if (this._isIncludeOnlyAssigned(issue)) {
+                issueLogger.info(`Skipping this $$type because its assignees list is empty`);
+                IssuesProcessor._endIssueProcessing(issue);
+                return; // If the issue has an 'include-only-assigned' option set, process only issues with nonempty assignees list
+            }
             const onlyLabels = words_to_list_1.wordsToList(this._getOnlyLabels(issue));
             if (onlyLabels.length > 0) {
                 issueLogger.info(`The option ${issueLogger.createOptionLink(option_1.Option.OnlyLabels)} was specified to only process issues and pull requests with all those labels (${logger_service_1.LoggerService.cyan(onlyLabels.length)})`);
@@ -987,6 +992,9 @@ class IssuesProcessor {
             }
         }
         return this.options.onlyLabels;
+    }
+    _isIncludeOnlyAssigned(issue) {
+        return this.options.includeOnlyAssigned && !issue.hasAssignees;
     }
     _getAnyOfLabels(issue) {
         if (issue.isPullRequest) {
@@ -2207,7 +2215,8 @@ function _getAndValidateArgs() {
         ignoreIssueUpdates: _toOptionalBoolean('ignore-issue-updates'),
         ignorePrUpdates: _toOptionalBoolean('ignore-pr-updates'),
         exemptDraftPr: core.getInput('exempt-draft-pr') === 'true',
-        closeIssueReason: core.getInput('close-issue-reason')
+        closeIssueReason: core.getInput('close-issue-reason'),
+        includeOnlyAssigned: core.getInput('include-only-assigned') === 'true'
     };
     for (const numberInput of [
         'days-before-stale',

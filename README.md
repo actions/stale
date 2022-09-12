@@ -520,7 +520,7 @@ Default value: unset
 
 #### include-only-assigned
 
-If set to `true`, only the issues ot the pull requests with an assignee will be marked as stale automatically.
+If set to `true`, only the issues or the pull requests with an assignee will be marked as stale automatically.
 
 Default value: `false`
 

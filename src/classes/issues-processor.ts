@@ -673,8 +673,13 @@ export class IssuesProcessor {
       issueLogger.info(`marked stale this run, so don't check for updates`);
     }
 
-    const issueHasUpdateSinceStale =
-      new Date(issue.updated_at) > new Date(markedStaleOn);
+    // The issue.updated_at and markedStaleOn are not always exactly in sync (they can be off by a second or 2)
+    // isDateMoreRecentThan makes sure they are not the same date within a certain tolerance (15 seconds in this case)
+    const issueHasUpdateSinceStale = isDateMoreRecentThan(
+      new Date(issue.updated_at),
+      new Date(markedStaleOn),
+      15
+    );
 
     issueLogger.info(
       `$$type has been updated since it was marked stale: ${LoggerService.cyan(

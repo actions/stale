@@ -1,5 +1,7 @@
 import {IIssuesProcessorOptions} from '../../src/interfaces/issues-processor-options';
 
+// Default options for use in tests.
+// Mirrors the defaults defined in action.yml
 export const DefaultProcessorOptions: IIssuesProcessorOptions = Object.freeze({
   repoToken: 'none',
   staleIssueMessage: 'This issue is stale',
@@ -51,6 +53,6 @@ export const DefaultProcessorOptions: IIssuesProcessorOptions = Object.freeze({
   ignoreIssueUpdates: undefined,
   ignorePrUpdates: undefined,
   exemptDraftPr: false,
-  closeIssueReason: '',
+  closeIssueReason: 'not_planned',
   includeOnlyAssigned: false
 });

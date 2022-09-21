@@ -1,18 +1,21 @@
 # Changelog
 
+# [6.0.0]
+
+:warning: Breaking change :warning:
+Issues/PRs default `close-issue-reason` is now `not_planned`([#789](https://github.com/actions/stale/issues/789))
+
 # [5.1.0]
 
 [Don't process stale issues right after they're marked stale](https://github.com/actions/stale/issues/696)
 [Add close-issue-reason option][#764](https://github.com/actions/stale/pull/764)[#772](https://github.com/actions/stale/pull/772)
 Various dependabot/dependency updates
 
-
 ## [4.1.0](https://github.com/actions/stale/compare/v3.0.19...v4.1.0) (2021-07-14)
 
 ## Features
 
-- [Ability to exempt draft PRs](https://github.com/actions/stale/commit/9912fa74d1c01b5d6187793d97441019cbe325d0
-)
+- [Ability to exempt draft PRs](https://github.com/actions/stale/commit/9912fa74d1c01b5d6187793d97441019cbe325d0)
 
 ## [4.0.0](https://github.com/actions/stale/compare/v3.0.19...v4.0.0) (2021-07-14)
 

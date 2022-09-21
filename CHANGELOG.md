@@ -3,6 +3,7 @@
 # [6.0.0]
 
 :warning: Breaking change :warning:
+
 Issues/PRs default `close-issue-reason` is now `not_planned`([#789](https://github.com/actions/stale/issues/789))
 
 # [5.1.0]

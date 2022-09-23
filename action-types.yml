@@ -1,0 +1,173 @@
+# See https://github.com/krzema12/github-actions-typing
+
+inputs:
+  repo-token:
+    type: string
+  stale-issue-message:
+    type: string
+  stale-pr-message:
+    type: string
+  close-issue-message:
+    type: string
+  close-pr-message:
+    type: string
+  days-before-stale:
+    type: integer
+  days-before-issue-stale:
+    type: string
+  days-before-pr-stale:
+    type: integer
+    named-values:
+      never: -1
+  days-before-close:
+    type: integer
+  days-before-issue-close:
+    type: integer
+    named-values:
+      never: -1
+  days-before-pr-close:
+    type: integer
+    named-values:
+      never: -1
+  stale-issue-label:
+    type: string
+  close-issue-label:
+    type: string
+  exempt-issue-labels:
+    type: list
+    separator: ','
+    list-item:
+      type: string
+  close-issue-reason:
+    type: string
+  stale-pr-label:
+    type: string
+  close-pr-label:
+    type: string
+  exempt-pr-labels:
+    type: list
+    separator: ','
+    list-item:
+      type: string
+  exempt-milestones:
+    type: list
+    separator: ','
+    list-item:
+      type: string
+  exempt-issue-milestones:
+    type: list
+    separator: ','
+    list-item:
+      type: string
+  exempt-pr-milestones:
+    type: list
+    separator: ','
+    list-item:
+      type: string
+  exempt-all-milestones:
+    type: boolean
+  exempt-all-issue-milestones:
+    type: boolean
+  exempt-all-pr-milestones:
+    type: boolean
+  only-labels:
+    type: list
+    separator: ','
+    list-item:
+      type: string
+  any-of-labels:
+    type: list
+    separator: ','
+    list-item:
+      type: string
+  any-of-issue-labels:
+    type: list
+    separator: ','
+    list-item:
+      type: string
+  any-of-pr-labels:
+    type: list
+    separator: ','
+    list-item:
+      type: string
+  only-issue-labels:
+    type: list
+    separator: ','
+    list-item:
+      type: string
+  only-pr-labels:
+    type: list
+    separator: ','
+    list-item:
+      type: string
+  operations-per-run:
+    type: integer
+  remove-stale-when-updated:
+    type: boolean
+  remove-issue-stale-when-updated:
+    type: boolean
+  remove-pr-stale-when-updated:
+    type: boolean
+  debug-only:
+    type: boolean
+  ascending:
+    type: boolean
+  delete-branch:
+    type: boolean
+  start-date:
+    type: string
+  exempt-assignees:
+    type: list
+    separator: ','
+    list-item:
+      type: string
+  exempt-issue-assignees:
+    type: list
+    separator: ','
+    list-item:
+      type: string
+  exempt-pr-assignees:
+    type: list
+    separator: ','
+    list-item:
+      type: string
+  exempt-all-assignees:
+    type: boolean
+  exempt-all-issue-assignees:
+    type: string
+  exempt-all-pr-assignees:
+    type: boolean
+  exempt-draft-pr:
+    type: boolean
+  enable-statistics:
+    type: boolean
+  labels-to-add-when-unstale:
+    type: list
+    separator: ','
+    list-item:
+      type: string
+  labels-to-remove-when-unstale:
+    type: list
+    separator: ','
+    list-item:
+      type: string
+  ignore-updates:
+    type: boolean
+  ignore-issue-updates:
+    type: boolean
+  ignore-pr-updates:
+    type: boolean
+  include-only-assigned:
+    type: boolean
+
+outputs:
+  closed-issues-prs:
+    type: list
+    separator: ','
+    list-item:
+      type: string
+  staled-issues-prs:
+    type: list
+    separator: ','
+    list-item:
+      type: string

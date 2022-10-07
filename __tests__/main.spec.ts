@@ -1998,6 +1998,84 @@ test('processing an issue opened since 2 days and with the option "daysBeforeIss
   expect(processor.closedIssues).toHaveLength(0);
 });
 
+test('processing an issue opened since 1 hour and with the option "daysBeforeIssueStale" at 0.1666666667 (4 hours) will not make it stale', async () => {
+  expect.assertions(2);
+  const opts: IIssuesProcessorOptions = {
+    ...DefaultProcessorOptions,
+    daysBeforeStale: 10,
+    daysBeforeIssueStale: 0.1666666667
+  };
+  const issueDate = new Date();
+  issueDate.setHours(issueDate.getHours() - 1);
+  const TestIssueList: Issue[] = [
+    generateIssue(opts, 1, 'An issue with no label', issueDate.toISOString())
+  ];
+  const processor = new IssuesProcessorMock(
+    opts,
+    async p => (p === 1 ? TestIssueList : []),
+    async () => [],
+    async () => new Date().toISOString()
+  );
+
+  // process our fake issue list
+  await processor.processIssues(1);
+
+  expect(processor.staleIssues).toHaveLength(0);
+  expect(processor.closedIssues).toHaveLength(0);
+});
+
+test('processing an issue opened since 4 hours and with the option "daysBeforeIssueStale" at 0.1666666667 (4 hours) will make it stale', async () => {
+  expect.assertions(2);
+  const opts: IIssuesProcessorOptions = {
+    ...DefaultProcessorOptions,
+    daysBeforeStale: 10,
+    daysBeforeIssueStale: 0.1666666667
+  };
+  const issueDate = new Date();
+  issueDate.setHours(issueDate.getHours() - 4);
+  const TestIssueList: Issue[] = [
+    generateIssue(opts, 1, 'An issue with no label', issueDate.toISOString())
+  ];
+  const processor = new IssuesProcessorMock(
+    opts,
+    async p => (p === 1 ? TestIssueList : []),
+    async () => [],
+    async () => new Date().toISOString()
+  );
+
+  // process our fake issue list
+  await processor.processIssues(1);
+
+  expect(processor.staleIssues).toHaveLength(1);
+  expect(processor.closedIssues).toHaveLength(0);
+});
+
+test('processing an issue opened since 5 hours and with the option "daysBeforeIssueStale" at 0.1666666667 (4 hours) will make it stale', async () => {
+  expect.assertions(2);
+  const opts: IIssuesProcessorOptions = {
+    ...DefaultProcessorOptions,
+    daysBeforeStale: 10,
+    daysBeforeIssueStale: 0.1666666667
+  };
+  const issueDate = new Date();
+  issueDate.setHours(issueDate.getHours() - 5);
+  const TestIssueList: Issue[] = [
+    generateIssue(opts, 1, 'An issue with no label', issueDate.toISOString())
+  ];
+  const processor = new IssuesProcessorMock(
+    opts,
+    async p => (p === 1 ? TestIssueList : []),
+    async () => [],
+    async () => new Date().toISOString()
+  );
+
+  // process our fake issue list
+  await processor.processIssues(1);
+
+  expect(processor.staleIssues).toHaveLength(1);
+  expect(processor.closedIssues).toHaveLength(0);
+});
+
 test('processing a pull request opened since 2 days and with the option "daysBeforePrStale" at 3 will not make it stale', async () => {
   expect.assertions(2);
   const opts: IIssuesProcessorOptions = {
@@ -2088,6 +2166,105 @@ test('processing a pull request opened since 2 days and with the option "daysBef
     async p => (p === 1 ? TestIssueList : []),
     async () => [],
     async () => new Date().toDateString()
+  );
+
+  // process our fake issue list
+  await processor.processIssues(1);
+
+  expect(processor.staleIssues).toHaveLength(1);
+  expect(processor.closedIssues).toHaveLength(0);
+});
+
+test('processing a pull request opened since 1 hour and with the option "daysBeforePrStale" at 0.1666666667 (4 hours) will not make it stale', async () => {
+  expect.assertions(2);
+  const opts: IIssuesProcessorOptions = {
+    ...DefaultProcessorOptions,
+    daysBeforeStale: 10,
+    daysBeforePrStale: 0.1666666667
+  };
+  const issueDate = new Date();
+  issueDate.setHours(issueDate.getHours() - 1);
+  const TestIssueList: Issue[] = [
+    generateIssue(
+      opts,
+      1,
+      'A pull request with no label',
+      issueDate.toISOString(),
+      issueDate.toISOString(),
+      true
+    )
+  ];
+  const processor = new IssuesProcessorMock(
+    opts,
+    async p => (p === 1 ? TestIssueList : []),
+    async () => [],
+    async () => new Date().toISOString()
+  );
+
+  // process our fake issue list
+  await processor.processIssues(1);
+
+  expect(processor.staleIssues).toHaveLength(0);
+  expect(processor.closedIssues).toHaveLength(0);
+});
+
+test('processing a pull request opened since 4 hours and with the option "daysBeforePrStale" at 0.1666666667 (4 hours) will make it stale', async () => {
+  expect.assertions(2);
+  const opts: IIssuesProcessorOptions = {
+    ...DefaultProcessorOptions,
+    daysBeforeStale: 10,
+    daysBeforePrStale: 0.1666666667
+  };
+  const issueDate = new Date();
+  issueDate.setHours(issueDate.getHours() - 4);
+  const TestIssueList: Issue[] = [
+    generateIssue(
+      opts,
+      1,
+      'A pull request with no label',
+      issueDate.toISOString(),
+      issueDate.toISOString(),
+      true
+    )
+  ];
+  const processor = new IssuesProcessorMock(
+    opts,
+    async p => (p === 1 ? TestIssueList : []),
+    async () => [],
+    async () => new Date().toISOString()
+  );
+
+  // process our fake issue list
+  await processor.processIssues(1);
+
+  expect(processor.staleIssues).toHaveLength(1);
+  expect(processor.closedIssues).toHaveLength(0);
+});
+
+test('processing a pull request opened since 5 hours and with the option "daysBeforePrStale" at 0.1666666667 (4 hours) will make it stale', async () => {
+  expect.assertions(2);
+  const opts: IIssuesProcessorOptions = {
+    ...DefaultProcessorOptions,
+    daysBeforeStale: 10,
+    daysBeforePrStale: 0.1666666667
+  };
+  const issueDate = new Date();
+  issueDate.setHours(issueDate.getHours() - 5);
+  const TestIssueList: Issue[] = [
+    generateIssue(
+      opts,
+      1,
+      'A pull request with no label',
+      issueDate.toISOString(),
+      issueDate.toISOString(),
+      true
+    )
+  ];
+  const processor = new IssuesProcessorMock(
+    opts,
+    async p => (p === 1 ? TestIssueList : []),
+    async () => [],
+    async () => new Date().toISOString()
   );
 
   // process our fake issue list

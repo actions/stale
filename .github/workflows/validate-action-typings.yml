@@ -3,7 +3,7 @@ name: Validate action typings
 on:
   push:
     branches:
-     - main
+      - main
   pull_request:
   workflow_dispatch:
 

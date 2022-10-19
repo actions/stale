@@ -2183,9 +2183,9 @@ function _getAndValidateArgs() {
         stalePrMessage: core.getInput('stale-pr-message'),
         closeIssueMessage: core.getInput('close-issue-message'),
         closePrMessage: core.getInput('close-pr-message'),
-        daysBeforeStale: parseInt(core.getInput('days-before-stale', { required: true })),
-        daysBeforeIssueStale: parseInt(core.getInput('days-before-issue-stale')),
-        daysBeforePrStale: parseInt(core.getInput('days-before-pr-stale')),
+        daysBeforeStale: parseFloat(core.getInput('days-before-stale', { required: true })),
+        daysBeforeIssueStale: parseFloat(core.getInput('days-before-issue-stale')),
+        daysBeforePrStale: parseFloat(core.getInput('days-before-pr-stale')),
         daysBeforeClose: parseInt(core.getInput('days-before-close', { required: true })),
         daysBeforeIssueClose: parseInt(core.getInput('days-before-issue-close')),
         daysBeforePrClose: parseInt(core.getInput('days-before-pr-close')),
@@ -2233,11 +2233,14 @@ function _getAndValidateArgs() {
         closeIssueReason: core.getInput('close-issue-reason'),
         includeOnlyAssigned: core.getInput('include-only-assigned') === 'true'
     };
-    for (const numberInput of [
-        'days-before-stale',
-        'days-before-close',
-        'operations-per-run'
-    ]) {
+    for (const numberInput of ['days-before-stale']) {
+        if (isNaN(parseFloat(core.getInput(numberInput)))) {
+            const errorMessage = `Option "${numberInput}" did not parse to a valid float`;
+            core.setFailed(errorMessage);
+            throw new Error(errorMessage);
+        }
+    }
+    for (const numberInput of ['days-before-close', 'operations-per-run']) {
         if (isNaN(parseInt(core.getInput(numberInput)))) {
             const errorMessage = `Option "${numberInput}" did not parse to a valid integer`;
             core.setFailed(errorMessage);

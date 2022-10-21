@@ -1,6 +1,6 @@
 # Changelog
 
-# [6.0.2]
+# [6.1.0]
 
 Allow daysBeforeStale options to be float ([#841](https://github.com/actions/stale/pull/841))
 

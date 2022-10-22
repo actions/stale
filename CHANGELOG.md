@@ -1,5 +1,9 @@
 # Changelog
 
+# [6.0.1]
+
+Update @actions/core to v1.10.0 ([#839](https://github.com/actions/stale/pull/839))
+
 # [6.0.0]
 
 :warning: Breaking change :warning:

@@ -26,4 +26,4 @@ jobs:
           debug-only: true
       - name: Print outputs
         # run: echo ${{ join(steps.stale.outputs.*, ',') }}
-        run: echo 'test'
+        run: echo steps.stale.outputs.staled-issues-prs

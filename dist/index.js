@@ -381,7 +381,7 @@ class IssuesProcessor {
         this.options = options;
         this.client = github_1.getOctokit(this.options.repoToken);
         this.operations = new stale_operations_1.StaleOperations(this.options);
-        this._logger.info(logger_service_1.LoggerService.yellow(`Starting the stale action process...`));
+        this._logger.info(logger_service_1.LoggerService.yellow(`Starting the stale action process... logging`));
         if (this.options.debugOnly) {
             this._logger.warning(logger_service_1.LoggerService.yellowBright(`Executing in debug mode!`));
             this._logger.warning(logger_service_1.LoggerService.yellowBright(`The debug output will be written but no issues/PRs will be processed.`));

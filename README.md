@@ -246,8 +246,7 @@ Required Permission: `pull-requests: write`
 
 #### exempt-issue-labels
 
-The label(s) that can exempt to automatically mark as stale the issues.  
-It can be a comma separated list of labels (e.g: `question,bug`).
+A comma separated list of labels, that prevent the issue from being marked as stale. (e.g: `question,bug,wip`)
 
 If unset (or an empty string), this option will not alter the stale workflow.
 

@@ -323,7 +323,7 @@ export class IssuesProcessor {
     if (issue.isStale) {
       issueLogger.info(`This $$type has a stale label`);
     } else {
-      issueLogger.info(`This $$type hasn't a stale label`);
+      issueLogger.info(`This $$type doesn't have a stale label`);
     }
 
     const exemptLabels: string[] = wordsToList(
@@ -338,7 +338,10 @@ export class IssuesProcessor {
       )
     ) {
       if (issue.isStale) {
-        issueLogger.info(`An exempt label was added after the stale label.`);
+        // issueLogger.info(`An exempt label was added after the stale label.`);
+        issueLogger.info(
+          `This $$type has an exempt label, removing the stale label.`
+        );
         await this._removeStaleLabel(issue, staleLabel);
       }
 

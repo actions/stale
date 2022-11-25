@@ -337,8 +337,12 @@ export class IssuesProcessor {
         isLabeled(issue, exemptLabel)
       )
     ) {
+      // check to see if the issue is stale and has an exempt label
+      // see issue #136 for more details
       if (issue.isStale) {
-        issueLogger.info(`An exempt label was added after the stale label.`);
+        issueLogger.info(
+          `This $$type has both an exempt and stale label, proceeding to remove the stale label.`
+        );
         await this._removeStaleLabel(issue, staleLabel);
       }
 

@@ -532,8 +532,10 @@ class IssuesProcessor {
                 ? this.options.exemptPrLabels
                 : this.options.exemptIssueLabels);
             if (exemptLabels.some((exemptLabel) => is_labeled_1.isLabeled(issue, exemptLabel))) {
+                // check to see if the issue is stale and has an exempt label
+                // see issue #136 for more details
                 if (issue.isStale) {
-                    issueLogger.info(`An exempt label was added after the stale label.`);
+                    issueLogger.info(`This $$type has both an exempt and stale label, proceeding to remove the stale label.`);
                     yield this._removeStaleLabel(issue, staleLabel);
                 }
                 issueLogger.info(`Skipping this $$type because it has an exempt label`);

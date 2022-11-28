@@ -189,6 +189,11 @@ export class IssuesProcessor {
       )}`
     );
 
+    const shouldIgnoreUpdates: boolean = new IgnoreUpdates(
+      this.options,
+      issue
+    ).shouldIgnoreUpdates();
+
     // calculate string based messages for this issue
     const staleMessage: string = issue.isPullRequest
       ? this.options.stalePrMessage
@@ -321,9 +326,9 @@ export class IssuesProcessor {
     }
 
     if (issue.isStale) {
-      issueLogger.info(`This $$type has a stale label`);
+      issueLogger.info(`This $$type includes a stale label`);
     } else {
-      issueLogger.info(`This $$type hasn't a stale label`);
+      issueLogger.info(`This $$type does not include a stale label`);
     }
 
     const exemptLabels: string[] = wordsToList(
@@ -332,16 +337,23 @@ export class IssuesProcessor {
         : this.options.exemptIssueLabels
     );
 
+    //Check to see if the item should be stale? if its no longer stale --> remove the stale label
+
+    const isItemStale = this._shouldItemBeStale(
+      issue,
+      shouldIgnoreUpdates,
+      daysBeforeStale
+    );
+    issueLogger.info(`IS this item stale? ${isItemStale}, ${issue.updated_at}`);
+
     if (
       exemptLabels.some((exemptLabel: Readonly<string>): boolean =>
         isLabeled(issue, exemptLabel)
       )
     ) {
-      if (issue.isStale) {
-        issueLogger.info(`An exempt label was added after the stale label.`);
-        await this._removeStaleLabel(issue, staleLabel);
-      }
-
+      // if(!isItemStale){
+      //   //remove the stale label, the item is no longer stale
+      // }
       issueLogger.info(`Skipping this $$type because it has an exempt label`);
       IssuesProcessor._endIssueProcessing(issue);
       return; // Don't process exempt issues
@@ -427,10 +439,6 @@ export class IssuesProcessor {
     // Determine if this issue needs to be marked stale first
     if (!issue.isStale) {
       issueLogger.info(`This $$type is not stale`);
-      const shouldIgnoreUpdates: boolean = new IgnoreUpdates(
-        this.options,
-        issue
-      ).shouldIgnoreUpdates();
 
       // Should this issue be marked as stale?
       let shouldBeStale: boolean;
@@ -1226,5 +1234,32 @@ export class IssuesProcessor {
     }
 
     return Option.RemoveStaleWhenUpdated;
+  }
+
+  /**
+   * Checks to see if the issue/pr should be considered stale
+   * if the ignore-updates flag is enabled use the creation date
+   * otherwise, use the last updated date to determine whether the item is stale.
+   * @param issue - the item we are evaluating
+   * @param shouldIgnoreUpdates - whether the ignore-updates flag is enabled
+   * @param daysBeforeStale - number of days before the item is stale
+   */
+  private _shouldItemBeStale(
+    issue: Readonly<Issue>,
+    shouldIgnoreUpdates: boolean,
+    daysBeforeStale: number
+  ): boolean {
+    return shouldIgnoreUpdates
+      ? !IssuesProcessor._updatedSince(issue.created_at, daysBeforeStale)
+      : !IssuesProcessor._updatedSince(issue.updated_at, daysBeforeStale);
+    // // Ignore the last update and only use the creation date
+    // if (shouldIgnoreUpdates) {
+    //   shouldBeStale =
+    // }
+    // // Use the last update to check if we need to stale
+    // else {
+    //   shouldBeStale =
+    // }
+    // return !!
   }
 }

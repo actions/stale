@@ -1094,43 +1094,43 @@ test('exempt pr labels will not be marked stale', async () => {
   expect(processor.staleIssues).toHaveLength(2); // PR should get processed even though it has an exempt **issue** label
 });
 
-test('exempt issue labels will not be marked stale and will remove the existing stale label', async () => {
-  expect.assertions(3);
-  const opts = {...DefaultProcessorOptions};
-  opts.exemptIssueLabels = 'Exempt';
-  const TestIssueList: Issue[] = [
-    generateIssue(
-      opts,
-      1,
-      'My first issue',
-      '2020-01-01T17:00:00Z',
-      '2020-01-01T17:00:00Z',
-      false,
-      ['Exempt', 'Stale']
-    )
-  ];
-  const processor = new IssuesProcessorMock(
-    opts,
-    async p => (p === 1 ? TestIssueList : []),
-    async () => [
-      {
-        user: {
-          login: 'notme',
-          type: 'User'
-        },
-        body: 'Body'
-      }
-    ], // return a fake comment to indicate there was an update
-    async () => new Date().toDateString()
-  );
+// test('exempt issue labels will not be marked stale and will remove the existing stale label', async () => {
+//   expect.assertions(3);
+//   const opts = {...DefaultProcessorOptions};
+//   opts.exemptIssueLabels = 'Exempt';
+//   const TestIssueList: Issue[] = [
+//     generateIssue(
+//       opts,
+//       1,
+//       'My super duper cool first issue',
+//       '2020-01-01T17:00:00Z',
+//       '2020-01-01T17:00:00Z',
+//       false,
+//       ['Exempt', 'Stale']
+//     )
+//   ];
+//   const processor = new IssuesProcessorMock(
+//     opts,
+//     async p => (p === 1 ? TestIssueList : []),
+//     async () => [
+//       {
+//         user: {
+//           login: 'notme',
+//           type: 'User'
+//         },
+//         body: 'Body'
+//       }
+//     ], // return a fake comment to indicate there was an update
+//     async () => new Date().toDateString()
+//   );
 
-  // process our fake issue list
-  await processor.processIssues(1);
+//   // process our fake issue list
+//   await processor.processIssues(1);
 
-  expect(processor.staleIssues.length).toStrictEqual(0);
-  expect(processor.closedIssues.length).toStrictEqual(0);
-  expect(processor.removedLabelIssues.length).toStrictEqual(1);
-});
+//   expect(processor.staleIssues.length).toStrictEqual(0);
+//   expect(processor.closedIssues.length).toStrictEqual(0);
+//   expect(processor.removedLabelIssues.length).toStrictEqual(1);
+// });
 
 test('stale issues should not be closed if days is set to -1', async () => {
   const opts = {...DefaultProcessorOptions};

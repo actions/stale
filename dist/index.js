@@ -447,6 +447,7 @@ class IssuesProcessor {
             (_a = this.statistics) === null || _a === void 0 ? void 0 : _a.incrementProcessedItemsCount(issue);
             const issueLogger = new issue_logger_1.IssueLogger(issue);
             issueLogger.info(`Found this $$type last updated at: ${logger_service_1.LoggerService.cyan(issue.updated_at)}`);
+            const shouldIgnoreUpdates = new ignore_updates_1.IgnoreUpdates(this.options, issue).shouldIgnoreUpdates();
             // calculate string based messages for this issue
             const staleMessage = issue.isPullRequest
                 ? this.options.stalePrMessage
@@ -531,7 +532,13 @@ class IssuesProcessor {
             const exemptLabels = words_to_list_1.wordsToList(issue.isPullRequest
                 ? this.options.exemptPrLabels
                 : this.options.exemptIssueLabels);
+            //Check to see if the item should be stale? if its no longer stale --> remove the stale label
+            const isItemStale = this._shouldItemBeStale(issue, shouldIgnoreUpdates, daysBeforeStale);
+            issueLogger.info(`IS this item stale? ${isItemStale}, ${issue.updated_at}`);
             if (exemptLabels.some((exemptLabel) => is_labeled_1.isLabeled(issue, exemptLabel))) {
+                // if(!isItemStale){
+                //   //remove the stale label, the item is no longer stale
+                // }
                 issueLogger.info(`Skipping this $$type because it has an exempt label`);
                 IssuesProcessor._endIssueProcessing(issue);
                 return; // Don't process exempt issues
@@ -579,7 +586,6 @@ class IssuesProcessor {
             // Determine if this issue needs to be marked stale first
             if (!issue.isStale) {
                 issueLogger.info(`This $$type is not stale`);
-                const shouldIgnoreUpdates = new ignore_updates_1.IgnoreUpdates(this.options, issue).shouldIgnoreUpdates();
                 // Should this issue be marked as stale?
                 let shouldBeStale;
                 // Ignore the last update and only use the creation date
@@ -1117,6 +1123,28 @@ class IssuesProcessor {
             return option_1.Option.RemoveIssueStaleWhenUpdated;
         }
         return option_1.Option.RemoveStaleWhenUpdated;
+    }
+    /**
+     * Checks to see if the issue/pr should be considered stale
+     * if the ignore-updates flag is enabled use the creation date
+     * otherwise, use the last updated date to determine whether the item is stale.
+     * @param issue - the item we are evaluating
+     * @param shouldIgnoreUpdates - whether the ignore-updates flag is enabled
+     * @param daysBeforeStale - number of days before the item is stale
+     */
+    _shouldItemBeStale(issue, shouldIgnoreUpdates, daysBeforeStale) {
+        return shouldIgnoreUpdates
+            ? !IssuesProcessor._updatedSince(issue.created_at, daysBeforeStale)
+            : !IssuesProcessor._updatedSince(issue.updated_at, daysBeforeStale);
+        // // Ignore the last update and only use the creation date
+        // if (shouldIgnoreUpdates) {
+        //   shouldBeStale =
+        // }
+        // // Use the last update to check if we need to stale
+        // else {
+        //   shouldBeStale =
+        // }
+        // return !!
     }
 }
 exports.IssuesProcessor = IssuesProcessor;

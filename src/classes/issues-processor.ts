@@ -339,7 +339,7 @@ export class IssuesProcessor {
 
     //Check to see if the item should be stale? if its no longer stale --> remove the stale label
 
-    const isItemStale = this._shouldItemBeStale(
+    const isItemStale = await this._shouldItemBeStale(
       issue,
       staleLabel,
       staleMessage

@@ -533,7 +533,7 @@ class IssuesProcessor {
                 ? this.options.exemptPrLabels
                 : this.options.exemptIssueLabels);
             //Check to see if the item should be stale? if its no longer stale --> remove the stale label
-            const isItemStale = this._shouldItemBeStale(issue, staleLabel, staleMessage);
+            const isItemStale = yield this._shouldItemBeStale(issue, staleLabel, staleMessage);
             issueLogger.info(`IS this item stale? ${isItemStale}`);
             if (exemptLabels.some((exemptLabel) => is_labeled_1.isLabeled(issue, exemptLabel))) {
                 // if(!isItemStale){
@@ -1138,8 +1138,8 @@ class IssuesProcessor {
             const issueHasCommentsSinceStale = yield this._hasCommentsSince(issue, markedStaleOn, staleMessage);
             const shouldRemoveStaleWhenUpdated = this._shouldRemoveStaleWhenUpdated(issue);
             const issueHasUpdateSinceStale = is_date_more_recent_than_1.isDateMoreRecentThan(new Date(issue.updated_at), new Date(markedStaleOn), 15);
-            return shouldRemoveStaleWhenUpdated &&
-                (issueHasUpdateSinceStale || issueHasCommentsSinceStale);
+            return (shouldRemoveStaleWhenUpdated &&
+                (issueHasUpdateSinceStale || issueHasCommentsSinceStale));
         });
     }
 }

@@ -532,9 +532,10 @@ class IssuesProcessor {
             const exemptLabels = words_to_list_1.wordsToList(issue.isPullRequest
                 ? this.options.exemptPrLabels
                 : this.options.exemptIssueLabels);
-            //Check to see if the item should be stale? if its no longer stale --> remove the stale label
+            // This item is currently marked still, should it still be considered stale?
+            // if its no longer stale, we should remove the label, otherwise leave it alone
             const isItemStillStale = yield this._shouldItemBeStale(issue, staleLabel, staleMessage);
-            issueLogger.info(`IS this item stale? ${isItemStillStale}`);
+            issueLogger.info(`Should the stale label be removed? ${isItemStillStale}`);
             if (exemptLabels.some((exemptLabel) => is_labeled_1.isLabeled(issue, exemptLabel))) {
                 // if(!isItemStale){
                 //   //remove the stale label, the item is no longer stale

@@ -532,14 +532,13 @@ class IssuesProcessor {
             const exemptLabels = words_to_list_1.wordsToList(issue.isPullRequest
                 ? this.options.exemptPrLabels
                 : this.options.exemptIssueLabels);
-            // This item is currently marked still, should it still be considered stale?
-            // if its no longer stale, we should remove the label, otherwise leave it alone
-            const isItemStillStale = yield this._shouldItemBeStale(issue, staleLabel, staleMessage);
+            const isItemStillStale = yield this._isStillStale(issue, staleLabel, staleMessage);
             issueLogger.info(`Should the stale label be removed? ${isItemStillStale}`);
             if (exemptLabels.some((exemptLabel) => is_labeled_1.isLabeled(issue, exemptLabel))) {
-                // if(!isItemStale){
-                //   //remove the stale label, the item is no longer stale
-                // }
+                if (isItemStillStale) {
+                    issueLogger.info(`This $$type is has recent activity, proceeding to remove stale label`);
+                    yield this._removeStaleLabel(issue, staleLabel);
+                }
                 issueLogger.info(`Skipping this $$type because it has an exempt label`);
                 IssuesProcessor._endIssueProcessing(issue);
                 return; // Don't process exempt issues
@@ -1126,21 +1125,24 @@ class IssuesProcessor {
         return option_1.Option.RemoveStaleWhenUpdated;
     }
     /**
-     * Checks to see if the issue/pr should be considered stale
-     * if the ignore-updates flag is enabled use the creation date
-     * otherwise, use the last updated date to determine whether the item is stale.
+     * Checks to see if there has been activity on an item after the issue was marked stale
      * @param issue - the item we are evaluating
-     * @param shouldIgnoreUpdates - whether the ignore-updates flag is enabled
-     * @param daysBeforeStale - number of days before the item is stale
+     * @param staleLabel - the stale label we use on our items
+     * @param staleMessage - the stale message we use on our items
+     * @returns - false by default
      */
-    _shouldItemBeStale(issue, staleLabel, staleMessage) {
+    _isStillStale(issue, staleLabel, staleMessage) {
         return __awaiter(this, void 0, void 0, function* () {
-            const markedStaleOn = (yield this.getLabelCreationDate(issue, staleLabel)) || issue.updated_at;
-            const issueHasCommentsSinceStale = yield this._hasCommentsSince(issue, markedStaleOn, staleMessage);
-            const shouldRemoveStaleWhenUpdated = this._shouldRemoveStaleWhenUpdated(issue);
-            const issueHasUpdateSinceStale = is_date_more_recent_than_1.isDateMoreRecentThan(new Date(issue.updated_at), new Date(markedStaleOn), 15);
-            return (shouldRemoveStaleWhenUpdated &&
-                (issueHasUpdateSinceStale || issueHasCommentsSinceStale));
+            if (issue.isStale) {
+                const markedStaleOn = (yield this.getLabelCreationDate(issue, staleLabel)) ||
+                    issue.updated_at;
+                const issueHasCommentsSinceStale = yield this._hasCommentsSince(issue, markedStaleOn, staleMessage);
+                const shouldRemoveStaleWhenUpdated = this._shouldRemoveStaleWhenUpdated(issue);
+                const issueHasUpdateSinceStale = is_date_more_recent_than_1.isDateMoreRecentThan(new Date(issue.updated_at), new Date(markedStaleOn), 15);
+                return (shouldRemoveStaleWhenUpdated &&
+                    (issueHasUpdateSinceStale || issueHasCommentsSinceStale));
+            }
+            return false;
         });
     }
 }

@@ -337,9 +337,7 @@ export class IssuesProcessor {
         : this.options.exemptIssueLabels
     );
 
-    // This item is currently marked still, should it still be considered stale?
-    // if its no longer stale, we should remove the label, otherwise leave it alone
-    const isItemStillStale = await this._shouldItemBeStale(
+    const isItemStillStale = await this._isStillStale(
       issue,
       staleLabel,
       staleMessage
@@ -351,9 +349,12 @@ export class IssuesProcessor {
         isLabeled(issue, exemptLabel)
       )
     ) {
-      // if(!isItemStale){
-      //   //remove the stale label, the item is no longer stale
-      // }
+      if (isItemStillStale) {
+        issueLogger.info(
+          `This $$type is has recent activity, proceeding to remove stale label`
+        );
+        await this._removeStaleLabel(issue, staleLabel);
+      }
       issueLogger.info(`Skipping this $$type because it has an exempt label`);
       IssuesProcessor._endIssueProcessing(issue);
       return; // Don't process exempt issues
@@ -1237,38 +1238,43 @@ export class IssuesProcessor {
   }
 
   /**
-   * Checks to see if the issue/pr should be considered stale
-   * if the ignore-updates flag is enabled use the creation date
-   * otherwise, use the last updated date to determine whether the item is stale.
+   * Checks to see if there has been activity on an item after the issue was marked stale
    * @param issue - the item we are evaluating
-   * @param shouldIgnoreUpdates - whether the ignore-updates flag is enabled
-   * @param daysBeforeStale - number of days before the item is stale
+   * @param staleLabel - the stale label we use on our items
+   * @param staleMessage - the stale message we use on our items
+   * @returns - false by default
    */
-  private async _shouldItemBeStale(
+  private async _isStillStale(
     issue: Issue,
     staleLabel: string,
     staleMessage: string
   ): Promise<boolean> {
-    const markedStaleOn: string =
-      (await this.getLabelCreationDate(issue, staleLabel)) || issue.updated_at;
-    const issueHasCommentsSinceStale: boolean = await this._hasCommentsSince(
-      issue,
-      markedStaleOn,
-      staleMessage
-    );
+    if (issue.isStale) {
+      const markedStaleOn =
+        (await this.getLabelCreationDate(issue, staleLabel)) ||
+        issue.updated_at;
 
-    const shouldRemoveStaleWhenUpdated: boolean =
-      this._shouldRemoveStaleWhenUpdated(issue);
+      const issueHasCommentsSinceStale = await this._hasCommentsSince(
+        issue,
+        markedStaleOn,
+        staleMessage
+      );
 
-    const issueHasUpdateSinceStale = isDateMoreRecentThan(
-      new Date(issue.updated_at),
-      new Date(markedStaleOn),
-      15
-    );
+      const shouldRemoveStaleWhenUpdated =
+        this._shouldRemoveStaleWhenUpdated(issue);
 
-    return (
-      shouldRemoveStaleWhenUpdated &&
-      (issueHasUpdateSinceStale || issueHasCommentsSinceStale)
-    );
+      const issueHasUpdateSinceStale = isDateMoreRecentThan(
+        new Date(issue.updated_at),
+        new Date(markedStaleOn),
+        15
+      );
+
+      return (
+        shouldRemoveStaleWhenUpdated &&
+        (issueHasUpdateSinceStale || issueHasCommentsSinceStale)
+      );
+    }
+
+    return false;
   }
 }

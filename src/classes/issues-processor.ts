@@ -339,12 +339,12 @@ export class IssuesProcessor {
 
     //Check to see if the item should be stale? if its no longer stale --> remove the stale label
 
-    const isItemStale = await this._shouldItemBeStale(
+    const isItemStillStale = await this._shouldItemBeStale(
       issue,
       staleLabel,
       staleMessage
     );
-    issueLogger.info(`IS this item stale? ${isItemStale}`);
+    issueLogger.info(`IS this item stale? ${isItemStillStale}`);
 
     if (
       exemptLabels.some((exemptLabel: Readonly<string>): boolean =>

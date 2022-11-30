@@ -524,6 +524,13 @@ If set to `true`, only the issues or the pull requests with an assignee will be 
 
 Default value: `false`
 
+#### remove-stale-from-exempt-items
+
+If set to `true`, issues or pull request with an [exempt-issue-label](#exempt-issue-label) or [exempt-pr-labels](#exempt-pr-labels)
+that are no longer stale will have the stale label removed.
+
+Default value: `false`
+
 ### Usage
 
 See also [action.yml](./action.yml) for a comprehensive list of all the options.

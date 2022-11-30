@@ -337,23 +337,28 @@ export class IssuesProcessor {
         : this.options.exemptIssueLabels
     );
 
-    //Check to see if the item should be stale? if its no longer stale --> remove the stale label
-
-    const isItemStale = this._shouldItemBeStale(
-      issue,
-      shouldIgnoreUpdates,
-      daysBeforeStale
+    const hasExemptLabel = exemptLabels.some((exemptLabel: Readonly<string>) =>
+      isLabeled(issue, exemptLabel)
     );
-    issueLogger.info(`IS this item stale? ${isItemStale}, ${issue.updated_at}`);
 
-    if (
-      exemptLabels.some((exemptLabel: Readonly<string>): boolean =>
-        isLabeled(issue, exemptLabel)
-      )
-    ) {
-      // if(!isItemStale){
-      //   //remove the stale label, the item is no longer stale
-      // }
+    const isRemoveStaleFromExemptItemEnabled =
+      this._removeStaleFromExemptItems(hasExemptLabel);
+
+    if (hasExemptLabel) {
+      // Determine whether we want to manage an exempt item
+      const isIssueStale =
+        isRemoveStaleFromExemptItemEnabled &&
+        (await this._isIssueStale(issue, staleLabel, staleMessage));
+
+      if (isIssueStale) {
+        issueLogger.info(
+          `The option ${issueLogger.createOptionLink(
+            Option.RemoveStaleFromExemptItem
+          )} is enabled, this $$type is no longer stale`
+        );
+
+        await this._removeStaleLabel(issue, staleLabel);
+      }
       issueLogger.info(`Skipping this $$type because it has an exempt label`);
       IssuesProcessor._endIssueProcessing(issue);
       return; // Don't process exempt issues
@@ -1037,6 +1042,10 @@ export class IssuesProcessor {
     return this.options.includeOnlyAssigned && !issue.hasAssignees;
   }
 
+  private _removeStaleFromExemptItems(hasExemptLabel: boolean) {
+    return this.options.removeStaleFromExemptItems && hasExemptLabel;
+  }
+
   private _getAnyOfLabels(issue: Issue): string {
     if (issue.isPullRequest) {
       if (this.options.anyOfPrLabels !== '') {
@@ -1237,29 +1246,44 @@ export class IssuesProcessor {
   }
 
   /**
-   * Checks to see if the issue/pr should be considered stale
-   * if the ignore-updates flag is enabled use the creation date
-   * otherwise, use the last updated date to determine whether the item is stale.
+   * Checks to see if there has been activity on an item after the issue was marked stale
+   * This consumes 2 operations, one to fetch when the issue was marked stale, and one to fetch the comments
    * @param issue - the item we are evaluating
-   * @param shouldIgnoreUpdates - whether the ignore-updates flag is enabled
-   * @param daysBeforeStale - number of days before the item is stale
+   * @param staleLabel - the stale label we use on our items
+   * @param staleMessage - the stale message we use on our items
+   * @returns - false by default
    */
-  private _shouldItemBeStale(
-    issue: Readonly<Issue>,
-    shouldIgnoreUpdates: boolean,
-    daysBeforeStale: number
-  ): boolean {
-    return shouldIgnoreUpdates
-      ? !IssuesProcessor._updatedSince(issue.created_at, daysBeforeStale)
-      : !IssuesProcessor._updatedSince(issue.updated_at, daysBeforeStale);
-    // // Ignore the last update and only use the creation date
-    // if (shouldIgnoreUpdates) {
-    //   shouldBeStale =
-    // }
-    // // Use the last update to check if we need to stale
-    // else {
-    //   shouldBeStale =
-    // }
-    // return !!
+  private async _isIssueStale(
+    issue: Issue,
+    staleLabel: string,
+    staleMessage: string
+  ): Promise<boolean> {
+    if (issue.isStale) {
+      const markedStaleOn =
+        (await this.getLabelCreationDate(issue, staleLabel)) ||
+        issue.updated_at;
+
+      const issueHasCommentsSinceStale = await this._hasCommentsSince(
+        issue,
+        markedStaleOn,
+        staleMessage
+      );
+
+      const shouldRemoveStaleWhenUpdated =
+        this._shouldRemoveStaleWhenUpdated(issue);
+
+      const issueHasUpdateSinceStale = isDateMoreRecentThan(
+        new Date(issue.updated_at),
+        new Date(markedStaleOn),
+        15
+      );
+
+      return (
+        shouldRemoveStaleWhenUpdated &&
+        (issueHasUpdateSinceStale || issueHasCommentsSinceStale)
+      );
+    }
+
+    return false;
   }
 }

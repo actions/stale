@@ -532,13 +532,17 @@ class IssuesProcessor {
             const exemptLabels = words_to_list_1.wordsToList(issue.isPullRequest
                 ? this.options.exemptPrLabels
                 : this.options.exemptIssueLabels);
-            //Check to see if the item should be stale? if its no longer stale --> remove the stale label
-            const isItemStale = this._shouldItemBeStale(issue, shouldIgnoreUpdates, daysBeforeStale);
-            issueLogger.info(`IS this item stale? ${isItemStale}, ${issue.updated_at}`);
-            if (exemptLabels.some((exemptLabel) => is_labeled_1.isLabeled(issue, exemptLabel))) {
-                // if(!isItemStale){
-                //   //remove the stale label, the item is no longer stale
-                // }
+            const hasExemptLabel = exemptLabels.some((exemptLabel) => is_labeled_1.isLabeled(issue, exemptLabel));
+            const isRemoveStaleFromExemptItemEnabled = this._removeStaleFromExemptItems(hasExemptLabel);
+            if (hasExemptLabel) {
+                // Determine whether we want to manage an exempt item
+                // Only check to see if the issue is stale if the option is enabled
+                const isIssueStale = isRemoveStaleFromExemptItemEnabled &&
+                    (yield this._isIssueStale(issue, staleLabel, staleMessage));
+                if (isIssueStale) {
+                    issueLogger.info(`The option ${issueLogger.createOptionLink(option_1.Option.RemoveStaleFromExemptItem)} is enabled, this $$type is no longer stale`);
+                    yield this._removeStaleLabel(issue, staleLabel);
+                }
                 issueLogger.info(`Skipping this $$type because it has an exempt label`);
                 IssuesProcessor._endIssueProcessing(issue);
                 return; // Don't process exempt issues
@@ -1000,6 +1004,9 @@ class IssuesProcessor {
     _isIncludeOnlyAssigned(issue) {
         return this.options.includeOnlyAssigned && !issue.hasAssignees;
     }
+    _removeStaleFromExemptItems(hasExemptLabel) {
+        return this.options.removeStaleFromExemptItems && hasExemptLabel;
+    }
     _getAnyOfLabels(issue) {
         if (issue.isPullRequest) {
             if (this.options.anyOfPrLabels !== '') {
@@ -1125,26 +1132,26 @@ class IssuesProcessor {
         return option_1.Option.RemoveStaleWhenUpdated;
     }
     /**
-     * Checks to see if the issue/pr should be considered stale
-     * if the ignore-updates flag is enabled use the creation date
-     * otherwise, use the last updated date to determine whether the item is stale.
+     * Checks to see if there has been activity on an item after the issue was marked stale
+     * This consumes 2 operations, one to fetch when the issue was marked stale, and one to fetch the comments
      * @param issue - the item we are evaluating
-     * @param shouldIgnoreUpdates - whether the ignore-updates flag is enabled
-     * @param daysBeforeStale - number of days before the item is stale
+     * @param staleLabel - the stale label we use on our items
+     * @param staleMessage - the stale message we use on our items
+     * @returns - false by default
      */
-    _shouldItemBeStale(issue, shouldIgnoreUpdates, daysBeforeStale) {
-        return shouldIgnoreUpdates
-            ? !IssuesProcessor._updatedSince(issue.created_at, daysBeforeStale)
-            : !IssuesProcessor._updatedSince(issue.updated_at, daysBeforeStale);
-        // // Ignore the last update and only use the creation date
-        // if (shouldIgnoreUpdates) {
-        //   shouldBeStale =
-        // }
-        // // Use the last update to check if we need to stale
-        // else {
-        //   shouldBeStale =
-        // }
-        // return !!
+    _isIssueStale(issue, staleLabel, staleMessage) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (issue.isStale) {
+                const markedStaleOn = (yield this.getLabelCreationDate(issue, staleLabel)) ||
+                    issue.updated_at;
+                const issueHasCommentsSinceStale = yield this._hasCommentsSince(issue, markedStaleOn, staleMessage);
+                const shouldRemoveStaleWhenUpdated = this._shouldRemoveStaleWhenUpdated(issue);
+                const issueHasUpdateSinceStale = is_date_more_recent_than_1.isDateMoreRecentThan(new Date(issue.updated_at), new Date(markedStaleOn), 15);
+                return (shouldRemoveStaleWhenUpdated &&
+                    (issueHasUpdateSinceStale || issueHasCommentsSinceStale));
+            }
+            return false;
+        });
     }
 }
 exports.IssuesProcessor = IssuesProcessor;
@@ -1930,6 +1937,7 @@ var Option;
     Option["IgnorePrUpdates"] = "ignore-pr-updates";
     Option["ExemptDraftPr"] = "exempt-draft-pr";
     Option["CloseIssueReason"] = "close-issue-reason";
+    Option["RemoveStaleFromExemptItem"] = "remove-stale-from-exempt-item";
 })(Option = exports.Option || (exports.Option = {}));
 
 
@@ -2255,7 +2263,8 @@ function _getAndValidateArgs() {
         ignorePrUpdates: _toOptionalBoolean('ignore-pr-updates'),
         exemptDraftPr: core.getInput('exempt-draft-pr') === 'true',
         closeIssueReason: core.getInput('close-issue-reason'),
-        includeOnlyAssigned: core.getInput('include-only-assigned') === 'true'
+        includeOnlyAssigned: core.getInput('include-only-assigned') === 'true',
+        removeStaleFromExemptItems: core.getInput('remove-stale-from-exempt-items') === 'true'
     };
     for (const numberInput of ['days-before-stale']) {
         if (isNaN(parseFloat(core.getInput(numberInput)))) {

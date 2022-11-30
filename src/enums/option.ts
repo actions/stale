@@ -47,5 +47,6 @@ export enum Option {
   IgnoreIssueUpdates = 'ignore-issue-updates',
   IgnorePrUpdates = 'ignore-pr-updates',
   ExemptDraftPr = 'exempt-draft-pr',
-  CloseIssueReason = 'close-issue-reason'
+  CloseIssueReason = 'close-issue-reason',
+  RemoveStaleFromExemptItem = 'remove-stale-from-exempt-item'
 }

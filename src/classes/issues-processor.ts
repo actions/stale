@@ -341,10 +341,10 @@ export class IssuesProcessor {
 
     const isItemStale = this._shouldItemBeStale(
       issue,
-      shouldIgnoreUpdates,
-      daysBeforeStale
+      staleLabel,
+      staleMessage,
     );
-    issueLogger.info(`IS this item stale? ${isItemStale}, ${issue.updated_at}`);
+    issueLogger.info(`IS this item stale? ${isItemStale}`);
 
     if (
       exemptLabels.some((exemptLabel: Readonly<string>): boolean =>
@@ -1244,22 +1244,29 @@ export class IssuesProcessor {
    * @param shouldIgnoreUpdates - whether the ignore-updates flag is enabled
    * @param daysBeforeStale - number of days before the item is stale
    */
-  private _shouldItemBeStale(
-    issue: Readonly<Issue>,
-    shouldIgnoreUpdates: boolean,
-    daysBeforeStale: number
-  ): boolean {
-    return shouldIgnoreUpdates
-      ? !IssuesProcessor._updatedSince(issue.created_at, daysBeforeStale)
-      : !IssuesProcessor._updatedSince(issue.updated_at, daysBeforeStale);
-    // // Ignore the last update and only use the creation date
-    // if (shouldIgnoreUpdates) {
-    //   shouldBeStale =
-    // }
-    // // Use the last update to check if we need to stale
-    // else {
-    //   shouldBeStale =
-    // }
-    // return !!
+  private async _shouldItemBeStale(
+    issue: Issue,
+    staleLabel: string,
+    staleMessage: string,
+  ): Promise<boolean> {
+    const markedStaleOn: string =
+    (await this.getLabelCreationDate(issue, staleLabel)) || issue.updated_at;
+  const issueHasCommentsSinceStale: boolean = await this._hasCommentsSince(
+    issue,
+    markedStaleOn,
+    staleMessage
+  );
+
+  const shouldRemoveStaleWhenUpdated: boolean =
+  this._shouldRemoveStaleWhenUpdated(issue);
+
+  const issueHasUpdateSinceStale = isDateMoreRecentThan(
+    new Date(issue.updated_at),
+    new Date(markedStaleOn),
+    15
+  );
+  
+  return shouldRemoveStaleWhenUpdated &&
+      (issueHasUpdateSinceStale || issueHasCommentsSinceStale)
   }
 }

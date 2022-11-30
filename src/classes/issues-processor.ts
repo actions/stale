@@ -342,7 +342,7 @@ export class IssuesProcessor {
     const isItemStale = this._shouldItemBeStale(
       issue,
       staleLabel,
-      staleMessage,
+      staleMessage
     );
     issueLogger.info(`IS this item stale? ${isItemStale}`);
 
@@ -1247,26 +1247,28 @@ export class IssuesProcessor {
   private async _shouldItemBeStale(
     issue: Issue,
     staleLabel: string,
-    staleMessage: string,
+    staleMessage: string
   ): Promise<boolean> {
     const markedStaleOn: string =
-    (await this.getLabelCreationDate(issue, staleLabel)) || issue.updated_at;
-  const issueHasCommentsSinceStale: boolean = await this._hasCommentsSince(
-    issue,
-    markedStaleOn,
-    staleMessage
-  );
+      (await this.getLabelCreationDate(issue, staleLabel)) || issue.updated_at;
+    const issueHasCommentsSinceStale: boolean = await this._hasCommentsSince(
+      issue,
+      markedStaleOn,
+      staleMessage
+    );
 
-  const shouldRemoveStaleWhenUpdated: boolean =
-  this._shouldRemoveStaleWhenUpdated(issue);
+    const shouldRemoveStaleWhenUpdated: boolean =
+      this._shouldRemoveStaleWhenUpdated(issue);
 
-  const issueHasUpdateSinceStale = isDateMoreRecentThan(
-    new Date(issue.updated_at),
-    new Date(markedStaleOn),
-    15
-  );
-  
-  return shouldRemoveStaleWhenUpdated &&
+    const issueHasUpdateSinceStale = isDateMoreRecentThan(
+      new Date(issue.updated_at),
+      new Date(markedStaleOn),
+      15
+    );
+
+    return (
+      shouldRemoveStaleWhenUpdated &&
       (issueHasUpdateSinceStale || issueHasCommentsSinceStale)
+    );
   }
 }

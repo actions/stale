@@ -533,8 +533,8 @@ class IssuesProcessor {
                 ? this.options.exemptPrLabels
                 : this.options.exemptIssueLabels);
             //Check to see if the item should be stale? if its no longer stale --> remove the stale label
-            const isItemStale = this._shouldItemBeStale(issue, shouldIgnoreUpdates, daysBeforeStale);
-            issueLogger.info(`IS this item stale? ${isItemStale}, ${issue.updated_at}`);
+            const isItemStale = this._shouldItemBeStale(issue, staleLabel, staleMessage);
+            issueLogger.info(`IS this item stale? ${isItemStale}`);
             if (exemptLabels.some((exemptLabel) => is_labeled_1.isLabeled(issue, exemptLabel))) {
                 // if(!isItemStale){
                 //   //remove the stale label, the item is no longer stale
@@ -1132,19 +1132,15 @@ class IssuesProcessor {
      * @param shouldIgnoreUpdates - whether the ignore-updates flag is enabled
      * @param daysBeforeStale - number of days before the item is stale
      */
-    _shouldItemBeStale(issue, shouldIgnoreUpdates, daysBeforeStale) {
-        return shouldIgnoreUpdates
-            ? !IssuesProcessor._updatedSince(issue.created_at, daysBeforeStale)
-            : !IssuesProcessor._updatedSince(issue.updated_at, daysBeforeStale);
-        // // Ignore the last update and only use the creation date
-        // if (shouldIgnoreUpdates) {
-        //   shouldBeStale =
-        // }
-        // // Use the last update to check if we need to stale
-        // else {
-        //   shouldBeStale =
-        // }
-        // return !!
+    _shouldItemBeStale(issue, staleLabel, staleMessage) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const markedStaleOn = (yield this.getLabelCreationDate(issue, staleLabel)) || issue.updated_at;
+            const issueHasCommentsSinceStale = yield this._hasCommentsSince(issue, markedStaleOn, staleMessage);
+            const shouldRemoveStaleWhenUpdated = this._shouldRemoveStaleWhenUpdated(issue);
+            const issueHasUpdateSinceStale = is_date_more_recent_than_1.isDateMoreRecentThan(new Date(issue.updated_at), new Date(markedStaleOn), 15);
+            return shouldRemoveStaleWhenUpdated &&
+                (issueHasUpdateSinceStale || issueHasCommentsSinceStale);
+        });
     }
 }
 exports.IssuesProcessor = IssuesProcessor;

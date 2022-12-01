@@ -532,14 +532,15 @@ class IssuesProcessor {
             const exemptLabels = words_to_list_1.wordsToList(issue.isPullRequest
                 ? this.options.exemptPrLabels
                 : this.options.exemptIssueLabels);
-            const isItemStillStale = yield this._isIssueStale(issue, staleLabel, staleMessage);
-            issueLogger.info(`Should the stale label be removed? ${isItemStillStale}`);
             const hasExemptLabel = exemptLabels.some((exemptLabel) => is_labeled_1.isLabeled(issue, exemptLabel));
             const isremoveStaleFromExemptItemEnabled = this._removeStaleFromExemptItems(hasExemptLabel);
             if (hasExemptLabel) {
                 // Determine whether we want to manage an exempt item
-                if (isremoveStaleFromExemptItemEnabled && isItemStillStale) {
-                    issueLogger.info(`This $$type is has recent activity, proceeding to remove stale label`);
+                // Only check to see if the issue is stale if the option is enabled
+                const isItemStillStale = isremoveStaleFromExemptItemEnabled && (yield this._isIssueStale(issue, staleLabel, staleMessage));
+                issueLogger.info(`Should the stale label be removed? ${isItemStillStale}`);
+                if (isItemStillStale) {
+                    issueLogger.info(`This $$type has had recent activity, proceeding to remove stale label`);
                     yield this._removeStaleLabel(issue, staleLabel);
                 }
                 issueLogger.info(`Skipping this $$type because it has an exempt label`);

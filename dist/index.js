@@ -447,7 +447,6 @@ class IssuesProcessor {
             (_a = this.statistics) === null || _a === void 0 ? void 0 : _a.incrementProcessedItemsCount(issue);
             const issueLogger = new issue_logger_1.IssueLogger(issue);
             issueLogger.info(`Found this $$type last updated at: ${logger_service_1.LoggerService.cyan(issue.updated_at)}`);
-            const shouldIgnoreUpdates = new ignore_updates_1.IgnoreUpdates(this.options, issue).shouldIgnoreUpdates();
             // calculate string based messages for this issue
             const staleMessage = issue.isPullRequest
                 ? this.options.stalePrMessage
@@ -536,7 +535,6 @@ class IssuesProcessor {
             const isRemoveStaleFromExemptItemEnabled = this._removeStaleFromExemptItems(hasExemptLabel);
             if (hasExemptLabel) {
                 // Determine whether we want to manage an exempt item
-                // Only check to see if the issue is stale if the option is enabled
                 const isIssueStale = isRemoveStaleFromExemptItemEnabled &&
                     (yield this._isIssueStale(issue, staleLabel, staleMessage));
                 if (isIssueStale) {
@@ -590,6 +588,7 @@ class IssuesProcessor {
             // Determine if this issue needs to be marked stale first
             if (!issue.isStale) {
                 issueLogger.info(`This $$type is not stale`);
+                const shouldIgnoreUpdates = new ignore_updates_1.IgnoreUpdates(this.options, issue).shouldIgnoreUpdates();
                 // Should this issue be marked as stale?
                 let shouldBeStale;
                 // Ignore the last update and only use the creation date
@@ -1132,12 +1131,9 @@ class IssuesProcessor {
         return option_1.Option.RemoveStaleWhenUpdated;
     }
     /**
-     * Checks to see if there has been activity on an item after the issue was marked stale
-     * This consumes 2 operations, one to fetch when the issue was marked stale, and one to fetch the comments
-     * @param issue - the item we are evaluating
-     * @param staleLabel - the stale label we use on our items
-     * @param staleMessage - the stale message we use on our items
-     * @returns - false by default
+     * Checks to see if there has been activity on an item after the item was marked stale
+     * This consumes 2 operations, one to fetch when the item was marked stale,
+     * and one to fetch the comments on that item
      */
     _isIssueStale(issue, staleLabel, staleMessage) {
         return __awaiter(this, void 0, void 0, function* () {

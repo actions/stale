@@ -189,11 +189,6 @@ export class IssuesProcessor {
       )}`
     );
 
-    const shouldIgnoreUpdates: boolean = new IgnoreUpdates(
-      this.options,
-      issue
-    ).shouldIgnoreUpdates();
-
     // calculate string based messages for this issue
     const staleMessage: string = issue.isPullRequest
       ? this.options.stalePrMessage
@@ -444,6 +439,11 @@ export class IssuesProcessor {
     // Determine if this issue needs to be marked stale first
     if (!issue.isStale) {
       issueLogger.info(`This $$type is not stale`);
+
+      const shouldIgnoreUpdates: boolean = new IgnoreUpdates(
+        this.options,
+        issue
+      ).shouldIgnoreUpdates();
 
       // Should this issue be marked as stale?
       let shouldBeStale: boolean;
@@ -1246,12 +1246,9 @@ export class IssuesProcessor {
   }
 
   /**
-   * Checks to see if there has been activity on an item after the issue was marked stale
-   * This consumes 2 operations, one to fetch when the issue was marked stale, and one to fetch the comments
-   * @param issue - the item we are evaluating
-   * @param staleLabel - the stale label we use on our items
-   * @param staleMessage - the stale message we use on our items
-   * @returns - false by default
+   * Checks to see if there has been activity on an item after the item was marked stale
+   * This consumes 2 operations, one to fetch when the item was marked stale,
+   * and one to fetch the comments on that item
    */
   private async _isIssueStale(
     issue: Issue,

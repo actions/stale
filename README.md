@@ -246,7 +246,7 @@ Required Permission: `pull-requests: write`
 
 #### exempt-issue-labels
 
-Comma separated list of labels that exclude the issue from being marked as stale
+Comma separated list of labels that can be assigned to issues to exclude them from being marked as stale
 (e.g: `question,bug`)
 
 If unset (or an empty string), this option will not alter the stale workflow.
@@ -255,7 +255,7 @@ Default value: unset
 
 #### exempt-pr-labels
 
-Comma separated list of labels that exclude the pull request from being marked as stale
+Comma separated list of labels that can be assigned to pull requests to exclude them from being marked as stale
 (e.g: `need-help,WIP`)
 
 If unset (or an empty string), this option will not alter the stale workflow.
@@ -526,7 +526,7 @@ Default value: `false`
 
 #### remove-stale-from-exempt-items
 
-If set to `true`, issues or pull request with an [exempt-issue-label](#exempt-issue-label) or [exempt-pr-labels](#exempt-pr-labels)
+If set to `true`, issues or pull requests with an [exempt-issue-label](#exempt-issue-labels) or [exempt-pr-label](#exempt-pr-labels)
 that are no longer stale will have the stale label removed.
 
 Default value: `false`

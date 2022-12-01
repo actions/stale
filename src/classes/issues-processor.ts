@@ -337,19 +337,23 @@ export class IssuesProcessor {
         : this.options.exemptIssueLabels
     );
 
-    const isItemStillStale = await this._isStillStale(
+    const isItemStillStale = await this._isIssueStale(
       issue,
       staleLabel,
       staleMessage
     );
     issueLogger.info(`Should the stale label be removed? ${isItemStillStale}`);
 
-    if (
-      exemptLabels.some((exemptLabel: Readonly<string>): boolean =>
-        isLabeled(issue, exemptLabel)
-      )
-    ) {
-      if (isItemStillStale) {
+    const hasExemptLabel = exemptLabels.some((exemptLabel: Readonly<string>) =>
+      isLabeled(issue, exemptLabel)
+    );
+
+    const isremoveStaleFromExemptItemEnabled =
+      this._removeStaleFromExemptItems(hasExemptLabel);
+
+    if (hasExemptLabel) {
+      // Determine whether we want to manage an exempt item
+      if (isremoveStaleFromExemptItemEnabled && isItemStillStale) {
         issueLogger.info(
           `This $$type is has recent activity, proceeding to remove stale label`
         );
@@ -1038,6 +1042,10 @@ export class IssuesProcessor {
     return this.options.includeOnlyAssigned && !issue.hasAssignees;
   }
 
+  private _removeStaleFromExemptItems(hasExemptLabel: boolean) {
+    return this.options.removeStaleFromExemptItems && hasExemptLabel;
+  }
+
   private _getAnyOfLabels(issue: Issue): string {
     if (issue.isPullRequest) {
       if (this.options.anyOfPrLabels !== '') {
@@ -1239,12 +1247,13 @@ export class IssuesProcessor {
 
   /**
    * Checks to see if there has been activity on an item after the issue was marked stale
+   * This consumes 2 operations, one to fetch when the issue was marked stale, and one to fetch the comments
    * @param issue - the item we are evaluating
    * @param staleLabel - the stale label we use on our items
    * @param staleMessage - the stale message we use on our items
    * @returns - false by default
    */
-  private async _isStillStale(
+  private async _isIssueStale(
     issue: Issue,
     staleLabel: string,
     staleMessage: string

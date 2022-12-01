@@ -532,10 +532,13 @@ class IssuesProcessor {
             const exemptLabels = words_to_list_1.wordsToList(issue.isPullRequest
                 ? this.options.exemptPrLabels
                 : this.options.exemptIssueLabels);
-            const isItemStillStale = yield this._isStillStale(issue, staleLabel, staleMessage);
+            const isItemStillStale = yield this._isIssueStale(issue, staleLabel, staleMessage);
             issueLogger.info(`Should the stale label be removed? ${isItemStillStale}`);
-            if (exemptLabels.some((exemptLabel) => is_labeled_1.isLabeled(issue, exemptLabel))) {
-                if (isItemStillStale) {
+            const hasExemptLabel = exemptLabels.some((exemptLabel) => is_labeled_1.isLabeled(issue, exemptLabel));
+            const isremoveStaleFromExemptItemEnabled = this._removeStaleFromExemptItems(hasExemptLabel);
+            if (hasExemptLabel) {
+                // Determine whether we want to manage an exempt item
+                if (isremoveStaleFromExemptItemEnabled && isItemStillStale) {
                     issueLogger.info(`This $$type is has recent activity, proceeding to remove stale label`);
                     yield this._removeStaleLabel(issue, staleLabel);
                 }
@@ -1000,6 +1003,9 @@ class IssuesProcessor {
     _isIncludeOnlyAssigned(issue) {
         return this.options.includeOnlyAssigned && !issue.hasAssignees;
     }
+    _removeStaleFromExemptItems(hasExemptLabel) {
+        return this.options.removeStaleFromExemptItems && hasExemptLabel;
+    }
     _getAnyOfLabels(issue) {
         if (issue.isPullRequest) {
             if (this.options.anyOfPrLabels !== '') {
@@ -1126,12 +1132,13 @@ class IssuesProcessor {
     }
     /**
      * Checks to see if there has been activity on an item after the issue was marked stale
+     * This consumes 2 operations, one to fetch when the issue was marked stale, and one to fetch the comments
      * @param issue - the item we are evaluating
      * @param staleLabel - the stale label we use on our items
      * @param staleMessage - the stale message we use on our items
      * @returns - false by default
      */
-    _isStillStale(issue, staleLabel, staleMessage) {
+    _isIssueStale(issue, staleLabel, staleMessage) {
         return __awaiter(this, void 0, void 0, function* () {
             if (issue.isStale) {
                 const markedStaleOn = (yield this.getLabelCreationDate(issue, staleLabel)) ||
@@ -2254,7 +2261,8 @@ function _getAndValidateArgs() {
         ignorePrUpdates: _toOptionalBoolean('ignore-pr-updates'),
         exemptDraftPr: core.getInput('exempt-draft-pr') === 'true',
         closeIssueReason: core.getInput('close-issue-reason'),
-        includeOnlyAssigned: core.getInput('include-only-assigned') === 'true'
+        includeOnlyAssigned: core.getInput('include-only-assigned') === 'true',
+        removeStaleFromExemptItems: core.getInput('remove-stale-from-exempt-items') === 'true'
     };
     for (const numberInput of ['days-before-stale']) {
         if (isNaN(parseFloat(core.getInput(numberInput)))) {

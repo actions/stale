@@ -32,8 +32,8 @@
     "stale"
   ],
   "engines": {
-    "node": "12",
-    "npm": "6"
+    "node": "16",
+    "npm": "8"
   },
   "author": "GitHub",
   "license": "MIT",

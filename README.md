@@ -580,7 +580,7 @@ jobs:
       - uses: actions/stale@v6
         with:
           stale-issue-message: 'This issue is stale because it has been open 30 days with no activity. Remove stale label or comment or this will be closed in 5 days.'
-          stale-pr-message: 'This PR is stale because it has been open 45 days with no activity. Remove stale label or comment or this will be closed in 10 days.'
+          stale-pr-message: 'This PR is stale because it has been open 30 days with no activity.'
           close-issue-message: 'This issue was closed because it has been stalled for 5 days with no activity.'
           days-before-stale: 30
           days-before-close: 5

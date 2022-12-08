@@ -2,9 +2,9 @@ name: 'Code scanning'
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
   schedule:
     - cron: '23 19 * * 0'
 
@@ -18,7 +18,7 @@ jobs:
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v2
         with:
-          languages: "javascript"
+          languages: 'javascript'
 
       - name: Autobuild
         uses: github/codeql-action/autobuild@v2

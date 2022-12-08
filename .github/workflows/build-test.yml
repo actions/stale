@@ -32,7 +32,7 @@ jobs:
 
       - name: Format, lint, build and test
         run: npm run all:ci
-        
+
   dry-run-test: # make sure the action works on a clean machine without building
     runs-on: ubuntu-latest
     steps:

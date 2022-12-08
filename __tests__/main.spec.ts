@@ -5,6 +5,7 @@ import {IIssuesProcessorOptions} from '../src/interfaces/issues-processor-option
 import {IssuesProcessorMock} from './classes/issues-processor-mock';
 import {DefaultProcessorOptions} from './constants/default-processor-options';
 import {generateIssue} from './functions/generate-issue';
+import {isPullRequest} from '../src/functions/is-pull-request';
 
 test('processing an issue with no label will make it stale and close it, if it is old enough only if days-before-close is set to 0', async () => {
   const opts: IIssuesProcessorOptions = {
@@ -2594,4 +2595,104 @@ test('processing an issue with the "includeOnlyAssigned" option set and no assig
 
   expect(processor.staleIssues).toHaveLength(0);
   expect(processor.closedIssues).toHaveLength(0);
+});
+
+test('interpolate stale message on prs when there is placeholder', async () => {
+  const opts = {...DefaultProcessorOptions};
+  opts.daysBeforeStale = 5; // stale after 5 days
+  opts.daysBeforeClose = 20; // closes after 25 days
+  opts.stalePrMessage = 'Hello {author}, Please take care of this pr!';
+  const lastUpdate = new Date();
+  lastUpdate.setDate(lastUpdate.getDate() - 10);
+  const loginUser = 'dummy-user';
+  const TestIssueList: Issue[] = [
+    generateIssue(
+      opts,
+      1,
+      'An issue that should be marked stale but not closed.',
+      lastUpdate.toString(),
+      lastUpdate.toString(),
+      true,
+      [],
+      false,
+      false,
+      undefined,
+      [],
+      loginUser
+    )
+  ];
+  const processor = new IssuesProcessorMock(
+    opts,
+    async p => (p === 1 ? TestIssueList : []),
+    async () => [],
+    async () => new Date().toDateString()
+  );
+
+  // for sake of testing, mocking private function
+  const markSpy = jest.spyOn(processor as any, '_markStale');
+
+  await processor.processIssues(1);
+
+  // issue should be staled
+  expect(processor.closedIssues).toHaveLength(0);
+  expect(processor.removedLabelIssues).toHaveLength(0);
+  expect(processor.staleIssues).toHaveLength(1);
+
+  // comment should not be created
+  expect(markSpy).toHaveBeenCalledWith(
+    TestIssueList[0],
+    'Hello @dummy-user, Please take care of this pr!',
+    opts.stalePrLabel,
+    false
+  );
+});
+
+test('interpolate stale message on issues when there is placeholder', async () => {
+  const opts = {...DefaultProcessorOptions};
+  opts.daysBeforeStale = 5; // stale after 5 days
+  opts.daysBeforeClose = 20; // closes after 25 days
+  opts.staleIssueMessage = 'Hello {author}, Please take care of this issue!';
+  const lastUpdate = new Date();
+  lastUpdate.setDate(lastUpdate.getDate() - 10);
+  const loginUser = 'dummy-user';
+  const TestIssueList: Issue[] = [
+    generateIssue(
+      opts,
+      1,
+      'An issue that should be marked stale but not closed',
+      lastUpdate.toString(),
+      lastUpdate.toString(),
+      false,
+      [],
+      false,
+      false,
+      undefined,
+      [],
+      loginUser
+    )
+  ];
+  const processor = new IssuesProcessorMock(
+    opts,
+    async p => (p === 1 ? TestIssueList : []),
+    async () => [],
+    async () => new Date().toDateString()
+  );
+
+  // for sake of testing, mocking private function
+  const markSpy = jest.spyOn(processor as any, '_markStale');
+
+  await processor.processIssues(1);
+
+  // issue should be staled
+  expect(processor.closedIssues).toHaveLength(0);
+  expect(processor.removedLabelIssues).toHaveLength(0);
+  expect(processor.staleIssues).toHaveLength(1);
+
+  // comment should be created
+  expect(markSpy).toHaveBeenCalledWith(
+    TestIssueList[0],
+    'Hello @dummy-user, Please take care of this issue!',
+    opts.staleIssueLabel,
+    false
+  );
 });

@@ -7,6 +7,7 @@ import {ILabel} from '../interfaces/label';
 import {IMilestone} from '../interfaces/milestone';
 import {IsoDateString} from '../types/iso-date-string';
 import {Operations} from './operations';
+import {IUser} from '../interfaces/user';
 
 export class Issue implements IIssue {
   readonly title: string;
@@ -23,6 +24,7 @@ export class Issue implements IIssue {
   markedStaleThisRun: boolean;
   operations = new Operations();
   private readonly _options: IIssuesProcessorOptions;
+  readonly user?: IUser | null;
 
   constructor(
     options: Readonly<IIssuesProcessorOptions>,
@@ -41,6 +43,7 @@ export class Issue implements IIssue {
     this.assignees = issue.assignees || [];
     this.isStale = isLabeled(this, this.staleLabel);
     this.markedStaleThisRun = false;
+    this.user = issue.user
   }
 
   get isPullRequest(): boolean {

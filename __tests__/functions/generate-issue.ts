@@ -14,7 +14,8 @@ export function generateIssue(
   isClosed = false,
   isLocked = false,
   milestone: string | undefined = undefined,
-  assignees: string[] = []
+  assignees: string[] = [],
+  userLogin: string | undefined = undefined
 ): Issue {
   return new Issue(options, {
     number: id,
@@ -37,6 +38,10 @@ export function generateIssue(
         login: assignee,
         type: 'User'
       };
-    })
+    }),
+    user: {
+      login: userLogin ? userLogin : 'dummy-test-user',
+      type: 'User'
+    }  
   });
 }

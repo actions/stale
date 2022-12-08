@@ -2638,7 +2638,7 @@ test('interpolate stale message on prs when there is placeholder', async () => {
   expect(processor.removedLabelIssues).toHaveLength(0);
   expect(processor.staleIssues).toHaveLength(1);
 
-  // comment should not be created
+  // comment should be created with placeholder replaced.
   expect(markSpy).toHaveBeenCalledWith(
     TestIssueList[0],
     'Hello @dummy-user, Please take care of this pr!',
@@ -2688,7 +2688,7 @@ test('interpolate stale message on issues when there is placeholder', async () =
   expect(processor.removedLabelIssues).toHaveLength(0);
   expect(processor.staleIssues).toHaveLength(1);
 
-  // comment should be created
+  // comment should be created with placeholder replaced.
   expect(markSpy).toHaveBeenCalledWith(
     TestIssueList[0],
     'Hello @dummy-user, Please take care of this issue!',

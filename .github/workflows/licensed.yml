@@ -1,0 +1,25 @@
+name: Licensed
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    name: Check licenses
+    steps:
+      - uses: actions/checkout@v3
+      - run: npm ci --ignore-scripts
+      - name: Install licensed
+        run: |
+          cd $RUNNER_TEMP
+          curl -Lfs -o licensed.tar.gz https://github.com/github/licensed/releases/download/3.9.0/licensed-3.9.0-linux-x64.tar.gz
+          sudo tar -xzf licensed.tar.gz
+          sudo mv licensed /usr/local/bin/licensed
+      - run: licensed status

@@ -1,11 +1,19 @@
 ---
 name: Feature request
-about: Propose a new feature or an enhancement
+about: Suggest an idea for this project
 title: ''
-labels: enhancement
+labels: feature request, needs triage
 assignees: ''
 ---
 
-## The problem
+<!--- Please direct any generic questions related to actions to our support community forum at https://github.community/c/code-to-cloud/github-actions/41 --->
+<!--- Before opening up a new bug report, please make sure to check for similar existing issues -->
 
-## The solution
+**Description:**
+Describe your proposal.
+
+**Justification:**
+Justification or a use case for your proposal.
+
+**Are you willing to submit a PR?**
+<!--- We accept contributions! -->

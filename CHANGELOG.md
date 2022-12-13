@@ -2,7 +2,9 @@
 
 # [6.1.0]
 
-Allow daysBeforeStale options to be float ([#841](https://github.com/actions/stale/pull/841))
+- fix print outputs step in existing workflows ([#859](https://github.com/actions/stale/pull/859))
+- Use cache in check-dist.yml ([#876](https://github.com/actions/stale/pull/876))
+- Allow daysBeforeStale options to be float ([#841](https://github.com/actions/stale/pull/841))
 
 # [6.0.1]
 

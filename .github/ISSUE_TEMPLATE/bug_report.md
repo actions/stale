@@ -14,7 +14,7 @@ assignees: ''
 A clear and concise description of what the bug is.
 
 **Action version:**
-Specify the task version
+Specify the action version
 
 **Platform:**
 - [ ] Ubuntu

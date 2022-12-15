@@ -14,5 +14,3 @@ jobs:
     # Check the reusable workflow here: https://github.com/actions/reusable-workflows/blob/main/.github/workflows/codeql-analysis.yml
     #uses: actions/reusable-workflows/.github/workflows/codeql-analysis.yml@main
     uses: IvanZosimov/reusable-workflows/.github/workflows/codeql-analysis.yml@main
-    with:
-      languages: "['typescript']"

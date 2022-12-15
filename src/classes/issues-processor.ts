@@ -326,35 +326,22 @@ export class IssuesProcessor {
       issueLogger.info(`This $$type does not include a stale label`);
     }
 
-    const exemptLabels: string[] = wordsToList(
-      issue.isPullRequest
-        ? this.options.exemptPrLabels
-        : this.options.exemptIssueLabels
-    );
+    const isExemptPr = issue.isPullRequest
+      ? this.options.exemptPrLabels
+      : this.options.exemptIssueLabels;
+
+    const exemptLabels: string[] = wordsToList(isExemptPr);
 
     const hasExemptLabel = exemptLabels.some((exemptLabel: Readonly<string>) =>
       isLabeled(issue, exemptLabel)
     );
 
-    const isRemoveStaleFromExemptItemEnabled =
-      this._removeStaleFromExemptItems(hasExemptLabel);
-
     if (hasExemptLabel) {
-      // Determine whether we want to manage an exempt item
-      const isIssueStale =
-        isRemoveStaleFromExemptItemEnabled &&
-        (await this._isIssueStale(issue, staleLabel, staleMessage));
-
-      if (isIssueStale) {
-        issueLogger.info(
-          `The option ${issueLogger.createOptionLink(
-            Option.RemoveStaleFromExemptItem
-          )} is enabled, this $$type is no longer stale`
-        );
-
-        await this._removeStaleLabel(issue, staleLabel);
-      }
-      issueLogger.info(`Skipping this $$type because it has an exempt label`);
+      issueLogger.info(
+        `Skipping this $$type because it contains an exempt label, see ${issueLogger.createOptionLink(
+          isExemptPr ? Option.ExemptPrLabels : Option.ExemptIssueLabels
+        )} for more details`
+      );
       IssuesProcessor._endIssueProcessing(issue);
       return; // Don't process exempt issues
     }
@@ -1042,10 +1029,6 @@ export class IssuesProcessor {
     return this.options.includeOnlyAssigned && !issue.hasAssignees;
   }
 
-  private _removeStaleFromExemptItems(hasExemptLabel: boolean) {
-    return this.options.removeStaleFromExemptItems && hasExemptLabel;
-  }
-
   private _getAnyOfLabels(issue: Issue): string {
     if (issue.isPullRequest) {
       if (this.options.anyOfPrLabels !== '') {
@@ -1243,44 +1226,5 @@ export class IssuesProcessor {
     }
 
     return Option.RemoveStaleWhenUpdated;
-  }
-
-  /**
-   * Checks to see if there has been activity on an item after the item was marked stale
-   * This consumes 2 operations, one to fetch when the item was marked stale,
-   * and one to fetch the comments on that item
-   */
-  private async _isIssueStale(
-    issue: Issue,
-    staleLabel: string,
-    staleMessage: string
-  ): Promise<boolean> {
-    if (issue.isStale) {
-      const markedStaleOn =
-        (await this.getLabelCreationDate(issue, staleLabel)) ||
-        issue.updated_at;
-
-      const issueHasCommentsSinceStale = await this._hasCommentsSince(
-        issue,
-        markedStaleOn,
-        staleMessage
-      );
-
-      const shouldRemoveStaleWhenUpdated =
-        this._shouldRemoveStaleWhenUpdated(issue);
-
-      const issueHasUpdateSinceStale = isDateMoreRecentThan(
-        new Date(issue.updated_at),
-        new Date(markedStaleOn),
-        15
-      );
-
-      return (
-        shouldRemoveStaleWhenUpdated &&
-        (issueHasUpdateSinceStale || issueHasCommentsSinceStale)
-      );
-    }
-
-    return false;
   }
 }

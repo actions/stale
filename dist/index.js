@@ -528,20 +528,13 @@ class IssuesProcessor {
             else {
                 issueLogger.info(`This $$type does not include a stale label`);
             }
-            const exemptLabels = words_to_list_1.wordsToList(issue.isPullRequest
+            const isExemptPr = issue.isPullRequest
                 ? this.options.exemptPrLabels
-                : this.options.exemptIssueLabels);
+                : this.options.exemptIssueLabels;
+            const exemptLabels = words_to_list_1.wordsToList(isExemptPr);
             const hasExemptLabel = exemptLabels.some((exemptLabel) => is_labeled_1.isLabeled(issue, exemptLabel));
-            const isRemoveStaleFromExemptItemEnabled = this._removeStaleFromExemptItems(hasExemptLabel);
             if (hasExemptLabel) {
-                // Determine whether we want to manage an exempt item
-                const isIssueStale = isRemoveStaleFromExemptItemEnabled &&
-                    (yield this._isIssueStale(issue, staleLabel, staleMessage));
-                if (isIssueStale) {
-                    issueLogger.info(`The option ${issueLogger.createOptionLink(option_1.Option.RemoveStaleFromExemptItem)} is enabled, this $$type is no longer stale`);
-                    yield this._removeStaleLabel(issue, staleLabel);
-                }
-                issueLogger.info(`Skipping this $$type because it has an exempt label`);
+                issueLogger.info(`Skipping this $$type because it contains an exempt label, see ${issueLogger.createOptionLink(isExemptPr ? option_1.Option.ExemptPrLabels : option_1.Option.ExemptIssueLabels)} for more details`);
                 IssuesProcessor._endIssueProcessing(issue);
                 return; // Don't process exempt issues
             }
@@ -1003,9 +996,6 @@ class IssuesProcessor {
     _isIncludeOnlyAssigned(issue) {
         return this.options.includeOnlyAssigned && !issue.hasAssignees;
     }
-    _removeStaleFromExemptItems(hasExemptLabel) {
-        return this.options.removeStaleFromExemptItems && hasExemptLabel;
-    }
     _getAnyOfLabels(issue) {
         if (issue.isPullRequest) {
             if (this.options.anyOfPrLabels !== '') {
@@ -1129,25 +1119,6 @@ class IssuesProcessor {
             return option_1.Option.RemoveIssueStaleWhenUpdated;
         }
         return option_1.Option.RemoveStaleWhenUpdated;
-    }
-    /**
-     * Checks to see if there has been activity on an item after the item was marked stale
-     * This consumes 2 operations, one to fetch when the item was marked stale,
-     * and one to fetch the comments on that item
-     */
-    _isIssueStale(issue, staleLabel, staleMessage) {
-        return __awaiter(this, void 0, void 0, function* () {
-            if (issue.isStale) {
-                const markedStaleOn = (yield this.getLabelCreationDate(issue, staleLabel)) ||
-                    issue.updated_at;
-                const issueHasCommentsSinceStale = yield this._hasCommentsSince(issue, markedStaleOn, staleMessage);
-                const shouldRemoveStaleWhenUpdated = this._shouldRemoveStaleWhenUpdated(issue);
-                const issueHasUpdateSinceStale = is_date_more_recent_than_1.isDateMoreRecentThan(new Date(issue.updated_at), new Date(markedStaleOn), 15);
-                return (shouldRemoveStaleWhenUpdated &&
-                    (issueHasUpdateSinceStale || issueHasCommentsSinceStale));
-            }
-            return false;
-        });
     }
 }
 exports.IssuesProcessor = IssuesProcessor;
@@ -1933,7 +1904,6 @@ var Option;
     Option["IgnorePrUpdates"] = "ignore-pr-updates";
     Option["ExemptDraftPr"] = "exempt-draft-pr";
     Option["CloseIssueReason"] = "close-issue-reason";
-    Option["RemoveStaleFromExemptItem"] = "remove-stale-from-exempt-item";
 })(Option = exports.Option || (exports.Option = {}));
 
 
@@ -2259,8 +2229,7 @@ function _getAndValidateArgs() {
         ignorePrUpdates: _toOptionalBoolean('ignore-pr-updates'),
         exemptDraftPr: core.getInput('exempt-draft-pr') === 'true',
         closeIssueReason: core.getInput('close-issue-reason'),
-        includeOnlyAssigned: core.getInput('include-only-assigned') === 'true',
-        removeStaleFromExemptItems: core.getInput('remove-stale-from-exempt-items') === 'true'
+        includeOnlyAssigned: core.getInput('include-only-assigned') === 'true'
     };
     for (const numberInput of ['days-before-stale']) {
         if (isNaN(parseFloat(core.getInput(numberInput)))) {

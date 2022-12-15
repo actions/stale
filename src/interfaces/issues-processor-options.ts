@@ -53,5 +53,4 @@ export interface IIssuesProcessorOptions {
   exemptDraftPr: boolean;
   closeIssueReason: string;
   includeOnlyAssigned: boolean;
-  removeStaleFromExemptItems: boolean;
 }

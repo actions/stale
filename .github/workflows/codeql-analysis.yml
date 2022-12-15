@@ -15,4 +15,4 @@ jobs:
     #uses: actions/reusable-workflows/.github/workflows/codeql-analysis.yml@main
     uses: IvanZosimov/reusable-workflows/.github/workflows/codeql-analysis.yml@main
     with:
-      language: "['typescript']"
+      languages: "['typescript']"

@@ -326,11 +326,11 @@ export class IssuesProcessor {
       issueLogger.info(`This $$type does not include a stale label`);
     }
 
-    const isExemptPr = issue.isPullRequest
-      ? this.options.exemptPrLabels
-      : this.options.exemptIssueLabels;
-
-    const exemptLabels: string[] = wordsToList(isExemptPr);
+    const exemptLabels: string[] = wordsToList(
+      issue.isPullRequest
+        ? this.options.exemptPrLabels
+        : this.options.exemptIssueLabels
+    );
 
     const hasExemptLabel = exemptLabels.some((exemptLabel: Readonly<string>) =>
       isLabeled(issue, exemptLabel)
@@ -339,7 +339,7 @@ export class IssuesProcessor {
     if (hasExemptLabel) {
       issueLogger.info(
         `Skipping this $$type because it contains an exempt label, see ${issueLogger.createOptionLink(
-          isExemptPr ? Option.ExemptPrLabels : Option.ExemptIssueLabels
+          issue.isPullRequest ? Option.ExemptPrLabels : Option.ExemptIssueLabels
         )} for more details`
       );
       IssuesProcessor._endIssueProcessing(issue);

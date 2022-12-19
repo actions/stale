@@ -16,7 +16,7 @@
     "test:only-errors": "jest --reporters jest-silent-reporter --silent",
     "test:watch": "jest --watch --notify --expand",
     "all": "npm run format && npm run lint && npm run build && npm test",
-    "all:ci": "npm run lint:all && npm run build && npm run test:only-errors",
+    "all:ci": "npm run format && npm run lint && npm run build && npm run test:only-errors",
     "prerelease": "npm run build",
     "release": "standard-version",
     "release:dry-run": "standard-version --dry-run"

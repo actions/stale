@@ -14,8 +14,7 @@ on:
 jobs:
   call-basic-validation: # The reusable workflow can be found here: https://github.com/actions/reusable-workflows/blob/main/.github/workflows/basic-validation.yml
     name: Basic validation
-    #uses: actions/reusable-workflows/.github/workflows/basic-validation.yml@main
-    uses: IvanZosimov/reusable-workflows/.github/workflows/basic-validation.yml@main
+    uses: actions/reusable-workflows/.github/workflows/basic-validation.yml@main
 
   dry-run-test: # make sure the action works on a clean machine without building
     runs-on: ubuntu-latest

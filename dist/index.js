@@ -523,20 +523,17 @@ class IssuesProcessor {
                 }
             }
             if (issue.isStale) {
-                issueLogger.info(`This $$type has a stale label`);
+                issueLogger.info(`This $$type includes a stale label`);
             }
             else {
-                issueLogger.info(`This $$type hasn't a stale label`);
+                issueLogger.info(`This $$type does not include a stale label`);
             }
             const exemptLabels = words_to_list_1.wordsToList(issue.isPullRequest
                 ? this.options.exemptPrLabels
                 : this.options.exemptIssueLabels);
-            if (exemptLabels.some((exemptLabel) => is_labeled_1.isLabeled(issue, exemptLabel))) {
-                if (issue.isStale) {
-                    issueLogger.info(`An exempt label was added after the stale label.`);
-                    yield this._removeStaleLabel(issue, staleLabel);
-                }
-                issueLogger.info(`Skipping this $$type because it has an exempt label`);
+            const hasExemptLabel = exemptLabels.some((exemptLabel) => is_labeled_1.isLabeled(issue, exemptLabel));
+            if (hasExemptLabel) {
+                issueLogger.info(`Skipping this $$type because it contains an exempt label, see ${issueLogger.createOptionLink(issue.isPullRequest ? option_1.Option.ExemptPrLabels : option_1.Option.ExemptIssueLabels)} for more details`);
                 IssuesProcessor._endIssueProcessing(issue);
                 return; // Don't process exempt issues
             }

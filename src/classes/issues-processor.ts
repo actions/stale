@@ -321,9 +321,9 @@ export class IssuesProcessor {
     }
 
     if (issue.isStale) {
-      issueLogger.info(`This $$type has a stale label`);
+      issueLogger.info(`This $$type includes a stale label`);
     } else {
-      issueLogger.info(`This $$type hasn't a stale label`);
+      issueLogger.info(`This $$type does not include a stale label`);
     }
 
     const exemptLabels: string[] = wordsToList(
@@ -332,17 +332,16 @@ export class IssuesProcessor {
         : this.options.exemptIssueLabels
     );
 
-    if (
-      exemptLabels.some((exemptLabel: Readonly<string>): boolean =>
-        isLabeled(issue, exemptLabel)
-      )
-    ) {
-      if (issue.isStale) {
-        issueLogger.info(`An exempt label was added after the stale label.`);
-        await this._removeStaleLabel(issue, staleLabel);
-      }
+    const hasExemptLabel = exemptLabels.some((exemptLabel: Readonly<string>) =>
+      isLabeled(issue, exemptLabel)
+    );
 
-      issueLogger.info(`Skipping this $$type because it has an exempt label`);
+    if (hasExemptLabel) {
+      issueLogger.info(
+        `Skipping this $$type because it contains an exempt label, see ${issueLogger.createOptionLink(
+          issue.isPullRequest ? Option.ExemptPrLabels : Option.ExemptIssueLabels
+        )} for more details`
+      );
       IssuesProcessor._endIssueProcessing(issue);
       return; // Don't process exempt issues
     }
@@ -427,6 +426,7 @@ export class IssuesProcessor {
     // Determine if this issue needs to be marked stale first
     if (!issue.isStale) {
       issueLogger.info(`This $$type is not stale`);
+
       const shouldIgnoreUpdates: boolean = new IgnoreUpdates(
         this.options,
         issue

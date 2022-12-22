@@ -1,4 +1,5 @@
-name: Build & Test
+name: e2e tests
+
 on:
   pull_request:
     paths-ignore:
@@ -11,28 +12,6 @@ on:
       - '**.md'
 
 jobs:
-  build:
-    runs-on: ${{ matrix.operating-system }}
-    strategy:
-      fail-fast: false
-      matrix:
-        operating-system: [ubuntu-latest, windows-latest, macOS-latest]
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-
-      - name: Set Node.js 16
-        uses: actions/setup-node@v3
-        with:
-          node-version: 16.x
-          cache: npm
-
-      - name: Install dependencies
-        run: npm ci --ignore-scripts
-
-      - name: Format, lint, build and test
-        run: npm run all:ci
-
   dry-run-test: # make sure the action works on a clean machine without building
     runs-on: ubuntu-latest
     steps:

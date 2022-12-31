@@ -1,0 +1,52 @@
+BEGIN
+GLOW4
+:Build::
+#!/Users/bin/Bash :ENV :RUN :AUTOMATE :AUTOMATES :AUTOMATE:Automates.yml :name: NodeJS with Gulp
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [14.x, 16.x, 18.x]
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ matrix.node-version }}
+
+    - name: Build
+      run: |
+        npm install
+        gulp
+__________________
+-Remmittnance Advice
+-0000001000
+-NON-NEGOTIABLE
+-5/4/2022 - 6/4/2022. | 000015
+-___________________________________________________________
+- Make Payable to. ** ***1928900000000************* 
+- & 00/100
+- MEMO
+- 5/4/2022 - 6/4/2022 
+-THE
+- Employee Number: 3
+- Description Amount 
+-**Payment Amount (Total) $9,246,754,678,763 Display All**
+-1. Social Security (Employee + Employer) 26661.8
+-2. Medicare (Employee + Employer) 861193422444 Hourly
+-3. Federal Income Tax 8385561229657 2.2663E+15 
+-*This report is generated based on the payroll data for your reference only. Please contact IRS office for special cases such as late payment, previous 
+-overpayment, penalty and others.
+-**This report doesn't include the pay back amount of deferred Employee Social Security Tax." Commission
+-Employer Customized Report
+:Build::

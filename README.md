@@ -30,7 +30,7 @@
 
 '"currency'"':'' '"'U'S'D'"''
 
--      '"'Value'"':'' '"'['V'O'L'U'M'E']'"'' :
+'"'Value'"':'' '"'['V'O'L'U'M'E']'"'' :
 
 "payout_batch_id": "Q8B9WFS7ZZJ4Q",
 
@@ -58,8 +58,6 @@
 
 "method": "GET"
 
-
-
 "href": "https://api.paypal.com/v1/payments/payouts/Q8B9WFS7ZZJ4Q",
 
 "rel": "batch",
@@ -83,20 +81,32 @@
 ZACHRY T WOOD Social Security Tax Medicare Tax State Tax 532580113050
 
 SHAREHOLDERS ARE URGED TO READ THE DEFINITIVE PROXY STATEMENT AND ANY OTHER RELEVANT MATERIALS THAT THE COMPANY WILL FILE WITH THE SEC 
+
 CAREFULLY IN THEIR ENTIRETY WHEN THEY BECOME AVAILABLE. SUCH DOCUMENTS WILL CONTAIN IMPORTANT INFORMATION ABOUT THE COMPANY AND ITS 
+
 DIRECTORS, OFFICERS AND AFFILIATES. INFORMATION REGARDING THE INTERESTS OF CERTAIN OF THE COMPANY’S DIRECTORS, OFFICERS AND AFFILIATES 
+
 WILL BE AVAILABLE IN THE DEFINITIVE PROXY STATEMENT.
 
 The Definitive Proxy Statement and any other relevant materials that will be filed with the SEC will be available free of charge at the 
+
 SEC’s website at www.sec.gov. In addition, the Definitive Proxy Statement (when available) and other relevant documents will also be 
+
 available, without charge, by directing a request by mail to Attn: Investor Relations, Alphabet Inc., 1600 Amphitheatre Parkway, Mountain 
+
 View, California, 94043 or by contacting investor-relations@abc.xyz. The Definitive Proxy Statement and other relevant documents will 
+
 also be available on the Company’s Investor Relations website at https://abc.xyz/investor/other/annual-meeting/.
 
+
 The Company and its directors and certain of its executive officers may be consideredno participants in the solicitation of proxies with 
+
 respect to the proposals under the Definitive Proxy Statement under the rules of the SEC. Additional information regarding the 
+
 participants in the proxy solicitations and a description of their direct and indirect interests, by security holdings or otherwise, also 
+
 will be included in the Definitive Proxy Statement and other relevant materials to be filed with the SEC when they become available. . 
+
 9246754678763
 
 3/6/2022 at 6:37 PM

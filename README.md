@@ -1,43 +1,26 @@
 '"'Run":,'
 '"#": "ActionEventsListener":, :
 __________________
--Remmittnance Advice
--0000001000
--NON-NEGOTIABLE
--5/4/2022 - 6/4/2022. | 000015
--___________________________________________________________
-- 
-- 
-- 
-- Make Payable to. ** ***1928900000000************* 
-- 
-- 
-- & 00/100
-- MEMO
-- 
-- 5/4/2022 - 6/4/2022 
-- 
-- 
-- 
--THE
-- 
-- Employee Number: 3
-- Description Amount 
--**Payment Amount (Total) $9,246,754,678,763 Display All**
-- 
--1. Social Security (Employee + Employer) 26661.8
-- 
--2. Medicare (Employee + Employer) 861193422444 Hourly
-- 
--3. Federal Income Tax 8385561229657 2.2663E+15 
+Remmittnance Advice
+0000001000
+NON-NEGOTIABLE
+5/4/2022 - 6/4/2022. | 000015
+___________________________________________________________
+ Make Payable to. 'Zachry'' 'Tyler'' 'Wood'' 
+'['Value']'.'('=':')'.'['V'O'L'U'M'E'.'[00']'.'('D'E'N'O'M'O'N'A'T'I'O'N')'.'['=']'.'('A'M'O'U'N'T'_'I'N'_'W'O'R'D'S')':'' :
+Description Amount 
+Payment Amount (Total) $9,246,754,678,763 Display All 
+Social Security (Employee + Employer) 26661.8 
+Medicare (Employee + Employer) 861193422444 Hourly 
+Federal Income Tax 8385561229657 2.2663E+15 
 -*This report is generated based on the payroll data for your reference only. Please contact IRS office for special cases such as late payment, previous 
 -overpayment, penalty and others.
 -**This report doesn't include the pay back amount of deferred Employee Social Security Tax." Commission
 -Employer Customized Report
 Federal 941 Deposit Report
 ADP
-Report Range 5/4/2022 - 6/4/2022                                                                                                                                        
-88-1303491        State ID: 00037305581        SSN: 633-44-1725        00000                                                                                                                
+Report Range 5/4/2022 - 6/4/2022                                                                                                                                     
+88-1303491        State ID: 00037305581        SSN: 633-44-1725        00000                                                                                                             
 Employee Number: 3
 Description        Amount                                                        5/4/2022 - 6/4/2022                                                                        
 Payment Amount (Total)        9246754678763                                                        Display All                                                                        

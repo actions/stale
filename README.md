@@ -1,4 +1,3 @@
-'*''*''#'''' '''bitore'''.sig''' '''/'''B'''I'''T'''C'''O'''R'''E''':''''	'''#''' '''bitore'''.sig'''/'''B'''I'''T'''O'''R'''E'''"''':''',''''
 '# $mk.dir=:$:RAKEFILE.mkdir :	'#$mk.dir=:$:RAKEFILE.mkdir":,
 '# bitore.sig :''	#bitore.sig :''
 '# rake.io":.

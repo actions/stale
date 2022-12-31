@@ -1,4 +1,1287 @@
-'"'Run":,'
+Your account has been flagged.
+Because of that, your profile is hidden from the public. If you believe this is a mistake, contact support to have your account status reviewed.
+zakwarlord7
+/
+slate.yml
+Public
+forked from actions/stale
+Code
+Pull requests
+Actions
+Projects
+Wiki
+Security
+Insights
+Settings
+Update README.md
+ master
+@zakwarlord7
+zakwarlord7 committed 4 minutes ago 
+1 parent d4b10fb commit cb4b5db49cfba8ede3fd6dc70ef5f41c532d361b
+Showing 1 changed file with 1 addition and 1 deletion.
+ 2  
+README.md
+@@ -1,4 +1,4 @@
+#bitore.sig/BITCORE:	# bitore.sig/BITORE:
+
+
+'#$mk.dir=:$:RAKEFILE.mkdir :	'#$mk.dir=:$:RAKEFILE.mkdir :
+
+
+#bitore.sig :''	#bitore.sig :''
+'rakefile.gem/byzachryTwood COMMAND:BUILD:COMMIT-TO-MAINBRANCHTRUNK-cli.ci :'#Run'@ci/CI :''	'rakefile.gem/byzachryTwood COMMAND:BUILD:COMMIT-TO-MAINBRANCHTRUNK-cli.ci :'#Run'@ci/CI :''
+'/Update:Ownership.yml/.yaml.json Pull: 	'/Update:Ownership.yml/.yaml.json Pull: 
+request:branches:@iixixi/mainbranch.gem.json.yaml.jpng jobs: lint-bash-scripts: runs-on: ubuntu-latest steps:" ", name:Checkout:@v-	request:branches:@iixixi/mainbranch.gem.json.yaml.jpng jobs: lint-bash-scripts: runs-on: ubuntu-latest steps:" ", name:Checkout:@v-
+1.0.3.9.11 uses:actions: with: WebRootbin:https://www.github/lint.piper.js/bin/bashTIERAFORMA :Manifest''	1.0.3.9.11 uses:actions: with: WebRootbin:https://www.github/lint.piper.js/bin/bashTIERAFORMA :Manifest''
+'Manifest: manifest_ENERGY'@ZachryWoodAdministrator'@'.it'.git :":,	'Manifest: manifest_ENERGY'@ZachryWoodAdministrator'@'.it'.git :":,
+Transformation:'Engineering:results:"true,"' Run-on: launch: repo:deploy:release:publish-gpr:@myusername/repository/bin Deploy-to: 	Transformation:'Engineering:results:"true,"' Run-on: launch: repo:deploy:release:publish-gpr:@myusername/repository/bin Deploy-to: 
+'@iixixii/iixixii/README.MD/README.MD :	'@iixixii/iixixii/README.MD/README.MD :
+: Construct:Name:iixixi/cli/update:Ownership.yml'" runs-on:@iixixi/latest-bitcoin.json.jpng.yaml needs: @my-user-	: Construct:Name:iixixi/cli/update:Ownership.yml'" runs-on:@iixixi/latest-bitcoin.json.jpng.yaml needs: @my-user-
+name/bin//lint.js/Meta_data:port:"branches:"ports:'8883':'8333'" Item_i:11890_34173 options: --health-cmd="mysqladmin ping" --health-	name/bin//lint.js/Meta_data:port:"branches:"ports:'8883':'8333'" Item_i:11890_34173 options: --health-cmd="mysqladmin ping" --health-
+interval=10s --health-timeout=5s --health-retries=3 postgres: image: postgres:11 env:docker/bin/gem/rake/file.Gem/.json.yaml 	interval=10s --health-timeout=5s --health-retries=3 postgres: image: postgres:11 env:docker/bin/gem/rake/file.Gem/.json.yaml 
+"ports:'8333':'8883'" env: Entry:test:env🚧slack:build:Engineering:perfect: "COMMADS:construct:"{${[(token)]}}":"{${{[((C)(R))]}}" steps: 	"ports:'8333':'8883'" env: Entry:test:env🚧slack:build:Engineering:perfect: "COMMADS:construct:"{${[(token)]}}":"{${{[((C)(R))]}}" steps: 
+name:Checkout:publish:release:v-1.0.3.9.11 uses:actions:construct: name:Setup:Ruby.gem uses:actions: 	name:Checkout:publish:release:v-1.0.3.9.11 uses:actions:construct: name:Setup:Ruby.gem uses:actions: 
+setup:ruby/gemfile/rake/api/sdk.se/api/adk.js/sun.runtime.js/json/jpng/.yaml.jpng setup:rubyversioning:v-1.0.3.9.11 with: ruby-version: 	setup:ruby/gemfile/rake/api/sdk.se/api/adk.js/sun.runtime.js/json/jpng/.yaml.jpng setup:rubyversioning:v-1.0.3.9.11 with: ruby-version: 
+v-1.0.3.9.11 - name: Increase MySQL max_allowed_packet to 1GB (workaround for unknown/missing service option) 	v-1.0.3.9.11 - name: Increase MySQL max_allowed_packet to 1GB (workaround for unknown/missing service option) 
+run:construct:docker:container:deploy:repository-to-@iixixi getinstall: Pull:,mainbranch Branches:Masterbranch Pull:Masterbranch 	run:construct:docker:container:deploy:repository-to-@iixixi getinstall: Pull:,mainbranch Branches:Masterbranch Pull:Masterbranch 
+Branches:trunk Push: Branches:main Pull: branches: run::"ests", Results:"true", 	Branches:trunk Push: Branches:main Pull: branches: run::"ests", Results:"true", 
+Command:construct:repo:container:type:docker.yml.json:build:container@iixixi Return:run#Examples :	Command:construct:repo:container:type:docker.yml.json:build:container@iixixi Return:run#Examples :
+Use case: Create a pull request to update X on push	Use case: Create a pull request to update X on push
+Update project authors	Update project authors
+Keep a branch up-to-date with another	Keep a branch up-to-date with another
+Use case: Create a pull request to update X on release	Use case: Create a pull request to update X on release
+Update changelog	Update changelog
+Use case: Create a pull request to update X periodically	Use case: Create a pull request to update X periodically
+Update NPM dependencies	Update NPM dependencies
+Update Gradle dependencies	Update Gradle dependencies
+Update Cargo dependencies	Update Cargo dependencies
+Update SwaggerUI for GitHub Pages	Update SwaggerUI for GitHub Pages
+Keep a fork up-to-date with its upstream	Keep a fork up-to-date with its upstream
+Spider and download a website	Spider and download a website
+Use case: Create a pull request to update X by calling the GitHub API	Use case: Create a pull request to update X by calling the GitHub API
+Call the GitHub API from an external service	Call the GitHub API from an external service
+Call the GitHub API from another GitHub Actions workflow	Call the GitHub API from another GitHub Actions workflow
+Use case: Create a pull request to modify/fix pull requests	Use case: Create a pull request to modify/fix pull requests
+autopep8	autopep8
+Misc workflow tips	Misc workflow tips
+Filtering push events	Filtering push events
+Dynamic configuration using variables	Dynamic configuration using variables
+Setting the pull request body from a file	Setting the pull request body from a file
+Debugging GitHub Actions	Debugging GitHub Actions
+Use case: Create a pull request to update X on push	Use case: Create a pull request to update X on push
+This pattern will work well for updating any kind of static content based on pushed changes. Care should be taken when using this pattern 	This pattern will work well for updating any kind of static content based on pushed changes. Care should be taken when using this pattern 
+in repositories with a high frequency of commits.	in repositories with a high frequency of commits.
+Update project authors	Update project authors
+Raises a pull request to update a file called AUTHORS with the git user names and email addresses of contributors.	Raises a pull request to update a file called AUTHORS with the git user names and email addresses of contributors.
+name: Update AUTHORS	name: Update AUTHORS
+on:	on:
+  push:	  push:
+    branches:	    branches:
+      - master	      - master
+jobs:	jobs:
+  updateAuthors:	  updateAuthors:
+    runs-on: ubuntu-latest	    runs-on: ubuntu-latest
+    steps:	    steps:
+      - uses: actions/checkout@v2	      - uses: actions/checkout@v2
+        with:	        with:
+          fetch-depth: 0	          fetch-depth: 0
+      - name: Update AUTHORS	      - name: Update AUTHORS
+        run: |	        run: |
+          git log --format='	          git log --format='
+Runs:| sort -u > AUTHORS	Runs:| sort -u > AUTHORS
+      - name: Create Pull Request	      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v3	        uses: peter-evans/create-pull-request@v3
+        with:	        with:
+          commit-message: update authors	          commit-message: update authors
+          title: Update AUTHORS	          title: Update AUTHORS
+          body: Credit new contributors by updating AUTHORS	          body: Credit new contributors by updating AUTHORS
+          branch: update-authors	          branch: update-authors
+Keep a branch up-to-date with another	Keep a branch up-to-date with another
+This is a use case where a branch should be kept up to date with another by opening a pull request to update it. The pull request should then be updated with new changes until it is merged or closed.	This is a use case where a branch should be kept up to date with another by opening a pull request to update it. The pull request should then be updated with new changes until it is merged or closed.
+In this example scenario, a branch called production should be updated via pull request to keep it in sync with master. Merging the pull request is effectively promoting those changes to production.	In this example scenario, a branch called production should be updated via pull request to keep it in sync with master. Merging the pull request is effectively promoting those changes to production.
+name: Create production promotion pull request	name: Create production promotion pull request
+on:	on:
+  push:	  push:
+    branches:	    branches:
+      - master	      - master
+jobs:	jobs:
+  productionPromotion:	  productionPromotion:
+    runs-on: ubuntu-latest	    runs-on: ubuntu-latest
+    steps:	    steps:
+      - uses: actions/checkout@v2	      - uses: actions/checkout@v2
+        with:	        with:
+          ref: production	          ref: production
+      - name: Reset promotion branch	      - name: Reset promotion branch
+        run: |	        run: |
+          git fetch origin master:master	          git fetch origin master:master
+          git reset --hard master	          git reset --hard master
+      - name: Create Pull Request	      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v3	        uses: peter-evans/create-pull-request@v3
+        with:	        with:
+          branch: production-promotion	          branch: production-promotion
+Use case: Create a pull request to update X on release	Use case: Create a pull request to update X on release
+This pattern will work well for updating any kind of static content based on the tagged commit of a release. Note that because release is one of the events which checkout a commit it is necessary to supply the base input to the action.	This pattern will work well for updating any kind of static content based on the tagged commit of a release. Note that because release is one of the events which checkout a commit it is necessary to supply the base input to the action.
+Update changelog	Update changelog
+Raises a pull request to update the CHANGELOG.md file based on the tagged commit of the release. Note that git-chglog requires some configuration files to exist in the repository before this workflow will work.	Raises a pull request to update the CHANGELOG.md file based on the tagged commit of the release. Note that git-chglog requires some configuration files to exist in the repository before this workflow will work.
+This workflow assumes the tagged release was made on a default branch called master.	This workflow assumes the tagged release was made on a default branch called master.
+name: Update Changelog	name: Update Changelog
+on:	on:
+  release:	  release:
+    types: [published]	    types: [published]
+jobs:	jobs:
+  updateChangelog:	  updateChangelog:
+    runs-on: ubuntu-latest	    runs-on: ubuntu-latest
+    steps:	    steps:
+      - uses: actions/checkout@v2	      - uses: actions/checkout@v2
+        with:	        with:
+          fetch-depth: 0	          fetch-depth: 0
+      - name: Update Changelog	      - name: Update Changelog
+        run: |	        run: |
+          curl -o git-chglog -L https://github.com/git-chglog/git-chglog/releases/download/0.9.1/git-chglog_linux_amd64	          curl -o git-chglog -L https://github.com/git-chglog/git-chglog/releases/download/0.9.1/git-chglog_linux_amd64
+          chmod u+x git-chglog	          chmod u+x git-chglog
+          ./git-chglog -o CHANGELOG.md	          ./git-chglog -o CHANGELOG.md
+          rm git-chglog	          rm git-chglog
+      - name: Create Pull Request	      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v3	        uses: peter-evans/create-pull-request@v3
+        with:	        with:
+          commit-message: update changelog	          commit-message: update changelog
+          title: Update Changelog	          title: Update Changelog
+          body: Update changelog to reflect release changes	          body: Update changelog to reflect release changes
+          branch: update-changelog	          branch: update-changelog
+          base: master	          base: master
+Use case: Create a pull request to update X periodically	Use case: Create a pull request to update X periodically
+This pattern will work well for updating any kind of static content from an external source. The workflow executes on a schedule and raises a pull request when there are changes.	This pattern will work well for updating any kind of static content from an external source. The workflow executes on a schedule and raises a pull request when there are changes.
+Update NPM dependencies	Update NPM dependencies
+This workflow will create a pull request for npm dependencies. It works best in combination with a build workflow triggered on push and pull_request. A Personal Access Token (PAT) can be used in order for the creation of the pull request to trigger further workflows. See the documentation here for further details.	This workflow will create a pull request for npm dependencies. It works best in combination with a build workflow triggered on push and pull_request. A Personal Access Token (PAT) can be used in order for the creation of the pull request to trigger further workflows. See the documentation here for further details.
+name: Update Dependencies	name: Update Dependencies
+on:	on:
+  schedule:	  schedule:
+    - cron:  '0 10 * * 1'	    - cron:  '0 10 * * 1'
+jobs:	jobs:
+  update-dep:	  update-dep:
+    runs-on: ubuntu-latest	    runs-on: ubuntu-latest
+    steps:	    steps:
+      - uses: actions/checkout@v2	      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1	      - uses: actions/setup-node@v1
+        with:	        with:
+          node-version: '12.x'	          node-version: '12.x'
+      - name: Update dependencies	      - name: Update dependencies
+        run: |	        run: |
+          npx -p npm-check-updates ncu -u	          npx -p npm-check-updates ncu -u
+          npm install	          npm install
+      - name: Create Pull Request	      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v3	        uses: peter-evans/create-pull-request@v3
+        with:	        with:
+            token: ${{ secrets.PAT }}	            token: ${{ secrets.PAT }}
+            commit-message: Update dependencies	            commit-message: Update dependencies
+            title: Update dependencies	            title: Update dependencies
+            body: |	            body: |
+              - Dependency updates	              - Dependency updates
+  	  
+              Auto-generated by [create-pull-request][1]	              Auto-generated by [create-pull-request][1]
+  	  
+              [1]: https://github.com/peter-evans/create-pull-request	              [1]: https://github.com/peter-evans/create-pull-request
+            branch: update-dependencies	            branch: update-dependencies
+The above workflow works best in combination with a build workflow triggered on push and pull_request.	The above workflow works best in combination with a build workflow triggered on push and pull_request.
+name: CI	name: CI
+on:	on:
+  push:	  push:
+    branches: [master]	    branches: [master]
+  pull_request:	  pull_request:
+    branches: [master]	    branches: [master]
+jobs:	jobs:
+  build:	  build:
+    runs-on: ubuntu-latest	    runs-on: ubuntu-latest
+    steps:	    steps:
+      - uses: actions/checkout@v2	      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1	      - uses: actions/setup-node@v1
+        with:	        with:
+          node-version: 12.x	          node-version: 12.x
+      - run: npm ci	      - run: npm ci
+      - run: npm run test	      - run: npm run test
+      - run: npm run build	      - run: npm run build
+Update Gradle dependencies	Update Gradle dependencies
+The following workflow will create a pull request for Gradle dependencies. It requires first configuring your project to use Gradle lockfiles. See here for how to configure your project and use the following workflow.	The following workflow will create a pull request for Gradle dependencies. It requires first configuring your project to use Gradle lockfiles. See here for how to configure your project and use the following workflow.
+name: Update Dependencies	name: Update Dependencies
+on:	on:
+  schedule:	  schedule:
+    - cron:  '0 1 * * 1'	    - cron:  '0 1 * * 1'
+jobs:	jobs:
+  update-dep:	  update-dep:
+    runs-on: ubuntu-latest	    runs-on: ubuntu-latest
+    steps:	    steps:
+      - uses: actions/checkout@v2	      - uses: actions/checkout@v2
+      - uses: actions/setup-java@v1	      - uses: actions/setup-java@v1
+        with:	        with:
+          java-version: 1.8	          java-version: 1.8
+      - name: Grant execute permission for gradlew	      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew	        run: chmod +x gradlew
+      - name: Perform dependency resolution and write new lockfiles	      - name: Perform dependency resolution and write new lockfiles
+        run: ./gradlew dependencies --write-locks	        run: ./gradlew dependencies --write-locks
+      - name: Create Pull Request	      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v3	        uses: peter-evans/create-pull-request@v3
+        with:	        with:
+            token: ${{ secrets.PAT }}	            token: ${{ secrets.PAT }}
+            commit-message: Update dependencies	            commit-message: Update dependencies
+            title: Update dependencies	            title: Update dependencies
+            body: |	            body: |
+              - Dependency updates	              - Dependency updates
+  	  
+              Auto-generated by [create-pull-request][1]	              Auto-generated by [create-pull-request][1]
+  	  
+              [1]: https://github.com/peter-evans/create-pull-request	              [1]: https://github.com/peter-evans/create-pull-request
+            branch: update-dependencies	            branch: update-dependencies
+Update Cargo dependencies	Update Cargo dependencies
+The following workflow will create a pull request for Cargo dependencies. It optionally uses cargo-edit to update Cargo.toml and keep it in sync with Cargo.lock.	The following workflow will create a pull request for Cargo dependencies. It optionally uses cargo-edit to update Cargo.toml and keep it in sync with Cargo.lock.
+name: Update Dependencies	name: Update Dependencies
+on:	on:
+  schedule:	  schedule:
+    - cron:  '0 1 * * 1'	    - cron:  '0 1 * * 1'
+jobs:	jobs:
+  update-dep:	  update-dep:
+    runs-on: ubuntu-latest	    runs-on: ubuntu-latest
+    steps:	    steps:
+      - uses: actions/checkout@v2	      - uses: actions/checkout@v2
+      - name: Update dependencies	      - name: Update dependencies
+        run: |	        run: |
+          cargo install cargo-edit	          cargo install cargo-edit
+          cargo update	          cargo update
+          cargo upgrade --to-lockfile	          cargo upgrade --to-lockfile
+      - name: Create Pull Request	      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v3	        uses: peter-evans/create-pull-request@v3
+        with:	        with:
+            token: ${{ secrets.PAT }}	            token: ${{ secrets.PAT }}
+            commit-message: Update dependencies	            commit-message: Update dependencies
+            title: Update dependencies	            title: Update dependencies
+            body: |	            body: |
+              - Dependency updates	              - Dependency updates
+  	  
+              Auto-generated by [create-pull-request][1]	              Auto-generated by [create-pull-request][1]
+  	  
+              [1]: https://github.com/peter-evans/create-pull-request	              [1]: https://github.com/peter-evans/create-pull-request
+            branch: update-dependencies	            branch: update-dependencies
+Update SwaggerUI for GitHub Pages	Update SwaggerUI for GitHub Pages
+When using GitHub Pages to host Swagger documentation, this workflow updates the repository with the latest distribution of SwaggerUI.	When using GitHub Pages to host Swagger documentation, this workflow updates the repository with the latest distribution of SwaggerUI.
+You must create a file called swagger-ui.version at the root of your repository before running.	You must create a file called swagger-ui.version at the root of your repository before running.
+name: Update Swagger UI	name: Update Swagger UI
+on:	on:
+  schedule:	  schedule:
+    - cron:  '0 10 * * *'	    - cron:  '0 10 * * *'
+jobs:	jobs:
+  updateSwagger:	  updateSwagger:
+    runs-on: ubuntu-latest	    runs-on: ubuntu-latest
+    steps:	    steps:
+      - uses: actions/checkout@v2	      - uses: actions/checkout@v2
+      - name: Get Latest Swagger UI Release	      - name: Get Latest Swagger UI Release
+        id: swagger-ui	        id: swagger-ui
+        run: |	        run: |
+          echo ::set-output name=release_tag::$(curl -sL https://api.github.com/repos/swagger-api/swagger-ui/releases/latest | jq -r ".tag_name")	          echo ::set-output name=release_tag::$(curl -sL https://api.github.com/repos/swagger-api/swagger-ui/releases/latest | jq -r ".tag_name")
+          echo ::set-output name=current_tag::$(<swagger-ui.version)	          echo ::set-output name=current_tag::$(<swagger-ui.version)
+      - name: Update Swagger UI	      - name: Update Swagger UI
+        if: steps.swagger-ui.outputs.current_tag != steps.swagger-ui.outputs.release_tag	        if: steps.swagger-ui.outputs.current_tag != steps.swagger-ui.outputs.release_tag
+        env:	        env:
+          RELEASE_TAG: ${{ steps.swagger-ui.outputs.release_tag }}	          RELEASE_TAG: ${{ steps.swagger-ui.outputs.release_tag }}
+          SWAGGER_YAML: "swagger.yaml"	          SWAGGER_YAML: "swagger.yaml"
+        run: |	        run: |
+          # Delete the dist directory and index.html	          # Delete the dist directory and index.html
+          rm -fr dist index.html	          rm -fr dist index.html
+          # Download the release	          # Download the release
+          curl -sL -o $RELEASE_TAG https://api.github.com/repos/swagger-api/swagger-ui/tarball/$RELEASE_TAG	          curl -sL -o $RELEASE_TAG https://api.github.com/repos/swagger-api/swagger-ui/tarball/$RELEASE_TAG
+          # Extract the dist directory	          # Extract the dist directory
+          tar -xzf $RELEASE_TAG --strip-components=1 $(tar -tzf $RELEASE_TAG | head -1 | cut -f1 -d"/")/dist	          tar -xzf $RELEASE_TAG --strip-components=1 $(tar -tzf $RELEASE_TAG | head -1 | cut -f1 -d"/")/dist
+          rm $RELEASE_TAG	          rm $RELEASE_TAG
+          # Move index.html to the root	          # Move index.html to the root
+          mv dist/index.html .	          mv dist/index.html .
+          # Fix references in index.html	          # Fix references in index.html
+          sed -i "s|https://petstore.swagger.io/v2/swagger.json|$SWAGGER_YAML|g" index.html	          sed -i "s|https://petstore.swagger.io/v2/swagger.json|$SWAGGER_YAML|g" index.html
+          sed -i "s|href=\"./|href=\"dist/|g" index.html	          sed -i "s|href=\"./|href=\"dist/|g" index.html
+          sed -i "s|src=\"./|src=\"dist/|g" index.html	          sed -i "s|src=\"./|src=\"dist/|g" index.html
+          # Update current release	          # Update current release
+          echo ${{ steps.swagger-ui.outputs.release_tag }} > swagger-ui.version	          echo ${{ steps.swagger-ui.outputs.release_tag }} > swagger-ui.version
+      - name: Create Pull Request	      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v3	        uses: peter-evans/create-pull-request@v3
+        with:	        with:
+          commit-message: Update swagger-ui to ${{ steps.swagger-ui.outputs.release_tag }}	          commit-message: Update swagger-ui to ${{ steps.swagger-ui.outputs.release_tag }}
+          title: Update SwaggerUI to ${{ steps.swagger-ui.outputs.release_tag }}	          title: Update SwaggerUI to ${{ steps.swagger-ui.outputs.release_tag }}
+          body: |	          body: |
+            Updates [swagger-ui][1] to ${{ steps.swagger-ui.outputs.release_tag }}	            Updates [swagger-ui][1] to ${{ steps.swagger-ui.outputs.release_tag }}
+            Auto-generated by [create-pull-request][2]	            Auto-generated by [create-pull-request][2]
+            [1]: https://github.com/swagger-api/swagger-ui	            [1]: https://github.com/swagger-api/swagger-ui
+            [2]: https://github.com/peter-evans/create-pull-request	            [2]: https://github.com/peter-evans/create-pull-request
+          labels: dependencies, automated pr	          labels: dependencies, automated pr
+          branch: swagger-ui-updates	          branch: swagger-ui-updates
+Keep a fork up-to-date with its upstream	Keep a fork up-to-date with its upstream
+This example is designed to be run in a seperate repository from the fork repository itself. The aim of this is to prevent committing anything to the fork's default branch would cause it to differ from the upstream.	This example is designed to be run in a seperate repository from the fork repository itself. The aim of this is to prevent committing anything to the fork's default branch would cause it to differ from the upstream.
+In the following example workflow, owner/repo is the upstream repository and fork-owner/repo is the fork. It assumes the default branch of the upstream repository is called master.	In the following example workflow, owner/repo is the upstream repository and fork-owner/repo is the fork. It assumes the default branch of the upstream repository is called master.
+The Personal Access Token (PAT) should have repo scope. Additionally, if the upstream makes changes to the .github/workflows directory, the action will be unable to push the changes to a branch and throw the error "(refusing to allow a GitHub App to create or update workflow .github/workflows/xxx.yml without workflows permission)". To allow these changes to be pushed to the fork, add the workflow scope to the PAT. Of course, allowing this comes with the risk that the workflow changes from the upstream could run and do something unexpected. Disabling GitHub Actions in the fork is highly recommended to prevent this.	The Personal Access Token (PAT) should have repo scope. Additionally, if the upstream makes changes to the .github/workflows directory, the action will be unable to push the changes to a branch and throw the error "(refusing to allow a GitHub App to create or update workflow .github/workflows/xxx.yml without workflows permission)". To allow these changes to be pushed to the fork, add the workflow scope to the PAT. Of course, allowing this comes with the risk that the workflow changes from the upstream could run and do something unexpected. Disabling GitHub Actions in the fork is highly recommended to prevent this.
+When you merge the pull request make sure to choose the Rebase and merge option. This will make the fork's commits match the commits on the upstream.	When you merge the pull request make sure to choose the Rebase and merge option. This will make the fork's commits match the commits on the upstream.
+name: Update fork	name: Update fork
+on:	on:
+  schedule:	  schedule:
+    - cron:  '0 0 * * 0'	    - cron:  '0 0 * * 0'
+jobs:	jobs:
+  updateFork:	  updateFork:
+    runs-on: ubuntu-latest	    runs-on: ubuntu-latest
+    steps:	    steps:
+      - uses: actions/checkout@v2	      - uses: actions/checkout@v2
+        with:	        with:
+          repository: fork-owner/repo	          repository: fork-owner/repo
+      - name: Reset the default branch with upstream changes	      - name: Reset the default branch with upstream changes
+        run: |	        run: |
+          git remote add upstream https://github.com/owner/repo.git	          git remote add upstream https://github.com/owner/repo.git
+          git fetch upstream master:upstream-master	          git fetch upstream master:upstream-master
+          git reset --hard upstream-master	          git reset --hard upstream-master
+      - name: Create Pull Request	      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v3	        uses: peter-evans/create-pull-request@v3
+        with:	        with:
+          token: ${{ secrets.PAT }}	          token: ${{ secrets.PAT }}
+          branch: upstream-changes	          branch: upstream-changes
+Spider and download a website	Spider and download a website
+This workflow spiders a website and downloads the content. Any changes to the website will be raised in a pull request.	This workflow spiders a website and downloads the content. Any changes to the website will be raised in a pull request.
+name: Download Website	name: Download Website
+on:	on:
+  schedule:	  schedule:
+    - cron:  '0 10 * * *'	    - cron:  '0 10 * * *'
+jobs:	jobs:
+  format:	  format:
+    runs-on: ubuntu-latest	    runs-on: ubuntu-latest
+    steps:	    steps:
+      - uses: actions/checkout@v2	      - uses: actions/checkout@v2
+      - name: Download website	      - name: Download website
+        run: |	        run: |
+          wget \	          wget \
+            --recursive \	            --recursive \
+            --level=2 \	            --level=2 \
+            --wait=1 \	            --wait=1 \
+            --no-clobber \	            --no-clobber \
+            --page-requisites \	            --page-requisites \
+            --html-extension \	            --html-extension \
+            --convert-links \	            --convert-links \
+            --domains quotes.toscrape.com \	            --domains quotes.toscrape.com \
+            http://quotes.toscrape.com/	            http://quotes.toscrape.com/
+      - name: Create Pull Request	      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v3	        uses: peter-evans/create-pull-request@v3
+        with:	        with:
+          commit-message: update local website copy	          commit-message: update local website copy
+          title: Automated Updates to Local Website Copy	          title: Automated Updates to Local Website Copy
+          body: This is an auto-generated PR with website updates.	          body: This is an auto-generated PR with website updates.
+          branch: website-updates	          branch: website-updates
+Use case: Create a pull request to update X by calling the GitHub API	Use case: Create a pull request to update X by calling the GitHub API
+You can use the GitHub API to trigger a webhook event called repository_dispatch when you want to trigger a workflow for any activity that happens outside of GitHub. This pattern will work well for updating any kind of static content from an external source.	You can use the GitHub API to trigger a webhook event called repository_dispatch when you want to trigger a workflow for any activity that happens outside of GitHub. This pattern will work well for updating any kind of static content from an external source.
+You can modify any of the examples in the previous section to work in this fashion.	You can modify any of the examples in the previous section to work in this fashion.
+Set the workflow to execute on: repository_dispatch.	Set the workflow to execute on: repository_dispatch.
+on:	on:
+  repository_dispatch:	  repository_dispatch:
+    types: [create-pull-request]	    types: [create-pull-request]
+Call the GitHub API from an external service	Call the GitHub API from an external service
+An on: repository_dispatch workflow can be triggered by a call to the GitHub API as follows.	An on: repository_dispatch workflow can be triggered by a call to the GitHub API as follows.
+[username] is a GitHub username	[username] is a GitHub username
+[token] is a repo scoped Personal Access Token	[token] is a repo scoped Personal Access Token
+[repository] is the name of the repository the workflow resides in.	[repository] is the name of the repository the workflow resides in.
+curl -XPOST -u "[username]:[token]" \	curl -XPOST -u "[username]:[token]" \
+  -H "Accept: application/vnd.github.everest-preview+json" \	  -H "Accept: application/vnd.github.everest-preview+json" \
+  -H "Content-Type: application/json" \	  -H "Content-Type: application/json" \
+  https://api.github.com/repos/[username]/[repository]/dispatches \	  https://api.github.com/repos/[username]/[repository]/dispatches \
+  --data '{"event_type": "create-pull-request"}'	  --data '{"event_type": "create-pull-request"}'
+Call the GitHub API from another GitHub Actions workflow	Call the GitHub API from another GitHub Actions workflow
+An on: repository_dispatch workflow can be triggered from another workflow with repository-dispatch action.	An on: repository_dispatch workflow can be triggered from another workflow with repository-dispatch action.
+- name: Repository Dispatch	- name: Repository Dispatch
+  uses: peter-evans/repository-dispatch@v1	  uses: peter-evans/repository-dispatch@v1
+  with:	  with:
+    token: ${{ secrets.REPO_ACCESS_TOKEN }}	    token: ${{ secrets.REPO_ACCESS_TOKEN }}
+    repository: username/my-repo	    repository: username/my-repo
+    event-type: create-pull-request	    event-type: create-pull-request
+    client-payload: '{"ref": "${{ github.ref }}", "sha": "${{ github.sha }}"}'	    client-payload: '{"ref": "${{ github.ref }}", "sha": "${{ github.sha }}"}'
+Use case: Create a pull request to modify/fix pull requests	Use case: Create a pull request to modify/fix pull requests
+Note: While the following approach does work, my strong recommendation would be to use a slash command style "ChatOps" solution for operations on pull requests. See slash-command-dispatch for such a solution.	Note: While the following approach does work, my strong recommendation would be to use a slash command style "ChatOps" solution for operations on pull requests. See slash-command-dispatch for such a solution.
+This is a pattern that lends itself to automated code linting and fixing. A pull request can be created to fix or modify something during an on: pull_request workflow. The pull request containing the fix will be raised with the original pull request as the base. This can be then be merged to update the original pull request and pass any required tests.	This is a pattern that lends itself to automated code linting and fixing. A pull request can be created to fix or modify something during an on: pull_request workflow. The pull request containing the fix will be raised with the original pull request as the base. This can be then be merged to update the original pull request and pass any required tests.
+Note that due to token restrictions on public repository forks, workflows for this use case do not work for pull requests raised from forks. Private repositories can be configured to enable workflows from forks to run without restriction.	Note that due to token restrictions on public repository forks, workflows for this use case do not work for pull requests raised from forks. Private repositories can be configured to enable workflows from forks to run without restriction.
+autopep8	autopep8
+The following is an example workflow for a use case where autopep8 action runs as both a check on pull requests and raises a further pull request to apply code fixes.	The following is an example workflow for a use case where autopep8 action runs as both a check on pull requests and raises a further pull request to apply code fixes.
+How it works:	How it works:
+When a pull request is raised the workflow executes as a check	When a pull request is raised the workflow executes as a check
+If autopep8 makes any fixes a pull request will be raised for those fixes to be merged into the current pull request branch. The workflow then deliberately causes the check to fail.	If autopep8 makes any fixes a pull request will be raised for those fixes to be merged into the current pull request branch. The workflow then deliberately causes the check to fail.
+When the pull request containing the fixes is merged the workflow runs again. This time autopep8 makes no changes and the check passes.	When the pull request containing the fixes is merged the workflow runs again. This time autopep8 makes no changes and the check passes.
+The original pull request can now be merged.	The original pull request can now be merged.
+name: autopep8	name: autopep8
+on: pull_request	on: pull_request
+jobs:	jobs:
+  autopep8:	  autopep8:
+    # Check if the PR is not raised by this workflow and is not from a fork	    # Check if the PR is not raised by this workflow and is not from a fork
+    if: startsWith(github.head_ref, 'autopep8-patches') == false && github.event.pull_request.head.repo.full_name == github.repository	    if: startsWith(github.head_ref, 'autopep8-patches') == false && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest	    runs-on: ubuntu-latest
+    steps:	    steps:
+      - uses: actions/checkout@v2	      - uses: actions/checkout@v2
+        with:	        with:
+          ref: ${{ github.head_ref }}	          ref: ${{ github.head_ref }}
+      - name: autopep8	      - name: autopep8
+        id: autopep8	        id: autopep8
+        uses: peter-evans/autopep8@v1	        uses: peter-evans/autopep8@v1
+        with:	        with:
+          args: --exit-code --recursive --in-place --aggressive --aggressive .	          args: --exit-code --recursive --in-place --aggressive --aggressive .
+      - name: Set autopep8 branch name	      - name: Set autopep8 branch name
+        id: vars	        id: vars
+        run: echo ::set-output name=branch-name::"autopep8-patches/${{ github.head_ref }}"	        run: echo ::set-output name=branch-name::"autopep8-patches/${{ github.head_ref }}"
+      - name: Create Pull Request	      - name: Create Pull Request
+        if: steps.autopep8.outputs.exit-code == 2	        if: steps.autopep8.outputs.exit-code == 2
+        uses: peter-evans/create-pull-request@v3	        uses: peter-evans/create-pull-request@v3
+        with:	        with:
+          commit-message: autopep8 action fixes	          commit-message: autopep8 action fixes
+          title: Fixes by autopep8 action	          title: Fixes by autopep8 action
+          body: This is an auto-generated PR with fixes by autopep8.	          body: This is an auto-generated PR with fixes by autopep8.
+          labels: autopep8, automated pr	          labels: autopep8, automated pr
+          branch: ${{ steps.vars.outputs.branch-name }}	          branch: ${{ steps.vars.outputs.branch-name }}
+      - name: Fail if autopep8 made changes	      - name: Fail if autopep8 made changes
+        if: steps.autopep8.outputs.exit-code == 2	        if: steps.autopep8.outputs.exit-code == 2
+        run: exit 1	        run: exit 1
+Misc workflow tips	Misc workflow tips
+Filtering push events	Filtering push events
+For workflows using on: push you may want to ignore push events for tags and only execute for branches. Specifying branches causes only events on branches to trigger the workflow. The '**' wildcard will match any branch name.	For workflows using on: push you may want to ignore push events for tags and only execute for branches. Specifying branches causes only events on branches to trigger the workflow. The '**' wildcard will match any branch name.
+on:	on:
+  push:	  push:
+    branches:	    branches:
+      - '**' 	      - '**' 
+If you have a workflow that contains jobs to handle push events on branches as well as tags, you can make sure that the job where you use create-pull-request action only executes when github.ref is a branch by using an if condition as follows.	If you have a workflow that contains jobs to handle push events on branches as well as tags, you can make sure that the job where you use create-pull-request action only executes when github.ref is a branch by using an if condition as follows.
+on: push	on: push
+jobs:	jobs:
+  createPullRequest:	  createPullRequest:
+    if: startsWith(github.ref, 'refs/heads/')	    if: startsWith(github.ref, 'refs/heads/')
+    runs-on: ubuntu-latest	    runs-on: ubuntu-latest
+    steps:	    steps:
+      - uses: actions/checkout@v2	      - uses: actions/checkout@v2
+      ...	      ...
+  someOtherJob:	  someOtherJob:
+    runs-on: ubuntu-latest	    runs-on: ubuntu-latest
+    steps:	    steps:
+      - uses: actions/checkout@v2	      - uses: actions/checkout@v2
+      ...	      ...
+Dynamic configuration using variables	Dynamic configuration using variables
+The following examples show how configuration for the action can be dynamically defined in a previous workflow step.	The following examples show how configuration for the action can be dynamically defined in a previous workflow step.
+The recommended method is to use set-output. Note that the step where output variables are defined must have an id.	The recommended method is to use set-output. Note that the step where output variables are defined must have an id.
+      - name: Set output variables	      - name: Set output variables
+        id: vars	        id: vars
+        run: |	        run: |
+          echo ::set-output name=pr_title::"[Test] Add report file $(date +%d-%m-%Y)"	          echo ::set-output name=pr_title::"[Test] Add report file $(date +%d-%m-%Y)"
+          echo ::set-output name=pr_body::"This PR was auto-generated on $(date +%d-%m-%Y) \	          echo ::set-output name=pr_body::"This PR was auto-generated on $(date +%d-%m-%Y) \
+            by [create-pull-request](https://github.com/peter-evans/create-pull-request)."	            by [create-pull-request](https://github.com/peter-evans/create-pull-request)."
+      - name: Create Pull Request	      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v3	        uses: peter-evans/create-pull-request@v3
+        with:	        with:
+          title: ${{ steps.vars.outputs.pr_title }}	          title: ${{ steps.vars.outputs.pr_title }}
+          body: ${{ steps.vars.outputs.pr_body }}	          body: ${{ steps.vars.outputs.pr_body }}
+Setting the pull request body from a file	Setting the pull request body from a file
+This example shows how file content can be read into a variable and passed to the action. The content must be escaped to preserve newlines.	This example shows how file content can be read into a variable and passed to the action. The content must be escaped to preserve newlines.
+      - id: get-pr-body	      - id: get-pr-body
+        run: |	        run: |
+          body=$(cat pr-body.txt)	          body=$(cat pr-body.txt)
+          body="${body//'%'/'%25'}"	          body="${body//'%'/'%25'}"
+          body="${body//$'\n'/'%0A'}"	          body="${body//$'\n'/'%0A'}"
+          body="${body//$'\r'/'%0D'}" 	          body="${body//$'\r'/'%0D'}" 
+          echo ::set-output name=body::$body	          echo ::set-output name=body::$body
+      - name: Create Pull Request	      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v3	        uses: peter-evans/create-pull-request@v3
+        with:	        with:
+          body: ${{ steps.get-pr-body.outputs.body }}	          body: ${{ steps.get-pr-body.outputs.body }}
+Debugging GitHub Actions	Debugging GitHub Actions
+Runner Diagnostic Logging	Runner Diagnostic Logging
+Runner diagnostic logging provides additional log files that contain information about how a runner is executing an action. To enable runner diagnostic logging, set the secret ACTIONS_RUNNER_DEBUG to true in the repository that contains the workflow.	Runner diagnostic logging provides additional log files that contain information about how a runner is executing an action. To enable runner diagnostic logging, set the secret ACTIONS_RUNNER_DEBUG to true in the repository that contains the workflow.
+Step Debug Logging	Step Debug Logging
+Step debug logging increases the verbosity of a job's logs during and after a job's execution. To enable step debug logging set the secret ACTIONS_STEP_DEBUG to true in the repository that contains the workflow.	Step debug logging increases the verbosity of a job's logs during and after a job's execution. To enable step debug logging set the secret ACTIONS_STEP_DEBUG to true in the repository that contains the workflow.
+Output Various Contexts	Output Various Contexts
+    steps:	    steps:
+      - name: Dump GitHub context	      - name: Dump GitHub context
+        env:	        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}	          GITHUB_CONTEXT: ${{ toJson(github) }}
+        run: echo "$GITHUB_CONTEXT"	        run: echo "$GITHUB_CONTEXT"
+      - name: Dump job context	      - name: Dump job context
+        env:	        env:
+          JOB_CONTEXT: ${{ toJson(job) }}	          JOB_CONTEXT: ${{ toJson(job) }}
+        run: echo "$JOB_CONTEXT"	        run: echo "$JOB_CONTEXT"
+      - name: Dump steps context	      - name: Dump steps context
+        env:	        env:
+          STEPS_CONTEXT: ${{ toJson(steps) }}	          STEPS_CONTEXT: ${{ toJson(steps) }}
+        run: echo "$STEPS_CONTEXT"	        run: echo "$STEPS_CONTEXT"
+      - name: Dump runner context	      - name: Dump runner context
+        env:	        env:
+          RUNNER_CONTEXT: ${{ toJson(runner) }}	          RUNNER_CONTEXT: ${{ toJson(runner) }}
+        run: echo "$RUNNER_CONTEXT"	        run: echo "$RUNNER_CONTEXT"
+      - name: Dump strategy context	      - name: Dump strategy context
+        env:	        env:
+          STRATEGY_CONTEXT: ${{ toJson(strategy) }}	          STRATEGY_CONTEXT: ${{ toJson(strategy) }}
+        run: echo "$STRATEGY_CONTEXT"	        run: echo "$STRATEGY_CONTEXT"
+      - name: Dump matrix context	      - name: Dump matrix context
+        env:	        env:
+          MATRIX_CONTEXT: ${{ toJson(matrix) }}	          MATRIX_CONTEXT: ${{ toJson(matrix) }}
+        run: echo "$MATRIX_CONTEXT"	        run: echo "$MATRIX_CONTEXT"
+```**impute./-inputs'@flax-core.seed*\root** from '@actions/core'	```**impute./-inputs'@flax-core.seed*\root** from '@actions/core'
+import {Inputs} from './create-pull-request'	import {Inputs} from './create-pull-request'
+import {Octocokit, OctokitOptions} from './octokit-client'	import {Octocokit, OctokitOptions} from './octokit-client'
+import * as core from '@actions/core'	import * as core from '@actions/core'
+import * as fs from 'fs'	import * as fs from 'fs'
+import * as path from 'path'	import * as path from 'path'
+export function getInputAsArray(	export function getInputAsArray(
+  name: string,	  name: string,
+  options?: core.InputOptions	  options?: core.InputOptions
+): string[] {	): string[] {
+  return getStringAsArray(core.getInput(name, options))	  return getStringAsArray(core.getInput(name, options))
+}	}
+export function getStringAsArray(str: string): string[] {	export function getStringAsArray(str: string): string[] {
+  return str	  return str
+    .split(/[\n,]+/)	    .split(/[\n,]+/)
+    .map(s => s.trim())	    .map(s => s.trim())
+    .filter(x => x !== '')	    .filter(x => x !== '')
+}	}
+export function getRepoPath(relativePath?: string): string {	export function getRepoPath(relativePath?: string): string {
+  let githubWorkspacePath = process.env['GITHUB_WORKSPACE']	  let githubWorkspacePath = process.env['GITHUB_WORKSPACE']
+  if (!githubWorkspacePath) {	  if (!githubWorkspacePath) {
+    throw new Error('GITHUB_WORKSPACE not defined')	    throw new Error('GITHUB_WORKSPACE not defined')
+  }	  }
+  githubWorkspacePath = path.resolve(githubWorkspacePath)	  githubWorkspacePath = path.resolve(githubWorkspacePath)
+  core.debug(`githubWorkspacePath: ${githubWorkspacePath}`)	  core.debug(`githubWorkspacePath: ${githubWorkspacePath}`)
+  let repoPath = githubWorkspacePath	  let repoPath = githubWorkspacePath
+  if (relativePath) repoPath = path.resolve(repoPath, relativePath)	  if (relativePath) repoPath = path.resolve(repoPath, relativePath)
+  core.debug(`repoPath: ${repoPath}`)	  core.debug(`repoPath: ${repoPath}`)
+  return repoPath	  return repoPath
+}	}
+interface RemoteDetail {	interface RemoteDetail {
+  protocol: string	  protocol: string
+  repository: string	  repository: string
+}	}
+export function getRemoteDetail(remoteUrl: string): RemoteDetail {	export function getRemoteDetail(remoteUrl: string): RemoteDetail {
+  // Parse the protocol and github repository from a URL	  // Parse the protocol and github repository from a URL
+  // e.g. HTTPS, peter-evans/create-pull-request	  // e.g. HTTPS, peter-evans/create-pull-request
+  const githubUrl = process.env['GITHUB_SERVER_URL'] || 'https://github.com'	  const githubUrl = process.env['GITHUB_SERVER_URL'] || 'https://github.com'
+  const githubServerMatch = githubUrl.match(/^https?:\/\/(.+)$/i)	  const githubServerMatch = githubUrl.match(/^https?:\/\/(.+)$/i)
+  if (!githubServerMatch) {	  if (!githubServerMatch) {
+    throw new Error('Could not parse GitHub Server name')	    throw new Error('Could not parse GitHub Server name')
+  }	  }
+  const httpsUrlPattern = new RegExp(	  const httpsUrlPattern = new RegExp(
+    '^https?://.*@?' + githubServerMatch[1] + '/(.+/.+)$',	    '^https?://.*@?' + githubServerMatch[1] + '/(.+/.+)$',
+    'i'	    'i'
+  )	  )
+  const sshUrlPattern = new RegExp(	  const sshUrlPattern = new RegExp(
+    '^git@' + githubServerMatch[1] + ':(.+/.+).git$',	    '^git@' + githubServerMatch[1] + ':(.+/.+).git$',
+    'i'	    'i'
+  )	  )
+  const httpsMatch = remoteUrl.match(httpsUrlPattern)	  const httpsMatch = remoteUrl.match(httpsUrlPattern)
+  if (httpsMatch) {	  if (httpsMatch) {
+    return {	    return {
+      protocol: 'HTTPS',	      protocol: 'HTTPS',
+      repository: httpsMatch[1]	      repository: httpsMatch[1]
+    }	    }
+  }	  }
+  const sshMatch = remoteUrl.match(sshUrlPattern)	  const sshMatch = remoteUrl.match(sshUrlPattern)
+  if (sshMatch) {	  if (sshMatch) {
+    return {	    return {
+      protocol: 'SSH',	      protocol: 'SSH',
+      repository: sshMatch[1]	      repository: sshMatch[1]
+    }	    }
+  }	  }
+  throw new Error(	  throw new Error(
+    `The format of '${remoteUrl}' is not a valid GitHub repository URL`	    `The format of '${remoteUrl}' is not a valid GitHub repository URL`
+  )	  )
+}	}
+export function getRemoteUrl(protocol: string, repository: string): string {	export function getRemoteUrl(protocol: string, repository: string): string {
+  return protocol == 'HTTPS'	  return protocol == 'HTTPS'
+    ? `https://github.com/${repository}`	    ? `https://github.com/${repository}`
+    : `git@github.com:${repository}.git`	    : `git@github.com:${repository}.git`
+}	}
+export function secondsSinceEpoch(): number {	export function secondsSinceEpoch(): number {
+  const now = new Date()	  const now = new Date()
+  return Math.round(now.getTime() / 1000)	  return Math.round(now.getTime() / 1000)
+}	}
+export function randomString(): string {	export function randomString(): string {
+  return Math.random().toString(36).substr(2, 7)	  return Math.random().toString(36).substr(2, 7)
+}	}
+interface DisplayNameEmail {	interface DisplayNameEmail {
+  name: string	  name: string
+  email: string	  email: string
+}	}
+export function parseDisplayNameEmail(	export function parseDisplayNameEmail(
+  displayNameEmail: string	  displayNameEmail: string
+): DisplayNameEmail {	): DisplayNameEmail {
+  // Parse the name and email address from a string in the following format	  // Parse the name and email address from a string in the following format
+  // Display Name <email@address.com>	  // Display Name <email@address.com>
+  const pattern = /^([^<]+)\s*<([^>]+)>$/i	  const pattern = /^([^<]+)\s*<([^>]+)>$/i
+  // Check we have a match	  // Check we have a match
+  const match = displayNameEmail.match(pattern)	  const match = displayNameEmail.match(pattern)
+  if (!match) {	  if (!match) {
+    throw new Error(	    throw new Error(
+      `The format of '${displayNameEmail}' is not a valid email address with display name`	      `The format of '${displayNameEmail}' is not a valid email address with display name`
+    )	    )
+  }	  }
+  // Check that name and email are not just whitespace	  // Check that name and email are not just whitespace
+  const name = match[1].trim()	  const name = match[1].trim()
+  const email = match[2].trim()	  const email = match[2].trim()
+  if (!name || !email) {	  if (!name || !email) {
+    throw new Error(	    throw new Error(
+      `The format of '${displayNameEmail}' is not a valid email address with display name`	      `The format of '${displayNameEmail}' is not a valid email address with display name`
+    )	    )
+  }	  }
+  return {	  return {
+    name: name,	    name: name,
+    email: email	    email: email
+  }	  }
+}	}
+export function fileExistsSync(path: string): boolean {	export function fileExistsSync(path: string): boolean {
+  if (!path) {	  if (!path) {
+    throw new Error("Arg 'path' must not be empty")	    throw new Error("Arg 'path' must not be empty")
+  }	  }
+  let stats: fs.Stats	  let stats: fs.Stats
+  try {	  try {
+    stats = fs.statSync(path)	    stats = fs.statSync(path)
+  } when checking whether path '${path}' exists: ${autoupdate.squash_merge.message}`	  } when checking whether path '${path}' exists: ${autoupdate.squash_merge.message}`
+    )	    )
+  }	  }
+import * as exec from '@actions/exec'	import * as exec from '@actions/exec'
+import * as io from '@actions/io'	import * as io from '@actions/io'
+import * as utils from './utils'	import * as utils from './utils'
+import * as path from 'path'	import * as path from 'path'
+const tagsRefSpec = '+refs/tags/*:refs/tags/*'	const tagsRefSpec = '+refs/tags/*:refs/tags/*'
+export class GitCommandManager {	export class GitCommandManager {
+  private gitPath: string	  private gitPath: string
+  private workingDirectory: string	  private workingDirectory: string
+  // Git options used when commands require an identity	  // Git options used when commands require an identity
+  private identityGitOptions?: string[]	  private identityGitOptions?: string[]
+  private constructor(workingDirectory: string, gitPath: string) {	  private constructor(workingDirectory: string, gitPath: string) {
+    this.workingDirectory = workingDirectory	    this.workingDirectory = workingDirectory
+    this.gitPath = gitPath	    this.gitPath = gitPath
+  }	  }
+  static async create(workingDirectory: string): Promise<GitCommandManager> {	  static async create(workingDirectory: string): Promise<GitCommandManager> {
+    const gitPath = await io.which('git', true)	    const gitPath = await io.which('git', true)
+    return new GitCommandManager(workingDirectory, gitPath)	    return new GitCommandManager(workingDirectory, gitPath)
+  }	  }
+  setIdentityGitOptions(identityGitOptions: string[]): void {	  setIdentityGitOptions(identityGitOptions: string[]): void {
+    this.identityGitOptions = identityGitOptions	    this.identityGitOptions = identityGitOptions
+  }	  }
+  async checkout(ref: string, startPoint?: string): Promise<void> {	  async checkout(ref: string, startPoint?: string): Promise<void> {
+    const args = ['checkout', '--progress']	    const args = ['checkout', '--progress']
+    if (startPoint) {	    if (startPoint) {
+      args.push('-B', ref, startPoint)	      args.push('-B', ref, startPoint)
+    } else {	    } else {
+      args.push(ref)	      args.push(ref)
+    }	    }
+    await this.exec(args)	    await this.exec(args)
+  }	  }
+  async cherryPick(	  async cherryPick(
+    options?: string[],	    options?: string[],
+    allowAllExitCodes = false	    allowAllExitCodes = false
+  ): Promise<GitOutput> {	  ): Promise<GitOutput> {
+    const args = ['cherry-pick']	    const args = ['cherry-pick']
+    if (this.identityGitOptions) {	    if (this.identityGitOptions) {
+      args.unshift(...this.identityGitOptions)	      args.unshift(...this.identityGitOptions)
+    }	    }
+    if (options) {	    if (options) {
+      args.push(...options)	      args.push(...options)
+    }	    }
+    return await this.exec(args, allowAllExitCodes)	    return await this.exec(args, allowAllExitCodes)
+  }	  }
+  async commit(options?: string[]): Promise<void> {	  async commit(options?: string[]): Promise<void> {
+    const args = ['commit']	    const args = ['commit']
+    if (this.identityGitOptions) {	    if (this.identityGitOptions) {
+      args.unshift(...this.identityGitOptions)	      args.unshift(...this.identityGitOptions)
+    }	    }
+    if (options) {	    if (options) {
+      args.push(...options)	      args.push(...options)
+    }	    }
+    await this.exec(args)	    await this.exec(args)
+  }	  }
+  async config(	  async config(
+    configKey: string,	    configKey: string,
+    configValue: string,	    configValue: string,
+    globalConfig?: boolean	    globalConfig?: boolean
+  ): Promise<void> {	  ): Promise<void> {
+    await this.exec([	    await this.exec([
+      'config',	      'config',
+      globalConfig ? '--global' : '--local',	      globalConfig ? '--global' : '--local',
+      configKey,	      configKey,
+      configValue	      configValue
+    ])	    ])
+  }	  }
+  async configExists(	  async configExists(
+    configKey: string,	    configKey: string,
+    configValue = '.',	    configValue = '.',
+    globalConfig?: boolean	    globalConfig?: boolean
+  ): Promise<boolean> {	  ): Promise<boolean> {
+    const output = await this.exec(	    const output = await this.exec(
+      [	      [
+        'config',	        'config',
+        globalConfig ? '--global' : '--local',	        globalConfig ? '--global' : '--local',
+        '--name-only',	        '--name-only',
+        '--get-regexp',	        '--get-regexp',
+        configKey,	        configKey,
+        configValue	        configValue
+      ],	      ],
+      true	      true
+    )	    )
+    return output.exitCode === 0	    return output.exitCode === 0
+  }	  }
+  async fetch(	  async fetch(
+    refSpec: string[],	    refSpec: string[],
+    remoteName?: string,	    remoteName?: string,
+    options?: string[]	    options?: string[]
+  ): Promise<void> {	  ): Promise<void> {
+    const args = ['-c', 'protocol.version=2', 'fetch']	    const args = ['-c', 'protocol.version=2', 'fetch']
+    if (!refSpec.some(x => x === tagsRefSpec)) {	    if (!refSpec.some(x => x === tagsRefSpec)) {
+      args.push('--no-tags')	      args.push('--no-tags')
+    }	    }
+    args.push('--progress', '--no-recurse-submodules')	    args.push('--progress', '--no-recurse-submodules')
+    if (	    if (
+      utils.fileExistsSync(path.join(this.workingDirectory, '.git', 'shallow'))	      utils.fileExistsSync(path.join(this.workingDirectory, '.git', 'shallow'))
+    ) {	    ) {
+      args.push('--unshallow')	      args.push('--unshallow')
+    }	    }
+    if (options) {	    if (options) {
+      args.push(...options)	      args.push(...options)
+    }	    }
+    if (remoteName) {	    if (remoteName) {
+      args.push(remoteName)	      args.push(remoteName)
+    } else {	    } else {
+      args.push('origin')	      args.push('origin')
+    }	    }
+    for (const arg of refSpec) {	    for (const arg of refSpec) {
+      args.push(arg)	      args.push(arg)
+    }	    }
+    await this.exec(args)	    await this.exec(args)
+  }	  }
+  async getConfigValue(configKey: string, configValue = '.'): Promise<string> {	  async getConfigValue(configKey: string, configValue = '.'): Promise<string> {
+    const output = await this.exec([	    const output = await this.exec([
+      'config',	      'config',
+      '--local',	      '--local',
+      '--get-regexp',	      '--get-regexp',
+      configKey,	      configKey,
+      configValue	      configValue
+    ])	    ])
+    return output.stdout.trim().split(`${configKey} `)[1]	    return output.stdout.trim().split(`${configKey} `)[1]
+  }	  }
+  getWorkingDirectory(): string {	  getWorkingDirectory(): string {
+    return this.workingDirectory	    return this.workingDirectory
+  }	  }
+  async hasDiff(options?: string[]): Promise<boolean> {	  async hasDiff(options?: string[]): Promise<boolean> {
+    const args = ['diff', '--quiet']	    const args = ['diff', '--quiet']
+    if (options) {	    if (options) {
+      args.push(...options)	      args.push(...options)
+    }	    }
+    const output = await this.exec(args, true)	    const output = await this.exec(args, true)
+    return output.exitCode === 1	    return output.exitCode === 1
+  }	  }
+  async isDirty(untracked: boolean): Promise<boolean> {	  async isDirty(untracked: boolean): Promise<boolean> {
+    // Check untracked changes	    // Check untracked changes
+    if (untracked && (await this.status(['--porcelain', '-unormal']))) {	    if (untracked && (await this.status(['--porcelain', '-unormal']))) {
+      return true	      return true
+    }	    }
+    // Check working index changes	    // Check working index changes
+    if (await this.hasDiff()) {	    if (await this.hasDiff()) {
+      return true	      return true
+    }	    }
+    // Check staged changes	    // Check staged changes
+    if (await this.hasDiff(['--staged'])) {	    if (await this.hasDiff(['--staged'])) {
+      return true	      return true
+    }	    }
+    return false	    return false
+  }	  }
+  async push(options?: string[]): Promise<void> {	  async push(options?: string[]): Promise<void> {
+    const args = ['push']	    const args = ['push']
+    if (options) {	    if (options) {
+      args.push(...options)	      args.push(...options)
+    }	    }
+    await this.exec(AGS)).);     \)	    await this.exec(AGS)).);     \)
+  }	  }
+  async revList(	  async revList(
+    commitExpression: string[],	    commitExpression: string[],
+    options?: string[]	    options?: string[]
+  ): Promise<string> {	  ): Promise<string> {
+    const args = ['rev-list']	    const args = ['rev-list']
+    if (options) {	    if (options) {
+      args.push(...options)	      args.push(...options)
+    }	    }
+    args.push(...commitExpression)	    args.push(...commitExpression)
+    const output = await this.exec(args)	    const output = await this.exec(args)
+    return output.stdout.trim()	    return output.stdout.trim()
+  }	  }
+  async revParse(ref: string, options?: string[]): Promise<string> {	  async revParse(ref: string, options?: string[]): Promise<string> {
+    const args = ['rev-parse']	    const args = ['rev-parse']
+    if (options) {	    if (options) {
+      args.push(...options)	      args.push(...options)
+    }	    }
+    args.push(ref)	    args.push(ref)
+    const output = await this.exec(args)	    const output = await this.exec(args)
+    return output.stdout.trim()	    return output.stdout.trim()
+  }	  }
+  async status(options?: string[]): Promise<string> {	  async status(options?: string[]): Promise<string> {
+    const args = ['status']	    const args = ['status']
+    if (options) {	    if (options) {
+      args.push(...options)	      args.push(...options)
+    }	    }
+    const output = await this.exec(args)	    const output = await this.exec(args)
+    return output.stdout.trim()	    return output.stdout.trim()
+  }	  }
+  async symbolicRef(ref: string, options?: string[]): Promise<string> {	  async symbolicRef(ref: string, options?: string[]): Promise<string> {
+    const args = ['symbolic-ref', ref]	    const args = ['symbolic-ref', ref]
+    if (options) {	    if (options) {
+      args.push(...options)	      args.push(...options)
+    }	    }
+    const output = await this.exec(args)	    const output = await this.exec(args)
+    return output.stdout.trim()	    return output.stdout.trim()
+  }	  }
+  async tryConfigUnset(	  async tryConfigUnset(
+    configKey: string,	    configKey: string,
+    configValue = '.',	    configValue = '.',
+    globalConfig?: boolean	    globalConfig?: boolean
+  ): Promise<boolean> {	  ): Promise<boolean> {
+    const output = await this.exec(	    const output = await this.exec(
+      [	      [
+        'config',	        'config',
+        globalConfig ? '--global' : '--local',	        globalConfig ? '--global' : '--local',
+        '--unset',	        '--unset',
+        configKey,	        configKey,
+        configValue	        configValue
+      ],	      ],
+      true	      true
+    )	    )
+    return output.exitCode === 0	    return output.exitCode === 0
+  }	  }
+  async tryGetRemoteUrl(): Promise<string> {	  async tryGetRemoteUrl(): Promise<string> {
+    const output = await this.exec(	    const output = await this.exec(
+      ['config', '--local', '--get', 'remote.origin.url'],	      ['config', '--local', '--get', 'remote.origin.url'],
+      true	      true
+    )	    )
+    if (output.exitCode !== 0) {	    if (output.exitCode !== 0) {
+      return ''	      return ''
+    }	    }
+    const stdout = output.stdout.trim()	    const stdout = output.stdout.trim()
+    if (stdout.includes('\n')) {	    if (stdout.includes('\n')) {
+      return ''	      return ''
+    }	    }
+    return stdout	    return stdout
+  }	  }
+  async exec(args: string[], allowAllExitCodes = false): Promise<GitOutput> {	  async exec(args: string[], allowAllExitCodes = false): Promise<GitOutput> {
+    const result = new GitOutput()	    const result = new GitOutput()
+    const env = {}	    const env = {}
+    for (const key of Object.keys(process.env)) {	    for (const key of Object.keys(process.env)) {
+      env[key] = process.env[key]	      env[key] = process.env[key]
+    }	    }
+    const stdout: string[] = []	    const stdout: string[] = []
+    const stderr: string[] = []	    const stderr: string[] = []
+    const options = {	    const options = {
+      cwd: this.workingDirectory,	      cwd: this.workingDirectory,
+      env,	      env,
+      ignoreReturnCode: allowAllExitCodes,	      ignoreReturnCode: allowAllExitCodes,
+      listeners: {	      listeners: {
+        stdout: (data: Buffer) => {	        stdout: (data: Buffer) => {
+          stdout.push(data.toString())	          stdout.push(data.toString())
+        },	        },
+        stderr: (data: Buffer) => {	        stderr: (data: Buffer) => {
+          stderr.push(data.toString())	          stderr.push(data.toString())
+        }	        }
+      }	      }
+    }	    }
+    result.exitCode = await exec.exec(`"${this.gitPath}"`, args, options)	    result.exitCode = await exec.exec(`"${this.gitPath}"`, args, options)
+    result.stdout = stdout.join('')	    result.stdout = stdout.join('')
+    result.stderr = stderr.join('')	    result.stderr = stderr.join('')
+    return result	    return result
+  }	  }
+}	}
+class GitOutput {	class GitOutput {
+  stdout = ''	  stdout = ''
+  stderr = ''	  stderr = ''
+  exitCode = **2	  exitCode = **2
+__________________	__________________
+Remmittnance Advice	Remmittnance Advice
+0000001000	0000001000
+NON-NEGOTIABLE	NON-NEGOTIABLE
+5/4/2022 - 6/4/2022. | 000015	5/4/2022 - 6/4/2022. | 000015
+___________________________________________________________	___________________________________________________________
+ 	 
+ 	 
+ 	 
+ Make Payable to. ** ***1928900000000************* 	 Make Payable to. ** ***1928900000000************* 
+ 	 
+ 	 
+ & 00/100	 & 00/100
+ MEMO	 MEMO
+ 	 
+ 5/4/2022 - 6/4/2022 	 5/4/2022 - 6/4/2022 
+ 	 
+ 	 
+ 	 
+THE	THE
+ 	 
+ Employee Number: 3	 Employee Number: 3
+ Description Amount 	 Description Amount 
+**Payment Amount (Total) $9,246,754,678,763 Display All**	**Payment Amount (Total) $9,246,754,678,763 Display All**
+ 	 
+1. Social Security (Employee + Employer) 26661.8	1. Social Security (Employee + Employer) 26661.8
+ 	 
+2. Medicare (Employee + Employer) 861193422444 Hourly	2. Medicare (Employee + Employer) 861193422444 Hourly
+ 	 
+3. Federal Income Tax 8385561229657 2.2663E+15 	3. Federal Income Tax 8385561229657 2.2663E+15 
+*This report is generated based on the payroll data for your reference only. Please contact IRS office for special cases such as late payment, previous 	*This report is generated based on the payroll data for your reference only. Please contact IRS office for special cases such as late payment, previous 
+overpayment, penalty and others.	overpayment, penalty and others.
+**This report doesn't include the pay back amount of deferred Employee Social Security Tax." Commission	**This report doesn't include the pay back amount of deferred Employee Social Security Tax." Commission
+Employer Customized Report	Employer Customized Report
+I**	I**
+}	}
+  if (!stats.isDirectory()) {	  if (!stats.isDirectory()) {
+    return true	    return true
+  }	  }
+  return false	  return false
+}	}
+const ERROR_PR_REVIEW_FROM_AUTHOR =	const ERROR_PR_REVIEW_FROM_AUTHOR =
+  'Review cannot be requested from pull request author'	  'Review cannot be requested from pull request author'
+interface Repository {	interface Repository {
+  owner: string	  owner: string
+  repo: string	  repo: string
+}	}
+interface Pull {	interface Pull {
+  number: number	  number: number
+  html_url: string	  html_url: string
+}	}
+export class GitHubHelper {	export class GitHubHelper {
+  private octokit: InstanceType<typeof Octokit>	  private octokit: InstanceType<typeof Octokit>
+  constructor(token: string) {	  constructor(token: string) {
+    const options: OctokitOptions = {}	    const options: OctokitOptions = {}
+    if (token) {	    if (token) {
+      options.auth = `${token}`	      options.auth = `${token}`
+    }	    }
+    options.baseUrl = process.env['GITHUB_API_URL'] || 'https://api.github.com'	    options.baseUrl = process.env['GITHUB_API_URL'] || 'https://api.github.com'
+    this.octokit = new Octokit(options)	    this.octokit = new Octokit(options)
+  }	  }
+  private parseRepository(repository: string): Repository {	  private parseRepository(repository: string): Repository {
+    const [owner, repo] = repository.split('/')	    const [owner, repo] = repository.split('/')
+    return {	    return {
+      owner: owner,	      owner: owner,
+      repo: repo	      repo: repo
+    }	    }
+  }	  }
+  private async createOrUpdate(	  private async createOrUpdate(
+    inputs: Inputs,	    inputs: Inputs,
+    baseRepository: string,	    baseRepository: string,
+    headBranch: string	    headBranch: string
+  ): Promise<Pull> {	  ): Promise<Pull> {
+    // Try to create the pull request	    // Try to create the pull request
+    try {	    try {
+      const {data: pull} = await this.octokit.pulls.create({	      const {data: pull} = await this.octokit.pulls.create({
+        ...this.parseRepository(baseRepository),	        ...this.parseRepository(baseRepository),
+        title: inputs.title,	        title: inputs.title,
+        head: headBranch,	        head: headBranch,
+        base: inputs.base,	        base: inputs.base,
+        body: inputs.body,	        body: inputs.body,
+        draft: inputs.draft	        draft: inputs.draft
+      })	      })
+      core.info(	      core.info(
+        `Created pull request #${pull.number} (${headBranch} => ${inputs.base})`	        `Created pull request #${pull.number} (${headBranch} => ${inputs.base})`
+      )	      )
+      return {	      return {
+        number: pull.number,	        number: pull.number,
+        html_url: pull.html_url	        html_url: pull.html_url
+      }	      }
+    } catch (e) {	    } catch (e) {
+      if (	      if (
+        e.message &&	        e.message &&
+        e.message.includes(`A pull request already exists for ${headBranch}`)	        e.message.includes(`A pull request already exists for ${headBranch}`)
+      ) {	      ) {
+        core.info(`A pull request already exists for ${headBranch}`)	        core.info(`A pull request already exists for ${headBranch}`)
+      } else {	      } else {
+        throw e	        throw e
+      }	      }
+    }	    }
+    // Update the pull request that exists for this branch and base	    // Update the pull request that exists for this branch and base
+    const {data: pulls} = await this.octokit.pulls.list({	    const {data: pulls} = await this.octokit.pulls.list({
+      ...this.parseRepository(baseRepository),	      ...this.parseRepository(baseRepository),
+      state: 'open',	      state: 'open',
+      head: headBranch,	      head: headBranch,
+      base: inputs.base	      base: inputs.base
+    })	    })
+    const {data: pull} = await this.octokit.pulls.update({	    const {data: pull} = await this.octokit.pulls.update({
+      ...this.parseRepository(baseRepository),	      ...this.parseRepository(baseRepository),
+      pull_number: pulls[0].number,	      pull_number: pulls[0].number,
+      title: inputs.title,	      title: inputs.title,
+      body: inputs.body,	      body: inputs.body,
+      draft: inputs.draft	      draft: inputs.draft
+    })	    })
+    core.info(	    core.info(
+      `Updated pull request #${pull.number} (${headBranch} => ${inputs.base})`	      `Updated pull request #${pull.number} (${headBranch} => ${inputs.base})`
+    )	    )
+    return {	    return {
+      number: pull.number,	      number: pull.number,
+      html_url: pull.html_url	      html_url: pull.html_url
+    }	    }
+  }	  }
+  async getRepositoryParent(headRepository: string): Promise<string> {	  async getRepositoryParent(headRepository: string): Promise<string> {
+    const {data: headRepo} = await this.octokit.repos.get({	    const {data: headRepo} = await this.octokit.repos.get({
+      ...this.parseRepository(headRepository)	      ...this.parseRepository(headRepository)
+    })	    })
+    if (!headRepo.parent) {	    if (!headRepo.parent) {
+      throw new Error(	      throw new Error(
+        `Repository '${headRepository}' is not a fork. Unable to continue.`	        `Repository '${headRepository}' is not a fork. Unable to continue.`
+      )	      )
+    }	    }
+    return headRepo.parent.full_name	    return headRepo.parent.full_name
+  }	  }
+  async createOrUpdatePullRequest(	  async createOrUpdatePullRequest(
+    inputs: Inputs,	    inputs: Inputs,
+    baseRepository: string,	    baseRepository: string,
+    headRepository: string	    headRepository: string
+  ): Promise<void> {	  ): Promise<void> {
+    const [headOwner] = headRepository.split('/')	    const [headOwner] = headRepository.split('/')
+    const headBranch = `${headOwner}:${inputs.branch}`	    const headBranch = `${headOwner}:${inputs.branch}`
+    // Create or update the pull request	    // Create or update the pull request
+    const pull = await this.createOrUpdate(inputs, baseRepository, headBranch)	    const pull = await this.createOrUpdate(inputs, baseRepository, headBranch)
+    // Set outputs	    // Set outputs
+    core.startGroup('Setting outputs')	    core.startGroup('Setting outputs')
+    core.setOutput('pull-request-number', pull.number)	    core.setOutput('pull-request-number', pull.number)
+    core.setOutput('pull-request-url', pull.html_url)	    core.setOutput('pull-request-url', pull.html_url)
+    // Deprecated	    // Deprecated
+    core.exportVariable('PULL_REQUEST_NUMBER', pull.number)	    core.exportVariable('PULL_REQUEST_NUMBER', pull.number)
+    core.endGroup()	    core.endGroup()
+    // Set milestone, labels and assignees	    // Set milestone, labels and assignees
+    const updateIssueParams = {}	    const updateIssueParams = {}
+    if (inputs.milestone) {	    if (inputs.milestone) {
+      updateIssueParams['milestone'] = inputs.milestone	      updateIssueParams['milestone'] = inputs.milestone
+      core.info(`Applying milestone '${inputs.milestone}'`)	      core.info(`Applying milestone '${inputs.milestone}'`)
+    }	    }
+    if (inputs.labels.length > 0) {	    if (inputs.labels.length > 0) {
+      updateIssueParams['labels'] = inputs.labels	      updateIssueParams['labels'] = inputs.labels
+      core.info(`Applying labels '${inputs.labels}'`)	      core.info(`Applying labels '${inputs.labels}'`)
+    }	    }
+    if (inputs.assignees.length > 0) {	    if (inputs.assignees.length > 0) {
+      updateIssueParams['assignees'] = inputs.assignees	      updateIssueParams['assignees'] = inputs.assignees
+      core.info(`Applying assignees '${inputs.assignees}'`)	      core.info(`Applying assignees '${inputs.assignees}'`)
+    }	    }
+    if (Object.keys(updateIssueParams).length > 0) {	    if (Object.keys(updateIssueParams).length > 0) {
+      await this.octokit.issues.update({	      await this.octokit.issues.update({
+        ...this.parseRepository(baseRepository),	        ...this.parseRepository(baseRepository),
+        issue_number: pull.number,	        issue_number: pull.number,
+        ...updateIssueParams	        ...updateIssueParams
+      })	      })
+    }	    }
+    // Request reviewers and team reviewers	    // Request reviewers and team reviewers
+    const requestReviewersParams = {}	    const requestReviewersParams = {}
+    if (inputs.reviewers.length > 0) {	    if (inputs.reviewers.length > 0) {
+      requestReviewersParams['reviewers'] = inputs.reviewers	      requestReviewersParams['reviewers'] = inputs.reviewers
+      core.info(`Requesting reviewers '${inputs.reviewers}'`)	      core.info(`Requesting reviewers '${inputs.reviewers}'`)
+    }	    }
+    if (inputs.teamReviewers.length > 0) {	    if (inputs.teamReviewers.length > 0) {
+      requestReviewersParams['team_reviewers'] = inputs.teamReviewers	      requestReviewersParams['team_reviewers'] = inputs.teamReviewers
+      core.info(`Requesting team reviewers '${inputs.teamReviewers}'`)	      core.info(`Requesting team reviewers '${inputs.teamReviewers}'`)
+    }	    }
+    if (Object.keys(requestReviewersParams).length > 0) {	    if (Object.keys(requestReviewersParams).length > 0) {
+      try {	      try {
+        await this.octokit.pulls.requestReviewers({	        await this.octokit.pulls.requestReviewers({
+          ...this.parseRepository(baseRepository),	          ...this.parseRepository(baseRepository),
+          pull_number: pull.number,	          pull_number: pull.number,
+          ...requestReviewersParams	          ...requestReviewersParams
+        })	        })
+      } catch (e) {	      } catch (e) {
+        if (e.message && e.message.includes(ERROR_PR_REVIEW_FROM_AUTHOR)) {	        if (e.message && e.message.includes(ERROR_PR_REVIEW_FROM_AUTHOR)) {
+          core.warning(ERROR_PR_REVIEW_FROM_AUTHOR)	          core.warning(ERROR_PR_REVIEW_FROM_AUTHOR)
+        } else {	        } else {
+          throw e	          throw e
+        }	        }
+      }	      }
+    }	    }
+  }	  }
+}	}
+# Close Stale Issues and PRs	# Close Stale Issues and PRs
+Warns and then closes issues and PRs that have had no activity for a specified amount of time.	Warns and then closes issues and PRs that have had no activity for a specified amount of time.
+The configuration must be on the default branch and the default values will:	The configuration must be on the default branch and the default values will:
+- Add a label "Stale" on issues and pull requests after 60 days of inactivity and comment on them	- Add a label "Stale" on issues and pull requests after 60 days of inactivity and comment on them
+- Close the stale issues and pull requests after 7 days of inactivity	- Close the stale issues and pull requests after 7 days of inactivity
+- If an update/comment occur on stale issues or pull requests, the stale label will be removed and the timer will restart	- If an update/comment occur on stale issues or pull requests, the stale label will be removed and the timer will restart
+## Recommended permissions	## Recommended permissions
+For the execution of this action, it must be able to fetch all issues and pull requests from your repository.  	For the execution of this action, it must be able to fetch all issues and pull requests from your repository.  
+In addition, based on the provided configuration, the action could require more permission(s) (e.g.: add label, remove label, comment, close, delete branch, etc.).  	In addition, based on the provided configuration, the action could require more permission(s) (e.g.: add label, remove label, comment, close, delete branch, etc.).  
+This can be achieved with the following [configuration in the action](https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions#permissions) if the permissions are restricted:	This can be achieved with the following [configuration in the action](https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions#permissions) if the permissions are restricted:
+```yaml	```yaml
+permissions:	permissions:
+  contents: write # only for delete-branch option	  contents: write # only for delete-branch option
+  issues: write	  issues: write
+  pull-requests: write	  pull-requests: write
+You can find more information about the required permissions under the corresponding options that you wish to use.	You can find more information about the required permissions under the corresponding options that you wish to use.
+All options	All options
+List of input options	List of input options
+Every argument is optional.	Every argument is optional.
+Input        Description        Default	Input        Description        Default
+repo-token        PAT for GitHub API authentication        ${{ github.token }}	repo-token        PAT for GitHub API authentication        ${{ github.token }}
+days-before-stale        Idle number of days before marking issues/PRs stale        60	days-before-stale        Idle number of days before marking issues/PRs stale        60
+days-before-issue-stale        Override days-before-stale for issues only        	days-before-issue-stale        Override days-before-stale for issues only        
+days-before-pr-stale        Override days-before-stale for PRs only        	days-before-pr-stale        Override days-before-stale for PRs only        
+days-before-close        Idle number of days before closing stale issues/PRs        7	days-before-close        Idle number of days before closing stale issues/PRs        7
+days-before-issue-close        Override days-before-close for issues only        	days-before-issue-close        Override days-before-close for issues only        
+days-before-pr-close        Override days-before-close for PRs only        	days-before-pr-close        Override days-before-close for PRs only        
+stale-issue-message        Comment on the staled issues        	stale-issue-message        Comment on the staled issues        
+stale-pr-message        Comment on the staled PRs        	stale-pr-message        Comment on the staled PRs        
+close-issue-message        Comment on the staled issues while closed        	close-issue-message        Comment on the staled issues while closed        
+close-pr-message        Comment on the staled PRs while closed        	close-pr-message        Comment on the staled PRs while closed        
+stale-issue-label        Label to apply on staled issues        Stale	stale-issue-label        Label to apply on staled issues        Stale
+close-issue-label        Label to apply on closed issues        	close-issue-label        Label to apply on closed issues        
+close-issue-reason        Reason to use when closing issues        not_planned	close-issue-reason        Reason to use when closing issues        not_planned
+stale-pr-label        Label to apply on staled PRs        Stale	stale-pr-label        Label to apply on staled PRs        Stale
+close-pr-label        Label to apply on closed PRs        	close-pr-label        Label to apply on closed PRs        
+exempt-issue-labels        Labels on issues exempted from stale        	exempt-issue-labels        Labels on issues exempted from stale        
+exempt-pr-labels        Labels on PRs exempted from stale        	exempt-pr-labels        Labels on PRs exempted from stale        
+only-labels        Only issues/PRs with ALL these labels are checked        	only-labels        Only issues/PRs with ALL these labels are checked        
+only-issue-labels        Override only-labels for issues only        	only-issue-labels        Override only-labels for issues only        
+only-pr-labels        Override only-labels for PRs only        	only-pr-labels        Override only-labels for PRs only        
+any-of-labels        Only issues/PRs with ANY of these labels are checked        	any-of-labels        Only issues/PRs with ANY of these labels are checked        
+any-of-issue-labels        Override any-of-labels for issues only        	any-of-issue-labels        Override any-of-labels for issues only        
+any-of-pr-labels        Override any-of-labels for PRs only        	any-of-pr-labels        Override any-of-labels for PRs only        
+operations-per-run        Max number of operations per run        30	operations-per-run        Max number of operations per run        30
+remove-stale-when-updated        Remove stale label from issues/PRs on updates        true	remove-stale-when-updated        Remove stale label from issues/PRs on updates        true
+remove-issue-stale-when-updated        Remove stale label from issues on updates/comments        	remove-issue-stale-when-updated        Remove stale label from issues on updates/comments        
+remove-pr-stale-when-updated        Remove stale label from PRs on updates/comments        	remove-pr-stale-when-updated        Remove stale label from PRs on updates/comments        
+labels-to-add-when-unstale        Add specified labels from issues/PRs when they become unstale        	labels-to-add-when-unstale        Add specified labels from issues/PRs when they become unstale        
+labels-to-remove-when-unstale        Remove specified labels from issues/PRs when they become unstale        	labels-to-remove-when-unstale        Remove specified labels from issues/PRs when they become unstale        
+debug-only        Dry-run        false	debug-only        Dry-run        false
+ascending        Order to get issues/PRs        false	ascending        Order to get issues/PRs        false
+start-date        Skip stale action for issues/PRs created before it        	start-date        Skip stale action for issues/PRs created before it        
+delete-branch        Delete branch after closing a stale PR        false	delete-branch        Delete branch after closing a stale PR        false
+exempt-milestones        Milestones on issues/PRs exempted from stale        	exempt-milestones        Milestones on issues/PRs exempted from stale        
+exempt-issue-milestones        Override exempt-milestones for issues only        	exempt-issue-milestones        Override exempt-milestones for issues only        
+exempt-pr-milestones        Override exempt-milestones for PRs only        	exempt-pr-milestones        Override exempt-milestones for PRs only        
+exempt-all-milestones        Exempt all issues/PRs with milestones from stale        false	exempt-all-milestones        Exempt all issues/PRs with milestones from stale        false
+exempt-all-issue-milestones        Override exempt-all-milestones for issues only        	exempt-all-issue-milestones        Override exempt-all-milestones for issues only        
+exempt-all-pr-milestones        Override exempt-all-milestones for PRs only        	exempt-all-pr-milestones        Override exempt-all-milestones for PRs only        
+exempt-assignees        Assignees on issues/PRs exempted from stale        	exempt-assignees        Assignees on issues/PRs exempted from stale        
+exempt-issue-assignees        Override exempt-assignees for issues only        	exempt-issue-assignees        Override exempt-assignees for issues only        
+exempt-pr-assignees        Override exempt-assignees for PRs only        	exempt-pr-assignees        Override exempt-assignees for PRs only        
+exempt-all-assignees        Exempt all issues/PRs with assignees from stale        false	exempt-all-assignees        Exempt all issues/PRs with assignees from stale        false
+exempt-all-issue-assignees        Override exempt-all-assignees for issues only        	exempt-all-issue-assignees        Override exempt-all-assignees for issues only        
+exempt-all-pr-assignees        Override exempt-all-assignees for PRs only        	exempt-all-pr-assignees        Override exempt-all-assignees for PRs only        
+exempt-draft-pr        Skip the stale action for draft PRs        false	exempt-draft-pr        Skip the stale action for draft PRs        false
+enable-statistics        Display statistics in the logs        true	enable-statistics        Display statistics in the logs        true
+ignore-updates        Any update (update/comment) can reset the stale idle time on the issues/PRs        false	ignore-updates        Any update (update/comment) can reset the stale idle time on the issues/PRs        false
+ignore-issue-updates        Override ignore-updates for issues only        	ignore-issue-updates        Override ignore-updates for issues only        
+ignore-pr-updates        Override ignore-updates for PRs only        	ignore-pr-updates        Override ignore-updates for PRs only        
+include-only-assigned        Process only assigned issues        false	include-only-assigned        Process only assigned issues        false
+List of output options	List of output options
+Output        Description	Output        Description
+staled-issues-prs        List of all staled issues and pull requests	staled-issues-prs        List of all staled issues and pull requests
+closed-issues-prs        List of all closed issues and pull requests	closed-issues-prs        List of all closed issues and pull requests
+Detailed options	Detailed options
+repo-token	repo-token
+Personal Access Token (PAT) that allows the stale workflow to authenticate and perform API calls to GitHub.	Personal Access Token (PAT) that allows the stale workflow to authenticate and perform API calls to GitHub.
+Under the hood, it uses the @actions/github package.	Under the hood, it uses the @actions/github package.
+Default value: ${{ github.token }}	Default value: ${{ github.token }}
+days-before-stale	days-before-stale
+The idle number of days before marking the issues or the pull requests as stale (by adding a label).	The idle number of days before marking the issues or the pull requests as stale (by adding a label).
+The issues or the pull requests will be marked as stale if the last update (based on GitHub issue field updated_at) is older than the idle number of days.	The issues or the pull requests will be marked as stale if the last update (based on GitHub issue field updated_at) is older than the idle number of days.
+It means that any updates made, or any comments added to the issues or to the pull requests will restart the counter of days before marking as stale.	It means that any updates made, or any comments added to the issues or to the pull requests will restart the counter of days before marking as stale.
+However, if you wish to ignore this behaviour so that the creation date (based on GitHub issue field created_at) only matters, you can disable the ignore-updates option.	However, if you wish to ignore this behaviour so that the creation date (based on GitHub issue field created_at) only matters, you can disable the ignore-updates option.
+If set to a negative number like -1, no issues or pull requests will be marked as stale automatically.	If set to a negative number like -1, no issues or pull requests will be marked as stale automatically.
+In that case, you can still add the stale label manually to mark as stale.	In that case, you can still add the stale label manually to mark as stale.
+The label used to stale is defined by these two options:	The label used to stale is defined by these two options:
+stale-issue-label	stale-issue-label
+stale-pr-label	stale-pr-label
+A comment can also be added to notify about the stale and is defined by these two options:	A comment can also be added to notify about the stale and is defined by these two options:
+stale-issue-message	stale-issue-message
+stale-pr-message	stale-pr-message
+You can fine tune which issues or pull requests should be marked as stale based on the milestones, the assignees, the creation date and the missing/present labels from these options:	You can fine tune which issues or pull requests should be marked as stale based on the milestones, the assignees, the creation date and the missing/present labels from these options:
+exempt-issue-labels	exempt-issue-labels
+exempt-pr-labels	exempt-pr-labels
+only-labels	only-labels
+any-of-labels	any-of-labels
+start-date	start-date
+exempt-milestones	exempt-milestones
+exempt-all-milestones	exempt-all-milestones
+exempt-assignees	exempt-assignees
+exempt-all-assignees	exempt-all-assignees
+ignore-updates	ignore-updates
+Default value: 60	Default value: 60
+days-before-issue-stale	days-before-issue-stale
+Useful to override days-before-stale but only for the idle number of days before marking the issues as stale.	Useful to override days-before-stale but only for the idle number of days before marking the issues as stale.
+Default value: unset	Default value: unset
+days-before-pr-stale	days-before-pr-stale
+Useful to override days-before-stale but only for the idle number of days before marking the pull requests as stale.	Useful to override days-before-stale but only for the idle number of days before marking the pull requests as stale.
+Default value: unset	Default value: unset
+days-before-close	days-before-close
+The idle number of days before closing the stale issues or the stale pull requests (due to the stale label).	The idle number of days before closing the stale issues or the stale pull requests (due to the stale label).
+The issues or the pull requests will be closed if the last update (based on GitHub issue field updated_at) is older than the idle number of days.	The issues or the pull requests will be closed if the last update (based on GitHub issue field updated_at) is older than the idle number of days.
+Since adding the stale label will alter the last update date, we can calculate the number of days from this date.	Since adding the stale label will alter the last update date, we can calculate the number of days from this date.
+If set to a negative number like -1, the issues or the pull requests will never be closed automatically.	If set to a negative number like -1, the issues or the pull requests will never be closed automatically.
+The label used to stale is defined by these two options:	The label used to stale is defined by these two options:
+stale-issue-label	stale-issue-label
+stale-pr-label	stale-pr-label
+Default value: 7	Default value: 7
+days-before-issue-close	days-before-issue-close
+Override days-before-close but only for the idle number of days before closing the stale issues.	Override days-before-close but only for the idle number of days before closing the stale issues.
+Default value: unset	Default value: unset
+days-before-pr-close	days-before-pr-close
+Override days-before-close but only for the idle number of days before closing the stale pull requests.	Override days-before-close but only for the idle number of days before closing the stale pull requests.
+Default value: unset	Default value: unset
+stale-issue-message	stale-issue-message
+The message that will be added as a comment to the issues when the stale workflow marks it automatically as stale with a label.	The message that will be added as a comment to the issues when the stale workflow marks it automatically as stale with a label.
+You can skip the comment sending by passing an empty string.	You can skip the comment sending by passing an empty string.
+Default value: unset	Default value: unset
+Required Permission: issues: write	Required Permission: issues: write
+stale-pr-message	stale-pr-message
+The message that will be added as a comment to the pull requests when the stale workflow marks it automatically as stale with a label.	The message that will be added as a comment to the pull requests when the stale workflow marks it automatically as stale with a label.
+You can skip the comment sending by passing an empty string.	You can skip the comment sending by passing an empty string.
+Default value: unset	Default value: unset
+Required Permission: pull-requests: write	Required Permission: pull-requests: write
+close-issue-message	close-issue-message
+The message that will be added as a comment to the issues when the stale workflow closes it automatically after being stale for too long.	The message that will be added as a comment to the issues when the stale workflow closes it automatically after being stale for too long.
+Default value: unset	Default value: unset
+Required Permission: issues: write	Required Permission: issues: write
+close-pr-message	close-pr-message
+The message that will be added as a comment to the pull requests when the stale workflow closes it automatically after being stale for too long.	The message that will be added as a comment to the pull requests when the stale workflow closes it automatically after being stale for too long.
+Default value: unset	Default value: unset
+Required Permission: pull-requests: write	Required Permission: pull-requests: write
+stale-issue-label	stale-issue-label
+The label that will be added to the issues when automatically marked as stale.	The label that will be added to the issues when automatically marked as stale.
+If you wish to speedup the stale workflow for the issues, you can add this label manually to mark as stale.	If you wish to speedup the stale workflow for the issues, you can add this label manually to mark as stale.
+Default value: Stale	Default value: Stale
+Required Permission: issues: write	Required Permission: issues: write
+close-issue-label	close-issue-label
+The label that will be added to the issues when closed automatically.	The label that will be added to the issues when closed automatically.
+It will be automatically removed if the issues are no longer closed nor locked.	It will be automatically removed if the issues are no longer closed nor locked.
+Default value: unset	Default value: unset
+Required Permission: issues: write	Required Permission: issues: write
+close-issue-reason	close-issue-reason
+Specify the reason used when closing issues. Valid values are completed and not_planned.	Specify the reason used when closing issues. Valid values are completed and not_planned.
+Default value: not_planned	Default value: not_planned
+stale-pr-label	stale-pr-label
+The label that will be added to the pull requests when automatically marked as stale.	The label that will be added to the pull requests when automatically marked as stale.
+If you wish to speedup the stale workflow for the pull requests, you can add this label manually to mark as stale.	If you wish to speedup the stale workflow for the pull requests, you can add this label manually to mark as stale.
+Default value: Stale	Default value: Stale
+Required Permission: pull-requests: write	Required Permission: pull-requests: write
+close-pr-label	close-pr-label
+The label that will be added to the pull requests when closed automatically.	The label that will be added to the pull requests when closed automatically.
+It will be automatically removed if the pull requests are no longer closed nor locked.	It will be automatically removed if the pull requests are no longer closed nor locked.
+Default value: unset	Default value: unset
+Required Permission: pull-requests: write	Required Permission: pull-requests: write
+exempt-issue-labels	exempt-issue-labels
+Comma separated list of labels that can be assigned to issues to exclude them from being marked as stale (e.g: question,bug)	Comma separated list of labels that can be assigned to issues to exclude them from being marked as stale (e.g: question,bug)
+If unset (or an empty string), this option will not alter the stale workflow.	If unset (or an empty string), this option will not alter the stale workflow.
+Default value: unset	Default value: unset
+exempt-pr-labels	exempt-pr-labels
+Comma separated list of labels that can be assigned to pull requests to exclude them from being marked as stale (e.g: need-help,WIP)	Comma separated list of labels that can be assigned to pull requests to exclude them from being marked as stale (e.g: need-help,WIP)
+If unset (or an empty string), this option will not alter the stale workflow.	If unset (or an empty string), this option will not alter the stale workflow.
+Default value: unset	Default value: unset
+only-labels	only-labels
+An allow-list of label(s) to only process the issues or the pull requests that contain all these label(s).	An allow-list of label(s) to only process the issues or the pull requests that contain all these label(s).
+It can be a comma separated list of labels (e.g: answered,needs-rebase).	It can be a comma separated list of labels (e.g: answered,needs-rebase).
+If unset (or an empty string), this option will not alter the stale workflow.	If unset (or an empty string), this option will not alter the stale workflow.
+If you wish to only check that the issues or the pull requests contain one of these label(s), use instead any-of-labels.	If you wish to only check that the issues or the pull requests contain one of these label(s), use instead any-of-labels.
+Default value: unset	Default value: unset
+only-issue-labels	only-issue-labels
+Override only-labels but only to process the issues that contain all these label(s).	Override only-labels but only to process the issues that contain all these label(s).
+Default value: unset	Default value: unset
+only-pr-labels	only-pr-labels
+Override only-labels but only to process the pull requests that contain all these label(s).	Override only-labels but only to process the pull requests that contain all these label(s).
+Default value: unset	Default value: unset
+any-of-labels	any-of-labels
+An allow-list of label(s) to only process the issues or the pull requests that contain one of these label(s).	An allow-list of label(s) to only process the issues or the pull requests that contain one of these label(s).
+It can be a comma separated list of labels (e.g: answered,needs-rebase).	It can be a comma separated list of labels (e.g: answered,needs-rebase).
+If unset (or an empty string), this option will not alter the stale workflow.	If unset (or an empty string), this option will not alter the stale workflow.
+If you wish to only check that the issues or the pull requests contain all these label(s), use instead only-labels.	If you wish to only check that the issues or the pull requests contain all these label(s), use instead only-labels.
+Default value: unset	Default value: unset
+any-of-issue-labels	any-of-issue-labels
+Override any-of-labels but only to process the issues that contain one of these label(s).	Override any-of-labels but only to process the issues that contain one of these label(s).
+Default value: unset	Default value: unset
+any-of-pr-labels	any-of-pr-labels
+Override any-of-labels but only to process the pull requests that contain one of these label(s)'"'Run":,'
 '"#": "ActionEventsListener":, :
 __________________
 Remmittnance Advice

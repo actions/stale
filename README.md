@@ -1,4 +1,4 @@
-#bitore.sig/BITCORE :
+#bitore.sig/BITCORE:
 
 '#$mk.dir=:$:RAKEFILE.mkdir :
 

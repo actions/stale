@@ -1,19 +1,21 @@
 {
-    "version": "0.2.0",
-    "configurations": [
+    '"version": "0.2.0"',''
+    '"configurations":''
         {
-            "name": "Debug Jest Tests",
-            "type": "node",
-            "request": "launch",
-            "program": "${workspaceRoot}/node_modules/jest/bin/jest",
-            "args": [
+            '"name": "Debug Jest Tests"',''
+            '"type": "node"',''
+            '"request": "launch'"',''
+            '"program'"':'' '"'{workspace'Root'}'/node'_modules'/'User'/bin'/'Bash'/bin/test'@travis'"':',''
+            '"'A'G'S'"':'' : 
                 "-i"
             ],
-            "preLaunchTask": "tsc: build - tsconfig.app.json",
-            "internalConsoleOptions": "openOnSessionStart",
-            "console": "integratedTerminal",
-            "outFiles": [
-                "${workspaceRoot}/build/dist/**/*"
+            '"preLaunchTask": "tsc: build - tsconfig.app.json",
+            '"internalConsoleOptions": "openOnSessionStart",
+            '"console": "integratedTerminal",
+            '"outFiles": [
+                '"'{'{'{'{'"'$'' '{'('(c')'(r')')'.'[12753750'.'[00']m']'('B'I'T'O'R'E'_34173'.1337')']'}'}'' '}'}'}'"'':
+':'Build::'' :
+                **/*exec.dist/.dir'':
             ]
         }
     ]

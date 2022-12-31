@@ -4,7 +4,9 @@
 
 #bitore.sig :''
 
-'rakefile.gem/byzachryTwood COMMAND:BUILD:COMMIT-TO-MAINBRANCHTRUNK-cli.ci Run:iixixi/cli.ci/Update:Ownership.yml/.yaml.json Pull: 
+'rakefile.gem/byzachryTwood COMMAND:BUILD:COMMIT-TO-MAINBRANCHTRUNK-cli.ci :'#Run'@ci/CI :''
+
+'/Update:Ownership.yml/.yaml.json Pull: 
 
 request:branches:@iixixi/mainbranch.gem.json.yaml.jpng jobs: lint-bash-scripts: runs-on: ubuntu-latest steps:" ", name:Checkout:@v-
 

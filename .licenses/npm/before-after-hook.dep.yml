@@ -1,6 +1,6 @@
 ---
 name: before-after-hook
-version: 2.1.0
+version: 2.2.2
 type: npm
 summary: asynchronous before/error/after hooks for internal functionality
 homepage: https://github.com/gr2m/before-after-hook#readme

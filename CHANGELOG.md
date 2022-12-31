@@ -1,5 +1,15 @@
 # Changelog
 
+# [7.0.0]
+
+:warning: Breaking change :warning:
+
+* Allow daysBeforeStale options to be float by @irega in https://github.com/actions/stale/pull/841
+* Use cache in check-dist.yml by @jongwooo in https://github.com/actions/stale/pull/876
+* fix print outputs step in existing workflows by @irega in https://github.com/actions/stale/pull/859
+* Update issue and PR templates, add/delete workflow files by @IvanZosimov in https://github.com/actions/stale/pull/880
+* Update how stale handles exempt items by @johnsudol in https://github.com/actions/stale/pull/874
+
 # [6.0.1]
 
 Update @actions/core to v1.10.0 ([#839](https://github.com/actions/stale/pull/839))

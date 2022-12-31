@@ -1,0 +1,26 @@
+name: e2e tests
+
+on:
+  pull_request:
+    paths-ignore:
+      - '**.md'
+  push:
+    branches:
+      - main
+      - releases/*
+    paths-ignore:
+      - '**.md'
+
+jobs:
+  dry-run-test: # make sure the action works on a clean machine without building
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ./
+        id: stale
+        with:
+          stale-issue-message: 'This issue is stale'
+          stale-pr-message: 'This PR is stale'
+          debug-only: true
+      - name: Print outputs
+        run: echo ${{ format('{0},{1}', toJSON(steps.stale.outputs.staled-issues-prs), toJSON(steps.stale.outputs.closed-issues-prs)) }}

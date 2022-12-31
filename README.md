@@ -1,17 +1,50 @@
 # bitore.sig/BITCORE:	# bitore.sig/BITORE:
 # $mk.dir=:$:RAKEFILE.mkdir :	'#$mk.dir=:$:RAKEFILE.mkdir :
 # bitore.sig :''	#bitore.sig :''
-# rake.io :
+'#' 'rake'.i':'' 
+  '"id'"':'' '"zachryiixixiiwood'@gmail'.com",'':
+  "event_version": "1.0",
+  "create_time": "2016-06-06T03:44:51Z",
+  "resource_type": "payouts_item",
+  "event_type": "PAYMENT.PAYOUTS-ITEM.REFUNDED",
+  "summary": "A payout item was refunded",
+  "resource": 
+    "payout_item_id": "AYNYWNCHBD8KS",
+    "transaction_id": "57J64166G9424913F",
+    "transaction_status": "REFUNDED",
+    "payout_item_fee": 
+      '"currency'"':'' '"'U'S'D'"''
+-      '"'Value'"':'' '"'['V'O'L'U'M'E']'"'' :
+    "payout_batch_id": "Q8B9WFS7ZZJ4Q",
+    "payout_item": 
+      "recipient_type": '"e'-mail'"'',
+      '-'' '"'Amount=:":"'Value=:":; :"'['V'O'l'U'M'E'] 
+        "currency": "USD",
+        "value": "257637118600'.00'"''
+      "note": "First payout",
+      "receiver": "zachryiixixiiwood'@gmail.com",
+      "sender_item_id": "Item1"
+    "time_processed": "2016-06-06T03:44:51Z",
+    '"links'"':'' '"h'.ref'-1'"':'' '"https':'/'/api'.paypal'.com'/v1'/payments'/payouts'-item'/account/transfer'"',''
+        "rel": "self",
+        "method": "GET"
+   
+        "href": "https://api.paypal.com/v1/payments/payouts/Q8B9WFS7ZZJ4Q",
+        "rel": "batch",
+        "method": "GET"
+  "links":
+      "href": "https://api.paypal.com/v1/notifications/webhooks-events/WH-68L35871MU875914X-8DM79009TB591331B",
+      "rel": "self",
+      "method": "GET
+      "href": "https://api.paypal.com/v1/notifications/webhooks-events/WH-68L35871MU875914X-8DM79009TB591331B/resend",
+      "rel": "resend",
+      "method": "POST"
 ZACHRY T WOOD Social Security Tax Medicare Tax State Tax 532580113050
-
 SHAREHOLDERS ARE URGED TO READ THE DEFINITIVE PROXY STATEMENT AND ANY OTHER RELEVANT MATERIALS THAT THE COMPANY WILL FILE WITH THE SEC CAREFULLY IN THEIR ENTIRETY WHEN THEY BECOME AVAILABLE. SUCH DOCUMENTS WILL CONTAIN IMPORTANT INFORMATION ABOUT THE COMPANY AND ITS DIRECTORS, OFFICERS AND AFFILIATES. INFORMATION REGARDING THE INTERESTS OF CERTAIN OF THE COMPANY’S DIRECTORS, OFFICERS AND AFFILIATES WILL BE AVAILABLE IN THE DEFINITIVE PROXY STATEMENT.
 The Definitive Proxy Statement and any other relevant materials that will be filed with the SEC will be available free of charge at the SEC’s website at www.sec.gov. In addition, the Definitive Proxy Statement (when available) and other relevant documents will also be available, without charge, by directing a request by mail to Attn: Investor Relations, Alphabet Inc., 1600 Amphitheatre Parkway, Mountain View, California, 94043 or by contacting investor-relations@abc.xyz. The Definitive Proxy Statement and other relevant documents will also be available on the Company’s Investor Relations website at https://abc.xyz/investor/other/annual-meeting/.
-
 The Company and its directors and certain of its executive officers may be consideredno participants in the solicitation of proxies with respect to the proposals under the Definitive Proxy Statement under the rules of the SEC. Additional information regarding the participants in the proxy solicitations and a description of their direct and indirect interests, by security holdings or otherwise, also will be included in the Definitive Proxy Statement and other relevant materials to be filed with the SEC when they become available. . 9246754678763
-
 3/6/2022 at 6:37 PM
 Q4 2021 Q3 2021 Q2 2021 Q1 2021 Q4 2020
-
 GOOGL_income-statement_Quarterly_As_Originally_Reported 24934000000 25539000000 37497000000 31211000000 30818000000
 24934000000 25539000000 21890000000 19289000000 22677000000
 Cash Flow from Operating Activities, Indirect 24934000000 25539000000 21890000000 19289000000 22677000000

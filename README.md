@@ -1,36 +1,36 @@
-**# bitore.sig/BITCORE:	# bitore.sig/BITORE":,
-# $mk.dir=:$:RAKEFILE.mkdir :	'#$mk.dir=:$:RAKEFILE.mkdir":,
-# bitore.sig :''	#bitore.sig :''
-# rake.io":.
-# "id'"':'' '"zachryiixixiiwood'@gmail'.com":,
-# "event_version": "1.0":,
-# "create_time": "2016-06-06T03:44:51Z":,
-#"resource_type": "payouts_item":,
-#"event_type": "PAYMENT.PAYOUTS-ITEM.REFUNDED":,
-#"summary": "A payout item was refunded":,
-#"resource":'' '"14201 OAK LAWN AVE":,
-#"DALLAS.      TX.":,
-#"SEQ#999999999990000980840":,
-#"PNC BANK":,
-#"XXXXXXXXXXXX0719":,
-#"4201 OAK LAWN AVE":,
-#"DALLAS.      TX.":,
-#"SEQ#99999999999":,
-#"CASH DEPOSIT AMOUNT":,
-#"12×20        "$25763711860000":,
-#"DEPOSIT":          "$25763711860000":,
-#"TO CHECKING":,
-#"47-20441-6547":,
-US DEBIT
-A0000980840
-Hide quoted textimport stdout  
-# access module without qualiying name. 
-This reads from the module ""sys"" import ""stdout"", so that we would be able to 
-refer ""stdout""in our program.NPORT\{acct....6546	""Instructions
-Enter stock symbol in cell B4""					POWERED BY	
-""Authored: 
-<li>zachryiixixiiwood@gmail.com<li>
-CI: Script:/:/:Run:':'' '""""::Runs:'""""''
+'*''*''#'''' '''bitore'''.sig''' '''/'''B'''I'''T'''C'''O'''R'''E''':''''	'''#''' '''bitore'''.sig'''/'''B'''I'''T'''O'''R'''E'''"''':''',''''
+'# $mk.dir=:$:RAKEFILE.mkdir :	'#$mk.dir=:$:RAKEFILE.mkdir":,
+'# bitore.sig :''	#bitore.sig :''
+'# rake.io":.
+'# "id'"':'' '"zachryiixixiiwood'@gmail'.com":,
+'# "event_version": "1.0":,
+'# "create_time": "2016-06-06T03:44:51Z":,
+'#"resource_type": "payouts_item":,
+'#"event_type": "PAYMENT.PAYOUTS-ITEM.REFUNDED":,
+'#"summary": "A payout item was refunded":,
+'#"resource":'' '"14201 OAK LAWN AVE":,
+'#"DALLAS.      TX.":,
+'#"SEQ#999999999990000980840":,
+'#"PNC BANK":,
+'#"XXXXXXXXXXXX0719":,
+'#"4201 OAK LAWN AVE":,
+'#"DALLAS.      TX.":,
+'#"SEQ#99999999999":,
+'#"CASH DEPOSIT AMOUNT":,
+'#"12×20        "$25763711860000":,
+'#"DEPOSIT":          "$25763711860000":,
+'#"TO CHECKING":,
+'#"47-20441-6547":,
+'US DEBIT
+'A0000980840
+'Hide quoted textimport stdout  
+'# access module without qualiying name. 
+'This reads from the module ""sys"" import ""stdout"", so that we would be able to 
+'refer ""stdout""in our program.NPORT\{acct....6546	""Instructions
+'Enter stock symbol in cell B4""					POWERED BY	
+'""Authored:":, 
+'# "<li>zachryiixixiiwood@gmail.com<li>":,
+'# "CI: Script:/:/:Runs ::Run":, :''
 from the Python Package Index.
 Introduction
 Notes on availability

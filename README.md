@@ -1,4 +1,4 @@
-#Bitore.sig/bitore.sig/README.MD/README.M :''
+#bitore.sig/BITCORE :
 
 '#$mk.dir=:$:RAKEFILE.mkdir :
 

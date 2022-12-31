@@ -4,13 +4,13 @@
 
 # bitore.sig :''	#bitore.sig :''
 
-'#' 'rake'.i':'' 
+# rake.io:''
 
-'"id'"':'' '"zachryiixixiiwood'@gmail'.com",'':
+# "id'"':'' '"zachryiixixiiwood'@gmail'.com",'':
 
-"event_version": "1.0",
+# "event_version": "1.0",
 
-"create_time": "2016-06-06T03:44:51Z",
+# "create_time": "2016-06-06T03:44:51Z",
 
 "resource_type": "payouts_item",
 

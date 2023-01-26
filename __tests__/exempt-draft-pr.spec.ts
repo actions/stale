@@ -130,7 +130,8 @@ class IssuesProcessorBuilder {
           number: 0,
           draft: true,
           head: {
-            ref: 'ref'
+            ref: 'ref',
+            repo: null
           }
         });
       }

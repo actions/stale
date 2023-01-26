@@ -921,26 +921,41 @@ export class IssuesProcessor {
     }
 
     const branch = pullRequest.head.ref;
-    issueLogger.info(
-      `Deleting the branch "${LoggerService.cyan(branch)}" from closed $$type`
-    );
 
-    try {
-      this._consumeIssueOperation(issue);
-      this.statistics?.incrementDeletedBranchesCount();
+    if (
+      pullRequest.head.repo === null ||
+      pullRequest.head.repo.full_name ===
+        `${context.repo.owner}/${context.repo.repo}`
+    ) {
+      issueLogger.info(
+        `Deleting the branch "${LoggerService.cyan(branch)}" from closed $$type`
+      );
 
-      if (!this.options.debugOnly) {
-        await this.client.rest.git.deleteRef({
-          owner: context.repo.owner,
-          repo: context.repo.repo,
-          ref: `heads/${branch}`
-        });
+      try {
+        this._consumeIssueOperation(issue);
+        this.statistics?.incrementDeletedBranchesCount();
+
+        if (!this.options.debugOnly) {
+          await this.client.rest.git.deleteRef({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            ref: `heads/${branch}`
+          });
+        }
+      } catch (error) {
+        issueLogger.error(
+          `Error when deleting the branch "${LoggerService.cyan(
+            branch
+          )}" from $$type: ${error.message}`
+        );
       }
-    } catch (error) {
-      issueLogger.error(
-        `Error when deleting the branch "${LoggerService.cyan(
+    } else {
+      issueLogger.warning(
+        `Deleting the branch "${LoggerService.cyan(
           branch
-        )}" from $$type: ${error.message}`
+        )}" has skipped because it belongs to other repo ${
+          pullRequest.head.repo.full_name
+        }`
       );
     }
   }

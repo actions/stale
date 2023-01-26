@@ -921,20 +921,27 @@ class IssuesProcessor {
                 return;
             }
             const branch = pullRequest.head.ref;
-            issueLogger.info(`Deleting the branch "${logger_service_1.LoggerService.cyan(branch)}" from closed $$type`);
-            try {
-                this._consumeIssueOperation(issue);
-                (_a = this.statistics) === null || _a === void 0 ? void 0 : _a.incrementDeletedBranchesCount();
-                if (!this.options.debugOnly) {
-                    yield this.client.rest.git.deleteRef({
-                        owner: github_1.context.repo.owner,
-                        repo: github_1.context.repo.repo,
-                        ref: `heads/${branch}`
-                    });
+            if (pullRequest.head.repo === null ||
+                pullRequest.head.repo.full_name ===
+                    `${github_1.context.repo.owner}/${github_1.context.repo.repo}`) {
+                issueLogger.info(`Deleting the branch "${logger_service_1.LoggerService.cyan(branch)}" from closed $$type`);
+                try {
+                    this._consumeIssueOperation(issue);
+                    (_a = this.statistics) === null || _a === void 0 ? void 0 : _a.incrementDeletedBranchesCount();
+                    if (!this.options.debugOnly) {
+                        yield this.client.rest.git.deleteRef({
+                            owner: github_1.context.repo.owner,
+                            repo: github_1.context.repo.repo,
+                            ref: `heads/${branch}`
+                        });
+                    }
+                }
+                catch (error) {
+                    issueLogger.error(`Error when deleting the branch "${logger_service_1.LoggerService.cyan(branch)}" from $$type: ${error.message}`);
                 }
             }
-            catch (error) {
-                issueLogger.error(`Error when deleting the branch "${logger_service_1.LoggerService.cyan(branch)}" from $$type: ${error.message}`);
+            else {
+                issueLogger.warning(`Deleting the branch "${logger_service_1.LoggerService.cyan(branch)}" has skipped because it belongs to other repo ${pullRequest.head.repo.full_name}`);
             }
         });
     }

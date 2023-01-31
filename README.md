@@ -1,5 +1,8 @@
 # Close Stale Issues and PRs
 
+[![Basic validation](https://github.com/actions/stale/actions/workflows/basic-validation.yml/badge.svg?branch=main)](https://github.com/actions/stale/actions/workflows/basic-validation.yml)
+[![e2e tests](https://github.com/actions/stale/actions/workflows/e2e-tests.yml/badge.svg?branch=main)](https://github.com/actions/stale/actions/workflows/e2e-tests.yml)
+
 Warns and then closes issues and PRs that have had no activity for a specified amount of time.
 
 The configuration must be on the default branch and the default values will:

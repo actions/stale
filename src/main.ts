@@ -15,6 +15,14 @@ async function _run(): Promise<void> {
       issueProcessor.staleIssues,
       issueProcessor.closedIssues
     );
+
+    if (issueProcessor.errors.length > 0) {
+      // Duplicate the error messages at the bottom of the build log
+      for (const error of issueProcessor.errors) {
+        core.error(error);
+      }
+      core.setFailed('Issues processing failed');
+    }
   } catch (error) {
     core.error(error);
     core.setFailed(error.message);

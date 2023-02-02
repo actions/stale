@@ -397,6 +397,7 @@ class IssuesProcessor {
         this.addedLabelIssues = [];
         this.addedCloseCommentIssues = [];
         this._logger = new logger_1.Logger();
+        this.errors = [];
         this.options = options;
         this.client = (0, github_1.getOctokit)(this.options.repoToken);
         this.operations = new stale_operations_1.StaleOperations(this.options);
@@ -670,6 +671,7 @@ class IssuesProcessor {
                 return issueResult.data.map((issue) => new issue_1.Issue(this.options, issue));
             }
             catch (error) {
+                this.errors.push(error);
                 this._logger.error(`Get issues for repo error: ${error.message}`);
                 return Promise.resolve([]);
             }
@@ -2185,6 +2187,13 @@ function _run() {
             const issueProcessor = new issues_processor_1.IssuesProcessor(args);
             yield issueProcessor.processIssues();
             yield processOutput(issueProcessor.staleIssues, issueProcessor.closedIssues);
+            if (issueProcessor.errors.length > 0) {
+                // Duplicate the error messages at the bottom of the build log
+                for (const error of issueProcessor.errors) {
+                    core.error(error);
+                }
+                core.setFailed('Issues processing failed');
+            }
         }
         catch (error) {
             core.error(error);

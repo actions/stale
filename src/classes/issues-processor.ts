@@ -71,6 +71,7 @@ export class IssuesProcessor {
   readonly addedCloseCommentIssues: Issue[] = [];
   readonly statistics: Statistics | undefined;
   private readonly _logger: Logger = new Logger();
+  readonly errors: Error[] = [];
 
   constructor(options: IIssuesProcessorOptions) {
     this.options = options;
@@ -556,6 +557,7 @@ export class IssuesProcessor {
         (issue: Readonly<OctokitIssue>): Issue => new Issue(this.options, issue)
       );
     } catch (error) {
+      this.errors.push(error);
       this._logger.error(`Get issues for repo error: ${error.message}`);
       return Promise.resolve([]);
     }

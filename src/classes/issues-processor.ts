@@ -25,6 +25,7 @@ import {StaleOperations} from './stale-operations';
 import {Statistics} from './statistics';
 import {LoggerService} from '../services/logger.service';
 import {OctokitIssue} from '../interfaces/issue';
+import {retry} from '@octokit/plugin-retry';
 
 /***
  * Handle processing of issues for staleness/closure.
@@ -74,7 +75,7 @@ export class IssuesProcessor {
 
   constructor(options: IIssuesProcessorOptions) {
     this.options = options;
-    this.client = getOctokit(this.options.repoToken);
+    this.client = getOctokit(this.options.repoToken, {}, retry);
     this.operations = new StaleOperations(this.options);
 
     this._logger.info(
@@ -556,8 +557,7 @@ export class IssuesProcessor {
         (issue: Readonly<OctokitIssue>): Issue => new Issue(this.options, issue)
       );
     } catch (error) {
-      this._logger.error(`Get issues for repo error: ${error.message}`);
-      return Promise.resolve([]);
+      throw Error(`Get issues for repo error: ${error.message}`);
     }
   }
 

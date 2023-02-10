@@ -14,4 +14,4 @@ jobs:
     name: Licensed
     uses: actions/reusable-workflows/.github/workflows/licensed.yml@main
     with:
-      node-version: v12
+      node-version: v16

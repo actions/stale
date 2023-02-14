@@ -557,7 +557,13 @@ export class IssuesProcessor {
         (issue: Readonly<OctokitIssue>): Issue => new Issue(this.options, issue)
       );
     } catch (error) {
-      throw Error(`Get issues for repo error: ${error.message}`);
+      const rethrow = Error(
+        `Getting issues was blocked by the error: ${error.message}`
+      );
+      rethrow.stack = `${error.stack.split('\n').slice(0, 2).join('\n')}\n${
+        error.stack
+      }`;
+      throw error;
     }
   }
 

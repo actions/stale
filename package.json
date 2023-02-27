@@ -45,7 +45,7 @@
   "devDependencies": {
     "@types/jest": "^29.4.0",
     "@types/lodash.deburr": "^4.1.6",
-    "@types/node": "^18.11.18",
+    "@types/node": "^18.14.2",
     "@types/semver": "^7.3.5",
     "@typescript-eslint/eslint-plugin": "^5.53.0",
     "@typescript-eslint/parser": "^5.52.0",

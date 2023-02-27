@@ -399,7 +399,7 @@ class IssuesProcessor {
         this.addedCloseCommentIssues = [];
         this._logger = new logger_1.Logger();
         this.options = options;
-        this.client = (0, github_1.getOctokit)(this.options.repoToken, {}, plugin_retry_1.retry);
+        this.client = (0, github_1.getOctokit)(this.options.repoToken, undefined, plugin_retry_1.retry);
         this.operations = new stale_operations_1.StaleOperations(this.options);
         this._logger.info(logger_service_1.LoggerService.yellow(`Starting the stale action process...`));
         if (this.options.debugOnly) {
@@ -672,7 +672,6 @@ class IssuesProcessor {
             }
             catch (error) {
                 const rethrow = Error(`Getting issues was blocked by the error: ${error.message}`);
-                rethrow.stack = `${error.stack.split('\n').slice(0, 2).join('\n')}\n${error.stack}`;
                 throw error;
             }
         });

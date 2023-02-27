@@ -75,7 +75,7 @@ export class IssuesProcessor {
 
   constructor(options: IIssuesProcessorOptions) {
     this.options = options;
-    this.client = getOctokit(this.options.repoToken, {}, retry);
+    this.client = getOctokit(this.options.repoToken, undefined, retry);
     this.operations = new StaleOperations(this.options);
 
     this._logger.info(
@@ -560,9 +560,6 @@ export class IssuesProcessor {
       const rethrow = Error(
         `Getting issues was blocked by the error: ${error.message}`
       );
-      rethrow.stack = `${error.stack.split('\n').slice(0, 2).join('\n')}\n${
-        error.stack
-      }`;
       throw error;
     }
   }

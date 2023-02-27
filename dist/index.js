@@ -671,8 +671,7 @@ class IssuesProcessor {
                 return issueResult.data.map((issue) => new issue_1.Issue(this.options, issue));
             }
             catch (error) {
-                const rethrow = Error(`Getting issues was blocked by the error: ${error.message}`);
-                throw error;
+                throw Error(`Getting issues was blocked by the error: ${error.message}`);
             }
         });
     }

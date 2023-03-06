@@ -6,8 +6,8 @@
   "main": "lib/main.js",
   "scripts": {
     "build": "tsc --project tsconfig.app.json && ncc build",
-    "format": "prettier --config ./.prettierrc.js --write **/*.{ts,yml,yaml}",
-    "format-check": "prettier --config ./.prettierrc.js --check **/*.{ts,yml,yaml}",
+    "format": "prettier --no-error-on-unmatched-pattern --config  ./.prettierrc.js --write **/*.{ts,yml,yaml}",
+    "format-check": "prettier --no-error-on-unmatched-pattern --config ./.prettierrc.js --check **/*.{ts,yml,yaml}",
     "lint": "eslint --config ./.eslintrc.js **/*.ts",
     "lint:fix": "eslint --config ./.eslintrc.js **/*.ts --fix",
     "lint:all": "npm run format-check && npm run lint",

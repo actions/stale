@@ -123,6 +123,13 @@ export class IssuesProcessor {
       );
     }
 
+    const labelsToAddWhenStale: string[] = wordsToList(
+      this.options.labelsToAddWhenStale
+    );
+    const labelsToRemoveWhenStale: string[] = wordsToList(
+      this.options.labelsToRemoveWhenStale
+    );
+
     const labelsToAddWhenUnstale: string[] = wordsToList(
       this.options.labelsToAddWhenUnstale
     );
@@ -141,7 +148,9 @@ export class IssuesProcessor {
         await this.processIssue(
           issue,
           labelsToAddWhenUnstale,
-          labelsToRemoveWhenUnstale
+          labelsToRemoveWhenUnstale,
+          labelsToAddWhenStale,
+          labelsToRemoveWhenStale,
         );
       });
     }
@@ -179,7 +188,9 @@ export class IssuesProcessor {
   async processIssue(
     issue: Issue,
     labelsToAddWhenUnstale: Readonly<string>[],
-    labelsToRemoveWhenUnstale: Readonly<string>[]
+    labelsToRemoveWhenUnstale: Readonly<string>[],
+    labelsToAddWhenStale: Readonly<string>[],
+    labelsToRemoveWhenStale: Readonly<string>[]
   ): Promise<void> {
     this.statistics?.incrementProcessedItemsCount(issue);
 
@@ -509,6 +520,8 @@ export class IssuesProcessor {
         staleMessage,
         labelsToAddWhenUnstale,
         labelsToRemoveWhenUnstale,
+        labelsToAddWhenStale,
+        labelsToRemoveWhenStale,
         closeMessage,
         closeLabel
       );
@@ -623,6 +636,8 @@ export class IssuesProcessor {
     staleMessage: string,
     labelsToAddWhenUnstale: Readonly<string>[],
     labelsToRemoveWhenUnstale: Readonly<string>[],
+    labelsToAddWhenStale: Readonly<string>[],
+    labelsToRemoveWhenStale: Readonly<string>[],
     closeMessage?: string,
     closeLabel?: string
   ) {
@@ -671,6 +686,12 @@ export class IssuesProcessor {
 
     if (issue.markedStaleThisRun) {
       issueLogger.info(`marked stale this run, so don't check for updates`);
+      await this._removeLabelsOnStatusTransition(issue, labelsToRemoveWhenStale, Option.LabelsToRemoveWhenStale);
+      await this._addLabelsOnStatusTransition(
+        issue,
+        labelsToAddWhenStale,
+        Option.LabelsToAddWhenStale
+      );
     }
 
     // The issue.updated_at and markedStaleOn are not always exactly in sync (they can be off by a second or 2)
@@ -699,8 +720,8 @@ export class IssuesProcessor {
       await this._removeStaleLabel(issue, staleLabel);
 
       // Are there labels to remove or add when an issue is no longer stale?
-      await this._removeLabelsWhenUnstale(issue, labelsToRemoveWhenUnstale);
-      await this._addLabelsWhenUnstale(issue, labelsToAddWhenUnstale);
+      await this._removeLabelsOnStatusTransition(issue, labelsToRemoveWhenUnstale, Option.LabelsToRemoveWhenStale);
+      await this._addLabelsOnStatusTransition(issue, labelsToAddWhenUnstale, Option.LabelsToAddWhenUnstale);
 
       issueLogger.info(`Skipping the process since the $$type is now un-stale`);
 
@@ -1074,9 +1095,10 @@ export class IssuesProcessor {
     return this.options.removeStaleWhenUpdated;
   }
 
-  private async _removeLabelsWhenUnstale(
+  private async _removeLabelsOnStatusTransition(
     issue: Issue,
-    removeLabels: Readonly<string>[]
+    removeLabels: Readonly<string>[],
+    staleStatus: Option
   ): Promise<void> {
     if (!removeLabels.length) {
       return;
@@ -1086,7 +1108,7 @@ export class IssuesProcessor {
 
     issueLogger.info(
       `Removing all the labels specified via the ${this._logger.createOptionLink(
-        Option.LabelsToRemoveWhenUnstale
+        staleStatus
       )} option.`
     );
 
@@ -1095,9 +1117,10 @@ export class IssuesProcessor {
     }
   }
 
-  private async _addLabelsWhenUnstale(
+  private async _addLabelsOnStatusTransition(
     issue: Issue,
-    labelsToAdd: Readonly<string>[]
+    labelsToAdd: Readonly<string>[],
+    staleStatus: Option
   ): Promise<void> {
     if (!labelsToAdd.length) {
       return;
@@ -1107,7 +1130,7 @@ export class IssuesProcessor {
 
     issueLogger.info(
       `Adding all the labels specified via the ${this._logger.createOptionLink(
-        Option.LabelsToAddWhenUnstale
+        staleStatus
       )} option.`
     );
 

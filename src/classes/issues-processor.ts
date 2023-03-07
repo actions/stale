@@ -150,7 +150,7 @@ export class IssuesProcessor {
           labelsToAddWhenUnstale,
           labelsToRemoveWhenUnstale,
           labelsToAddWhenStale,
-          labelsToRemoveWhenStale,
+          labelsToRemoveWhenStale
         );
       });
     }
@@ -686,7 +686,11 @@ export class IssuesProcessor {
 
     if (issue.markedStaleThisRun) {
       issueLogger.info(`marked stale this run, so don't check for updates`);
-      await this._removeLabelsOnStatusTransition(issue, labelsToRemoveWhenStale, Option.LabelsToRemoveWhenStale);
+      await this._removeLabelsOnStatusTransition(
+        issue,
+        labelsToRemoveWhenStale,
+        Option.LabelsToRemoveWhenStale
+      );
       await this._addLabelsOnStatusTransition(
         issue,
         labelsToAddWhenStale,
@@ -720,8 +724,16 @@ export class IssuesProcessor {
       await this._removeStaleLabel(issue, staleLabel);
 
       // Are there labels to remove or add when an issue is no longer stale?
-      await this._removeLabelsOnStatusTransition(issue, labelsToRemoveWhenUnstale, Option.LabelsToRemoveWhenStale);
-      await this._addLabelsOnStatusTransition(issue, labelsToAddWhenUnstale, Option.LabelsToAddWhenUnstale);
+      await this._removeLabelsOnStatusTransition(
+        issue,
+        labelsToRemoveWhenUnstale,
+        Option.LabelsToRemoveWhenStale
+      );
+      await this._addLabelsOnStatusTransition(
+        issue,
+        labelsToAddWhenUnstale,
+        Option.LabelsToAddWhenUnstale
+      );
 
       issueLogger.info(`Skipping the process since the $$type is now un-stale`);
 

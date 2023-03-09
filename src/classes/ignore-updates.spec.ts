@@ -1,3 +1,4 @@
+/* eslint jest/no-identical-title: "off" */
 import {DefaultProcessorOptions} from '../../__tests__/constants/default-processor-options';
 import {generateIIssue} from '../../__tests__/functions/generate-iissue';
 import {IIssue} from '../interfaces/issue';

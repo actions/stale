@@ -423,7 +423,6 @@ class IssuesProcessor {
             else {
                 this._logger.info(`${logger_service_1.LoggerService.yellow('Processing the batch of issues ')} ${logger_service_1.LoggerService.cyan(`#${page}`)} ${logger_service_1.LoggerService.yellow(' containing ')} ${logger_service_1.LoggerService.cyan(issues.length)} ${logger_service_1.LoggerService.yellow(` issue${issues.length > 1 ? 's' : ''}...`)}`);
             }
-            const labelsToAddWhenStale = (0, words_to_list_1.wordsToList)(this.options.labelsToAddWhenStale);
             const labelsToRemoveWhenStale = (0, words_to_list_1.wordsToList)(this.options.labelsToRemoveWhenStale);
             const labelsToAddWhenUnstale = (0, words_to_list_1.wordsToList)(this.options.labelsToAddWhenUnstale);
             const labelsToRemoveWhenUnstale = (0, words_to_list_1.wordsToList)(this.options.labelsToRemoveWhenUnstale);
@@ -434,7 +433,7 @@ class IssuesProcessor {
                 }
                 const issueLogger = new issue_logger_1.IssueLogger(issue);
                 yield issueLogger.grouping(`$$type #${issue.number}`, () => __awaiter(this, void 0, void 0, function* () {
-                    yield this.processIssue(issue, labelsToAddWhenUnstale, labelsToRemoveWhenUnstale, labelsToAddWhenStale, labelsToRemoveWhenStale);
+                    yield this.processIssue(issue, labelsToAddWhenUnstale, labelsToRemoveWhenUnstale, labelsToRemoveWhenStale);
                 }));
             }
             if (!this.operations.hasRemainingOperations()) {
@@ -448,7 +447,7 @@ class IssuesProcessor {
             return this.processIssues(page + 1);
         });
     }
-    processIssue(issue, labelsToAddWhenUnstale, labelsToRemoveWhenUnstale, labelsToAddWhenStale, labelsToRemoveWhenStale) {
+    processIssue(issue, labelsToAddWhenUnstale, labelsToRemoveWhenUnstale, labelsToRemoveWhenStale) {
         var _a;
         return __awaiter(this, void 0, void 0, function* () {
             (_a = this.statistics) === null || _a === void 0 ? void 0 : _a.incrementProcessedItemsCount(issue);
@@ -628,7 +627,7 @@ class IssuesProcessor {
             // Process the issue if it was marked stale
             if (issue.isStale) {
                 issueLogger.info(`This $$type is already stale`);
-                yield this._processStaleIssue(issue, staleLabel, staleMessage, labelsToAddWhenUnstale, labelsToRemoveWhenUnstale, labelsToAddWhenStale, labelsToRemoveWhenStale, closeMessage, closeLabel);
+                yield this._processStaleIssue(issue, staleLabel, staleMessage, labelsToAddWhenUnstale, labelsToRemoveWhenUnstale, labelsToRemoveWhenStale, closeMessage, closeLabel);
             }
             IssuesProcessor._endIssueProcessing(issue);
         });
@@ -723,7 +722,7 @@ class IssuesProcessor {
         });
     }
     // handle all of the stale issue logic when we find a stale issue
-    _processStaleIssue(issue, staleLabel, staleMessage, labelsToAddWhenUnstale, labelsToRemoveWhenUnstale, labelsToAddWhenStale, labelsToRemoveWhenStale, closeMessage, closeLabel) {
+    _processStaleIssue(issue, staleLabel, staleMessage, labelsToAddWhenUnstale, labelsToRemoveWhenUnstale, labelsToRemoveWhenStale, closeMessage, closeLabel) {
         return __awaiter(this, void 0, void 0, function* () {
             const issueLogger = new issue_logger_1.IssueLogger(issue);
             const markedStaleOn = (yield this.getLabelCreationDate(issue, staleLabel)) || issue.updated_at;
@@ -745,7 +744,6 @@ class IssuesProcessor {
             if (issue.markedStaleThisRun) {
                 issueLogger.info(`marked stale this run, so don't check for updates`);
                 yield this._removeLabelsOnStatusTransition(issue, labelsToRemoveWhenStale, option_1.Option.LabelsToRemoveWhenStale);
-                yield this._addLabelsOnStatusTransition(issue, labelsToAddWhenStale, option_1.Option.LabelsToAddWhenStale);
             }
             // The issue.updated_at and markedStaleOn are not always exactly in sync (they can be off by a second or 2)
             // isDateMoreRecentThan makes sure they are not the same date within a certain tolerance (15 seconds in this case)
@@ -759,7 +757,7 @@ class IssuesProcessor {
                 yield this._removeStaleLabel(issue, staleLabel);
                 // Are there labels to remove or add when an issue is no longer stale?
                 yield this._removeLabelsOnStatusTransition(issue, labelsToRemoveWhenUnstale, option_1.Option.LabelsToRemoveWhenStale);
-                yield this._addLabelsOnStatusTransition(issue, labelsToAddWhenUnstale, option_1.Option.LabelsToAddWhenUnstale);
+                yield this._addLabelsWhenUnstale(issue, labelsToAddWhenUnstale);
                 issueLogger.info(`Skipping the process since the $$type is now un-stale`);
                 return; // Nothing to do because it is no longer stale
             }
@@ -1047,14 +1045,14 @@ class IssuesProcessor {
             }
         });
     }
-    _addLabelsOnStatusTransition(issue, labelsToAdd, staleStatus) {
+    _addLabelsWhenUnstale(issue, labelsToAdd) {
         var _a;
         return __awaiter(this, void 0, void 0, function* () {
             if (!labelsToAdd.length) {
                 return;
             }
             const issueLogger = new issue_logger_1.IssueLogger(issue);
-            issueLogger.info(`Adding all the labels specified via the ${this._logger.createOptionLink(staleStatus)} option.`);
+            issueLogger.info(`Adding all the labels specified via the ${this._logger.createOptionLink(option_1.Option.LabelsToAddWhenUnstale)} option.`);
             this.addedLabelIssues.push(issue);
             try {
                 this._consumeIssueOperation(issue);
@@ -1917,7 +1915,6 @@ var Option;
     Option["EnableStatistics"] = "enable-statistics";
     Option["LabelsToRemoveWhenStale"] = "labels-to-remove-when-stale";
     Option["LabelsToRemoveWhenUnstale"] = "labels-to-remove-when-unstale";
-    Option["LabelsToAddWhenStale"] = "labels-to-add-when-stale";
     Option["LabelsToAddWhenUnstale"] = "labels-to-add-when-unstale";
     Option["IgnoreUpdates"] = "ignore-updates";
     Option["IgnoreIssueUpdates"] = "ignore-issue-updates";
@@ -2248,7 +2245,6 @@ function _getAndValidateArgs() {
         enableStatistics: core.getInput('enable-statistics') === 'true',
         labelsToRemoveWhenStale: core.getInput('labels-to-remove-when-stale'),
         labelsToRemoveWhenUnstale: core.getInput('labels-to-remove-when-unstale'),
-        labelsToAddWhenStale: core.getInput('labels-to-add-when-stale'),
         labelsToAddWhenUnstale: core.getInput('labels-to-add-when-unstale'),
         ignoreUpdates: core.getInput('ignore-updates') === 'true',
         ignoreIssueUpdates: _toOptionalBoolean('ignore-issue-updates'),

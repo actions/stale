@@ -84,7 +84,6 @@ function _getAndValidateArgs(): IIssuesProcessorOptions {
     enableStatistics: core.getInput('enable-statistics') === 'true',
     labelsToRemoveWhenStale: core.getInput('labels-to-remove-when-stale'),
     labelsToRemoveWhenUnstale: core.getInput('labels-to-remove-when-unstale'),
-    labelsToAddWhenStale: core.getInput('labels-to-add-when-stale'),
     labelsToAddWhenUnstale: core.getInput('labels-to-add-when-unstale'),
     ignoreUpdates: core.getInput('ignore-updates') === 'true',
     ignoreIssueUpdates: _toOptionalBoolean('ignore-issue-updates'),

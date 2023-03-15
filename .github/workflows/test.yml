@@ -11,6 +11,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+      - name: Set Node.js 12.x
+        uses: actions/setup-node@v3
+        with:
+          node-version: 12
       - run: |
           npm ci
           npm run all:ci
@@ -18,6 +22,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+      - name: Set Node.js 12.x
+        uses: actions/setup-node@v3
+        with:
+          node-version: 12
       - uses: ./
         id: stale
         with:

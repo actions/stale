@@ -181,7 +181,7 @@ inputs:
     default: ''
     required: false
   labels-to-remove-when-stale:
-    description: 'A comma delimited list of labels to remove when a issue or pull request receives activity and has the stale-issue-label or stale-pr-label add to it.'
+    description: 'A comma delimited list of labels to remove when a issue or pull request receives activity and has the stale-issue-label or stale-pr-label added to it.'
     default: ''
     required: false
   labels-to-remove-when-unstale:

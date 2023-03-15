@@ -63,7 +63,7 @@ Every argument is optional.
 | [remove-issue-stale-when-updated](#remove-issue-stale-when-updated) | Remove stale label from issues on updates/comments                          |                       |
 | [remove-pr-stale-when-updated](#remove-pr-stale-when-updated)       | Remove stale label from PRs on updates/comments                             |                       |
 | [labels-to-add-when-unstale](#labels-to-add-when-unstale)           | Add specified labels from issues/PRs when they become unstale               |                       |
-| [labels-to-remove-when-stale](#labels-to-remove-when-stale)     | Remove specified labels from issues/PRs when they become stale            |                       |
+| [labels-to-remove-when-stale](#labels-to-remove-when-stale)         | Remove specified labels from issues/PRs when they become stale              |                       |
 | [labels-to-remove-when-unstale](#labels-to-remove-when-unstale)     | Remove specified labels from issues/PRs when they become unstale            |                       |
 | [debug-only](#debug-only)                                           | Dry-run                                                                     | `false`               |
 | [ascending](#ascending)                                             | Order to get issues/PRs                                                     | `false`               |

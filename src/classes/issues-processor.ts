@@ -715,7 +715,7 @@ export class IssuesProcessor {
       await this._removeLabelsOnStatusTransition(
         issue,
         labelsToRemoveWhenUnstale,
-        Option.LabelsToRemoveWhenStale
+        Option.LabelsToRemoveWhenUnstale
       );
       await this._addLabelsWhenUnstale(issue, labelsToAddWhenUnstale);
 

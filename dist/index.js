@@ -756,7 +756,7 @@ class IssuesProcessor {
                 issueLogger.info(`Remove the stale label since the $$type has been updated and the workflow should remove the stale label when updated`);
                 yield this._removeStaleLabel(issue, staleLabel);
                 // Are there labels to remove or add when an issue is no longer stale?
-                yield this._removeLabelsOnStatusTransition(issue, labelsToRemoveWhenUnstale, option_1.Option.LabelsToRemoveWhenStale);
+                yield this._removeLabelsOnStatusTransition(issue, labelsToRemoveWhenUnstale, option_1.Option.LabelsToRemoveWhenUnstale);
                 yield this._addLabelsWhenUnstale(issue, labelsToAddWhenUnstale);
                 issueLogger.info(`Skipping the process since the $$type is now un-stale`);
                 return; // Nothing to do because it is no longer stale

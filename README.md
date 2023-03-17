@@ -359,6 +359,15 @@ A comma delimited list of labels to add when a stale issue or pull request recei
 
 Default value: unset
 
+#### labels-to-remove-when-stale
+
+A comma delimited list of labels to remove when an issue or pull request becomes stale and has the [stale-issue-label](#stale-issue-label) or [stale-pr-label](#stale-pr-label) added to it.
+
+Warning: each label results in a unique API call which can drastically consume the limit of [operations-per-run](#operations-per-run).
+
+Default value: unset  
+Required Permission: `pull-requests: write`
+
 #### labels-to-remove-when-unstale
 
 A comma delimited list of labels to remove when a stale issue or pull request receives activity and has the [stale-issue-label](#stale-issue-label) or [stale-pr-label](#stale-pr-label) removed from it.

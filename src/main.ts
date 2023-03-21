@@ -82,6 +82,7 @@ function _getAndValidateArgs(): IIssuesProcessorOptions {
     exemptAllIssueAssignees: _toOptionalBoolean('exempt-all-issue-assignees'),
     exemptAllPrAssignees: _toOptionalBoolean('exempt-all-pr-assignees'),
     enableStatistics: core.getInput('enable-statistics') === 'true',
+    labelsToRemoveWhenStale: core.getInput('labels-to-remove-when-stale'),
     labelsToRemoveWhenUnstale: core.getInput('labels-to-remove-when-unstale'),
     labelsToAddWhenUnstale: core.getInput('labels-to-add-when-unstale'),
     ignoreUpdates: core.getInput('ignore-updates') === 'true',

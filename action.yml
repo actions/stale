@@ -177,11 +177,15 @@ inputs:
     default: 'true'
     required: false
   labels-to-add-when-unstale:
-    description: 'A comma delimited list of labels to add when a stale issue or pull request receives activity and has the stale-issue-label or stale-pr-label removed from it.'
+    description: 'A comma delimited list of labels to add when an issue or pull request becomes unstale.'
+    default: ''
+    required: false
+  labels-to-remove-when-stale:
+    description: 'A comma delimited list of labels to remove when an issue or pull request becomes stale.'
     default: ''
     required: false
   labels-to-remove-when-unstale:
-    description: 'A comma delimited list of labels to remove when a stale issue or pull request receives activity and has the stale-issue-label or stale-pr-label removed from it.'
+    description: 'A comma delimited list of labels to remove when an issue or pull request becomes unstale.'
     default: ''
     required: false
   ignore-updates:

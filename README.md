@@ -1,5 +1,8 @@
 # Close Stale Issues and PRs
 
+[![Basic validation](https://github.com/actions/stale/actions/workflows/basic-validation.yml/badge.svg?branch=main)](https://github.com/actions/stale/actions/workflows/basic-validation.yml)
+[![e2e tests](https://github.com/actions/stale/actions/workflows/e2e-tests.yml/badge.svg?branch=main)](https://github.com/actions/stale/actions/workflows/e2e-tests.yml)
+
 Warns and then closes issues and PRs that have had no activity for a specified amount of time.
 
 The configuration must be on the default branch and the default values will:
@@ -246,8 +249,8 @@ Required Permission: `pull-requests: write`
 
 #### exempt-issue-labels
 
-The label(s) that can exempt to automatically mark as stale the issues.  
-It can be a comma separated list of labels (e.g: `question,bug`).
+Comma separated list of labels that can be assigned to issues to exclude them from being marked as stale
+(e.g: `question,bug`)
 
 If unset (or an empty string), this option will not alter the stale workflow.
 
@@ -255,8 +258,8 @@ Default value: unset
 
 #### exempt-pr-labels
 
-The label(s) that can exempt to automatically mark as stale the pull requests.  
-It can be a comma separated list of labels (e.g: `need-help,WIP`).
+Comma separated list of labels that can be assigned to pull requests to exclude them from being marked as stale
+(e.g: `need-help,WIP`)
 
 If unset (or an empty string), this option will not alter the stale workflow.
 
@@ -540,7 +543,7 @@ jobs:
   stale:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/stale@v6
+      - uses: actions/stale@v7
         with:
           stale-issue-message: 'Message to comment on stale issues. If none provided, will not mark issues stale'
           stale-pr-message: 'Message to comment on stale PRs. If none provided, will not mark PRs stale'
@@ -558,7 +561,7 @@ jobs:
   stale:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/stale@v6
+      - uses: actions/stale@v7
         with:
           stale-issue-message: 'This issue is stale because it has been open 30 days with no activity. Remove stale label or comment or this will be closed in 5 days.'
           days-before-stale: 30
@@ -577,7 +580,7 @@ jobs:
   stale:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/stale@v6
+      - uses: actions/stale@v7
         with:
           stale-issue-message: 'This issue is stale because it has been open 30 days with no activity. Remove stale label or comment or this will be closed in 5 days.'
           stale-pr-message: 'This PR is stale because it has been open 45 days with no activity. Remove stale label or comment or this will be closed in 10 days.'
@@ -599,7 +602,7 @@ jobs:
   stale:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/stale@v6
+      - uses: actions/stale@v7
         with:
           stale-issue-message: 'This issue is stale because it has been open 30 days with no activity. Remove stale label or comment or this will be closed in 5 days.'
           stale-pr-message: 'This PR is stale because it has been open 45 days with no activity. Remove stale label or comment or this will be closed in 10 days.'
@@ -623,7 +626,7 @@ jobs:
   stale:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/stale@v6
+      - uses: actions/stale@v7
         with:
           stale-issue-message: 'Stale issue message'
           stale-pr-message: 'Stale pull request message'
@@ -646,7 +649,7 @@ jobs:
   stale:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/stale@v6
+      - uses: actions/stale@v7
         with:
           start-date: '2020-04-18T00:00:00Z' # ISO 8601 or RFC 2822
 ```
@@ -663,7 +666,7 @@ jobs:
   stale:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/stale@v6
+      - uses: actions/stale@v7
         with:
           exempt-issue-milestones: 'future,alpha,beta'
           exempt-pr-milestones: 'bugfix,improvement'
@@ -681,7 +684,7 @@ jobs:
   stale:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/stale@v6
+      - uses: actions/stale@v7
         with:
           exempt-all-pr-milestones: true
 ```
@@ -698,7 +701,7 @@ jobs:
   stale:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/stale@v6
+      - uses: actions/stale@v7
         with:
           any-of-labels: 'needs-more-info,needs-demo'
           # You can opt for 'only-labels' instead if your use-case requires all labels
@@ -717,7 +720,7 @@ jobs:
   stale:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/stale@v6
+      - uses: actions/stale@v7
         with:
           exempt-issue-assignees: 'marco,polo'
           exempt-pr-assignees: 'marco'
@@ -735,7 +738,7 @@ jobs:
   stale:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/stale@v6
+      - uses: actions/stale@v7
         with:
           exempt-all-pr-assignees: true
 ```

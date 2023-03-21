@@ -25,6 +25,7 @@ import {StaleOperations} from './stale-operations';
 import {Statistics} from './statistics';
 import {LoggerService} from '../services/logger.service';
 import {OctokitIssue} from '../interfaces/issue';
+import {retry} from '@octokit/plugin-retry';
 
 /***
  * Handle processing of issues for staleness/closure.
@@ -74,7 +75,7 @@ export class IssuesProcessor {
 
   constructor(options: IIssuesProcessorOptions) {
     this.options = options;
-    this.client = getOctokit(this.options.repoToken);
+    this.client = getOctokit(this.options.repoToken, undefined, retry);
     this.operations = new StaleOperations(this.options);
 
     this._logger.info(
@@ -327,9 +328,9 @@ export class IssuesProcessor {
     }
 
     if (issue.isStale) {
-      issueLogger.info(`This $$type has a stale label`);
+      issueLogger.info(`This $$type includes a stale label`);
     } else {
-      issueLogger.info(`This $$type hasn't a stale label`);
+      issueLogger.info(`This $$type does not include a stale label`);
     }
 
     const exemptLabels: string[] = wordsToList(
@@ -338,17 +339,16 @@ export class IssuesProcessor {
         : this.options.exemptIssueLabels
     );
 
-    if (
-      exemptLabels.some((exemptLabel: Readonly<string>): boolean =>
-        isLabeled(issue, exemptLabel)
-      )
-    ) {
-      if (issue.isStale) {
-        issueLogger.info(`An exempt label was added after the stale label.`);
-        await this._removeStaleLabel(issue, staleLabel);
-      }
+    const hasExemptLabel = exemptLabels.some((exemptLabel: Readonly<string>) =>
+      isLabeled(issue, exemptLabel)
+    );
 
-      issueLogger.info(`Skipping this $$type because it has an exempt label`);
+    if (hasExemptLabel) {
+      issueLogger.info(
+        `Skipping this $$type because it contains an exempt label, see ${issueLogger.createOptionLink(
+          issue.isPullRequest ? Option.ExemptPrLabels : Option.ExemptIssueLabels
+        )} for more details`
+      );
       IssuesProcessor._endIssueProcessing(issue);
       return; // Don't process exempt issues
     }
@@ -433,6 +433,7 @@ export class IssuesProcessor {
     // Determine if this issue needs to be marked stale first
     if (!issue.isStale) {
       issueLogger.info(`This $$type is not stale`);
+
       const shouldIgnoreUpdates: boolean = new IgnoreUpdates(
         this.options,
         issue
@@ -562,8 +563,7 @@ export class IssuesProcessor {
         (issue: Readonly<OctokitIssue>): Issue => new Issue(this.options, issue)
       );
     } catch (error) {
-      this._logger.error(`Get issues for repo error: ${error.message}`);
-      return Promise.resolve([]);
+      throw Error(`Getting issues was blocked by the error: ${error.message}`);
     }
   }
 
@@ -927,26 +927,41 @@ export class IssuesProcessor {
     }
 
     const branch = pullRequest.head.ref;
-    issueLogger.info(
-      `Deleting the branch "${LoggerService.cyan(branch)}" from closed $$type`
-    );
 
-    try {
-      this._consumeIssueOperation(issue);
-      this.statistics?.incrementDeletedBranchesCount();
+    if (
+      pullRequest.head.repo === null ||
+      pullRequest.head.repo.full_name ===
+        `${context.repo.owner}/${context.repo.repo}`
+    ) {
+      issueLogger.info(
+        `Deleting the branch "${LoggerService.cyan(branch)}" from closed $$type`
+      );
 
-      if (!this.options.debugOnly) {
-        await this.client.rest.git.deleteRef({
-          owner: context.repo.owner,
-          repo: context.repo.repo,
-          ref: `heads/${branch}`
-        });
+      try {
+        this._consumeIssueOperation(issue);
+        this.statistics?.incrementDeletedBranchesCount();
+
+        if (!this.options.debugOnly) {
+          await this.client.rest.git.deleteRef({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            ref: `heads/${branch}`
+          });
+        }
+      } catch (error) {
+        issueLogger.error(
+          `Error when deleting the branch "${LoggerService.cyan(
+            branch
+          )}" from $$type: ${error.message}`
+        );
       }
-    } catch (error) {
-      issueLogger.error(
-        `Error when deleting the branch "${LoggerService.cyan(
+    } else {
+      issueLogger.warning(
+        `Deleting the branch "${LoggerService.cyan(
           branch
-        )}" from $$type: ${error.message}`
+        )}" has skipped because it belongs to other repo ${
+          pullRequest.head.repo.full_name
+        }`
       );
     }
   }

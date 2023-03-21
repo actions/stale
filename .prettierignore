@@ -1,7 +1,7 @@
-.idea
-.licenses
-.vscode
-dist
-lib
-node_modules
-package-lock.json
+# Ignore list
+/*
+
+# Do not ignore these folders:
+!__tests__/
+!.github/
+!src/

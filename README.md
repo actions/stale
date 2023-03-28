@@ -208,7 +208,7 @@ Required Permission: `issues: write`
 The message that will be added as a comment to the pull requests when the stale workflow closes it automatically after being stale for too long.
 
 Default value: unset  
-Required Permission: `pull-requests: write`
+Required Permission: `pull-requests: write` and `issues: write`
 
 #### stale-issue-label
 

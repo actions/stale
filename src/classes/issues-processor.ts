@@ -1254,4 +1254,4 @@ export class IssuesProcessor {
       ? message.replace('{author}', `@${issue.user?.login}`)
       : message;
   }
-}  
+}

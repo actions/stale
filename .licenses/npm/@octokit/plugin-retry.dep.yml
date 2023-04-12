@@ -1,6 +1,6 @@
 ---
 name: "@octokit/plugin-retry"
-version: 4.1.1
+version: 4.1.3
 type: npm
 summary: Automatic retry plugin for octokit
 homepage:

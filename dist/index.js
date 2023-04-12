@@ -7405,7 +7405,7 @@ var Bottleneck = _interopDefault(__nccwpck_require__(1174));
 var requestError = __nccwpck_require__(537);
 
 // @ts-ignore
-async function errorRequest(octokit, state, error, options) {
+async function errorRequest(state, octokit, error, options) {
   if (!error.request || !error.request.request) {
     // address https://github.com/octokit/plugin-retry.js/issues/8
     throw error;
@@ -7420,11 +7420,9 @@ async function errorRequest(octokit, state, error, options) {
   throw error;
 }
 
-// @ts-ignore
-// @ts-ignore
-async function wrapRequest(state, request, options) {
+// @ts-nocheck
+async function wrapRequest(state, octokit, request, options) {
   const limiter = new Bottleneck();
-  // @ts-ignore
   limiter.on("failed", function (error, info) {
     const maxRetries = ~~error.request.request.retries;
     const after = ~~error.request.request.retryAfter;
@@ -7435,10 +7433,9 @@ async function wrapRequest(state, request, options) {
       return after * state.retryAfterBaseValue;
     }
   });
-  return limiter.schedule(requestWithGraphqlErrorHandling.bind(null, request), options);
+  return limiter.schedule(requestWithGraphqlErrorHandling.bind(null, state, octokit, request), options);
 }
-// @ts-ignore
-async function requestWithGraphqlErrorHandling(request, options) {
+async function requestWithGraphqlErrorHandling(state, octokit, request, options) {
   const response = await request(request, options);
   if (response.data && response.data.errors && /Something went wrong while executing your query/.test(response.data.errors[0].message)) {
     // simulate 500 request error for retry handling
@@ -7446,12 +7443,12 @@ async function requestWithGraphqlErrorHandling(request, options) {
       request: options,
       response
     });
-    throw error;
+    return errorRequest(state, octokit, error, options);
   }
   return response;
 }
 
-const VERSION = "4.1.1";
+const VERSION = "4.1.3";
 function retry(octokit, octokitOptions) {
   const state = Object.assign({
     enabled: true,
@@ -7460,8 +7457,8 @@ function retry(octokit, octokitOptions) {
     retries: 3
   }, octokitOptions.retry);
   if (state.enabled) {
-    octokit.hook.error("request", errorRequest.bind(null, octokit, state));
-    octokit.hook.wrap("request", wrapRequest.bind(null, state));
+    octokit.hook.error("request", errorRequest.bind(null, state, octokit));
+    octokit.hook.wrap("request", wrapRequest.bind(null, state, octokit));
   }
   return {
     retry: {

@@ -42,7 +42,7 @@
     "@octokit/core": "^4.2.0",
     "@octokit/plugin-retry": "^4.1.1",
     "lodash.deburr": "^4.1.0",
-    "semver": "^7.3.5"
+    "semver": "^7.4.0"
   },
   "devDependencies": {
     "@types/jest": "^29.5.0",

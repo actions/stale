@@ -41,6 +41,7 @@ describe('Issue', (): void => {
       staleIssueMessage: '',
       stalePrMessage: '',
       startDate: undefined,
+      endDate: undefined,
       stalePrLabel: 'dummy-stale-pr-label',
       staleIssueLabel: 'dummy-stale-issue-label',
       exemptMilestones: '',

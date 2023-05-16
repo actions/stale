@@ -406,6 +406,14 @@ If set, the date must be formatted following the `ISO 8601` or `RFC 2822` standa
 
 Default value: unset
 
+#### end-date
+
+The end date is used to ignore the issues and pull requests after the end date.
+
+If set, the date must be formatted following the `ISO 8601` or `RFC 2822` standard.
+
+Default value: unset
+
 #### delete-branch
 
 If set to `true`, the stale workflow will automatically delete the GitHub branches related to the pull requests automatically closed by the stale workflow.

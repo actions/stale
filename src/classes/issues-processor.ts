@@ -327,6 +327,41 @@ export class IssuesProcessor {
       }
     }
 
+    if (this.options.endDate) {
+      const endDate: Date = new Date(this.options.endDate);
+      const createdAt: Date = new Date(issue.created_at);
+
+      issueLogger.info(
+        `An end date was specified for the ${getHumanizedDate(
+          endDate
+        )} (${LoggerService.cyan(this.options.endDate)})`
+      );
+
+      // Expecting that GitHub will always set a creation date on the issues and PRs
+      // But you never know!
+      if (!isValidDate(createdAt)) {
+        IssuesProcessor._endIssueProcessing(issue);
+        core.setFailed(
+          new Error(`Invalid issue field: "created_at". Expected a valid date`)
+        );
+      }
+
+      issueLogger.info(
+        `$$type created the ${getHumanizedDate(
+          createdAt
+        )} (${LoggerService.cyan(issue.created_at)})`
+      );
+
+      if (!isDateMoreRecentThan(endDate, createdAt)) {
+        issueLogger.info(
+          `Skipping this $$type because it was created after the specified end date`
+        );
+
+        IssuesProcessor._endIssueProcessing(issue);
+        return; // Don't process issues which were created after the end date
+      }
+    }
+
     if (issue.isStale) {
       issueLogger.info(`This $$type includes a stale label`);
     } else {

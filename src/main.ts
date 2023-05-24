@@ -69,6 +69,8 @@ function _getAndValidateArgs(): IIssuesProcessorOptions {
       core.getInput('start-date') !== ''
         ? core.getInput('start-date')
         : undefined,
+    endDate:
+      core.getInput('end-date') !== '' ? core.getInput('end-date') : undefined,
     exemptMilestones: core.getInput('exempt-milestones'),
     exemptIssueMilestones: core.getInput('exempt-issue-milestones'),
     exemptPrMilestones: core.getInput('exempt-pr-milestones'),
@@ -109,7 +111,7 @@ function _getAndValidateArgs(): IIssuesProcessorOptions {
     }
   }
 
-  for (const optionalDateInput of ['start-date']) {
+  for (const optionalDateInput of ['start-date', 'end-date']) {
     // Ignore empty dates because it is considered as the right type for a default value (so a valid one)
     if (core.getInput(optionalDateInput) !== '') {
       if (!isValidDate(new Date(core.getInput(optionalDateInput)))) {

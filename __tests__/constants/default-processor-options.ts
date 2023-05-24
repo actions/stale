@@ -34,6 +34,7 @@ export const DefaultProcessorOptions: IIssuesProcessorOptions = Object.freeze({
   ascending: false,
   deleteBranch: false,
   startDate: '',
+  endDate: '',
   exemptMilestones: '',
   exemptIssueMilestones: '',
   exemptPrMilestones: '',

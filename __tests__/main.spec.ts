@@ -276,6 +276,130 @@ test('processing an issue with no label and a start date as RFC 2822 being after
   expect(processor.closedIssues.length).toStrictEqual(0);
 });
 
+test('processing an issue with no label and an end date as ISO 8601 being before the issue creation date will not make it stale nor close it when it is old enough and days-before-close is set to 0', async () => {
+  expect.assertions(2);
+  const january2000 = '2000-01-01T00:00:00Z';
+  const opts: IIssuesProcessorOptions = {
+    ...DefaultProcessorOptions,
+    daysBeforeClose: 0,
+    endDate: january2000.toString()
+  };
+  const TestIssueList: Issue[] = [
+    generateIssue(
+      opts,
+      1,
+      'An issue with no label',
+      '2020-01-01T17:00:00Z',
+      '2000-01-01T17:00:00Z'
+    )
+  ];
+  const processor = new IssuesProcessorMock(
+    opts,
+    async p => (p === 1 ? TestIssueList : []),
+    async () => [],
+    async () => new Date().toDateString()
+  );
+
+  // process our fake issue list
+  await processor.processIssues(1);
+
+  expect(processor.staleIssues.length).toStrictEqual(0);
+  expect(processor.closedIssues.length).toStrictEqual(0);
+});
+
+test('processing an issue with no label and an end date as ISO 8601 being after the issue creation date will make it stale and close it when it is old enough and days-before-close is set to 0', async () => {
+  expect.assertions(2);
+  const january2000 = '2000-01-01T00:00:00Z';
+  const opts: IIssuesProcessorOptions = {
+    ...DefaultProcessorOptions,
+    daysBeforeClose: 0,
+    endDate: january2000.toString()
+  };
+  const TestIssueList: Issue[] = [
+    generateIssue(
+      opts,
+      1,
+      'An issue with no label',
+      '2020-01-01T17:00:00Z',
+      '1999-12-31T17:00:00Z'
+    )
+  ];
+  const processor = new IssuesProcessorMock(
+    opts,
+    async p => (p === 1 ? TestIssueList : []),
+    async () => [],
+    async () => new Date().toDateString()
+  );
+
+  // process our fake issue list
+  await processor.processIssues(1);
+
+  expect(processor.staleIssues.length).toStrictEqual(1);
+  expect(processor.closedIssues.length).toStrictEqual(1);
+});
+
+test('processing an issue with no label and an end date as RFC 2822 being before the issue creation date will not make it stale nor close it when it is old enough and days-before-close is set to 0', async () => {
+  expect.assertions(2);
+  const january2000 = 'January 1, 2000 00:00:00';
+  const opts: IIssuesProcessorOptions = {
+    ...DefaultProcessorOptions,
+    daysBeforeClose: 0,
+    endDate: january2000.toString()
+  };
+  const TestIssueList: Issue[] = [
+    generateIssue(
+      opts,
+      1,
+      'An issue with no label',
+      '2020-01-01T17:00:00Z',
+      '2000-01-01T17:00:00Z'
+    )
+  ];
+  const processor = new IssuesProcessorMock(
+    opts,
+    async p => (p === 1 ? TestIssueList : []),
+    async () => [],
+    async () => new Date().toDateString()
+  );
+
+  // process our fake issue list
+  await processor.processIssues(1);
+
+  expect(processor.staleIssues.length).toStrictEqual(0);
+  expect(processor.closedIssues.length).toStrictEqual(0);
+});
+
+test('processing an issue with no label and an end date as RFC 2822 being after the issue creation date will make it stale and close it when it is old enough and days-before-close is set to 0', async () => {
+  expect.assertions(2);
+  const january2000 = 'January 1, 2000 00:00:00';
+  const opts: IIssuesProcessorOptions = {
+    ...DefaultProcessorOptions,
+    daysBeforeClose: 0,
+    endDate: january2000.toString()
+  };
+  const TestIssueList: Issue[] = [
+    generateIssue(
+      opts,
+      1,
+      'An issue with no label',
+      '2020-01-01T17:00:00Z',
+      '1999-12-31T17:00:00Z'
+    )
+  ];
+  const processor = new IssuesProcessorMock(
+    opts,
+    async p => (p === 1 ? TestIssueList : []),
+    async () => [],
+    async () => new Date().toDateString()
+  );
+
+  // process our fake issue list
+  await processor.processIssues(1);
+
+  expect(processor.staleIssues.length).toStrictEqual(1);
+  expect(processor.closedIssues.length).toStrictEqual(1);
+});
+
 test('processing an issue with no label will make it stale and close it, if it is old enough only if days-before-close is set to > 0 and days-before-issue-close is set to 0', async () => {
   const opts: IIssuesProcessorOptions = {
     ...DefaultProcessorOptions,

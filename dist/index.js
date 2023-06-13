@@ -381,6 +381,7 @@ const stale_operations_1 = __nccwpck_require__(5080);
 const statistics_1 = __nccwpck_require__(3334);
 const logger_service_1 = __nccwpck_require__(1973);
 const plugin_retry_1 = __nccwpck_require__(6298);
+const rate_limit_1 = __nccwpck_require__(7069);
 /***
  * Handle processing of issues for staleness/closure.
  */
@@ -735,6 +736,18 @@ class IssuesProcessor {
             }
             catch (error) {
                 issueLogger.error(`Error when getting this $$type: ${error.message}`);
+            }
+        });
+    }
+    getRateLimit() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const logger = new logger_1.Logger();
+            try {
+                const rateLimitResult = yield this.client.rest.rateLimit.get();
+                return new rate_limit_1.RateLimit(rateLimitResult.data.rate);
+            }
+            catch (error) {
+                logger.error(`Error when getting rateLimit: ${error.message}`);
             }
         });
     }
@@ -1484,6 +1497,26 @@ class Operations {
     }
 }
 exports.Operations = Operations;
+
+
+/***/ }),
+
+/***/ 7069:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.RateLimit = void 0;
+class RateLimit {
+    constructor(rateLimit) {
+        this.limit = rateLimit.limit;
+        this.remaining = rateLimit.remaining;
+        this.used = rateLimit.used;
+        this.reset = new Date(rateLimit.reset * 1000);
+    }
+}
+exports.RateLimit = RateLimit;
 
 
 /***/ }),
@@ -2435,7 +2468,18 @@ function _run() {
             const state = (0, state_service_1.getStateInstance)(args);
             yield state.restore();
             const issueProcessor = new issues_processor_1.IssuesProcessor(args, state);
+            const rateLimitAtStart = yield issueProcessor.getRateLimit();
+            if (rateLimitAtStart) {
+                core.debug(`Github API rate status: limit=${rateLimitAtStart.limit}, used=${rateLimitAtStart.used}, remaining=${rateLimitAtStart.remaining}`);
+            }
             yield issueProcessor.processIssues();
+            const rateLimitAtEnd = yield issueProcessor.getRateLimit();
+            if (rateLimitAtEnd) {
+                core.debug(`Github API rate status: limit=${rateLimitAtEnd.limit}, used=${rateLimitAtEnd.used}, remaining=${rateLimitAtEnd.remaining}`);
+                if (rateLimitAtStart)
+                    core.info(`Github API rate used: ${rateLimitAtStart.remaining - rateLimitAtEnd.remaining}`);
+                core.info(`Github API rate remaining: ${rateLimitAtEnd.remaining}; reset at: ${rateLimitAtEnd.reset}`);
+            }
             yield state.persist();
             yield processOutput(issueProcessor.staleIssues, issueProcessor.closedIssues);
         }

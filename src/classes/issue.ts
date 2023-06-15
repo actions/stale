@@ -13,6 +13,7 @@ export class Issue implements IIssue {
   readonly number: number;
   created_at: IsoDateString;
   updated_at: IsoDateString;
+  readonly draft: boolean;
   readonly labels: ILabel[];
   readonly pull_request: object | null | undefined;
   readonly state: string | 'closed' | 'open';
@@ -33,6 +34,7 @@ export class Issue implements IIssue {
     this.number = issue.number;
     this.created_at = issue.created_at;
     this.updated_at = issue.updated_at;
+    this.draft = issue.draft || false;
     this.labels = mapLabels(issue.labels);
     this.pull_request = issue.pull_request;
     this.state = issue.state;

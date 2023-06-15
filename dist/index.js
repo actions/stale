@@ -169,12 +169,18 @@ class ExemptDraftPullRequest {
         this._issueLogger = new issue_logger_1.IssueLogger(issue);
     }
     shouldExemptDraftPullRequest(pullRequestCallback) {
+        var _a;
         return __awaiter(this, void 0, void 0, function* () {
             if (this._issue.isPullRequest) {
                 if (this._options.exemptDraftPr) {
                     this._issueLogger.info(`The option ${this._issueLogger.createOptionLink(option_1.Option.ExemptDraftPr)} is enabled`);
-                    const pullRequest = yield pullRequestCallback();
-                    if ((pullRequest === null || pullRequest === void 0 ? void 0 : pullRequest.draft) === true) {
+                    /*
+                    const pullRequest: IPullRequest | undefined | void =
+                      await pullRequestCallback();
+            
+                    if (pullRequest?.draft === true) {
+                     */
+                    if (((_a = this._issue) === null || _a === void 0 ? void 0 : _a.draft) === true) {
                         this._issueLogger.info(logger_service_1.LoggerService.white('└──'), `Skip the $$type draft checks`);
                         return true;
                     }
@@ -271,6 +277,7 @@ class Issue {
         this.number = issue.number;
         this.created_at = issue.created_at;
         this.updated_at = issue.updated_at;
+        this.draft = issue.draft || false;
         this.labels = mapLabels(issue.labels);
         this.pull_request = issue.pull_request;
         this.state = issue.state;

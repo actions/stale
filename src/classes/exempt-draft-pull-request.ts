@@ -27,10 +27,13 @@ export class ExemptDraftPullRequest {
           )} is enabled`
         );
 
+        /* This code was used until Jun 15 2022 - it is unclear why they had to call API for getting pull request
         const pullRequest: IPullRequest | undefined | void =
           await pullRequestCallback();
 
         if (pullRequest?.draft === true) {
+         */
+        if (this._issue?.draft === true) {
           this._issueLogger.info(
             LoggerService.white('└──'),
             `Skip the $$type draft checks`

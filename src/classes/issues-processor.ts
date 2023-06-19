@@ -14,6 +14,7 @@ import {IComment} from '../interfaces/comment';
 import {IIssueEvent} from '../interfaces/issue-event';
 import {IIssuesProcessorOptions} from '../interfaces/issues-processor-options';
 import {IPullRequest} from '../interfaces/pull-request';
+import {IReaction} from '../interfaces/reaction';
 import {Assignees} from './assignees';
 import {IgnoreUpdates} from './ignore-updates';
 import {ExemptDraftPullRequest} from './exempt-draft-pull-request';
@@ -546,6 +547,41 @@ export class IssuesProcessor {
     }
   }
 
+  // Grab reactions for an issue since a given date
+  async listIssueReactions(
+    issue: Readonly<Issue>,
+    sinceDate: Readonly<string>
+  ): Promise<IReaction[]> {
+    try {
+      this._consumeIssueOperation(issue);
+      this.statistics?.incrementFetchedItemsReactionsCount();
+      let reactions: IReaction[] = [];
+      let currentReactions: IReaction[] = [];
+      let iterator = 1;
+      const daysSinceLastUpdated =
+        (new Date().getTime() - new Date(sinceDate).getTime()) /
+        (1000 * 60 * 60 * 24);
+      do {
+        const response = await this.client.rest.reactions.listForIssue({
+          owner: context.repo.owner,
+          repo: context.repo.repo,
+          issue_number: issue.number,
+          per_page: 100,
+          page: iterator
+        });
+        currentReactions = response.data;
+        reactions = [...reactions, ...currentReactions];
+        iterator++;
+      } while (currentReactions.length !== 0);
+      return reactions.filter(reaction =>
+        IssuesProcessor._updatedSince(reaction.created_at, daysSinceLastUpdated)
+      );
+    } catch (error) {
+      this._logger.error(`List issue reactions error: ${error.message}`);
+      return Promise.resolve([]);
+    }
+  }
+
   // grab issues from github in batches of 100
   async getIssues(page: number): Promise<Issue[]> {
     try {
@@ -652,6 +688,16 @@ export class IssuesProcessor {
       )}`
     );
 
+    const issueHasReactionsSinceStale: boolean = await this._hasReactionsSince(
+      issue,
+      markedStaleOn
+    );
+    issueLogger.info(
+      `$$type had a reaction: ${LoggerService.cyan(
+        issueHasReactionsSinceStale
+      )}`
+    );
+
     const daysBeforeClose: number = issue.isPullRequest
       ? this._getDaysBeforePrClose()
       : this._getDaysBeforeIssueClose();
@@ -703,7 +749,9 @@ export class IssuesProcessor {
     // Should we un-stale this issue?
     if (
       shouldRemoveStaleWhenUpdated &&
-      (issueHasUpdateSinceStale || issueHasCommentsSinceStale) &&
+      (issueHasUpdateSinceStale ||
+        issueHasCommentsSinceStale ||
+        issueHasReactionsSinceStale) &&
       !issue.markedStaleThisRun
     ) {
       issueLogger.info(
@@ -739,7 +787,11 @@ export class IssuesProcessor {
       )}`
     );
 
-    if (!issueHasCommentsSinceStale && !issueHasUpdateInCloseWindow) {
+    if (
+      !issueHasCommentsSinceStale &&
+      !issueHasUpdateInCloseWindow &&
+      !issueHasReactionsSinceStale
+    ) {
       issueLogger.info(
         `Closing $$type because it was last updated on: ${LoggerService.cyan(
           issue.updated_at
@@ -796,6 +848,26 @@ export class IssuesProcessor {
 
     // if there are any user comments returned
     return filteredComments.length > 0;
+  }
+
+  // find any reactions since the date
+  private async _hasReactionsSince(
+    issue: Issue,
+    sinceDate: string
+  ): Promise<boolean> {
+    const issueLogger: IssueLogger = new IssueLogger(issue);
+
+    issueLogger.info(
+      `Checking for reactions on $$type since: ${LoggerService.cyan(sinceDate)}`
+    );
+
+    if (!sinceDate) {
+      return true;
+    }
+
+    const reactions = await this.listIssueReactions(issue, sinceDate);
+
+    return reactions.length > 0;
   }
 
   // Mark an issue as stale with a comment and a label

@@ -654,6 +654,38 @@ class IssuesProcessor {
             }
         });
     }
+    // Grab reactions for an issue since a given date
+    listIssueReactions(issue, sinceDate) {
+        var _a;
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                this._consumeIssueOperation(issue);
+                (_a = this.statistics) === null || _a === void 0 ? void 0 : _a.incrementFetchedItemsReactionsCount();
+                let reactions = [];
+                let currentReactions = [];
+                let iterator = 1;
+                const daysSinceLastUpdated = (new Date().getTime() - new Date(sinceDate).getTime()) /
+                    (1000 * 60 * 60 * 24);
+                do {
+                    const response = yield this.client.rest.reactions.listForIssue({
+                        owner: github_1.context.repo.owner,
+                        repo: github_1.context.repo.repo,
+                        issue_number: issue.number,
+                        per_page: 100,
+                        page: iterator
+                    });
+                    currentReactions = response.data;
+                    reactions = [...reactions, ...currentReactions];
+                    iterator++;
+                } while (currentReactions.length !== 0);
+                return reactions.filter(reaction => IssuesProcessor._updatedSince(reaction.created_at, daysSinceLastUpdated));
+            }
+            catch (error) {
+                this._logger.error(`List issue reactions error: ${error.message}`);
+                return Promise.resolve([]);
+            }
+        });
+    }
     // grab issues from github in batches of 100
     getIssues(page) {
         var _a;
@@ -729,6 +761,8 @@ class IssuesProcessor {
             issueLogger.info(`$$type marked stale on: ${logger_service_1.LoggerService.cyan(markedStaleOn)}`);
             const issueHasCommentsSinceStale = yield this._hasCommentsSince(issue, markedStaleOn, staleMessage);
             issueLogger.info(`$$type has been commented on: ${logger_service_1.LoggerService.cyan(issueHasCommentsSinceStale)}`);
+            const issueHasReactionsSinceStale = yield this._hasReactionsSince(issue, markedStaleOn);
+            issueLogger.info(`$$type had a reaction: ${logger_service_1.LoggerService.cyan(issueHasReactionsSinceStale)}`);
             const daysBeforeClose = issue.isPullRequest
                 ? this._getDaysBeforePrClose()
                 : this._getDaysBeforeIssueClose();
@@ -751,7 +785,9 @@ class IssuesProcessor {
             issueLogger.info(`$$type has been updated since it was marked stale: ${logger_service_1.LoggerService.cyan(issueHasUpdateSinceStale)}`);
             // Should we un-stale this issue?
             if (shouldRemoveStaleWhenUpdated &&
-                (issueHasUpdateSinceStale || issueHasCommentsSinceStale) &&
+                (issueHasUpdateSinceStale ||
+                    issueHasCommentsSinceStale ||
+                    issueHasReactionsSinceStale) &&
                 !issue.markedStaleThisRun) {
                 issueLogger.info(`Remove the stale label since the $$type has been updated and the workflow should remove the stale label when updated`);
                 yield this._removeStaleLabel(issue, staleLabel);
@@ -767,7 +803,9 @@ class IssuesProcessor {
             }
             const issueHasUpdateInCloseWindow = IssuesProcessor._updatedSince(issue.updated_at, daysBeforeClose);
             issueLogger.info(`$$type has been updated in the last ${daysBeforeClose} days: ${logger_service_1.LoggerService.cyan(issueHasUpdateInCloseWindow)}`);
-            if (!issueHasCommentsSinceStale && !issueHasUpdateInCloseWindow) {
+            if (!issueHasCommentsSinceStale &&
+                !issueHasUpdateInCloseWindow &&
+                !issueHasReactionsSinceStale) {
                 issueLogger.info(`Closing $$type because it was last updated on: ${logger_service_1.LoggerService.cyan(issue.updated_at)}`);
                 yield this._closeIssue(issue, closeMessage, closeLabel);
                 if (this.options.deleteBranch && issue.pull_request) {
@@ -799,6 +837,18 @@ class IssuesProcessor {
             issueLogger.info(`Comments that are not the stale comment or another bot: ${logger_service_1.LoggerService.cyan(filteredComments.length)}`);
             // if there are any user comments returned
             return filteredComments.length > 0;
+        });
+    }
+    // find any reactions since the date
+    _hasReactionsSince(issue, sinceDate) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const issueLogger = new issue_logger_1.IssueLogger(issue);
+            issueLogger.info(`Checking for reactions on $$type since: ${logger_service_1.LoggerService.cyan(sinceDate)}`);
+            if (!sinceDate) {
+                return true;
+            }
+            const reactions = yield this.listIssueReactions(issue, sinceDate);
+            return reactions.length > 0;
         });
     }
     // Mark an issue as stale with a comment and a label
@@ -1529,6 +1579,7 @@ class Statistics {
         this.fetchedItemsCount = 0;
         this.fetchedItemsEventsCount = 0;
         this.fetchedItemsCommentsCount = 0;
+        this.fetchedItemsReactionsCount = 0;
         this.fetchedPullRequestsCount = 0;
     }
     incrementProcessedItemsCount(issue, increment = 1) {
@@ -1599,6 +1650,10 @@ class Statistics {
         this.fetchedItemsCommentsCount += increment;
         return this;
     }
+    incrementFetchedItemsReactionsCount(increment = 1) {
+        this.fetchedItemsReactionsCount += increment;
+        return this;
+    }
     incrementFetchedPullRequestsCount(increment = 1) {
         this.fetchedPullRequestsCount += increment;
         return this;
@@ -1617,6 +1672,7 @@ class Statistics {
         this._logFetchedItemsCount();
         this._logFetchedItemsEventsCount();
         this._logFetchedItemsCommentsCount();
+        this._logFetchedItemsReactionsCount();
         this._logFetchedPullRequestsCount();
         this._logOperationsCount();
         return this;
@@ -1792,6 +1848,9 @@ class Statistics {
     }
     _logFetchedItemsCommentsCount() {
         this._logCount('Fetched items comments', this.fetchedItemsCommentsCount);
+    }
+    _logFetchedItemsReactionsCount() {
+        this._logCount('Fetched items reactions', this.fetchedItemsReactionsCount);
     }
     _logFetchedPullRequestsCount() {
         this._logCount('Fetched pull requests', this.fetchedPullRequestsCount);

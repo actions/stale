@@ -1560,6 +1560,7 @@ const crypto_1 = __importDefault(__nccwpck_require__(6113));
 const fs_1 = __importDefault(__nccwpck_require__(7147));
 const path_1 = __importDefault(__nccwpck_require__(1017));
 const artifact = __importStar(__nccwpck_require__(2605));
+const core = __importStar(__nccwpck_require__(2186));
 class State {
     constructor() {
         this.processedIssuesIDs = new Set();
@@ -1577,11 +1578,15 @@ class State {
         return __awaiter(this, void 0, void 0, function* () {
             const serialized = Array.from(this.processedIssuesIDs).join('|');
             const tmpDir = os_1.default.tmpdir();
-            const file = crypto_1.default.randomBytes(8).readBigUInt64LE(0).toString();
-            fs_1.default.writeFileSync(path_1.default.join(tmpDir, file), serialized);
+            const file = path_1.default.join(tmpDir, crypto_1.default.randomBytes(8).readBigUInt64LE(0).toString());
+            fs_1.default.writeFileSync(file, serialized);
             const artifactClient = artifact.create();
-            // TODO: handle errors
-            yield artifactClient.uploadArtifact(State.ARTIFACT_NAME, [file], tmpDir);
+            try {
+                yield artifactClient.uploadArtifact(State.ARTIFACT_NAME, [file], tmpDir);
+            }
+            catch (error) {
+                core.warning(`Persisting the state was not successful due to "${error.message || 'unknown reason'}"`);
+            }
         });
     }
     rehydrate() {
@@ -1589,19 +1594,25 @@ class State {
             this.reset();
             const tmpDir = os_1.default.tmpdir();
             const artifactClient = artifact.create();
-            const downloadResponse = yield artifactClient.downloadArtifact(State.ARTIFACT_NAME, tmpDir);
-            const downloadedFiles = fs_1.default.readdirSync(downloadResponse.downloadPath);
-            if (downloadedFiles.length === 0) {
-                // TODO: handle error
+            try {
+                const downloadResponse = yield artifactClient.downloadArtifact(State.ARTIFACT_NAME, tmpDir);
+                const downloadedFiles = fs_1.default.readdirSync(downloadResponse.downloadPath);
+                if (downloadedFiles.length === 0) {
+                    throw Error('There is no data in the state artifact, probably because of the previous run failed');
+                }
+                const serialized = fs_1.default.readFileSync(path_1.default.join(downloadResponse.downloadPath, downloadedFiles[0]), { encoding: 'utf8' });
+                if (serialized.length === 0)
+                    return;
+                const issueIDs = serialized
+                    .split('|')
+                    .map(parseInt)
+                    .filter(i => !isNaN(i));
+                this.processedIssuesIDs = new Set(issueIDs);
+                core.debug(`Rehydrated state includes info about ${issueIDs.length} issue(s)`);
             }
-            const serialized = fs_1.default.readFileSync(path_1.default.join(downloadResponse.downloadPath, downloadedFiles[0]), { encoding: 'utf8' });
-            if (serialized.length === 0)
-                return;
-            const issueIDs = serialized
-                .split('|')
-                .map(parseInt)
-                .filter(i => !isNaN(i));
-            this.processedIssuesIDs = new Set(issueIDs);
+            catch (error) {
+                core.warning(`Rehydrating the state was not successful due to "${error.message || 'unknown reason'}"`);
+            }
         });
     }
 }

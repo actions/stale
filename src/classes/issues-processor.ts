@@ -26,6 +26,7 @@ import {Statistics} from './statistics';
 import {LoggerService} from '../services/logger.service';
 import {OctokitIssue} from '../interfaces/issue';
 import {retry} from '@octokit/plugin-retry';
+import {IState} from '../interfaces/state';
 
 /***
  * Handle processing of issues for staleness/closure.
@@ -72,9 +73,11 @@ export class IssuesProcessor {
   readonly addedCloseCommentIssues: Issue[] = [];
   readonly statistics: Statistics | undefined;
   private readonly _logger: Logger = new Logger();
+  private readonly state: IState;
 
-  constructor(options: IIssuesProcessorOptions) {
+  constructor(options: IIssuesProcessorOptions, state: IState) {
     this.options = options;
+    this.state = state;
     this.client = getOctokit(this.options.repoToken, undefined, retry);
     this.operations = new StaleOperations(this.options);
 
@@ -109,6 +112,8 @@ export class IssuesProcessor {
       this.statistics
         ?.setOperationsCount(this.operations.getConsumedOperationsCount())
         .logStats();
+
+      this.state.reset();
 
       return this.operations.getRemainingOperationsCount();
     } else {
@@ -195,6 +200,15 @@ export class IssuesProcessor {
         issue.updated_at
       )}`
     );
+
+    if (this.state.isIssueProcessed(issue)) {
+      issueLogger.info(
+        '           $$type skipped due being processed during the previous run'
+      );
+      return;
+    }
+
+    this.state.addIssueToProcessed(issue);
 
     // calculate string based messages for this issue
     const staleMessage: string = issue.isPullRequest

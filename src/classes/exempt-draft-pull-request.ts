@@ -17,6 +17,8 @@ export class ExemptDraftPullRequest {
   }
 
   async shouldExemptDraftPullRequest(
+    // keep this for backward compatibility
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     pullRequestCallback: () => Promise<IPullRequest | undefined | void>
   ): Promise<boolean> {
     if (this._issue.isPullRequest) {

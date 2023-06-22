@@ -3,6 +3,7 @@ import {IIssuesProcessorOptions} from '../src/interfaces/issues-processor-option
 import {IssuesProcessorMock} from './classes/issues-processor-mock';
 import {DefaultProcessorOptions} from './constants/default-processor-options';
 import {generateIssue} from './functions/generate-issue';
+import {alwaysFalseStateMock} from './classes/state-mock';
 
 interface ITestData {
   id: number;
@@ -35,6 +36,7 @@ describe('assignees options', (): void => {
         'My first issue',
         '2020-01-01T17:00:00Z',
         '2020-01-01T17:00:00Z',
+        false,
         isPullRequest,
         undefined,
         undefined,
@@ -48,6 +50,7 @@ describe('assignees options', (): void => {
   const setProcessor = () => {
     processor = new IssuesProcessorMock(
       opts,
+      alwaysFalseStateMock,
       async p => (p === 1 ? testIssueList : []),
       async () => [],
       async () => new Date().toDateString()

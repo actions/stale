@@ -34,7 +34,7 @@ export class Issue implements IIssue {
     this.number = issue.number;
     this.created_at = issue.created_at;
     this.updated_at = issue.updated_at;
-    this.draft = issue.draft || false;
+    this.draft = Boolean(issue.draft);
     this.labels = mapLabels(issue.labels);
     this.pull_request = issue.pull_request;
     this.state = issue.state;

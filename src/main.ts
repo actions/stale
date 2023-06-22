@@ -3,13 +3,19 @@ import {IssuesProcessor} from './classes/issues-processor';
 import {isValidDate} from './functions/dates/is-valid-date';
 import {IIssuesProcessorOptions} from './interfaces/issues-processor-options';
 import {Issue} from './classes/issue';
+import {StateService} from './services/state.service';
 
 async function _run(): Promise<void> {
   try {
     const args = _getAndValidateArgs();
 
-    const issueProcessor: IssuesProcessor = new IssuesProcessor(args);
+    const state = StateService.getState();
+    await state.rehydrate();
+
+    const issueProcessor: IssuesProcessor = new IssuesProcessor(args, state);
     await issueProcessor.processIssues();
+
+    await state.persist();
 
     await processOutput(
       issueProcessor.staleIssues,

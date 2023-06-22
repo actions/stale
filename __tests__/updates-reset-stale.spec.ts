@@ -4,6 +4,7 @@ import {IsoDateString} from '../src/types/iso-date-string';
 import {IssuesProcessorMock} from './classes/issues-processor-mock';
 import {DefaultProcessorOptions} from './constants/default-processor-options';
 import {generateIssue} from './functions/generate-issue';
+import {alwaysFalseStateMock} from './classes/state-mock';
 
 describe('ignore-updates options', (): void => {
   let sut: SUT;
@@ -676,6 +677,7 @@ class SUT {
         'My first issue',
         this._updatedAt,
         this._createdAt,
+        false,
         this._isPullRequest
       )
     ];
@@ -686,6 +688,7 @@ class SUT {
   private async _setProcessor(): Promise<number> {
     this.processor = new IssuesProcessorMock(
       this._opts,
+      alwaysFalseStateMock,
       async p => (p === 1 ? this._testIssueList : []),
       async () => [],
       async () => new Date().toDateString()

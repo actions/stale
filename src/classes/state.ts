@@ -4,7 +4,7 @@ import os from 'os';
 import crypto from 'crypto';
 import fs from 'fs';
 import path from 'path';
-import artifact from '@actions/artifact';
+import * as artifact from '@actions/artifact';
 
 type IssueID = number;
 export class State implements IState {

@@ -44,6 +44,9 @@ export class State implements IState {
     );
     fs.writeFileSync(file, serialized);
 
+    core.debug(
+      `Persisting state includes info about ${this.processedIssuesIDs.size} issue(s)`
+    );
     const artifactClient = artifact.create();
     try {
       await artifactClient.uploadArtifact(State.ARTIFACT_NAME, [file], tmpDir);

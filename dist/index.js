@@ -1585,6 +1585,7 @@ class State {
             const tmpDir = os_1.default.tmpdir();
             const file = path_1.default.join(tmpDir, crypto_1.default.randomBytes(8).readBigUInt64LE(0).toString());
             fs_1.default.writeFileSync(file, serialized);
+            core.debug(`Persisting state includes info about ${this.processedIssuesIDs.size} issue(s)`);
             const artifactClient = artifact.create();
             try {
                 yield artifactClient.uploadArtifact(State.ARTIFACT_NAME, [file], tmpDir);

@@ -33,7 +33,10 @@ export class State implements IState {
 
   private static readonly ARTIFACT_NAME = '_stale_state';
   async persist() {
-    if (this.debug) return;
+    if (this.debug) {
+      core.debug('The state is not persisted in the debug mode');
+      return;
+    }
 
     const serialized = Array.from(this.processedIssuesIDs).join('|');
 

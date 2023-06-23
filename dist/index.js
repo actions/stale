@@ -1579,8 +1579,10 @@ class State {
     }
     persist() {
         return __awaiter(this, void 0, void 0, function* () {
-            if (this.debug)
+            if (this.debug) {
+                core.debug('The state is not persisted in the debug mode');
                 return;
+            }
             const serialized = Array.from(this.processedIssuesIDs).join('|');
             const tmpDir = os_1.default.tmpdir();
             const file = path_1.default.join(tmpDir, crypto_1.default.randomBytes(8).readBigUInt64LE(0).toString());

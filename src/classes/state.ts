@@ -10,8 +10,13 @@ import * as core from '@actions/core';
 type IssueID = number;
 export class State implements IState {
   private processedIssuesIDs: Set<IssueID>;
+  /**
+   * @private don't mutate in the debug mode
+   */
+  private readonly debug: boolean;
   constructor() {
     this.processedIssuesIDs = new Set();
+    this.debug = core.getInput('debug-only') === 'true';
   }
 
   isIssueProcessed(issue: Issue) {
@@ -19,15 +24,17 @@ export class State implements IState {
   }
 
   addIssueToProcessed(issue: Issue) {
-    this.processedIssuesIDs.add(issue.number);
+    if (!this.debug) this.processedIssuesIDs.add(issue.number);
   }
 
   reset() {
-    this.processedIssuesIDs.clear();
+    if (!this.debug) this.processedIssuesIDs.clear();
   }
 
   private static readonly ARTIFACT_NAME = '_stale_state';
   async persist() {
+    if (this.debug) return;
+
     const serialized = Array.from(this.processedIssuesIDs).join('|');
 
     const tmpDir = os.tmpdir();

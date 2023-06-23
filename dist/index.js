@@ -1564,18 +1564,23 @@ const core = __importStar(__nccwpck_require__(2186));
 class State {
     constructor() {
         this.processedIssuesIDs = new Set();
+        this.debug = core.getInput('debug-only') === 'true';
     }
     isIssueProcessed(issue) {
         return this.processedIssuesIDs.has(issue.number);
     }
     addIssueToProcessed(issue) {
-        this.processedIssuesIDs.add(issue.number);
+        if (!this.debug)
+            this.processedIssuesIDs.add(issue.number);
     }
     reset() {
-        this.processedIssuesIDs.clear();
+        if (!this.debug)
+            this.processedIssuesIDs.clear();
     }
     persist() {
         return __awaiter(this, void 0, void 0, function* () {
+            if (this.debug)
+                return;
             const serialized = Array.from(this.processedIssuesIDs).join('|');
             const tmpDir = os_1.default.tmpdir();
             const file = path_1.default.join(tmpDir, crypto_1.default.randomBytes(8).readBigUInt64LE(0).toString());

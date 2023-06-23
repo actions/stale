@@ -3,7 +3,7 @@ import {IssuesProcessor} from '../../src/classes/issues-processor';
 import {IComment} from '../../src/interfaces/comment';
 import {IIssuesProcessorOptions} from '../../src/interfaces/issues-processor-options';
 import {IPullRequest} from '../../src/interfaces/pull-request';
-import {IState} from '../../src/interfaces/state';
+import {IState} from '../../src/interfaces/state/state';
 
 export class IssuesProcessorMock extends IssuesProcessor {
   constructor(

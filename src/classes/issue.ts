@@ -27,7 +27,7 @@ export class Issue implements IIssue {
 
   constructor(
     options: Readonly<IIssuesProcessorOptions>,
-    issue: Readonly<OctokitIssue> | Readonly<IIssue>
+    issue: Readonly<OctokitIssue | Readonly<IIssue>>
   ) {
     this._options = options;
     this.title = issue.title;

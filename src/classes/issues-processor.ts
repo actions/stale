@@ -26,7 +26,7 @@ import {Statistics} from './statistics';
 import {LoggerService} from '../services/logger.service';
 import {OctokitIssue} from '../interfaces/issue';
 import {retry} from '@octokit/plugin-retry';
-import {IState} from '../interfaces/state';
+import {IState} from '../interfaces/state/state';
 
 /***
  * Handle processing of issues for staleness/closure.
@@ -146,6 +146,12 @@ export class IssuesProcessor {
       }
 
       const issueLogger: IssueLogger = new IssueLogger(issue);
+      if (this.state.isIssueProcessed(issue)) {
+        issueLogger.info(
+          '           $$type skipped due being processed during the previous run'
+        );
+        continue;
+      }
       await issueLogger.grouping(`$$type #${issue.number}`, async () => {
         await this.processIssue(
           issue,
@@ -154,6 +160,7 @@ export class IssuesProcessor {
           labelsToRemoveWhenStale
         );
       });
+      this.state.addIssueToProcessed(issue);
     }
 
     if (!this.operations.hasRemainingOperations()) {
@@ -200,15 +207,6 @@ export class IssuesProcessor {
         issue.updated_at
       )}`
     );
-
-    if (this.state.isIssueProcessed(issue)) {
-      issueLogger.info(
-        '           $$type skipped due being processed during the previous run'
-      );
-      return;
-    }
-
-    this.state.addIssueToProcessed(issue);
 
     // calculate string based messages for this issue
     const staleMessage: string = issue.isPullRequest
@@ -574,9 +572,11 @@ export class IssuesProcessor {
       });
       this.statistics?.incrementFetchedItemsCount(issueResult.data.length);
 
-      return issueResult.data.map(
-        (issue: Readonly<OctokitIssue>): Issue => new Issue(this.options, issue)
-      );
+      // state_reason is incompatible - oktokit dependency conflict?
+      // return issueResult.data.map((issue: Readonly<OctokitIssue>): Issue => {
+      return issueResult.data.map((issue): Issue => {
+        return new Issue(this.options, issue as Readonly<OctokitIssue>);
+      });
     } catch (error) {
       throw Error(`Getting issues was blocked by the error: ${error.message}`);
     }

@@ -1,4 +1,4 @@
-import {IState} from '../../src/interfaces/state';
+import {IState} from '../../src/interfaces/state/state';
 import {IIssue} from '../../src/interfaces/issue';
 
 export class StateMock implements IState {

@@ -4,8 +4,9 @@ import os from 'os';
 import crypto from 'crypto';
 import fs from 'fs';
 import path from 'path';
-import * as artifact from '@actions/artifact';
+// import * as artifact from '@actions/artifact';
 import * as core from '@actions/core';
+import {restoreCache, saveCache} from '@actions/cache';
 
 type IssueID = number;
 export class State implements IState {
@@ -31,7 +32,8 @@ export class State implements IState {
     if (!this.debug) this.processedIssuesIDs.clear();
   }
 
-  private static readonly ARTIFACT_NAME = '_stale_state';
+  private static readonly ARTIFACT_NAME = '_state';
+  private static readonly STATE_FILE = 'state.txt';
   async persist() {
     if (this.debug) {
       core.debug('The state is not persisted in the debug mode');
@@ -43,16 +45,18 @@ export class State implements IState {
     const tmpDir = os.tmpdir();
     const file = path.join(
       tmpDir,
-      crypto.randomBytes(8).readBigUInt64LE(0).toString()
+      State.STATE_FILE
+      //  crypto.randomBytes(8).readBigUInt64LE(0).toString()
     );
     fs.writeFileSync(file, serialized);
 
     core.debug(
       `Persisting state includes info about ${this.processedIssuesIDs.size} issue(s)`
     );
-    const artifactClient = artifact.create();
+    // const artifactClient = artifact.create();
     try {
-      await artifactClient.uploadArtifact(State.ARTIFACT_NAME, [file], tmpDir);
+      saveCache([tmpDir], State.ARTIFACT_NAME);
+      // await artifactClient.uploadArtifact(State.ARTIFACT_NAME, [file], tmpDir);
     } catch (error) {
       core.warning(
         `Persisting the state was not successful due to "${
@@ -66,21 +70,26 @@ export class State implements IState {
     this.reset();
 
     const tmpDir = os.tmpdir();
-    const artifactClient = artifact.create();
+    // const artifactClient = artifact.create();
     try {
+      /*
       const downloadResponse = await artifactClient.downloadArtifact(
         State.ARTIFACT_NAME,
         tmpDir
       );
+       */
+      await restoreCache([tmpDir], State.ARTIFACT_NAME);
 
+      /*
       const downloadedFiles = fs.readdirSync(downloadResponse.downloadPath);
       if (downloadedFiles.length === 0) {
         throw Error(
           'There is no data in the state artifact, probably because of the previous run failed'
         );
       }
+       */
       const serialized = fs.readFileSync(
-        path.join(downloadResponse.downloadPath, downloadedFiles[0]),
+        path.join(tmpDir, State.ARTIFACT_NAME),
         {encoding: 'utf8'}
       );
 

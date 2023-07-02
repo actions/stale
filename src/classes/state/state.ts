@@ -1,8 +1,8 @@
-import {Issue} from '../issue';
 import {IState} from '../../interfaces/state/state';
 import * as core from '@actions/core';
 import {IIssuesProcessorOptions} from '../../interfaces/issues-processor-options';
 import {IStateStorage} from '../../interfaces/state/state-storage';
+import {IIssue} from '../../interfaces/issue';
 
 export type IssueID = number;
 
@@ -22,18 +22,18 @@ export class State implements IState {
     this.stateStorage = stateStorage;
   }
 
-  isIssueProcessed(issue: Issue) {
+  isIssueProcessed(issue: IIssue) {
     return this.processedIssuesIDs.has(issue.number);
   }
 
-  addIssueToProcessed(issue: Issue) {
+  addIssueToProcessed(issue: IIssue) {
     core.debug(`state: mark ${issue.number} as processed`);
-    if (!this.debug) this.processedIssuesIDs.add(issue.number);
+    this.processedIssuesIDs.add(issue.number);
   }
 
   reset() {
     core.debug('state: reset');
-    if (!this.debug) this.processedIssuesIDs.clear();
+    this.processedIssuesIDs.clear();
   }
 
   private deserialize(serialized: string) {
@@ -51,7 +51,7 @@ export class State implements IState {
 
   async persist(): Promise<void> {
     if (this.debug) {
-      core.debug('The state is not persisted in the debug mode');
+      core.warning('The state is not persisted in the debug mode');
       return;
     }
     core.info(
@@ -65,7 +65,7 @@ export class State implements IState {
     const serialized = await this.stateStorage.restore();
     this.deserialize(serialized);
     core.info(
-      `state: rehydrated info about ${this.processedIssuesIDs.size} issue(s)`
+      `state: rehydrated with info about ${this.processedIssuesIDs.size} issue(s)`
     );
   }
 }

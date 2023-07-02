@@ -2120,13 +2120,11 @@ class State {
     }
     addIssueToProcessed(issue) {
         core.debug(`state: mark ${issue.number} as processed`);
-        if (!this.debug)
-            this.processedIssuesIDs.add(issue.number);
+        this.processedIssuesIDs.add(issue.number);
     }
     reset() {
         core.debug('state: reset');
-        if (!this.debug)
-            this.processedIssuesIDs.clear();
+        this.processedIssuesIDs.clear();
     }
     deserialize(serialized) {
         const issueIDs = serialized
@@ -2142,7 +2140,7 @@ class State {
     persist() {
         return __awaiter(this, void 0, void 0, function* () {
             if (this.debug) {
-                core.debug('The state is not persisted in the debug mode');
+                core.warning('The state is not persisted in the debug mode');
                 return;
             }
             core.info(`state: persisting info about ${this.processedIssuesIDs.size} issue(s)`);
@@ -2154,7 +2152,7 @@ class State {
             this.reset();
             const serialized = yield this.stateStorage.restore();
             this.deserialize(serialized);
-            core.info(`state: rehydrated info about ${this.processedIssuesIDs.size} issue(s)`);
+            core.info(`state: rehydrated with info about ${this.processedIssuesIDs.size} issue(s)`);
         });
     }
 }

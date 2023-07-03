@@ -572,8 +572,6 @@ export class IssuesProcessor {
       });
       this.statistics?.incrementFetchedItemsCount(issueResult.data.length);
 
-      // state_reason is incompatible - oktokit dependency conflict?
-      // return issueResult.data.map((issue: Readonly<OctokitIssue>): Issue => {
       return issueResult.data.map((issue): Issue => {
         return new Issue(this.options, issue as Readonly<OctokitIssue>);
       });

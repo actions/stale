@@ -1144,8 +1144,6 @@ class IssuesProcessor {
                     page
                 });
                 (_a = this.statistics) === null || _a === void 0 ? void 0 : _a.incrementFetchedItemsCount(issueResult.data.length);
-                // state_reason is incompatible - oktokit dependency conflict?
-                // return issueResult.data.map((issue: Readonly<OctokitIssue>): Issue => {
                 return issueResult.data.map((issue) => {
                     return new issue_1.Issue(this.options, issue);
                 });

@@ -572,9 +572,10 @@ export class IssuesProcessor {
       });
       this.statistics?.incrementFetchedItemsCount(issueResult.data.length);
 
-      return issueResult.data.map((issue): Issue => {
-        return new Issue(this.options, issue as Readonly<OctokitIssue>);
-      });
+      return issueResult.data.map(
+        (issue): Issue =>
+          new Issue(this.options, issue as Readonly<OctokitIssue>)
+      );
     } catch (error) {
       throw Error(`Getting issues was blocked by the error: ${error.message}`);
     }

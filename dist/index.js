@@ -1144,9 +1144,7 @@ class IssuesProcessor {
                     page
                 });
                 (_a = this.statistics) === null || _a === void 0 ? void 0 : _a.incrementFetchedItemsCount(issueResult.data.length);
-                return issueResult.data.map((issue) => {
-                    return new issue_1.Issue(this.options, issue);
-                });
+                return issueResult.data.map((issue) => new issue_1.Issue(this.options, issue));
             }
             catch (error) {
                 throw Error(`Getting issues was blocked by the error: ${error.message}`);

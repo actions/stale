@@ -5,5 +5,5 @@ export interface IState {
   addIssueToProcessed(issue: IIssue): void;
   reset(): void;
   persist(): Promise<void>;
-  rehydrate(): Promise<void>;
+  restore(): Promise<void>;
 }

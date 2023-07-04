@@ -114,7 +114,7 @@ describe('State', () => {
         mockStorage,
         {} as unknown as IIssuesProcessorOptions
       );
-      await state.rehydrate();
+      await state.restore();
       const processedIssuesIDs = (
         state as unknown as {processedIssuesIDs: Set<IssueID>}
       ).processedIssuesIDs;

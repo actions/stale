@@ -10,7 +10,7 @@ async function _run(): Promise<void> {
     const args = _getAndValidateArgs();
 
     const state = getStateInstance(args);
-    await state.rehydrate();
+    await state.restore();
 
     const issueProcessor: IssuesProcessor = new IssuesProcessor(args, state);
     await issueProcessor.processIssues();

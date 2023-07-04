@@ -60,7 +60,7 @@ export class State implements IState {
     return this.stateStorage.save(this.serialized);
   }
 
-  async rehydrate(): Promise<void> {
+  async restore(): Promise<void> {
     this.reset();
     const serialized = await this.stateStorage.restore();
     this.deserialize(serialized);

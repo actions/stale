@@ -4,7 +4,7 @@ import path from 'path';
 import os from 'os';
 import * as core from '@actions/core';
 import {uploadFileToActionsCache} from '../actions-cache/upload';
-import {downloadFileFromActionCache} from '../actions-cache/download';
+import {downloadFileFromActionsCache} from '../actions-cache/download';
 
 const CACHE_KEY = '_state';
 const CACHE_VERSION = '1';
@@ -30,10 +30,10 @@ export class StateCacheStorage implements IStateStorage {
     const tmpDir = fs.mkdtempSync('state-');
     const fileName = path.join(tmpDir, STATE_FILE);
     try {
-      await downloadFileFromActionCache(fileName, CACHE_KEY, CACHE_VERSION);
+      await downloadFileFromActionsCache(fileName, CACHE_KEY, CACHE_VERSION);
       if (!fs.existsSync(fileName)) {
         core.info(
-          'There is no state persisted, probably because of the very first run or previous run failed'
+          'The stored state has not been found, probably because of the very first run or the previous run failed'
         );
         return '';
       }

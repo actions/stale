@@ -14,7 +14,7 @@ export class StateMock implements IState {
     return Promise.resolve(undefined);
   }
 
-  rehydrate(): Promise<void> {
+  restore(): Promise<void> {
     return Promise.resolve(undefined);
   }
 

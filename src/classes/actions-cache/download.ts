@@ -45,7 +45,7 @@ const getCacheArchiveUrl = async (
   return cacheDownloadUrl;
 };
 
-export const downloadFileFromActionCache = async (
+export const downloadFileFromActionsCache = async (
   destFileName: string,
   cacheKey: string,
   cacheVersion: string

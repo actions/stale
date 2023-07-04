@@ -39,7 +39,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.downloadFileFromActionCache = void 0;
+exports.downloadFileFromActionsCache = void 0;
 const http_client_1 = __nccwpck_require__(8661);
 const retry_1 = __nccwpck_require__(3910);
 const http_responses_1 = __nccwpck_require__(7233);
@@ -67,7 +67,7 @@ const getCacheArchiveUrl = (httpClient, cacheKey, cacheVersion) => __awaiter(voi
     }
     return cacheDownloadUrl;
 });
-const downloadFileFromActionCache = (destFileName, cacheKey, cacheVersion) => __awaiter(void 0, void 0, void 0, function* () {
+const downloadFileFromActionsCache = (destFileName, cacheKey, cacheVersion) => __awaiter(void 0, void 0, void 0, function* () {
     const httpClient = (0, http_client_1.createHttpClient)();
     const archiveUrl = yield getCacheArchiveUrl(httpClient, cacheKey, cacheVersion);
     if (!archiveUrl) {
@@ -75,7 +75,7 @@ const downloadFileFromActionCache = (destFileName, cacheKey, cacheVersion) => __
     }
     yield (0, downloadUtils_1.downloadCacheHttpClient)(archiveUrl, destFileName);
 });
-exports.downloadFileFromActionCache = downloadFileFromActionCache;
+exports.downloadFileFromActionsCache = downloadFileFromActionsCache;
 
 
 /***/ }),
@@ -2041,9 +2041,9 @@ class StateCacheStorage {
             const tmpDir = fs_1.default.mkdtempSync('state-');
             const fileName = path_1.default.join(tmpDir, STATE_FILE);
             try {
-                yield (0, download_1.downloadFileFromActionCache)(fileName, CACHE_KEY, CACHE_VERSION);
+                yield (0, download_1.downloadFileFromActionsCache)(fileName, CACHE_KEY, CACHE_VERSION);
                 if (!fs_1.default.existsSync(fileName)) {
-                    core.info('There is no state persisted, probably because of the very first run or previous run failed');
+                    core.info('The stored state has not been found, probably because of the very first run or the previous run failed');
                     return '';
                 }
                 return fs_1.default.readFileSync(path_1.default.join(tmpDir, STATE_FILE), {
@@ -2143,7 +2143,7 @@ class State {
             return this.stateStorage.save(this.serialized);
         });
     }
-    rehydrate() {
+    restore() {
         return __awaiter(this, void 0, void 0, function* () {
             this.reset();
             const serialized = yield this.stateStorage.restore();
@@ -2848,7 +2848,7 @@ function _run() {
         try {
             const args = _getAndValidateArgs();
             const state = (0, state_service_1.getStateInstance)(args);
-            yield state.rehydrate();
+            yield state.restore();
             const issueProcessor = new issues_processor_1.IssuesProcessor(args, state);
             yield issueProcessor.processIssues();
             yield state.persist();

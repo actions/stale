@@ -3,6 +3,7 @@ import * as core from '@actions/core';
 import * as cache from '@actions/cache';
 import {getOctokit} from '@actions/github';
 import {retry as octokitRetry} from '@octokit/plugin-retry';
+import path from 'path';
 
 const resetCacheWithOctokit = async (cacheKey: string): Promise<void> => {
   const token = core.getInput('repo-token');
@@ -26,6 +27,7 @@ const resetCacheWithOctokit = async (cacheKey: string): Promise<void> => {
 export const uploadFileToActionsCache = async (
   filePath: string,
   cacheKey: string,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   cacheVersion: string
 ) => {
   await resetCacheWithOctokit(cacheKey);
@@ -36,5 +38,6 @@ export const uploadFileToActionsCache = async (
     return;
   }
 
-  cache.saveCache([filePath], cacheKey);
+  core.debug('content: ' + fs.readFileSync(filePath).toString());
+  cache.saveCache([path.dirname(filePath)], cacheKey);
 };

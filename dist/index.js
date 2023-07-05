@@ -36,90 +36,12 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.downloadFileFromActionsCache = void 0;
 const cache = __importStar(__nccwpck_require__(7799));
 const path_1 = __importDefault(__nccwpck_require__(1017));
-const downloadFileFromActionsCache = (destFileName, cacheKey, cacheVersion) => cache.restoreCache([path_1.default.dirname(destFileName)], cacheKey, [
+const downloadFileFromActionsCache = (destFileName, cacheKey, 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+cacheVersion) => cache.restoreCache([path_1.default.dirname(destFileName)], cacheKey, [
     cacheKey
 ]);
 exports.downloadFileFromActionsCache = downloadFileFromActionsCache;
-
-
-/***/ }),
-
-/***/ 5970:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
-
-"use strict";
-
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.uploadFileToActionsCache = void 0;
-const fs_1 = __importDefault(__nccwpck_require__(7147));
-const core = __importStar(__nccwpck_require__(2186));
-const cache = __importStar(__nccwpck_require__(7799));
-const github_1 = __nccwpck_require__(5438);
-const plugin_retry_1 = __nccwpck_require__(6298);
-const resetCacheWithOctokit = (cacheKey) => __awaiter(void 0, void 0, void 0, function* () {
-    const token = core.getInput('repo-token');
-    const client = (0, github_1.getOctokit)(token, undefined, plugin_retry_1.retry);
-    // TODO: better way to get repository?
-    const repo = process.env['GITHUB_REPOSITORY'];
-    core.debug(`remove cache "${cacheKey}"`);
-    try {
-        // TODO: replace with client.rest.
-        yield client.request(`DELETE /repos/${repo}/actions/caches?key=${cacheKey}`);
-    }
-    catch (error) {
-        if (error.status) {
-            core.debug(`Cache ${cacheKey} does not exist`);
-        }
-        else {
-            throw error;
-        }
-    }
-});
-const uploadFileToActionsCache = (filePath, cacheKey, cacheVersion) => __awaiter(void 0, void 0, void 0, function* () {
-    yield resetCacheWithOctokit(cacheKey);
-    const fileSize = fs_1.default.statSync(filePath).size;
-    if (fileSize === 0) {
-        core.info(`the cache ${cacheKey} will be removed`);
-        return;
-    }
-    cache.saveCache([filePath], cacheKey);
-});
-exports.uploadFileToActionsCache = uploadFileToActionsCache;
 
 
 /***/ }),
@@ -1677,13 +1599,16 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.StateCacheStorage = void 0;
+exports.StateCacheStorage = exports.getCommandOutput = void 0;
 const fs_1 = __importDefault(__nccwpck_require__(7147));
 const path_1 = __importDefault(__nccwpck_require__(1017));
 const os_1 = __importDefault(__nccwpck_require__(2037));
 const core = __importStar(__nccwpck_require__(2186));
 const download_1 = __nccwpck_require__(8802);
-const upload_1 = __nccwpck_require__(5970);
+const exec = __importStar(__nccwpck_require__(1514));
+const github_1 = __nccwpck_require__(5438);
+const plugin_retry_1 = __nccwpck_require__(6298);
+const cache = __importStar(__nccwpck_require__(7799));
 /*
 import {uploadFileToActionsCache} from '../actions-cache-internal/upload';
 import {downloadFileFromActionsCache} from '../actions-cache-internal/download';
@@ -1691,26 +1616,93 @@ import {downloadFileFromActionsCache} from '../actions-cache-internal/download';
 const CACHE_KEY = '_state';
 const CACHE_VERSION = '1';
 const STATE_FILE = 'state.txt';
+const STALE_DIR = '56acbeaa-1fef-4c79-8f84-7565e560fb03';
+const mkTempDir = () => {
+    const tmpDir = path_1.default.join(os_1.default.tmpdir(), STALE_DIR);
+    fs_1.default.mkdirSync(tmpDir, { recursive: true });
+    return tmpDir;
+};
+const unlinkSafely = (filePath) => {
+    try {
+        fs_1.default.unlinkSync(filePath);
+    }
+    catch (foo) {
+        /* ignore */
+    }
+};
+const getCommandOutput = (toolCommand, cwd) => __awaiter(void 0, void 0, void 0, function* () {
+    let { stdout, stderr, exitCode } = yield exec.getExecOutput(toolCommand, undefined, Object.assign({ ignoreReturnCode: true }, (cwd && { cwd })));
+    if (exitCode) {
+        stderr = !stderr.trim()
+            ? `The '${toolCommand}' command failed with exit code: ${exitCode}`
+            : stderr;
+        throw new Error(stderr);
+    }
+    return stdout.trim();
+});
+exports.getCommandOutput = getCommandOutput;
+function execCommands(commands, cwd) {
+    return __awaiter(this, void 0, void 0, function* () {
+        for (const command of commands) {
+            try {
+                yield exec.exec(command, undefined, { cwd });
+            }
+            catch (error) {
+                throw new Error(`${command.split(' ')[0]} failed with error: ${error === null || error === void 0 ? void 0 : error.message}`);
+            }
+        }
+    });
+}
+const resetCacheWithOctokit = (cacheKey) => __awaiter(void 0, void 0, void 0, function* () {
+    const token = core.getInput('repo-token');
+    const client = (0, github_1.getOctokit)(token, undefined, plugin_retry_1.retry);
+    // TODO: better way to get repository?
+    const repo = process.env['GITHUB_REPOSITORY'];
+    core.debug(`remove cache "${cacheKey}"`);
+    try {
+        // TODO: replace with client.rest.
+        yield client.request(`DELETE /repos/${repo}/actions/caches?key=${cacheKey}`);
+    }
+    catch (error) {
+        if (error.status) {
+            core.debug(`Cache ${cacheKey} does not exist`);
+        }
+        else {
+            throw error;
+        }
+    }
+});
 class StateCacheStorage {
     save(serializedState) {
         return __awaiter(this, void 0, void 0, function* () {
-            const tmpDir = fs_1.default.mkdtempSync(path_1.default.join(os_1.default.tmpdir(), 'state-'));
-            const file = path_1.default.join(tmpDir, STATE_FILE);
-            fs_1.default.writeFileSync(file, serializedState);
+            const tmpDir = mkTempDir();
+            const filePath = path_1.default.join(tmpDir, STATE_FILE);
+            fs_1.default.writeFileSync(filePath, serializedState);
             try {
-                yield (0, upload_1.uploadFileToActionsCache)(file, CACHE_KEY, CACHE_VERSION);
+                yield resetCacheWithOctokit(CACHE_KEY);
+                const fileSize = fs_1.default.statSync(filePath).size;
+                if (fileSize === 0) {
+                    core.info(`the cache ${CACHE_KEY} will be removed`);
+                    return;
+                }
+                yield cache.saveCache([path_1.default.dirname(filePath)], CACHE_KEY);
             }
             catch (error) {
                 core.warning(`Saving the state was not successful due to "${error.message || 'unknown reason'}"`);
+            }
+            finally {
+                unlinkSafely(filePath);
             }
         });
     }
     restore() {
         return __awaiter(this, void 0, void 0, function* () {
-            const tmpDir = fs_1.default.mkdtempSync('state-');
+            const tmpDir = mkTempDir(); //fs.mkdtempSync('state-');
             const fileName = path_1.default.join(tmpDir, STATE_FILE);
+            unlinkSafely(fileName);
             try {
                 yield (0, download_1.downloadFileFromActionsCache)(fileName, CACHE_KEY, CACHE_VERSION);
+                yield execCommands([`ls -la ${path_1.default.dirname(fileName)}`]);
                 if (!fs_1.default.existsSync(fileName)) {
                     core.info('The stored state has not been found, probably because of the very first run or the previous run failed');
                     return '';

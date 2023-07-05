@@ -3,19 +3,12 @@ import fs from 'fs';
 import path from 'path';
 import os from 'os';
 import * as core from '@actions/core';
-import {downloadFileFromActionsCache} from '../actions-cache-hilevel/download';
-import {uploadFileToActionsCache} from '../actions-cache-hilevel/upload';
 import * as exec from '@actions/exec';
 import {getOctokit} from '@actions/github';
 import {retry as octokitRetry} from '@octokit/plugin-retry';
 import * as cache from '@actions/cache';
-/*
-import {uploadFileToActionsCache} from '../actions-cache-internal/upload';
-import {downloadFileFromActionsCache} from '../actions-cache-internal/download';
- */
 
 const CACHE_KEY = '_state';
-const CACHE_VERSION = '1';
 const STATE_FILE = 'state.txt';
 const STALE_DIR = '56acbeaa-1fef-4c79-8f84-7565e560fb03';
 
@@ -111,15 +104,13 @@ export class StateCacheStorage implements IStateStorage {
   }
 
   async restore(): Promise<string> {
-    const tmpDir = mkTempDir(); //fs.mkdtempSync('state-');
-    const fileName = path.join(tmpDir, STATE_FILE);
-    unlinkSafely(fileName);
+    const tmpDir = mkTempDir();
+    const filePath = path.join(tmpDir, STATE_FILE);
+    unlinkSafely(filePath);
     try {
-      await downloadFileFromActionsCache(fileName, CACHE_KEY, CACHE_VERSION);
+      await cache.restoreCache([path.dirname(filePath)], CACHE_KEY);
 
-      await execCommands([`ls -la ${path.dirname(fileName)}`]);
-
-      if (!fs.existsSync(fileName)) {
+      if (!fs.existsSync(filePath)) {
         core.info(
           'The stored state has not been found, probably because of the very first run or the previous run failed'
         );

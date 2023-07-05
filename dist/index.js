@@ -1,51 +1,6 @@
 /******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
-/***/ 8802:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
-
-"use strict";
-
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.downloadFileFromActionsCache = void 0;
-const cache = __importStar(__nccwpck_require__(7799));
-const path_1 = __importDefault(__nccwpck_require__(1017));
-const downloadFileFromActionsCache = (destFileName, cacheKey, 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-cacheVersion) => cache.restoreCache([path_1.default.dirname(destFileName)], cacheKey, [
-    cacheKey
-]);
-exports.downloadFileFromActionsCache = downloadFileFromActionsCache;
-
-
-/***/ }),
-
 /***/ 7236:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
@@ -1604,17 +1559,11 @@ const fs_1 = __importDefault(__nccwpck_require__(7147));
 const path_1 = __importDefault(__nccwpck_require__(1017));
 const os_1 = __importDefault(__nccwpck_require__(2037));
 const core = __importStar(__nccwpck_require__(2186));
-const download_1 = __nccwpck_require__(8802);
 const exec = __importStar(__nccwpck_require__(1514));
 const github_1 = __nccwpck_require__(5438);
 const plugin_retry_1 = __nccwpck_require__(6298);
 const cache = __importStar(__nccwpck_require__(7799));
-/*
-import {uploadFileToActionsCache} from '../actions-cache-internal/upload';
-import {downloadFileFromActionsCache} from '../actions-cache-internal/download';
- */
 const CACHE_KEY = '_state';
-const CACHE_VERSION = '1';
 const STATE_FILE = 'state.txt';
 const STALE_DIR = '56acbeaa-1fef-4c79-8f84-7565e560fb03';
 const mkTempDir = () => {
@@ -1697,13 +1646,12 @@ class StateCacheStorage {
     }
     restore() {
         return __awaiter(this, void 0, void 0, function* () {
-            const tmpDir = mkTempDir(); //fs.mkdtempSync('state-');
-            const fileName = path_1.default.join(tmpDir, STATE_FILE);
-            unlinkSafely(fileName);
+            const tmpDir = mkTempDir();
+            const filePath = path_1.default.join(tmpDir, STATE_FILE);
+            unlinkSafely(filePath);
             try {
-                yield (0, download_1.downloadFileFromActionsCache)(fileName, CACHE_KEY, CACHE_VERSION);
-                yield execCommands([`ls -la ${path_1.default.dirname(fileName)}`]);
-                if (!fs_1.default.existsSync(fileName)) {
+                yield cache.restoreCache([path_1.default.dirname(filePath)], CACHE_KEY);
+                if (!fs_1.default.existsSync(filePath)) {
                     core.info('The stored state has not been found, probably because of the very first run or the previous run failed');
                     return '';
                 }

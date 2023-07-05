@@ -36,7 +36,9 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.downloadFileFromActionsCache = void 0;
 const cache = __importStar(__nccwpck_require__(7799));
 const path_1 = __importDefault(__nccwpck_require__(1017));
-const downloadFileFromActionsCache = (destFileName, cacheKey, cacheVersion) => cache.restoreCache([path_1.default.dirname(destFileName)], cacheKey);
+const downloadFileFromActionsCache = (destFileName, cacheKey, cacheVersion) => cache.restoreCache([path_1.default.dirname(destFileName)], cacheKey, [
+    cacheKey
+]);
 exports.downloadFileFromActionsCache = downloadFileFromActionsCache;
 
 
@@ -1815,7 +1817,7 @@ class State {
             this.reset();
             const serialized = yield this.stateStorage.restore();
             this.deserialize(serialized);
-            core.info(`state: rehydrated with info about ${this.processedIssuesIDs.size} issue(s)`);
+            core.info(`state: restored with info about ${this.processedIssuesIDs.size} issue(s)`);
         });
     }
 }

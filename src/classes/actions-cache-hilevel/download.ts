@@ -6,4 +6,6 @@ export const downloadFileFromActionsCache = (
   cacheKey: string,
   cacheVersion: string
 ): Promise<void> =>
-  cache.restoreCache([path.dirname(destFileName)], cacheKey) as Promise<void>;
+  cache.restoreCache([path.dirname(destFileName)], cacheKey, [
+    cacheKey
+  ]) as Promise<void>;

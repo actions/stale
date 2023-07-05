@@ -3,7 +3,6 @@ import fs from 'fs';
 import path from 'path';
 import os from 'os';
 import * as core from '@actions/core';
-import * as exec from '@actions/exec';
 import {getOctokit} from '@actions/github';
 import {retry as octokitRetry} from '@octokit/plugin-retry';
 import * as cache from '@actions/cache';
@@ -25,37 +24,6 @@ const unlinkSafely = (filePath: string) => {
     /* ignore */
   }
 };
-
-export const getCommandOutput = async (
-  toolCommand: string,
-  cwd?: string
-): Promise<string> => {
-  let {stdout, stderr, exitCode} = await exec.getExecOutput(
-    toolCommand,
-    undefined,
-    {ignoreReturnCode: true, ...(cwd && {cwd})}
-  );
-
-  if (exitCode) {
-    stderr = !stderr.trim()
-      ? `The '${toolCommand}' command failed with exit code: ${exitCode}`
-      : stderr;
-    throw new Error(stderr);
-  }
-
-  return stdout.trim();
-};
-async function execCommands(commands: string[], cwd?: string): Promise<void> {
-  for (const command of commands) {
-    try {
-      await exec.exec(command, undefined, {cwd});
-    } catch (error) {
-      throw new Error(
-        `${command.split(' ')[0]} failed with error: ${error?.message}`
-      );
-    }
-  }
-}
 
 const resetCacheWithOctokit = async (cacheKey: string): Promise<void> => {
   const token = core.getInput('repo-token');

@@ -121,7 +121,7 @@ describe('State', () => {
       expect(processedIssuesIDs).toEqual(new Set([1, 2, 3]));
       expect(infoSpy).toHaveBeenCalledTimes(1);
       expect(infoSpy).toHaveBeenCalledWith(
-        'state: rehydrated with info about 3 issue(s)'
+        'state: restored with info about 3 issue(s)'
       );
     });
   });

@@ -1554,12 +1554,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.StateCacheStorage = exports.getCommandOutput = void 0;
+exports.StateCacheStorage = void 0;
 const fs_1 = __importDefault(__nccwpck_require__(7147));
 const path_1 = __importDefault(__nccwpck_require__(1017));
 const os_1 = __importDefault(__nccwpck_require__(2037));
 const core = __importStar(__nccwpck_require__(2186));
-const exec = __importStar(__nccwpck_require__(1514));
 const github_1 = __nccwpck_require__(5438);
 const plugin_retry_1 = __nccwpck_require__(6298);
 const cache = __importStar(__nccwpck_require__(7799));
@@ -1579,29 +1578,6 @@ const unlinkSafely = (filePath) => {
         /* ignore */
     }
 };
-const getCommandOutput = (toolCommand, cwd) => __awaiter(void 0, void 0, void 0, function* () {
-    let { stdout, stderr, exitCode } = yield exec.getExecOutput(toolCommand, undefined, Object.assign({ ignoreReturnCode: true }, (cwd && { cwd })));
-    if (exitCode) {
-        stderr = !stderr.trim()
-            ? `The '${toolCommand}' command failed with exit code: ${exitCode}`
-            : stderr;
-        throw new Error(stderr);
-    }
-    return stdout.trim();
-});
-exports.getCommandOutput = getCommandOutput;
-function execCommands(commands, cwd) {
-    return __awaiter(this, void 0, void 0, function* () {
-        for (const command of commands) {
-            try {
-                yield exec.exec(command, undefined, { cwd });
-            }
-            catch (error) {
-                throw new Error(`${command.split(' ')[0]} failed with error: ${error === null || error === void 0 ? void 0 : error.message}`);
-            }
-        }
-    });
-}
 const resetCacheWithOctokit = (cacheKey) => __awaiter(void 0, void 0, void 0, function* () {
     const token = core.getInput('repo-token');
     const client = (0, github_1.getOctokit)(token, undefined, plugin_retry_1.retry);

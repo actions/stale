@@ -7,7 +7,9 @@ import {isSuccessStatusCode} from './http-responses';
 import {retryHttpClientResponse, retryTypedResponse} from './retry';
 import {getOctokit} from '@actions/github';
 import {retry as octokitRetry} from '@octokit/plugin-retry';
-import {createHttpClient, getCacheApiUrl} from './http-client';
+import {createActionsCacheClient, getCacheApiUrl} from './http-client';
+
+const uploadChunk = async (httpClient: HttpClient): Promise<void> => {};
 
 const uploadFile = async (
   httpClient: HttpClient,
@@ -32,29 +34,30 @@ const uploadFile = async (
 
   const resourceUrl = getCacheApiUrl(`caches/${cacheId.toString()}`);
   const fd = fs.openSync(filePath, 'r');
+  const openStream = () =>
+    fs
+      .createReadStream(filePath, {
+        fd,
+        start,
+        end,
+        autoClose: false
+      })
+      .on('error', error => {
+        throw new Error(
+          `Cache upload failed because file read failed with ${error.message}`
+        );
+      });
+
   try {
     const uploadChunkResponse = await retryHttpClientResponse(
       `uploadChunk (start: ${start}, end: ${end})`,
-      async () => {
-        const stream = fs
-          .createReadStream(filePath, {
-            fd,
-            start,
-            end,
-            autoClose: false
-          })
-          .on('error', error => {
-            throw new Error(
-              `Cache upload failed because file read failed with ${error.message}`
-            );
-          });
-        return httpClient.sendStream(
+      async () =>
+        httpClient.sendStream(
           'PATCH',
           resourceUrl,
-          stream,
+          openStream(),
           additionalHeaders
-        );
-      }
+        )
     );
 
     if (!isSuccessStatusCode(uploadChunkResponse.message.statusCode)) {
@@ -65,7 +68,6 @@ const uploadFile = async (
   } finally {
     fs.closeSync(fd);
   }
-  return;
 };
 
 const resetCacheWithOctokit = async (cacheKey: string): Promise<void> => {
@@ -155,7 +157,7 @@ export const uploadFileToActionsCache = async (
       return;
     }
 
-    const httpClient = createHttpClient();
+    const httpClient = createActionsCacheClient();
 
     const cacheId = await reserveCache(
       httpClient,
@@ -171,10 +173,11 @@ export const uploadFileToActionsCache = async (
     const typedError = error as Error;
     if (typedError.name === ValidationError.name) {
       throw error;
-    } else if (typedError.name === ReserveCacheError.name) {
-      core.info(`Failed to save: ${typedError.message}`);
-    } else {
-      core.warning(`Failed to save: ${typedError.message}`);
     }
+    if (typedError.name === ReserveCacheError.name) {
+      core.info(`Failed to save: ${typedError.message}`);
+      return;
+    }
+    core.warning(`Failed to save: ${typedError.message}`);
   }
 };

@@ -1,4 +1,4 @@
-import {createHttpClient, getCacheApiUrl} from './http-client';
+import {createActionsCacheClient, getCacheApiUrl} from './http-client';
 import {retryTypedResponse} from './retry';
 import {isSuccessStatusCode} from './http-responses';
 import {HttpClient} from '@actions/http-client';
@@ -50,7 +50,7 @@ export const downloadFileFromActionsCache = async (
   cacheKey: string,
   cacheVersion: string
 ) => {
-  const httpClient = createHttpClient();
+  const httpClient = createActionsCacheClient();
   const archiveUrl = await getCacheArchiveUrl(
     httpClient,
     cacheKey,

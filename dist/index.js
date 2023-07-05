@@ -68,7 +68,7 @@ const getCacheArchiveUrl = (httpClient, cacheKey, cacheVersion) => __awaiter(voi
     return cacheDownloadUrl;
 });
 const downloadFileFromActionsCache = (destFileName, cacheKey, cacheVersion) => __awaiter(void 0, void 0, void 0, function* () {
-    const httpClient = (0, http_client_1.createHttpClient)();
+    const httpClient = (0, http_client_1.createActionsCacheClient)();
     const archiveUrl = yield getCacheArchiveUrl(httpClient, cacheKey, cacheVersion);
     if (!archiveUrl) {
         return undefined;
@@ -109,7 +109,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getCacheApiUrl = exports.getGitHubActionsApiUrl = exports.createHttpClient = void 0;
+exports.getCacheApiUrl = exports.getGitHubActionsApiUrl = exports.createActionsCacheClient = void 0;
 const http_client_1 = __nccwpck_require__(6255);
 const auth_1 = __nccwpck_require__(5526);
 const core = __importStar(__nccwpck_require__(2186));
@@ -119,12 +119,12 @@ const getRequestOptions = () => ({
         Accept: createAcceptHeader('application/json', '6.0-preview.1')
     }
 });
-const createHttpClient = () => {
+const createActionsCacheClient = () => {
     const token = process.env['ACTIONS_RUNTIME_TOKEN'] || '';
     const bearerCredentialHandler = new auth_1.BearerCredentialHandler(token);
     return new http_client_1.HttpClient('actions/cache', [bearerCredentialHandler], getRequestOptions());
 };
-exports.createHttpClient = createHttpClient;
+exports.createActionsCacheClient = createActionsCacheClient;
 const getGitHubActionsApiUrl = (resource) => {
     const baseUrl = process.env['GITHUB_API_URL'] || '';
     if (!baseUrl) {
@@ -345,6 +345,7 @@ const retry_1 = __nccwpck_require__(3910);
 const github_1 = __nccwpck_require__(5438);
 const plugin_retry_1 = __nccwpck_require__(6298);
 const http_client_1 = __nccwpck_require__(8661);
+const uploadChunk = (httpClient) => __awaiter(void 0, void 0, void 0, function* () { });
 const uploadFile = (httpClient, cacheId, filePath, fileSize) => __awaiter(void 0, void 0, void 0, function* () {
     if (fileSize <= 0)
         return;
@@ -358,19 +359,19 @@ const uploadFile = (httpClient, cacheId, filePath, fileSize) => __awaiter(void 0
     };
     const resourceUrl = (0, http_client_1.getCacheApiUrl)(`caches/${cacheId.toString()}`);
     const fd = fs_1.default.openSync(filePath, 'r');
+    const openStream = () => fs_1.default
+        .createReadStream(filePath, {
+        fd,
+        start,
+        end,
+        autoClose: false
+    })
+        .on('error', error => {
+        throw new Error(`Cache upload failed because file read failed with ${error.message}`);
+    });
     try {
         const uploadChunkResponse = yield (0, retry_1.retryHttpClientResponse)(`uploadChunk (start: ${start}, end: ${end})`, () => __awaiter(void 0, void 0, void 0, function* () {
-            const stream = fs_1.default
-                .createReadStream(filePath, {
-                fd,
-                start,
-                end,
-                autoClose: false
-            })
-                .on('error', error => {
-                throw new Error(`Cache upload failed because file read failed with ${error.message}`);
-            });
-            return httpClient.sendStream('PATCH', resourceUrl, stream, additionalHeaders);
+            return httpClient.sendStream('PATCH', resourceUrl, openStream(), additionalHeaders);
         }));
         if (!(0, http_responses_1.isSuccessStatusCode)(uploadChunkResponse.message.statusCode)) {
             throw new Error(`Cache service responded with ${uploadChunkResponse.message.statusCode} during upload chunk.`);
@@ -379,7 +380,6 @@ const uploadFile = (httpClient, cacheId, filePath, fileSize) => __awaiter(void 0
     finally {
         fs_1.default.closeSync(fd);
     }
-    return;
 });
 const resetCacheWithOctokit = (cacheKey) => __awaiter(void 0, void 0, void 0, function* () {
     const token = core.getInput('repo-token');
@@ -436,7 +436,7 @@ const uploadFileToActionsCache = (filePath, cacheKey, cacheVersion) => __awaiter
             core.info(`the cache ${cacheKey} will be removed`);
             return;
         }
-        const httpClient = (0, http_client_1.createHttpClient)();
+        const httpClient = (0, http_client_1.createActionsCacheClient)();
         const cacheId = yield reserveCache(httpClient, fileSize, cacheKey, cacheVersion);
         yield uploadFile(httpClient, cacheId, filePath, fileSize);
         yield commitCache(httpClient, cacheId, fileSize);
@@ -446,12 +446,11 @@ const uploadFileToActionsCache = (filePath, cacheKey, cacheVersion) => __awaiter
         if (typedError.name === cache_1.ValidationError.name) {
             throw error;
         }
-        else if (typedError.name === cache_1.ReserveCacheError.name) {
+        if (typedError.name === cache_1.ReserveCacheError.name) {
             core.info(`Failed to save: ${typedError.message}`);
+            return;
         }
-        else {
-            core.warning(`Failed to save: ${typedError.message}`);
-        }
+        core.warning(`Failed to save: ${typedError.message}`);
     }
 });
 exports.uploadFileToActionsCache = uploadFileToActionsCache;

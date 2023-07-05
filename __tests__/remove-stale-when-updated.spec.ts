@@ -549,6 +549,7 @@ class IssuesProcessorBuilder {
           body: 'body'
         }
       ],
+      async () => [],
       async () => new Date().toDateString()
     );
   }

@@ -207,6 +207,7 @@ class SUT {
       this._opts,
       async p => (p === 1 ? this._testIssueList : []),
       async () => [],
+      async () => [],
       async () => new Date().toDateString()
     );
 

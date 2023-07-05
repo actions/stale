@@ -87,7 +87,7 @@ export class StateCacheStorage implements IStateStorage {
       const fileSize = fs.statSync(filePath).size;
 
       if (fileSize === 0) {
-        core.info(`the cache ${CACHE_KEY} will be removed`);
+        core.info(`the state will be removed`);
         return;
       }
 

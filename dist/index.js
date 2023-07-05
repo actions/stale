@@ -1631,7 +1631,7 @@ class StateCacheStorage {
                 yield resetCacheWithOctokit(CACHE_KEY);
                 const fileSize = fs_1.default.statSync(filePath).size;
                 if (fileSize === 0) {
-                    core.info(`the cache ${CACHE_KEY} will be removed`);
+                    core.info(`the state will be removed`);
                     return;
                 }
                 yield cache.saveCache([path_1.default.dirname(filePath)], CACHE_KEY);

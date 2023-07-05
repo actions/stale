@@ -1,7 +1,7 @@
 /******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
-/***/ 8262:
+/***/ 8802:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
@@ -29,273 +29,20 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.downloadFileFromActionsCache = void 0;
-const http_client_1 = __nccwpck_require__(8661);
-const retry_1 = __nccwpck_require__(3910);
-const http_responses_1 = __nccwpck_require__(7233);
-const downloadUtils_1 = __nccwpck_require__(5500);
-const core = __importStar(__nccwpck_require__(2186));
-const getCacheArchiveUrl = (httpClient, cacheKey, cacheVersion) => __awaiter(void 0, void 0, void 0, function* () {
-    // TODO: should work with delete?
-    const resource = `cache?keys=${cacheKey}&version=${cacheVersion}`;
-    const response = yield (0, retry_1.retryTypedResponse)('getCacheEntry', () => __awaiter(void 0, void 0, void 0, function* () { return httpClient.getJson((0, http_client_1.getCacheApiUrl)(resource)); }));
-    // Cache not found
-    if (response.statusCode === 204) {
-        core.debug(`There's no cache with key ${cacheKey} & version=${cacheVersion}`);
-        // List cache for primary key only if cache miss occurs
-        return null;
-    }
-    if (!(0, http_responses_1.isSuccessStatusCode)(response.statusCode)) {
-        throw new Error(`Cache service responded with ${response.statusCode}`);
-    }
-    const cacheResult = response.result;
-    core.debug(`getCacheEntry response is:\n${JSON.stringify(cacheResult)}`);
-    const cacheDownloadUrl = cacheResult === null || cacheResult === void 0 ? void 0 : cacheResult.archiveLocation;
-    if (!cacheDownloadUrl) {
-        // Cache archiveLocation not found. This should never happen, and hence bail out.
-        throw new Error('Cache not found.');
-    }
-    return cacheDownloadUrl;
-});
-const downloadFileFromActionsCache = (destFileName, cacheKey, cacheVersion) => __awaiter(void 0, void 0, void 0, function* () {
-    const httpClient = (0, http_client_1.createActionsCacheClient)();
-    const archiveUrl = yield getCacheArchiveUrl(httpClient, cacheKey, cacheVersion);
-    if (!archiveUrl) {
-        return undefined;
-    }
-    yield (0, downloadUtils_1.downloadCacheHttpClient)(archiveUrl, destFileName);
-});
+const cache = __importStar(__nccwpck_require__(7799));
+const path_1 = __importDefault(__nccwpck_require__(1017));
+const downloadFileFromActionsCache = (destFileName, cacheKey, cacheVersion) => cache.restoreCache([path_1.default.dirname(destFileName)], cacheKey);
 exports.downloadFileFromActionsCache = downloadFileFromActionsCache;
 
 
 /***/ }),
 
-/***/ 8661:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
-
-"use strict";
-
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getCacheApiUrl = exports.getGitHubActionsApiUrl = exports.createActionsCacheClient = void 0;
-const http_client_1 = __nccwpck_require__(6255);
-const auth_1 = __nccwpck_require__(5526);
-const core = __importStar(__nccwpck_require__(2186));
-const createAcceptHeader = (type, apiVersion) => `${type};api-version=${apiVersion}`;
-const getRequestOptions = () => ({
-    headers: {
-        Accept: createAcceptHeader('application/json', '6.0-preview.1')
-    }
-});
-const createActionsCacheClient = () => {
-    const token = process.env['ACTIONS_RUNTIME_TOKEN'] || '';
-    const bearerCredentialHandler = new auth_1.BearerCredentialHandler(token);
-    return new http_client_1.HttpClient('actions/cache', [bearerCredentialHandler], getRequestOptions());
-};
-exports.createActionsCacheClient = createActionsCacheClient;
-const getGitHubActionsApiUrl = (resource) => {
-    const baseUrl = process.env['GITHUB_API_URL'] || '';
-    if (!baseUrl) {
-        throw new Error('GitHub API Url not found, unable to restore cache.');
-    }
-    const repo = process.env['GITHUB_REPOSITORY'];
-    const url = `${baseUrl}/repos/${repo}/actions/${resource}`;
-    core.debug(`Resource Url: ${url}`);
-    return url;
-};
-exports.getGitHubActionsApiUrl = getGitHubActionsApiUrl;
-const getCacheApiUrl = (resource) => {
-    const baseUrl = process.env['ACTIONS_CACHE_URL'] || '';
-    if (!baseUrl) {
-        throw new Error('Cache Service Url not found, unable to restore cache.');
-    }
-    const url = `${baseUrl}_apis/artifactcache/${resource}`;
-    core.debug(`Resource Url: ${url}`);
-    return url;
-};
-exports.getCacheApiUrl = getCacheApiUrl;
-
-
-/***/ }),
-
-/***/ 7233:
-/***/ ((__unused_webpack_module, exports) => {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.isServerErrorStatusCode = exports.isSuccessStatusCode = void 0;
-const isSuccessStatusCode = (statusCode) => {
-    if (!statusCode) {
-        return false;
-    }
-    return statusCode >= 200 && statusCode < 300;
-};
-exports.isSuccessStatusCode = isSuccessStatusCode;
-function isServerErrorStatusCode(statusCode) {
-    if (!statusCode) {
-        return true;
-    }
-    return statusCode >= 500;
-}
-exports.isServerErrorStatusCode = isServerErrorStatusCode;
-
-
-/***/ }),
-
-/***/ 3910:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
-
-"use strict";
-
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.retryTypedResponse = exports.retryHttpClientResponse = void 0;
-const http_client_1 = __nccwpck_require__(6255);
-const http_responses_1 = __nccwpck_require__(7233);
-const core = __importStar(__nccwpck_require__(2186));
-const isRetryableStatusCode = (statusCode) => {
-    if (!statusCode) {
-        return false;
-    }
-    const retryableStatusCodes = [
-        http_client_1.HttpCodes.BadGateway,
-        http_client_1.HttpCodes.ServiceUnavailable,
-        http_client_1.HttpCodes.GatewayTimeout
-    ];
-    return retryableStatusCodes.includes(statusCode);
-};
-const sleep = (milliseconds) => new Promise(resolve => setTimeout(resolve, milliseconds));
-// The default number of retry attempts.
-const DefaultRetryAttempts = 2;
-// The default delay in milliseconds between retry attempts.
-const DefaultRetryDelay = 5000;
-const retry = (name, method, getStatusCode, maxAttempts = DefaultRetryAttempts, delay = DefaultRetryDelay, onError = undefined) => __awaiter(void 0, void 0, void 0, function* () {
-    let errorMessage = '';
-    let attempt = 1;
-    while (attempt <= maxAttempts) {
-        let response = undefined;
-        let statusCode = undefined;
-        let isRetryable = false;
-        try {
-            response = yield method();
-        }
-        catch (error) {
-            if (onError) {
-                response = onError(error);
-            }
-            isRetryable = true;
-            errorMessage = error.message;
-        }
-        if (response) {
-            statusCode = getStatusCode(response);
-            if (!(0, http_responses_1.isServerErrorStatusCode)(statusCode)) {
-                return response;
-            }
-        }
-        if (statusCode) {
-            isRetryable = isRetryableStatusCode(statusCode);
-            errorMessage = `Cache service responded with ${statusCode}`;
-        }
-        core.debug(`${name} - Attempt ${attempt} of ${maxAttempts} failed with error: ${errorMessage}`);
-        if (!isRetryable) {
-            core.debug(`${name} - Error is not retryable`);
-            break;
-        }
-        yield sleep(delay);
-        attempt++;
-    }
-    throw Error(`${name} failed: ${errorMessage}`);
-});
-const retryHttpClientResponse = (name, method, maxAttempts = DefaultRetryAttempts, delay = DefaultRetryDelay) => __awaiter(void 0, void 0, void 0, function* () {
-    return yield retry(name, method, (response) => response.message.statusCode, maxAttempts, delay);
-});
-exports.retryHttpClientResponse = retryHttpClientResponse;
-const retryTypedResponse = (name, method, maxAttempts = DefaultRetryAttempts, delay = DefaultRetryDelay) => retry(name, method, (response) => response.statusCode, maxAttempts, delay, 
-// If the error object contains the statusCode property, extract it and return
-// an TypedResponse<T> so it can be processed by the retry logic.
-(error) => {
-    if (error instanceof http_client_1.HttpClientError) {
-        return {
-            statusCode: error.statusCode,
-            result: null,
-            headers: {},
-            error
-        };
-    }
-    else {
-        return undefined;
-    }
-});
-exports.retryTypedResponse = retryTypedResponse;
-
-
-/***/ }),
-
-/***/ 7042:
+/***/ 5970:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
@@ -337,50 +84,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.uploadFileToActionsCache = void 0;
-const core = __importStar(__nccwpck_require__(2186));
 const fs_1 = __importDefault(__nccwpck_require__(7147));
-const cache_1 = __nccwpck_require__(7799);
-const http_responses_1 = __nccwpck_require__(7233);
-const retry_1 = __nccwpck_require__(3910);
+const core = __importStar(__nccwpck_require__(2186));
+const cache = __importStar(__nccwpck_require__(7799));
 const github_1 = __nccwpck_require__(5438);
 const plugin_retry_1 = __nccwpck_require__(6298);
-const http_client_1 = __nccwpck_require__(8661);
-const uploadChunk = (httpClient) => __awaiter(void 0, void 0, void 0, function* () { });
-const uploadFile = (httpClient, cacheId, filePath, fileSize) => __awaiter(void 0, void 0, void 0, function* () {
-    if (fileSize <= 0)
-        return;
-    const start = 0;
-    const end = fileSize - 1;
-    const contentRange = `bytes ${start}-${end}/*`;
-    core.debug(`Uploading chunk of size ${end - start + 1} bytes at offset ${start} with content range: ${contentRange}`);
-    const additionalHeaders = {
-        'Content-Type': 'application/octet-stream',
-        'Content-Range': contentRange
-    };
-    const resourceUrl = (0, http_client_1.getCacheApiUrl)(`caches/${cacheId.toString()}`);
-    const fd = fs_1.default.openSync(filePath, 'r');
-    const openStream = () => fs_1.default
-        .createReadStream(filePath, {
-        fd,
-        start,
-        end,
-        autoClose: false
-    })
-        .on('error', error => {
-        throw new Error(`Cache upload failed because file read failed with ${error.message}`);
-    });
-    try {
-        const uploadChunkResponse = yield (0, retry_1.retryHttpClientResponse)(`uploadChunk (start: ${start}, end: ${end})`, () => __awaiter(void 0, void 0, void 0, function* () {
-            return httpClient.sendStream('PATCH', resourceUrl, openStream(), additionalHeaders);
-        }));
-        if (!(0, http_responses_1.isSuccessStatusCode)(uploadChunkResponse.message.statusCode)) {
-            throw new Error(`Cache service responded with ${uploadChunkResponse.message.statusCode} during upload chunk.`);
-        }
-    }
-    finally {
-        fs_1.default.closeSync(fd);
-    }
-});
 const resetCacheWithOctokit = (cacheKey) => __awaiter(void 0, void 0, void 0, function* () {
     const token = core.getInput('repo-token');
     const client = (0, github_1.getOctokit)(token, undefined, plugin_retry_1.retry);
@@ -400,58 +108,14 @@ const resetCacheWithOctokit = (cacheKey) => __awaiter(void 0, void 0, void 0, fu
         }
     }
 });
-const reserveCache = (httpClient, fileSize, cacheKey, cacheVersion) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a, _b, _c, _d;
-    const reserveCacheRequest = {
-        key: cacheKey,
-        version: cacheVersion,
-        cacheSize: fileSize
-    };
-    const response = yield (0, retry_1.retryTypedResponse)('reserveCache', () => __awaiter(void 0, void 0, void 0, function* () {
-        return httpClient.postJson((0, http_client_1.getCacheApiUrl)('caches'), reserveCacheRequest);
-    }));
-    // handle 400 in the special way
-    if ((response === null || response === void 0 ? void 0 : response.statusCode) === 400)
-        throw new Error((_b = (_a = response === null || response === void 0 ? void 0 : response.error) === null || _a === void 0 ? void 0 : _a.message) !== null && _b !== void 0 ? _b : `Cache size of ~${Math.round(fileSize / (1024 * 1024))} MB (${fileSize} B) is over the data cap limit, not saving cache.`);
-    const cacheId = (_c = response === null || response === void 0 ? void 0 : response.result) === null || _c === void 0 ? void 0 : _c.cacheId;
-    if (cacheId === undefined)
-        throw new cache_1.ReserveCacheError(`Unable to reserve cache with key ${cacheKey}, another job may be creating this cache. More details: ${(_d = response === null || response === void 0 ? void 0 : response.error) === null || _d === void 0 ? void 0 : _d.message}`);
-    return cacheId;
-});
-const commitCache = (httpClient, cacheId, filesize) => __awaiter(void 0, void 0, void 0, function* () {
-    const response = (yield (0, retry_1.retryTypedResponse)('commitCache', () => __awaiter(void 0, void 0, void 0, function* () {
-        return httpClient.postJson((0, http_client_1.getCacheApiUrl)(`caches/${cacheId.toString()}`), {
-            size: filesize
-        });
-    })));
-    if (!(0, http_responses_1.isSuccessStatusCode)(response.statusCode)) {
-        throw new Error(`Cache service responded with ${response.statusCode} during commit cache.`);
-    }
-});
 const uploadFileToActionsCache = (filePath, cacheKey, cacheVersion) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        yield resetCacheWithOctokit(cacheKey);
-        const fileSize = fs_1.default.statSync(filePath).size;
-        if (fileSize === 0) {
-            core.info(`the cache ${cacheKey} will be removed`);
-            return;
-        }
-        const httpClient = (0, http_client_1.createActionsCacheClient)();
-        const cacheId = yield reserveCache(httpClient, fileSize, cacheKey, cacheVersion);
-        yield uploadFile(httpClient, cacheId, filePath, fileSize);
-        yield commitCache(httpClient, cacheId, fileSize);
+    yield resetCacheWithOctokit(cacheKey);
+    const fileSize = fs_1.default.statSync(filePath).size;
+    if (fileSize === 0) {
+        core.info(`the cache ${cacheKey} will be removed`);
+        return;
     }
-    catch (error) {
-        const typedError = error;
-        if (typedError.name === cache_1.ValidationError.name) {
-            throw error;
-        }
-        if (typedError.name === cache_1.ReserveCacheError.name) {
-            core.info(`Failed to save: ${typedError.message}`);
-            return;
-        }
-        core.warning(`Failed to save: ${typedError.message}`);
-    }
+    cache.saveCache([filePath], cacheKey);
 });
 exports.uploadFileToActionsCache = uploadFileToActionsCache;
 
@@ -2016,8 +1680,12 @@ const fs_1 = __importDefault(__nccwpck_require__(7147));
 const path_1 = __importDefault(__nccwpck_require__(1017));
 const os_1 = __importDefault(__nccwpck_require__(2037));
 const core = __importStar(__nccwpck_require__(2186));
-const upload_1 = __nccwpck_require__(7042);
-const download_1 = __nccwpck_require__(8262);
+const download_1 = __nccwpck_require__(8802);
+const upload_1 = __nccwpck_require__(5970);
+/*
+import {uploadFileToActionsCache} from '../actions-cache-internal/upload';
+import {downloadFileFromActionsCache} from '../actions-cache-internal/download';
+ */
 const CACHE_KEY = '_state';
 const CACHE_VERSION = '1';
 const STATE_FILE = 'state.txt';

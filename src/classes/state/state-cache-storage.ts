@@ -3,8 +3,12 @@ import fs from 'fs';
 import path from 'path';
 import os from 'os';
 import * as core from '@actions/core';
-import {uploadFileToActionsCache} from '../actions-cache/upload';
-import {downloadFileFromActionsCache} from '../actions-cache/download';
+import {downloadFileFromActionsCache} from '../actions-cache-hilevel/download';
+import {uploadFileToActionsCache} from '../actions-cache-hilevel/upload';
+/*
+import {uploadFileToActionsCache} from '../actions-cache-internal/upload';
+import {downloadFileFromActionsCache} from '../actions-cache-internal/download';
+ */
 
 const CACHE_KEY = '_state';
 const CACHE_VERSION = '1';

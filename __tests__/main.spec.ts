@@ -1213,6 +1213,116 @@ test('stale label should be removed if a comment was added to a stale issue', as
   expect(processor.removedLabelIssues).toHaveLength(1);
 });
 
+test('when the option "ignoreReactions" is set to false, stale label should be removed if a reaction was added to a stale issue', async () => {
+  const opts = {
+    ...DefaultProcessorOptions,
+    removeStaleWhenUpdated: true,
+    ignoreReactions: false
+  };
+  const TestIssueList: Issue[] = [
+    generateIssue(
+      opts,
+      1,
+      'An issue that should un-stale',
+      '2020-01-01T17:00:00Z',
+      '2020-01-01T17:00:00Z',
+      false,
+      ['Stale']
+    )
+  ];
+  const processor = new IssuesProcessorMock(
+    opts,
+    async p => (p === 1 ? TestIssueList : []),
+    async () => [],
+    async () => [
+      {
+        content: '+1',
+        created_at: '2020-01-07T17:00:00Z'
+      }
+    ], // return a fake reaction to indicate there was an update
+    async () => new Date().toDateString()
+  );
+
+  // process our fake issue list
+  await processor.processIssues(1);
+
+  expect(processor.closedIssues).toHaveLength(0);
+  expect(processor.staleIssues).toHaveLength(0);
+  expect(processor.removedLabelIssues).toHaveLength(1);
+});
+
+test('when the option "ignoreReactions" is not set, stale label should not be removed if a reaction was added to a stale issue', async () => {
+  const opts = {...DefaultProcessorOptions, removeStaleWhenUpdated: true};
+  const TestIssueList: Issue[] = [
+    generateIssue(
+      opts,
+      1,
+      'An issue that should un-stale',
+      '2020-01-01T17:00:00Z',
+      '2020-01-01T17:00:00Z',
+      false,
+      ['Stale']
+    )
+  ];
+  const processor = new IssuesProcessorMock(
+    opts,
+    async p => (p === 1 ? TestIssueList : []),
+    async () => [],
+    async () => [
+      {
+        content: '+1',
+        created_at: '2020-01-07T17:00:00Z'
+      }
+    ], // return a fake reaction to indicate there was an update
+    async () => new Date().toDateString()
+  );
+
+  // process our fake issue list
+  await processor.processIssues(1);
+
+  expect(processor.closedIssues).toHaveLength(1);
+  expect(processor.staleIssues).toHaveLength(0);
+  expect(processor.removedLabelIssues).toHaveLength(0);
+});
+
+test('when the option "ignoreReactions" is set to true, stale label should not be removed if a reaction was added to a stale issue', async () => {
+  const opts = {
+    ...DefaultProcessorOptions,
+    removeStaleWhenUpdated: true,
+    ignoreReactions: true
+  };
+  const TestIssueList: Issue[] = [
+    generateIssue(
+      opts,
+      1,
+      'An issue that should un-stale',
+      '2020-01-01T17:00:00Z',
+      '2020-01-01T17:00:00Z',
+      false,
+      ['Stale']
+    )
+  ];
+  const processor = new IssuesProcessorMock(
+    opts,
+    async p => (p === 1 ? TestIssueList : []),
+    async () => [],
+    async () => [
+      {
+        content: '+1',
+        created_at: '2020-01-07T17:00:00Z'
+      }
+    ], // return a fake reaction to indicate there was an update
+    async () => new Date().toDateString()
+  );
+
+  // process our fake issue list
+  await processor.processIssues(1);
+
+  expect(processor.closedIssues).toHaveLength(1);
+  expect(processor.staleIssues).toHaveLength(0);
+  expect(processor.removedLabelIssues).toHaveLength(0);
+});
+
 test('when the option "labelsToAddWhenUnstale" is set, the labels should be added when unstale', async () => {
   expect.assertions(4);
   const opts = {

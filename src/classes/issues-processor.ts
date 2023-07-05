@@ -751,7 +751,9 @@ export class IssuesProcessor {
       shouldRemoveStaleWhenUpdated &&
       (issueHasUpdateSinceStale ||
         issueHasCommentsSinceStale ||
-        issueHasReactionsSinceStale) &&
+        (this.options.ignoreReactions === false
+          ? issueHasReactionsSinceStale
+          : false)) &&
       !issue.markedStaleThisRun
     ) {
       issueLogger.info(
@@ -790,7 +792,9 @@ export class IssuesProcessor {
     if (
       !issueHasCommentsSinceStale &&
       !issueHasUpdateInCloseWindow &&
-      !issueHasReactionsSinceStale
+      (this.options.ignoreReactions === false
+        ? !issueHasReactionsSinceStale
+        : true)
     ) {
       issueLogger.info(
         `Closing $$type because it was last updated on: ${LoggerService.cyan(

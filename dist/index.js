@@ -408,6 +408,8 @@ class IssuesProcessor {
         this.addedLabelIssues = [];
         this.addedCloseCommentIssues = [];
         this._logger = new logger_1.Logger();
+        this._lastIssueEvents = [];
+        this._lastIssueEventsIssueId = -1;
         this.options = options;
         this.state = state;
         this.client = (0, github_1.getOctokit)(this.options.repoToken, undefined, plugin_retry_1.retry);
@@ -464,6 +466,34 @@ class IssuesProcessor {
             return this.processIssues(page + 1);
         });
     }
+    getIssueEvents(issue) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (issue.number !== this._lastIssueEventsIssueId) {
+                const options = this.client.rest.issues.listEvents.endpoint.merge({
+                    owner: github_1.context.repo.owner,
+                    repo: github_1.context.repo.repo,
+                    per_page: 100,
+                    issue_number: issue.number
+                });
+                const events = yield this.client.paginate(options);
+                this._lastIssueEvents = events.reverse();
+                this._lastIssueEventsIssueId = issue.number;
+            }
+            return this._lastIssueEvents;
+        });
+    }
+    getPinnedStatus(issue) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const events = yield this.getIssueEvents(issue);
+            const pinnedEvent = events.findIndex(event => event.event === 'pinned');
+            if (pinnedEvent == -1)
+                return false;
+            const unpinnedEvent = events.findIndex(event => event.event === 'unpinned');
+            if (unpinnedEvent == -1)
+                return true;
+            return pinnedEvent < unpinnedEvent;
+        });
+    }
     processIssue(issue, labelsToAddWhenUnstale, labelsToRemoveWhenUnstale, labelsToRemoveWhenStale) {
         var _a;
         return __awaiter(this, void 0, void 0, function* () {
@@ -503,6 +533,11 @@ class IssuesProcessor {
                 issueLogger.info(`Skipping this $$type because its assignees list is empty`);
                 IssuesProcessor._endIssueProcessing(issue);
                 return; // If the issue has an 'include-only-assigned' option set, process only issues with nonempty assignees list
+            }
+            if (yield this._isSkipPinned(issue)) {
+                issueLogger.info('Skipping this issue because it is pinned');
+                IssuesProcessor._endIssueProcessing(issue);
+                return; // Don't process pinned issues
             }
             const onlyLabels = (0, words_to_list_1.wordsToList)(this._getOnlyLabels(issue));
             if (onlyLabels.length > 0) {
@@ -702,15 +737,8 @@ class IssuesProcessor {
             issueLogger.info(`Checking for label on this $$type`);
             this._consumeIssueOperation(issue);
             (_a = this.statistics) === null || _a === void 0 ? void 0 : _a.incrementFetchedItemsEventsCount();
-            const options = this.client.rest.issues.listEvents.endpoint.merge({
-                owner: github_1.context.repo.owner,
-                repo: github_1.context.repo.repo,
-                per_page: 100,
-                issue_number: issue.number
-            });
-            const events = yield this.client.paginate(options);
-            const reversedEvents = events.reverse();
-            const staleLabeledEvent = reversedEvents.find(event => event.event === 'labeled' &&
+            const events = yield this.getIssueEvents(issue);
+            const staleLabeledEvent = events.find(event => event.event === 'labeled' &&
                 (0, clean_label_1.cleanLabel)(event.label.name) === (0, clean_label_1.cleanLabel)(label));
             if (!staleLabeledEvent) {
                 // Must be old rather than labeled
@@ -1024,6 +1052,11 @@ class IssuesProcessor {
     }
     _isIncludeOnlyAssigned(issue) {
         return this.options.includeOnlyAssigned && !issue.hasAssignees;
+    }
+    _isSkipPinned(issue) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return (this.options.exemptPinnedIssues && (yield this.getPinnedStatus(issue)));
+        });
     }
     _getAnyOfLabels(issue) {
         if (issue.isPullRequest) {
@@ -2461,6 +2494,7 @@ function _getAndValidateArgs() {
         staleIssueLabel: core.getInput('stale-issue-label', { required: true }),
         closeIssueLabel: core.getInput('close-issue-label'),
         exemptIssueLabels: core.getInput('exempt-issue-labels'),
+        exemptPinnedIssues: core.getInput('exempt-pinned-issues') === 'true',
         stalePrLabel: core.getInput('stale-pr-label', { required: true }),
         closePrLabel: core.getInput('close-pr-label'),
         exemptPrLabels: core.getInput('exempt-pr-labels'),

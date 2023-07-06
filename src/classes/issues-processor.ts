@@ -193,6 +193,35 @@ export class IssuesProcessor {
     return this.processIssues(page + 1);
   }
 
+  private _lastIssueEvents: IIssueEvent[] = [];
+  private _lastIssueEventsIssueId = -1;
+  async getIssueEvents(issue: Issue): Promise<IIssueEvent[]> {
+    if (issue.number !== this._lastIssueEventsIssueId) {
+      const options = this.client.rest.issues.listEvents.endpoint.merge({
+        owner: context.repo.owner,
+        repo: context.repo.repo,
+        per_page: 100,
+        issue_number: issue.number
+      });
+      const events: IIssueEvent[] = await this.client.paginate(options);
+      this._lastIssueEvents = events.reverse();
+      this._lastIssueEventsIssueId = issue.number;
+    }
+    return this._lastIssueEvents;
+  }
+
+  async getPinnedStatus(issue: Issue): Promise<boolean> {
+    const events = await this.getIssueEvents(issue);
+    const pinnedEvent = events.findIndex(event => event.event === 'pinned');
+
+    if (pinnedEvent == -1) return false;
+
+    const unpinnedEvent = events.findIndex(event => event.event === 'unpinned');
+    if (unpinnedEvent == -1) return true;
+
+    return pinnedEvent < unpinnedEvent;
+  }
+
   async processIssue(
     issue: Issue,
     labelsToAddWhenUnstale: Readonly<string>[],
@@ -246,6 +275,12 @@ export class IssuesProcessor {
       );
       IssuesProcessor._endIssueProcessing(issue);
       return; // If the issue has an 'include-only-assigned' option set, process only issues with nonempty assignees list
+    }
+
+    if (await this._isSkipPinned(issue)) {
+      issueLogger.info('Skipping this issue because it is pinned');
+      IssuesProcessor._endIssueProcessing(issue);
+      return; // Don't process pinned issues
     }
 
     const onlyLabels: string[] = wordsToList(this._getOnlyLabels(issue));
@@ -593,17 +628,9 @@ export class IssuesProcessor {
 
     this._consumeIssueOperation(issue);
     this.statistics?.incrementFetchedItemsEventsCount();
-    const options = this.client.rest.issues.listEvents.endpoint.merge({
-      owner: context.repo.owner,
-      repo: context.repo.repo,
-      per_page: 100,
-      issue_number: issue.number
-    });
 
-    const events: IIssueEvent[] = await this.client.paginate(options);
-    const reversedEvents = events.reverse();
-
-    const staleLabeledEvent = reversedEvents.find(
+    const events = await this.getIssueEvents(issue);
+    const staleLabeledEvent = events.find(
       event =>
         event.event === 'labeled' &&
         cleanLabel(event.label.name) === cleanLabel(label)
@@ -1072,6 +1099,12 @@ export class IssuesProcessor {
 
   private _isIncludeOnlyAssigned(issue: Issue): boolean {
     return this.options.includeOnlyAssigned && !issue.hasAssignees;
+  }
+
+  private async _isSkipPinned(issue: Issue): Promise<boolean> {
+    return (
+      this.options.exemptPinnedIssues && (await this.getPinnedStatus(issue))
+    );
   }
 
   private _getAnyOfLabels(issue: Issue): string {

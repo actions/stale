@@ -4,6 +4,7 @@ import {IIssuesProcessorOptions} from '../src/interfaces/issues-processor-option
 import {IssuesProcessorMock} from './classes/issues-processor-mock';
 import {DefaultProcessorOptions} from './constants/default-processor-options';
 import {generateIssue} from './functions/generate-issue';
+import {StateMock} from './classes/state-mock';
 
 let issuesProcessorBuilder: IssuesProcessorBuilder;
 let issuesProcessor: IssuesProcessorMock;
@@ -1102,6 +1103,7 @@ class IssuesProcessorBuilder {
           issue.title ?? 'dummy-title',
           issue.updated_at ?? new Date().toDateString(),
           issue.created_at ?? new Date().toDateString(),
+          false,
           !!issue.pull_request,
           issue.labels ? issue.labels.map(label => label.name || '') : []
         )
@@ -1139,6 +1141,7 @@ class IssuesProcessorBuilder {
   build(): IssuesProcessorMock {
     return new IssuesProcessorMock(
       this._options,
+      new StateMock(),
       async p => (p === 1 ? this._issues : []),
       async () => [],
       async () => new Date().toDateString()

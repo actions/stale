@@ -9,6 +9,7 @@ export function generateIIssue(
     labels: [],
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
+    draft: false,
     number: Math.round(Math.random() * 5000),
     pull_request: null,
     title: 'dummy-title',

@@ -3,10 +3,12 @@ import {IssuesProcessor} from '../../src/classes/issues-processor';
 import {IComment} from '../../src/interfaces/comment';
 import {IIssuesProcessorOptions} from '../../src/interfaces/issues-processor-options';
 import {IPullRequest} from '../../src/interfaces/pull-request';
+import {IState} from '../../src/interfaces/state/state';
 
 export class IssuesProcessorMock extends IssuesProcessor {
   constructor(
     options: IIssuesProcessorOptions,
+    state: IState,
     getIssues?: (page: number) => Promise<Issue[]>,
     listIssueComments?: (
       issue: Issue,
@@ -18,7 +20,7 @@ export class IssuesProcessorMock extends IssuesProcessor {
     ) => Promise<string | undefined>,
     getPullRequest?: (issue: Issue) => Promise<IPullRequest | undefined | void>
   ) {
-    super(options);
+    super(options, state);
 
     if (getIssues) {
       this.getIssues = getIssues;

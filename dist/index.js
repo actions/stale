@@ -787,7 +787,9 @@ class IssuesProcessor {
             if (shouldRemoveStaleWhenUpdated &&
                 (issueHasUpdateSinceStale ||
                     issueHasCommentsSinceStale ||
-                    issueHasReactionsSinceStale) &&
+                    (this.options.ignoreReactions === false
+                        ? issueHasReactionsSinceStale
+                        : false)) &&
                 !issue.markedStaleThisRun) {
                 issueLogger.info(`Remove the stale label since the $$type has been updated and the workflow should remove the stale label when updated`);
                 yield this._removeStaleLabel(issue, staleLabel);
@@ -805,7 +807,9 @@ class IssuesProcessor {
             issueLogger.info(`$$type has been updated in the last ${daysBeforeClose} days: ${logger_service_1.LoggerService.cyan(issueHasUpdateInCloseWindow)}`);
             if (!issueHasCommentsSinceStale &&
                 !issueHasUpdateInCloseWindow &&
-                !issueHasReactionsSinceStale) {
+                (this.options.ignoreReactions === false
+                    ? !issueHasReactionsSinceStale
+                    : true)) {
                 issueLogger.info(`Closing $$type because it was last updated on: ${logger_service_1.LoggerService.cyan(issue.updated_at)}`);
                 yield this._closeIssue(issue, closeMessage, closeLabel);
                 if (this.options.deleteBranch && issue.pull_request) {
@@ -2308,6 +2312,7 @@ function _getAndValidateArgs() {
         ignoreUpdates: core.getInput('ignore-updates') === 'true',
         ignoreIssueUpdates: _toOptionalBoolean('ignore-issue-updates'),
         ignorePrUpdates: _toOptionalBoolean('ignore-pr-updates'),
+        ignoreReactions: _toOptionalBoolean('ignore-reactions'),
         exemptDraftPr: core.getInput('exempt-draft-pr') === 'true',
         closeIssueReason: core.getInput('close-issue-reason'),
         includeOnlyAssigned: core.getInput('include-only-assigned') === 'true'

@@ -4,6 +4,7 @@ import {IComment} from '../../src/interfaces/comment';
 import {IIssuesProcessorOptions} from '../../src/interfaces/issues-processor-options';
 import {IPullRequest} from '../../src/interfaces/pull-request';
 import {IState} from '../../src/interfaces/state/state';
+import {IIssueEvent} from '../../src/interfaces/issue-event';
 
 export class IssuesProcessorMock extends IssuesProcessor {
   constructor(
@@ -18,7 +19,8 @@ export class IssuesProcessorMock extends IssuesProcessor {
       issue: Issue,
       label: string
     ) => Promise<string | undefined>,
-    getPullRequest?: (issue: Issue) => Promise<IPullRequest | undefined | void>
+    getPullRequest?: (issue: Issue) => Promise<IPullRequest | undefined | void>,
+    getIssueEvents?: (issue: Issue) => Promise<IIssueEvent[]>
   ) {
     super(options, state);
 
@@ -36,6 +38,10 @@ export class IssuesProcessorMock extends IssuesProcessor {
 
     if (getPullRequest) {
       this.getPullRequest = getPullRequest;
+    }
+
+    if (getIssueEvents) {
+      this.getIssueEvents = getIssueEvents;
     }
   }
 }

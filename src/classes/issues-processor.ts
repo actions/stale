@@ -195,7 +195,7 @@ export class IssuesProcessor {
 
   private _lastIssueEvents: IIssueEvent[] = [];
   private _lastIssueEventsIssueId = -1;
-  private async getIssueEvents(issue: Issue): Promise<IIssueEvent[]> {
+  async getIssueEvents(issue: Issue): Promise<IIssueEvent[]> {
     if (issue.number !== this._lastIssueEventsIssueId) {
       const options = this.client.rest.issues.listEvents.endpoint.merge({
         owner: context.repo.owner,

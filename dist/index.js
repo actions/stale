@@ -1982,6 +1982,7 @@ var Option;
     Option["IgnoreUpdates"] = "ignore-updates";
     Option["IgnoreIssueUpdates"] = "ignore-issue-updates";
     Option["IgnorePrUpdates"] = "ignore-pr-updates";
+    Option["IgnoreReactions"] = "ignore-reactions";
     Option["ExemptDraftPr"] = "exempt-draft-pr";
     Option["CloseIssueReason"] = "close-issue-reason";
 })(Option = exports.Option || (exports.Option = {}));

@@ -201,7 +201,7 @@ inputs:
     default: ''
     required: false
   ignore-reactions:
-    description: 'Any reaction can reset the stale idle time on the issues/PRs'
+    description: 'Any reaction can reset the stale idle time on the issues/PRs.'
     default: ''
     required: false
   include-only-assigned:

@@ -13,7 +13,34 @@ async function _run(): Promise<void> {
     await state.restore();
 
     const issueProcessor: IssuesProcessor = new IssuesProcessor(args, state);
+
+    const rateLimitAtStart = await issueProcessor.getRateLimit();
+    if (rateLimitAtStart) {
+      core.debug(
+        `Github API rate status: limit=${rateLimitAtStart.limit}, used=${rateLimitAtStart.used}, remaining=${rateLimitAtStart.remaining}`
+      );
+    }
+
     await issueProcessor.processIssues();
+
+    const rateLimitAtEnd = await issueProcessor.getRateLimit();
+
+    if (rateLimitAtEnd) {
+      core.debug(
+        `Github API rate status: limit=${rateLimitAtEnd.limit}, used=${rateLimitAtEnd.used}, remaining=${rateLimitAtEnd.remaining}`
+      );
+
+      if (rateLimitAtStart)
+        core.info(
+          `Github API rate used: ${
+            rateLimitAtStart.remaining - rateLimitAtEnd.remaining
+          }`
+        );
+
+      core.info(
+        `Github API rate remaining: ${rateLimitAtEnd.remaining}; reset at: ${rateLimitAtEnd.reset}`
+      );
+    }
 
     await state.persist();
 

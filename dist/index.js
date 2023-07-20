@@ -1611,15 +1611,28 @@ const unlinkSafely = (filePath) => {
         /* ignore */
     }
 };
-const resetCacheWithOctokit = (cacheKey) => __awaiter(void 0, void 0, void 0, function* () {
+const getOctokitClient = () => {
     const token = core.getInput('repo-token');
-    const client = (0, github_1.getOctokit)(token, undefined, plugin_retry_1.retry);
-    // TODO: better way to get repository?
-    const repo = process.env['GITHUB_REPOSITORY'];
+    return (0, github_1.getOctokit)(token, undefined, plugin_retry_1.retry);
+};
+const checkCacheExist = (cacheKey) => __awaiter(void 0, void 0, void 0, function* () {
+    const client = getOctokitClient();
+    try {
+        const issueResult = yield client.request(`/repos/${github_1.context.repo.owner}/${github_1.context.repo.repo}/actions/caches`);
+        const caches = issueResult.data['actions_caches'] || [];
+        return Boolean(caches.find(cache => cache['key'] === cacheKey));
+    }
+    catch (error) {
+        core.debug(`$Error checking if cache exist: ${error.message}`);
+    }
+    return false;
+});
+const resetCacheWithOctokit = (cacheKey) => __awaiter(void 0, void 0, void 0, function* () {
+    const client = getOctokitClient();
     core.debug(`remove cache "${cacheKey}"`);
     try {
         // TODO: replace with client.rest.
-        yield client.request(`DELETE /repos/${repo}/actions/caches?key=${cacheKey}`);
+        yield client.request(`DELETE /repos/${github_1.context.repo.owner}/${github_1.context.repo.repo}/actions/caches?key=${cacheKey}`);
     }
     catch (error) {
         if (error.status) {
@@ -1659,9 +1672,14 @@ class StateCacheStorage {
             const filePath = path_1.default.join(tmpDir, STATE_FILE);
             unlinkSafely(filePath);
             try {
+                const cacheExist = yield checkCacheExist(CACHE_KEY);
+                if (!cacheExist) {
+                    core.info('The saved state was not found, the process starts from the first issue.');
+                    return '';
+                }
                 yield cache.restoreCache([path_1.default.dirname(filePath)], CACHE_KEY);
                 if (!fs_1.default.existsSync(filePath)) {
-                    core.info('The stored state has not been found, probably because of the very first run or the previous run failed');
+                    core.warning('Unknown error when unpacking the cache, the process starts from the first issue.');
                     return '';
                 }
                 return fs_1.default.readFileSync(path_1.default.join(tmpDir, STATE_FILE), {
@@ -1766,7 +1784,8 @@ class State {
             this.reset();
             const serialized = yield this.stateStorage.restore();
             this.deserialize(serialized);
-            core.info(`state: restored with info about ${this.processedIssuesIDs.size} issue(s)`);
+            if (this.processedIssuesIDs.size > 0)
+                core.info(`state: restored with info about ${this.processedIssuesIDs.size} issue(s)`);
         });
     }
 }

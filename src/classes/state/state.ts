@@ -64,8 +64,9 @@ export class State implements IState {
     this.reset();
     const serialized = await this.stateStorage.restore();
     this.deserialize(serialized);
-    core.info(
-      `state: restored with info about ${this.processedIssuesIDs.size} issue(s)`
-    );
+    if (this.processedIssuesIDs.size > 0)
+      core.info(
+        `state: restored with info about ${this.processedIssuesIDs.size} issue(s)`
+      );
   }
 }

@@ -3,7 +3,7 @@ import fs from 'fs';
 import path from 'path';
 import os from 'os';
 import * as core from '@actions/core';
-import {getOctokit} from '@actions/github';
+import {context, getOctokit} from '@actions/github';
 import {retry as octokitRetry} from '@octokit/plugin-retry';
 import * as cache from '@actions/cache';
 
@@ -25,16 +25,32 @@ const unlinkSafely = (filePath: string) => {
   }
 };
 
-const resetCacheWithOctokit = async (cacheKey: string): Promise<void> => {
+const getOctokitClient = () => {
   const token = core.getInput('repo-token');
-  const client = getOctokit(token, undefined, octokitRetry);
-  // TODO: better way to get repository?
-  const repo = process.env['GITHUB_REPOSITORY'];
+  return getOctokit(token, undefined, octokitRetry);
+};
+
+const checkCacheExist = async (cacheKey: string): Promise<boolean> => {
+  const client = getOctokitClient();
+  try {
+    const issueResult = await client.request(
+      `/repos/${context.repo.owner}/${context.repo.repo}/actions/caches`
+    );
+    const caches: Array<{key?: string}> =
+      issueResult.data['actions_caches'] || [];
+    return Boolean(caches.find(cache => cache['key'] === cacheKey));
+  } catch (error) {
+    core.debug(`$Error checking if cache exist: ${error.message}`);
+  }
+  return false;
+};
+const resetCacheWithOctokit = async (cacheKey: string): Promise<void> => {
+  const client = getOctokitClient();
   core.debug(`remove cache "${cacheKey}"`);
   try {
     // TODO: replace with client.rest.
     await client.request(
-      `DELETE /repos/${repo}/actions/caches?key=${cacheKey}`
+      `DELETE /repos/${context.repo.owner}/${context.repo.repo}/actions/caches?key=${cacheKey}`
     );
   } catch (error) {
     if (error.status) {
@@ -76,11 +92,19 @@ export class StateCacheStorage implements IStateStorage {
     const filePath = path.join(tmpDir, STATE_FILE);
     unlinkSafely(filePath);
     try {
+      const cacheExist = await checkCacheExist(CACHE_KEY);
+      if (!cacheExist) {
+        core.info(
+          'The saved state was not found, the process starts from the first issue.'
+        );
+        return '';
+      }
+
       await cache.restoreCache([path.dirname(filePath)], CACHE_KEY);
 
       if (!fs.existsSync(filePath)) {
-        core.info(
-          'The stored state has not been found, probably because of the very first run or the previous run failed'
+        core.warning(
+          'Unknown error when unpacking the cache, the process starts from the first issue.'
         );
         return '';
       }

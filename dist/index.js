@@ -1615,7 +1615,7 @@ const getOctokitClient = () => {
     const token = core.getInput('repo-token');
     return (0, github_1.getOctokit)(token, undefined, plugin_retry_1.retry);
 };
-const checkCacheExist = (cacheKey) => __awaiter(void 0, void 0, void 0, function* () {
+const checkIfCacheExists = (cacheKey) => __awaiter(void 0, void 0, void 0, function* () {
     const client = getOctokitClient();
     try {
         const issueResult = yield client.request(`/repos/${github_1.context.repo.owner}/${github_1.context.repo.repo}/actions/caches`);
@@ -1623,7 +1623,7 @@ const checkCacheExist = (cacheKey) => __awaiter(void 0, void 0, void 0, function
         return Boolean(caches.find(cache => cache['key'] === cacheKey));
     }
     catch (error) {
-        core.debug(`$Error checking if cache exist: ${error.message}`);
+        core.debug(`Error checking if cache exist: ${error.message}`);
     }
     return false;
 });
@@ -1672,8 +1672,8 @@ class StateCacheStorage {
             const filePath = path_1.default.join(tmpDir, STATE_FILE);
             unlinkSafely(filePath);
             try {
-                const cacheExist = yield checkCacheExist(CACHE_KEY);
-                if (!cacheExist) {
+                const cacheExists = yield checkIfCacheExists(CACHE_KEY);
+                if (!cacheExists) {
                     core.info('The saved state was not found, the process starts from the first issue.');
                     return '';
                 }

@@ -30,7 +30,7 @@ const getOctokitClient = () => {
   return getOctokit(token, undefined, octokitRetry);
 };
 
-const checkCacheExist = async (cacheKey: string): Promise<boolean> => {
+const checkIfCacheExists = async (cacheKey: string): Promise<boolean> => {
   const client = getOctokitClient();
   try {
     const issueResult = await client.request(
@@ -40,7 +40,7 @@ const checkCacheExist = async (cacheKey: string): Promise<boolean> => {
       issueResult.data['actions_caches'] || [];
     return Boolean(caches.find(cache => cache['key'] === cacheKey));
   } catch (error) {
-    core.debug(`$Error checking if cache exist: ${error.message}`);
+    core.debug(`Error checking if cache exist: ${error.message}`);
   }
   return false;
 };
@@ -92,8 +92,8 @@ export class StateCacheStorage implements IStateStorage {
     const filePath = path.join(tmpDir, STATE_FILE);
     unlinkSafely(filePath);
     try {
-      const cacheExist = await checkCacheExist(CACHE_KEY);
-      if (!cacheExist) {
+      const cacheExists = await checkIfCacheExists(CACHE_KEY);
+      if (!cacheExists) {
         core.info(
           'The saved state was not found, the process starts from the first issue.'
         );

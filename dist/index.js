@@ -761,7 +761,7 @@ class IssuesProcessor {
             issueLogger.info(`$$type marked stale on: ${logger_service_1.LoggerService.cyan(markedStaleOn)}`);
             const issueHasCommentsSinceStale = yield this._hasCommentsSince(issue, markedStaleOn, staleMessage);
             issueLogger.info(`$$type has been commented on: ${logger_service_1.LoggerService.cyan(issueHasCommentsSinceStale)}`);
-            const issueHasReactionsSinceStale = yield this._hasReactionsSince(issue, markedStaleOn);
+            const issueHasReactionsSinceStale = yield this._hasReactionsSince(issue, markedStaleOn, this.options.ignoreReactions);
             issueLogger.info(`$$type had a reaction: ${logger_service_1.LoggerService.cyan(issueHasReactionsSinceStale)}`);
             const daysBeforeClose = issue.isPullRequest
                 ? this._getDaysBeforePrClose()
@@ -844,14 +844,17 @@ class IssuesProcessor {
         });
     }
     // find any reactions since the date
-    _hasReactionsSince(issue, sinceDate) {
+    _hasReactionsSince(issue, sinceDate, ignoreReactions) {
         return __awaiter(this, void 0, void 0, function* () {
             const issueLogger = new issue_logger_1.IssueLogger(issue);
-            issueLogger.info(`Checking for reactions on $$type since: ${logger_service_1.LoggerService.cyan(sinceDate)}`);
+            let reactions = [];
             if (!sinceDate) {
                 return true;
             }
-            const reactions = yield this.listIssueReactions(issue, sinceDate);
+            if (ignoreReactions === false) {
+                issueLogger.info(`Checking for reactions on $$type since: ${logger_service_1.LoggerService.cyan(sinceDate)}`);
+                reactions = yield this.listIssueReactions(issue, sinceDate);
+            }
             return reactions.length > 0;
         });
     }

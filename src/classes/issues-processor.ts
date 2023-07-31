@@ -690,7 +690,8 @@ export class IssuesProcessor {
 
     const issueHasReactionsSinceStale: boolean = await this._hasReactionsSince(
       issue,
-      markedStaleOn
+      markedStaleOn,
+      this.options.ignoreReactions
     );
     issueLogger.info(
       `$$type had a reaction: ${LoggerService.cyan(
@@ -857,19 +858,24 @@ export class IssuesProcessor {
   // find any reactions since the date
   private async _hasReactionsSince(
     issue: Issue,
-    sinceDate: string
+    sinceDate: string,
+    ignoreReactions: boolean | undefined
   ): Promise<boolean> {
     const issueLogger: IssueLogger = new IssueLogger(issue);
-
-    issueLogger.info(
-      `Checking for reactions on $$type since: ${LoggerService.cyan(sinceDate)}`
-    );
+    let reactions: IReaction[] = [];
 
     if (!sinceDate) {
       return true;
     }
 
-    const reactions = await this.listIssueReactions(issue, sinceDate);
+    if (ignoreReactions === false) {
+      issueLogger.info(
+        `Checking for reactions on $$type since: ${LoggerService.cyan(
+          sinceDate
+        )}`
+      );
+      reactions = await this.listIssueReactions(issue, sinceDate);
+    }
 
     return reactions.length > 0;
   }

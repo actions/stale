@@ -847,14 +847,14 @@ class IssuesProcessor {
     _hasReactionsSince(issue, sinceDate, ignoreReactions) {
         return __awaiter(this, void 0, void 0, function* () {
             const issueLogger = new issue_logger_1.IssueLogger(issue);
-            let reactions = [];
             if (!sinceDate) {
                 return true;
             }
-            if (ignoreReactions === false) {
-                issueLogger.info(`Checking for reactions on $$type since: ${logger_service_1.LoggerService.cyan(sinceDate)}`);
-                reactions = yield this.listIssueReactions(issue, sinceDate);
+            if (ignoreReactions === true || ignoreReactions === undefined) {
+                return false;
             }
+            issueLogger.info(`Checking for reactions on $$type since: ${logger_service_1.LoggerService.cyan(sinceDate)}`);
+            const reactions = yield this.listIssueReactions(issue, sinceDate);
             return reactions.length > 0;
         });
     }

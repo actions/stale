@@ -862,20 +862,19 @@ export class IssuesProcessor {
     ignoreReactions: boolean | undefined
   ): Promise<boolean> {
     const issueLogger: IssueLogger = new IssueLogger(issue);
-    let reactions: IReaction[] = [];
 
     if (!sinceDate) {
       return true;
     }
 
-    if (ignoreReactions === false) {
-      issueLogger.info(
-        `Checking for reactions on $$type since: ${LoggerService.cyan(
-          sinceDate
-        )}`
-      );
-      reactions = await this.listIssueReactions(issue, sinceDate);
+    if (ignoreReactions === true || ignoreReactions === undefined) {
+      return false;
     }
+
+    issueLogger.info(
+      `Checking for reactions on $$type since: ${LoggerService.cyan(sinceDate)}`
+    );
+    const reactions = await this.listIssueReactions(issue, sinceDate);
 
     return reactions.length > 0;
   }

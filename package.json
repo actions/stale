@@ -43,13 +43,13 @@
     "@octokit/core": "^4.2.0",
     "@octokit/plugin-retry": "^4.1.1",
     "lodash.deburr": "^4.1.0",
-    "semver": "^7.3.5"
+    "semver": "^7.5.4"
   },
   "devDependencies": {
     "@types/jest": "^29.5.3",
     "@types/lodash.deburr": "^4.1.6",
     "@types/node": "^18.15.11",
-    "@types/semver": "^7.3.5",
+    "@types/semver": "^7.5.0",
     "@typescript-eslint/eslint-plugin": "^5.54.0",
     "@typescript-eslint/parser": "^5.62.0",
     "@vercel/ncc": "^0.36.1",

@@ -27,6 +27,9 @@ import {Statistics} from './statistics';
 import {LoggerService} from '../services/logger.service';
 import {OctokitIssue} from '../interfaces/issue';
 import {retry} from '@octokit/plugin-retry';
+import {IState} from '../interfaces/state/state';
+import {IRateLimit} from '../interfaces/rate-limit';
+import {RateLimit} from './rate-limit';
 
 /***
  * Handle processing of issues for staleness/closure.
@@ -73,9 +76,11 @@ export class IssuesProcessor {
   readonly addedCloseCommentIssues: Issue[] = [];
   readonly statistics: Statistics | undefined;
   private readonly _logger: Logger = new Logger();
+  private readonly state: IState;
 
-  constructor(options: IIssuesProcessorOptions) {
+  constructor(options: IIssuesProcessorOptions, state: IState) {
     this.options = options;
+    this.state = state;
     this.client = getOctokit(this.options.repoToken, undefined, retry);
     this.operations = new StaleOperations(this.options);
 
@@ -111,6 +116,8 @@ export class IssuesProcessor {
         ?.setOperationsCount(this.operations.getConsumedOperationsCount())
         .logStats();
 
+      this.state.reset();
+
       return this.operations.getRemainingOperationsCount();
     } else {
       this._logger.info(
@@ -142,6 +149,12 @@ export class IssuesProcessor {
       }
 
       const issueLogger: IssueLogger = new IssueLogger(issue);
+      if (this.state.isIssueProcessed(issue)) {
+        issueLogger.info(
+          '           $$type skipped due being processed during the previous run'
+        );
+        continue;
+      }
       await issueLogger.grouping(`$$type #${issue.number}`, async () => {
         await this.processIssue(
           issue,
@@ -150,6 +163,7 @@ export class IssuesProcessor {
           labelsToRemoveWhenStale
         );
       });
+      this.state.addIssueToProcessed(issue);
     }
 
     if (!this.operations.hasRemainingOperations()) {
@@ -597,7 +611,8 @@ export class IssuesProcessor {
       this.statistics?.incrementFetchedItemsCount(issueResult.data.length);
 
       return issueResult.data.map(
-        (issue: Readonly<OctokitIssue>): Issue => new Issue(this.options, issue)
+        (issue): Issue =>
+          new Issue(this.options, issue as Readonly<OctokitIssue>)
       );
     } catch (error) {
       throw Error(`Getting issues was blocked by the error: ${error.message}`);
@@ -656,6 +671,16 @@ export class IssuesProcessor {
       return pullRequest.data;
     } catch (error) {
       issueLogger.error(`Error when getting this $$type: ${error.message}`);
+    }
+  }
+
+  async getRateLimit(): Promise<IRateLimit | undefined> {
+    const logger: Logger = new Logger();
+    try {
+      const rateLimitResult = await this.client.rest.rateLimit.get();
+      return new RateLimit(rateLimitResult.data.rate);
+    } catch (error) {
+      logger.error(`Error when getting rateLimit: ${error.message}`);
     }
   }
 

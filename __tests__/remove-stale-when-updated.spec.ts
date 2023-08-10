@@ -5,6 +5,7 @@ import {ILabel} from '../src/interfaces/label';
 import {IssuesProcessorMock} from './classes/issues-processor-mock';
 import {DefaultProcessorOptions} from './constants/default-processor-options';
 import {generateIssue} from './functions/generate-issue';
+import {alwaysFalseStateMock} from './classes/state-mock';
 
 let issuesProcessorBuilder: IssuesProcessorBuilder;
 let issuesProcessor: IssuesProcessorMock;
@@ -141,7 +142,9 @@ describe('remove-issue-stale-when-updated option', (): void => {
 
       test('should not remove the stale label on the pull request', async (): Promise<void> => {
         expect.assertions(1);
-        issuesProcessor = issuesProcessorBuilder.stalePrs([{}]).build();
+        issuesProcessor = issuesProcessorBuilder
+          .stalePrs([{draft: true}])
+          .build();
 
         await issuesProcessor.processIssues();
 
@@ -454,6 +457,7 @@ class IssuesProcessorBuilder {
           issue.title ?? 'dummy-title',
           issue.updated_at ?? new Date().toDateString(),
           issue.created_at ?? new Date().toDateString(),
+          !!issue.draft,
           !!issue.pull_request,
           issue.labels ? issue.labels.map(label => label.name || '') : []
         )
@@ -515,7 +519,7 @@ class IssuesProcessorBuilder {
   stalePrs(issues: Partial<IIssue>[]): IssuesProcessorBuilder {
     this.prs(
       issues.map((issue: Readonly<Partial<IIssue>>): Partial<IIssue> => {
-        return {
+        const o = {
           ...issue,
           updated_at: '2020-01-01T17:00:00Z',
           created_at: '2020-01-01T17:00:00Z',
@@ -530,6 +534,7 @@ class IssuesProcessorBuilder {
             }
           ]
         };
+        return o;
       })
     );
 
@@ -539,6 +544,7 @@ class IssuesProcessorBuilder {
   build(): IssuesProcessorMock {
     return new IssuesProcessorMock(
       this._options,
+      alwaysFalseStateMock,
       async p => (p === 1 ? this._issues : []),
       async () => [
         {

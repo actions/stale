@@ -17,6 +17,8 @@ export class ExemptDraftPullRequest {
   }
 
   async shouldExemptDraftPullRequest(
+    // keep this for backward compatibility
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     pullRequestCallback: () => Promise<IPullRequest | undefined | void>
   ): Promise<boolean> {
     if (this._issue.isPullRequest) {
@@ -27,10 +29,13 @@ export class ExemptDraftPullRequest {
           )} is enabled`
         );
 
+        /* This code was used until Jun 15 2022 - it is unclear why they had to call API for getting pull request
         const pullRequest: IPullRequest | undefined | void =
           await pullRequestCallback();
 
         if (pullRequest?.draft === true) {
+         */
+        if (this._issue?.draft === true) {
           this._issueLogger.info(
             LoggerService.white('└──'),
             `Skip the $$type draft checks`

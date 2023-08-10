@@ -9,6 +9,7 @@ export interface IIssue {
   number: number;
   created_at: IsoDateString;
   updated_at: IsoDateString;
+  draft: boolean;
   labels: ILabel[];
   pull_request?: object | null;
   state: string;

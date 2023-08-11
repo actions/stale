@@ -1195,7 +1195,7 @@ export class IssuesProcessor {
     const issueLogger: IssueLogger = new IssueLogger(issue);
 
     issueLogger.info(
-      `The $$type is not closed nor locked. Trying to remove the close label...`
+      `The $$type is neither closed nor locked. Trying to remove the close label...`
     );
 
     if (!closeLabel) {

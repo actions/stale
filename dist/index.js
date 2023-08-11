@@ -1114,7 +1114,7 @@ class IssuesProcessor {
         var _a;
         return __awaiter(this, void 0, void 0, function* () {
             const issueLogger = new issue_logger_1.IssueLogger(issue);
-            issueLogger.info(`The $$type is not closed nor locked. Trying to remove the close label...`);
+            issueLogger.info(`The $$type is neither closed nor locked. Trying to remove the close label...`);
             if (!closeLabel) {
                 issueLogger.info(logger_service_1.LoggerService.white('├──'), `The ${issueLogger.createOptionLink(IssuesProcessor._getCloseLabelUsedOptionName(issue))} option was not set`);
                 issueLogger.info(logger_service_1.LoggerService.white('└──'), `Skipping the removal of the close label`);

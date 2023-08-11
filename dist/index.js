@@ -603,7 +603,7 @@ class IssuesProcessor {
             }
             // Determine if this issue needs to be marked stale first
             if (!issue.isStale) {
-                issueLogger.info(`This $$type is not stale`);
+                issueLogger.info(`This $$type is not marked stale`);
                 const shouldIgnoreUpdates = new ignore_updates_1.IgnoreUpdates(this.options, issue).shouldIgnoreUpdates();
                 // Should this issue be marked as stale?
                 let shouldBeStale;

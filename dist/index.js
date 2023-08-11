@@ -592,7 +592,7 @@ class IssuesProcessor {
                 return; // Don't process exempt assignees
             }
             // Ignore draft PR
-            // Note that this check is so far below because it cost one read operation
+            // Note that this check is so far below because it costs one read operation
             // So it's simply better to do all the stale checks which don't cost an operation before this one
             const exemptDraftPullRequest = new exempt_draft_pull_request_1.ExemptDraftPullRequest(this.options, issue);
             if (yield exemptDraftPullRequest.shouldExemptDraftPullRequest(() => __awaiter(this, void 0, void 0, function* () {

@@ -428,7 +428,7 @@ export class IssuesProcessor {
     }
 
     // Ignore draft PR
-    // Note that this check is so far below because it cost one read operation
+    // Note that this check is so far below because it costs one read operation
     // So it's simply better to do all the stale checks which don't cost an operation before this one
     const exemptDraftPullRequest: ExemptDraftPullRequest =
       new ExemptDraftPullRequest(this.options, issue);

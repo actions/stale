@@ -1039,7 +1039,7 @@ export class IssuesProcessor {
       issueLogger.error(
         `${
           isSubStep ? LoggerService.white('└── ') : ''
-        }Error when removing the label: "${LoggerService.cyan(error.message)}"`
+        }Error when removing the label: ${LoggerService.cyan(error.message)}`
       );
     }
   }

@@ -104,12 +104,12 @@ export class IssuesProcessor {
   }
 
   async processIssues(page: Readonly<number> = 1): Promise<number> {
-    // get the next batch of issues
+    // get the next batch of items
     const issues: Issue[] = await this.getIssues(page);
 
     if (issues.length <= 0) {
       this._logger.info(
-        LoggerService.green(`No more issues found to process. Exiting...`)
+        LoggerService.green(`No more items found to process. Exiting...`)
       );
       this.statistics
         ?.setOperationsCount(this.operations.getConsumedOperationsCount())
@@ -121,11 +121,11 @@ export class IssuesProcessor {
     } else {
       this._logger.info(
         `${LoggerService.yellow(
-          'Processing the batch of issues '
+          'Processing the batch of items '
         )} ${LoggerService.cyan(`#${page}`)} ${LoggerService.yellow(
           ' containing '
         )} ${LoggerService.cyan(issues.length)} ${LoggerService.yellow(
-          ` issue${issues.length > 1 ? 's' : ''}...`
+          ` item${issues.length > 1 ? 's' : ''}...`
         )}`
       );
     }
@@ -171,7 +171,7 @@ export class IssuesProcessor {
       );
       this._logger.warning(
         `${LoggerService.yellowBright(
-          'If you think that not enough issues were processed you could try to increase the quantity related to the '
+          'If you think that not enough items were processed you could try to increase the quantity related to the '
         )} ${this._logger.createOptionLink(
           Option.OperationsPerRun
         )} ${LoggerService.yellowBright(
@@ -555,7 +555,7 @@ export class IssuesProcessor {
       });
       return comments.data;
     } catch (error) {
-      this._logger.error(`List issue comments error: ${error.message}`);
+      this._logger.error(`List $$type comments error: ${error.message}`);
       return Promise.resolve([]);
     }
   }
@@ -579,7 +579,7 @@ export class IssuesProcessor {
           new Issue(this.options, issue as Readonly<OctokitIssue>)
       );
     } catch (error) {
-      throw Error(`Getting issues was blocked by the error: ${error.message}`);
+      throw Error(`Getting items was blocked by the error: ${error.message}`);
     }
   }
 

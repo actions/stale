@@ -17,7 +17,7 @@ async function _run(): Promise<void> {
     const rateLimitAtStart = await issueProcessor.getRateLimit();
     if (rateLimitAtStart) {
       core.debug(
-        `Github API rate status: limit=${rateLimitAtStart.limit}, used=${rateLimitAtStart.used}, remaining=${rateLimitAtStart.remaining}`
+        `GitHub API rate status: limit=${rateLimitAtStart.limit}, used=${rateLimitAtStart.used}, remaining=${rateLimitAtStart.remaining}`
       );
     }
 
@@ -27,18 +27,18 @@ async function _run(): Promise<void> {
 
     if (rateLimitAtEnd) {
       core.debug(
-        `Github API rate status: limit=${rateLimitAtEnd.limit}, used=${rateLimitAtEnd.used}, remaining=${rateLimitAtEnd.remaining}`
+        `GitHub API rate status: limit=${rateLimitAtEnd.limit}, used=${rateLimitAtEnd.used}, remaining=${rateLimitAtEnd.remaining}`
       );
 
       if (rateLimitAtStart)
         core.info(
-          `Github API rate used: ${
+          `GitHub API rate used: ${
             rateLimitAtStart.remaining - rateLimitAtEnd.remaining
           }`
         );
 
       core.info(
-        `Github API rate remaining: ${rateLimitAtEnd.remaining}; reset at: ${rateLimitAtEnd.reset}`
+        `GitHub API rate remaining: ${rateLimitAtEnd.remaining}; reset at: ${rateLimitAtEnd.reset}`
       );
     }
 

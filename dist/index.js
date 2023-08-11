@@ -2489,15 +2489,15 @@ function _run() {
             const issueProcessor = new issues_processor_1.IssuesProcessor(args, state);
             const rateLimitAtStart = yield issueProcessor.getRateLimit();
             if (rateLimitAtStart) {
-                core.debug(`Github API rate status: limit=${rateLimitAtStart.limit}, used=${rateLimitAtStart.used}, remaining=${rateLimitAtStart.remaining}`);
+                core.debug(`GitHub API rate status: limit=${rateLimitAtStart.limit}, used=${rateLimitAtStart.used}, remaining=${rateLimitAtStart.remaining}`);
             }
             yield issueProcessor.processIssues();
             const rateLimitAtEnd = yield issueProcessor.getRateLimit();
             if (rateLimitAtEnd) {
-                core.debug(`Github API rate status: limit=${rateLimitAtEnd.limit}, used=${rateLimitAtEnd.used}, remaining=${rateLimitAtEnd.remaining}`);
+                core.debug(`GitHub API rate status: limit=${rateLimitAtEnd.limit}, used=${rateLimitAtEnd.used}, remaining=${rateLimitAtEnd.remaining}`);
                 if (rateLimitAtStart)
-                    core.info(`Github API rate used: ${rateLimitAtStart.remaining - rateLimitAtEnd.remaining}`);
-                core.info(`Github API rate remaining: ${rateLimitAtEnd.remaining}; reset at: ${rateLimitAtEnd.reset}`);
+                    core.info(`GitHub API rate used: ${rateLimitAtStart.remaining - rateLimitAtEnd.remaining}`);
+                core.info(`GitHub API rate remaining: ${rateLimitAtEnd.remaining}; reset at: ${rateLimitAtEnd.reset}`);
             }
             yield state.persist();
             yield processOutput(issueProcessor.staleIssues, issueProcessor.closedIssues);

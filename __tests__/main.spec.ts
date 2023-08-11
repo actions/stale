@@ -1442,7 +1442,7 @@ test('stale issues should not be closed until after the closed number of days', 
   expect(processor.staleIssues).toHaveLength(1);
 });
 
-test('stale issues should be closed if the closed nubmer of days (additive) is also passed', async () => {
+test('stale issues should be closed if the closed number of days (additive) is also passed', async () => {
   const opts = {...DefaultProcessorOptions};
   opts.daysBeforeStale = 5; // stale after 5 days
   opts.daysBeforeClose = 1; // closes after 6 days

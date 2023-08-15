@@ -946,11 +946,7 @@ export class IssuesProcessor {
   private async _deleteBranch(issue: Issue): Promise<void> {
     const issueLogger: IssueLogger = new IssueLogger(issue);
 
-    issueLogger.info(`Delete
-    branch from closed $
-    $type
-    -
-    ${issue.title}`);
+    issueLogger.info(`Delete branch from closed $$type - ${issue.title}`);
 
     const pullRequest: IPullRequest | undefined | void =
       await this.getPullRequest(issue);

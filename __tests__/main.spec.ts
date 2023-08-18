@@ -1298,11 +1298,13 @@ test('when the option "ignoreReactions" is set to false, stale label should be r
       '2020-01-01T17:00:00Z',
       '2020-01-01T17:00:00Z',
       false,
+      false,
       ['Stale']
     )
   ];
   const processor = new IssuesProcessorMock(
     opts,
+    alwaysFalseStateMock,
     async p => (p === 1 ? TestIssueList : []),
     async () => [],
     async () => [
@@ -1332,11 +1334,13 @@ test('when the option "ignoreReactions" is not set, stale label should not be re
       '2020-01-01T17:00:00Z',
       '2020-01-01T17:00:00Z',
       false,
+      false,
       ['Stale']
     )
   ];
   const processor = new IssuesProcessorMock(
     opts,
+    alwaysFalseStateMock,
     async p => (p === 1 ? TestIssueList : []),
     async () => [],
     async () => [
@@ -1370,11 +1374,13 @@ test('when the option "ignoreReactions" is set to true, stale label should not b
       '2020-01-01T17:00:00Z',
       '2020-01-01T17:00:00Z',
       false,
+      false,
       ['Stale']
     )
   ];
   const processor = new IssuesProcessorMock(
     opts,
+    alwaysFalseStateMock,
     async p => (p === 1 ? TestIssueList : []),
     async () => [],
     async () => [

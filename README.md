@@ -45,6 +45,8 @@ Every argument is optional.
 | Input                                                               | Description                                                                 | Default               |
 | ------------------------------------------------------------------- | --------------------------------------------------------------------------- | --------------------- |
 | [repo-token](#repo-token)                                           | PAT for GitHub API authentication                                           | `${{ github.token }}` |
+| [repo-owner](#repo-owner)                                           | Owner of the repository                                                     | `${{ github.repository_owner }}` |
+| [repo-name](#repo-name)                                             | Name of the repository                                                       | `${{ github.event.repository.name }}` |
 | [days-before-stale](#days-before-stale)                             | Idle number of days before marking issues/PRs stale                         | `60`                  |
 | [days-before-issue-stale](#days-before-issue-stale)                 | Override [days-before-stale](#days-before-stale) for issues only            |                       |
 | [days-before-pr-stale](#days-before-pr-stale)                       | Override [days-before-stale](#days-before-stale) for PRs only               |                       |
@@ -109,10 +111,22 @@ Every argument is optional.
 
 #### repo-token
 
-Personal Access Token (PAT) that allows the stale workflow to authenticate and perform API calls to GitHub.  
+Personal Access Token (PAT) that allows the stale workflow to authenticate and perform API calls to GitHub in the specified repository.  
 Under the hood, it uses the [@actions/github](https://www.npmjs.com/package/@actions/github) package.
 
 Default value: `${{ github.token }}`
+
+#### repo-owner
+
+The owner / organization of the repository that you wish to run the stale workflow on.
+
+Default value: `${{ github.repository_owner }}`
+
+#### repo-name
+
+The name of the repository that you wish to run the stale workflow on.
+
+Default value: `${{ github.event.repository.name }}`
 
 #### days-before-stale
 

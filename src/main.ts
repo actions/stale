@@ -1,4 +1,5 @@
 import * as core from '@actions/core';
+import {context} from '@actions/github';
 import {IssuesProcessor} from './classes/issues-processor';
 import {isValidDate} from './functions/dates/is-valid-date';
 import {IIssuesProcessorOptions} from './interfaces/issues-processor-options';
@@ -57,6 +58,14 @@ async function _run(): Promise<void> {
 function _getAndValidateArgs(): IIssuesProcessorOptions {
   const args: IIssuesProcessorOptions = {
     repoToken: core.getInput('repo-token'),
+    repoOwner:
+      core.getInput('repo-owner') === ''
+        ? context.repo.owner
+        : core.getInput('repo-owner'),
+    repoName:
+      core.getInput('repo-name') === ''
+        ? context.repo.repo
+        : core.getInput('repo-name'),
     staleIssueMessage: core.getInput('stale-issue-message'),
     stalePrMessage: core.getInput('stale-pr-message'),
     closeIssueMessage: core.getInput('close-issue-message'),

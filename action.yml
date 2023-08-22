@@ -6,6 +6,12 @@ inputs:
     description: 'Token for the repository. Can be passed in using `{{ secrets.GITHUB_TOKEN }}`.'
     required: false
     default: ${{ github.token }}
+  repo-owner:
+    description: 'Name of the organization / owner of the repository that you want to manage'
+    required: false
+  repo-name:
+   description: 'Name of the repository that you want to apply stale bot'
+   required: false
   stale-issue-message:
     description: 'The message to post on the issue when tagging it. If none provided, will not mark issues stale.'
     required: false

@@ -2,6 +2,8 @@ import {IsoOrRfcDateString} from '../types/iso-or-rfc-date-string';
 
 export interface IIssuesProcessorOptions {
   repoToken: string;
+  repoOwner: string;
+  repoName: string;
   staleIssueMessage: string;
   stalePrMessage: string;
   closeIssueMessage: string;

@@ -54,7 +54,11 @@ const resetCacheWithOctokit = async (cacheKey: string): Promise<void> => {
     );
   } catch (error) {
     if (error.status) {
-      core.debug(`Cache ${cacheKey} does not exist`);
+      core.warning(
+        `Error delete ${cacheKey}: [${error.status}] ${
+          error.message || 'Unknown reason'
+        }`
+      );
     } else {
       throw error;
     }
@@ -67,7 +71,10 @@ export class StateCacheStorage implements IStateStorage {
     fs.writeFileSync(filePath, serializedState);
 
     try {
-      await resetCacheWithOctokit(CACHE_KEY);
+      const cacheExists = await checkIfCacheExists(CACHE_KEY);
+      if (cacheExists) {
+        await resetCacheWithOctokit(CACHE_KEY);
+      }
       const fileSize = fs.statSync(filePath).size;
 
       if (fileSize === 0) {

@@ -29,8 +29,8 @@ You can find more information about the required permissions under the correspon
 ## Statefulness
 
 If the action ends because of [operations-per-run](#operations-per-run) then the next run will start from the first
-unprocessed issue skipping the issues proceeded during the previous run(s). The state is reset when all the issues are
-proceeded. This should be considered for scheduling workflow runs.
+unprocessed issue skipping the issues processed during the previous run(s). The state is reset when all the issues are
+processed. This should be considered for scheduling workflow runs.
 
 The saved state lifetime is the same as the
 [actions cache](https://docs.github.com/en/actions/using-workflows/caching-dependencies-to-speed-up-workflows#usage-limits-and-eviction-policy)

@@ -1693,7 +1693,7 @@ const resetCacheWithOctokit = (cacheKey) => __awaiter(void 0, void 0, void 0, fu
     }
     catch (error) {
         if (error.status) {
-            core.debug(`Cache ${cacheKey} does not exist`);
+            core.warning(`Error delete ${cacheKey}: [${error.status}] ${error.message || 'Unknown reason'}`);
         }
         else {
             throw error;
@@ -1707,7 +1707,10 @@ class StateCacheStorage {
             const filePath = path_1.default.join(tmpDir, STATE_FILE);
             fs_1.default.writeFileSync(filePath, serializedState);
             try {
-                yield resetCacheWithOctokit(CACHE_KEY);
+                const cacheExists = yield checkIfCacheExists(CACHE_KEY);
+                if (cacheExists) {
+                    yield resetCacheWithOctokit(CACHE_KEY);
+                }
                 const fileSize = fs_1.default.statSync(filePath).size;
                 if (fileSize === 0) {
                     core.info(`the state will be removed`);

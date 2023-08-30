@@ -562,12 +562,39 @@ export class IssuesProcessor {
 
   // grab issues from github in batches of 100
   async getIssues(page: number): Promise<Issue[]> {
+    // Compute labels filter.
+    let labels = '';
+
+    // We can filter issues already when listing them if neither only-pr-labels
+    // nor only-issue-labels are specified or both are the same.
+    if (
+      this.options.onlyPrLabels === '' &&
+      this.options.onlyIssueLabels === ''
+    ) {
+      labels = this.options.onlyLabels;
+    } else if (this.options.onlyPrLabels == this.options.onlyIssueLabels) {
+      labels = this.options.onlyIssueLabels;
+    }
+
+    // If we don't have to mark issues and pull requests stale and
+    // both the stale labels are the same then we can use it as a filter:
+    // because we only want to process stale issues.
+    if (
+      !shouldMarkWhenStale(this._getDaysBeforeIssueStale()) &&
+      !shouldMarkWhenStale(this._getDaysBeforePrStale()) &&
+      this.options.stalePrLabel === this.options.staleIssueLabel &&
+      !labels.includes(this.options.staleIssueLabel)
+    ) {
+      labels += (labels !== '' ? ',' : '') + this.options.staleIssueLabel;
+    }
+
     try {
       this.operations.consumeOperation();
       const issueResult = await this.client.rest.issues.listForRepo({
         owner: context.repo.owner,
         repo: context.repo.repo,
         state: 'open',
+        labels,
         per_page: 100,
         direction: this.options.ascending ? 'asc' : 'desc',
         page

@@ -676,6 +676,7 @@ class IssuesProcessor {
     getIssues(page) {
         var _a;
         return __awaiter(this, void 0, void 0, function* () {
+            this._logger.info(logger_service_1.LoggerService.green(`Processing: ${this.options.repoOwner}/${this.options.repoName}`));
             try {
                 this.operations.consumeOperation();
                 const issueResult = yield this.client.rest.issues.listForRepo({

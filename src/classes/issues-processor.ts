@@ -562,6 +562,11 @@ export class IssuesProcessor {
 
   // grab issues from github in batches of 100
   async getIssues(page: number): Promise<Issue[]> {
+    this._logger.info(
+      LoggerService.green(
+        `Processing: ${this.options.repoOwner}/${this.options.repoName}`
+      )
+    );
     try {
       this.operations.consumeOperation();
       const issueResult = await this.client.rest.issues.listForRepo({

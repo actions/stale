@@ -26,6 +26,9 @@ import {Statistics} from './statistics';
 import {LoggerService} from '../services/logger.service';
 import {OctokitIssue} from '../interfaces/issue';
 import {retry} from '@octokit/plugin-retry';
+import {IState} from '../interfaces/state/state';
+import {IRateLimit} from '../interfaces/rate-limit';
+import {RateLimit} from './rate-limit';
 
 /***
  * Handle processing of issues for staleness/closure.
@@ -72,9 +75,11 @@ export class IssuesProcessor {
   readonly addedCloseCommentIssues: Issue[] = [];
   readonly statistics: Statistics | undefined;
   private readonly _logger: Logger = new Logger();
+  private readonly state: IState;
 
-  constructor(options: IIssuesProcessorOptions) {
+  constructor(options: IIssuesProcessorOptions, state: IState) {
     this.options = options;
+    this.state = state;
     this.client = getOctokit(this.options.repoToken, undefined, retry);
     this.operations = new StaleOperations(this.options);
 
@@ -110,6 +115,8 @@ export class IssuesProcessor {
         ?.setOperationsCount(this.operations.getConsumedOperationsCount())
         .logStats();
 
+      this.state.reset();
+
       return this.operations.getRemainingOperationsCount();
     } else {
       this._logger.info(
@@ -122,6 +129,10 @@ export class IssuesProcessor {
         )}`
       );
     }
+
+    const labelsToRemoveWhenStale: string[] = wordsToList(
+      this.options.labelsToRemoveWhenStale
+    );
 
     const labelsToAddWhenUnstale: string[] = wordsToList(
       this.options.labelsToAddWhenUnstale
@@ -137,13 +148,21 @@ export class IssuesProcessor {
       }
 
       const issueLogger: IssueLogger = new IssueLogger(issue);
+      if (this.state.isIssueProcessed(issue)) {
+        issueLogger.info(
+          '           $$type skipped due being processed during the previous run'
+        );
+        continue;
+      }
       await issueLogger.grouping(`$$type #${issue.number}`, async () => {
         await this.processIssue(
           issue,
           labelsToAddWhenUnstale,
-          labelsToRemoveWhenUnstale
+          labelsToRemoveWhenUnstale,
+          labelsToRemoveWhenStale
         );
       });
+      this.state.addIssueToProcessed(issue);
     }
 
     if (!this.operations.hasRemainingOperations()) {
@@ -179,7 +198,8 @@ export class IssuesProcessor {
   async processIssue(
     issue: Issue,
     labelsToAddWhenUnstale: Readonly<string>[],
-    labelsToRemoveWhenUnstale: Readonly<string>[]
+    labelsToRemoveWhenUnstale: Readonly<string>[],
+    labelsToRemoveWhenStale: Readonly<string>[]
   ): Promise<void> {
     this.statistics?.incrementProcessedItemsCount(issue);
 
@@ -515,6 +535,7 @@ export class IssuesProcessor {
         staleMessage,
         labelsToAddWhenUnstale,
         labelsToRemoveWhenUnstale,
+        labelsToRemoveWhenStale,
         closeMessage,
         closeLabel
       );
@@ -560,7 +581,8 @@ export class IssuesProcessor {
       this.statistics?.incrementFetchedItemsCount(issueResult.data.length);
 
       return issueResult.data.map(
-        (issue: Readonly<OctokitIssue>): Issue => new Issue(this.options, issue)
+        (issue): Issue =>
+          new Issue(this.options, issue as Readonly<OctokitIssue>)
       );
     } catch (error) {
       throw Error(`Getting issues was blocked by the error: ${error.message}`);
@@ -622,6 +644,16 @@ export class IssuesProcessor {
     }
   }
 
+  async getRateLimit(): Promise<IRateLimit | undefined> {
+    const logger: Logger = new Logger();
+    try {
+      const rateLimitResult = await this.client.rest.rateLimit.get();
+      return new RateLimit(rateLimitResult.data.rate);
+    } catch (error) {
+      logger.error(`Error when getting rateLimit: ${error.message}`);
+    }
+  }
+
   // handle all of the stale issue logic when we find a stale issue
   private async _processStaleIssue(
     issue: Issue,
@@ -629,6 +661,7 @@ export class IssuesProcessor {
     staleMessage: string,
     labelsToAddWhenUnstale: Readonly<string>[],
     labelsToRemoveWhenUnstale: Readonly<string>[],
+    labelsToRemoveWhenStale: Readonly<string>[],
     closeMessage?: string,
     closeLabel?: string
   ) {
@@ -677,6 +710,11 @@ export class IssuesProcessor {
 
     if (issue.markedStaleThisRun) {
       issueLogger.info(`marked stale this run, so don't check for updates`);
+      await this._removeLabelsOnStatusTransition(
+        issue,
+        labelsToRemoveWhenStale,
+        Option.LabelsToRemoveWhenStale
+      );
     }
 
     // The issue.updated_at and markedStaleOn are not always exactly in sync (they can be off by a second or 2)
@@ -705,7 +743,11 @@ export class IssuesProcessor {
       await this._removeStaleLabel(issue, staleLabel);
 
       // Are there labels to remove or add when an issue is no longer stale?
-      await this._removeLabelsWhenUnstale(issue, labelsToRemoveWhenUnstale);
+      await this._removeLabelsOnStatusTransition(
+        issue,
+        labelsToRemoveWhenUnstale,
+        Option.LabelsToRemoveWhenUnstale
+      );
       await this._addLabelsWhenUnstale(issue, labelsToAddWhenUnstale);
 
       issueLogger.info(`Skipping the process since the $$type is now un-stale`);
@@ -1080,9 +1122,10 @@ export class IssuesProcessor {
     return this.options.removeStaleWhenUpdated;
   }
 
-  private async _removeLabelsWhenUnstale(
+  private async _removeLabelsOnStatusTransition(
     issue: Issue,
-    removeLabels: Readonly<string>[]
+    removeLabels: Readonly<string>[],
+    staleStatus: Option
   ): Promise<void> {
     if (!removeLabels.length) {
       return;
@@ -1092,7 +1135,7 @@ export class IssuesProcessor {
 
     issueLogger.info(
       `Removing all the labels specified via the ${this._logger.createOptionLink(
-        Option.LabelsToRemoveWhenUnstale
+        staleStatus
       )} option.`
     );
 

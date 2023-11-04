@@ -26,6 +26,16 @@ permissions:
 
 You can find more information about the required permissions under the corresponding options that you wish to use.
 
+## Statefulness
+
+If the action ends because of [operations-per-run](#operations-per-run) then the next run will start from the first
+unprocessed issue skipping the issues processed during the previous run(s). The state is reset when all the issues are
+processed. This should be considered for scheduling workflow runs.
+
+The saved state lifetime is the same as the
+[actions cache](https://docs.github.com/en/actions/using-workflows/caching-dependencies-to-speed-up-workflows#usage-limits-and-eviction-policy)
+configured for the repo.
+
 ## All options
 
 ### List of input options
@@ -63,6 +73,7 @@ Every argument is optional.
 | [remove-issue-stale-when-updated](#remove-issue-stale-when-updated) | Remove stale label from issues on updates/comments                          |                       |
 | [remove-pr-stale-when-updated](#remove-pr-stale-when-updated)       | Remove stale label from PRs on updates/comments                             |                       |
 | [labels-to-add-when-unstale](#labels-to-add-when-unstale)           | Add specified labels from issues/PRs when they become unstale               |                       |
+| [labels-to-remove-when-stale](#labels-to-remove-when-stale)         | Remove specified labels from issues/PRs when they become stale              |                       |
 | [labels-to-remove-when-unstale](#labels-to-remove-when-unstale)     | Remove specified labels from issues/PRs when they become unstale            |                       |
 | [debug-only](#debug-only)                                           | Dry-run                                                                     | `false`               |
 | [ascending](#ascending)                                             | Order to get issues/PRs                                                     | `false`               |
@@ -358,6 +369,15 @@ A comma delimited list of labels to add when a stale issue or pull request recei
 
 Default value: unset
 
+#### labels-to-remove-when-stale
+
+A comma delimited list of labels to remove when an issue or pull request becomes stale and has the [stale-issue-label](#stale-issue-label) or [stale-pr-label](#stale-pr-label) added to it.
+
+Warning: each label results in a unique API call which can drastically consume the limit of [operations-per-run](#operations-per-run).
+
+Default value: unset  
+Required Permission: `pull-requests: write`
+
 #### labels-to-remove-when-unstale
 
 A comma delimited list of labels to remove when a stale issue or pull request receives activity and has the [stale-issue-label](#stale-issue-label) or [stale-pr-label](#stale-pr-label) removed from it.
@@ -543,7 +563,7 @@ jobs:
   stale:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/stale@v7
+      - uses: actions/stale@v8
         with:
           stale-issue-message: 'Message to comment on stale issues. If none provided, will not mark issues stale'
           stale-pr-message: 'Message to comment on stale PRs. If none provided, will not mark PRs stale'
@@ -561,7 +581,7 @@ jobs:
   stale:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/stale@v7
+      - uses: actions/stale@v8
         with:
           stale-issue-message: 'This issue is stale because it has been open 30 days with no activity. Remove stale label or comment or this will be closed in 5 days.'
           days-before-stale: 30
@@ -580,7 +600,7 @@ jobs:
   stale:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/stale@v7
+      - uses: actions/stale@v8
         with:
           stale-issue-message: 'This issue is stale because it has been open 30 days with no activity. Remove stale label or comment or this will be closed in 5 days.'
           stale-pr-message: 'This PR is stale because it has been open 45 days with no activity. Remove stale label or comment or this will be closed in 10 days.'
@@ -602,7 +622,7 @@ jobs:
   stale:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/stale@v7
+      - uses: actions/stale@v8
         with:
           stale-issue-message: 'This issue is stale because it has been open 30 days with no activity. Remove stale label or comment or this will be closed in 5 days.'
           stale-pr-message: 'This PR is stale because it has been open 45 days with no activity. Remove stale label or comment or this will be closed in 10 days.'
@@ -626,7 +646,7 @@ jobs:
   stale:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/stale@v7
+      - uses: actions/stale@v8
         with:
           stale-issue-message: 'Stale issue message'
           stale-pr-message: 'Stale pull request message'
@@ -649,7 +669,7 @@ jobs:
   stale:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/stale@v7
+      - uses: actions/stale@v8
         with:
           start-date: '2020-04-18T00:00:00Z' # ISO 8601 or RFC 2822
 ```
@@ -666,7 +686,7 @@ jobs:
   stale:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/stale@v7
+      - uses: actions/stale@v8
         with:
           exempt-issue-milestones: 'future,alpha,beta'
           exempt-pr-milestones: 'bugfix,improvement'
@@ -684,7 +704,7 @@ jobs:
   stale:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/stale@v7
+      - uses: actions/stale@v8
         with:
           exempt-all-pr-milestones: true
 ```
@@ -701,7 +721,7 @@ jobs:
   stale:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/stale@v7
+      - uses: actions/stale@v8
         with:
           any-of-labels: 'needs-more-info,needs-demo'
           # You can opt for 'only-labels' instead if your use-case requires all labels
@@ -720,7 +740,7 @@ jobs:
   stale:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/stale@v7
+      - uses: actions/stale@v8
         with:
           exempt-issue-assignees: 'marco,polo'
           exempt-pr-assignees: 'marco'
@@ -738,7 +758,7 @@ jobs:
   stale:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/stale@v7
+      - uses: actions/stale@v8
         with:
           exempt-all-pr-assignees: true
 ```

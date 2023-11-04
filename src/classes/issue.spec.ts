@@ -56,6 +56,7 @@ describe('Issue', (): void => {
       exemptAllIssueAssignees: undefined,
       exemptAllPrAssignees: undefined,
       enableStatistics: false,
+      labelsToRemoveWhenStale: '',
       labelsToRemoveWhenUnstale: '',
       labelsToAddWhenUnstale: '',
       ignoreUpdates: false,
@@ -70,6 +71,7 @@ describe('Issue', (): void => {
       number: 8,
       created_at: 'dummy-created-at',
       updated_at: 'dummy-updated-at',
+      draft: false,
       labels: [
         {
           name: 'dummy-name'

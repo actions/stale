@@ -5,6 +5,7 @@ import {IPullRequest} from '../src/interfaces/pull-request';
 import {IssuesProcessorMock} from './classes/issues-processor-mock';
 import {DefaultProcessorOptions} from './constants/default-processor-options';
 import {generateIssue} from './functions/generate-issue';
+import {alwaysFalseStateMock} from './classes/state-mock';
 
 let issuesProcessorBuilder: IssuesProcessorBuilder;
 let issuesProcessor: IssuesProcessorMock;
@@ -45,6 +46,7 @@ describe('exempt-draft-pr option', (): void => {
       issuesProcessor = issuesProcessorBuilder
         .toStalePrs([
           {
+            draft: true,
             number: 20
           }
         ])
@@ -84,6 +86,7 @@ class IssuesProcessorBuilder {
           issue.title ?? 'dummy-title',
           issue.updated_at ?? new Date().toDateString(),
           issue.created_at ?? new Date().toDateString(),
+          !!issue.draft,
           !!issue.pull_request,
           issue.labels ? issue.labels.map(label => label.name || '') : []
         )
@@ -122,6 +125,7 @@ class IssuesProcessorBuilder {
   build(): IssuesProcessorMock {
     return new IssuesProcessorMock(
       this._options,
+      alwaysFalseStateMock,
       async p => (p === 1 ? this._issues : []),
       async () => [],
       async () => new Date().toDateString(),

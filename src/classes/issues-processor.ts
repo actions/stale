@@ -34,7 +34,12 @@ import {RateLimit} from './rate-limit';
  * Handle processing of issues for staleness/closure.
  */
 
-type state_reason_type= "completed" | "reopened" | "not_planned"|null |undefined;
+type state_reason_type =
+  | 'completed'
+  | 'reopened'
+  | 'not_planned'
+  | null
+  | undefined;
 export class IssuesProcessor {
   private static _updatedSince(timestamp: string, num_days: number): boolean {
     const daysInMillis = 1000 * 60 * 60 * 24 * num_days;
@@ -929,14 +934,14 @@ export class IssuesProcessor {
     try {
       this._consumeIssueOperation(issue);
       this.statistics?.incrementClosedItemsCount(issue);
-      
+
       if (!this.options.debugOnly) {
         await this.client.rest.issues.update({
           owner: context.repo.owner,
           repo: context.repo.repo,
           issue_number: issue.number,
           state: 'closed',
-          state_reason : this.options.closeIssueReason as state_reason_type 
+          state_reason: this.options.closeIssueReason as state_reason_type
         });
       }
     } catch (error) {

@@ -1,6 +1,6 @@
 {
   "name": "stale-action",
-  "version": "8.0.0",
+  "version": "9.0.0",
   "private": true,
   "description": "Marks old issues and PRs as stale",
   "main": "lib/main.js",

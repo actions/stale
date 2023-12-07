@@ -33,6 +33,7 @@ import {RateLimit} from './rate-limit';
 /***
  * Handle processing of issues for staleness/closure.
  */
+
 export class IssuesProcessor {
   private static _updatedSince(timestamp: string, num_days: number): boolean {
     const daysInMillis = 1000 * 60 * 60 * 24 * num_days;

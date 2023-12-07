@@ -1,6 +1,6 @@
 {
   "name": "stale-action",
-  "version": "7.0.0",
+  "version": "9.0.0",
   "private": true,
   "description": "Marks old issues and PRs as stale",
   "main": "lib/main.js",
@@ -31,7 +31,7 @@
     "stale"
   ],
   "engines": {
-    "node": "16",
+    "node": "20",
     "npm": ">=7.0.0 <10.0.0-0"
   },
   "author": "GitHub",

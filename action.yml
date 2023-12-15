@@ -200,6 +200,10 @@ inputs:
     description: 'Any update (update/comment) can reset the stale idle time on the pull requests. Override "ignore-updates" option regarding only the pull requests.'
     default: ''
     required: false
+  ignore-reactions:
+    description: 'Any reaction can reset the stale idle time on the issues/PRs.'
+    default: ''
+    required: false
   include-only-assigned:
     description: 'Only the issues or the pull requests with an assignee will be marked as stale automatically.'
     default: 'false'

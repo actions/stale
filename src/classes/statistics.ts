@@ -363,26 +363,26 @@ export class Statistics {
   }
 
   private _logDeletedIssuesAndPullRequestsLabelsCount(): void {
-    this._logGroup('Deleted items labels', [
+    this._logGroup('Deleted item labels', [
       {
-        name: 'Deleted issues labels',
+        name: 'Deleted issue labels',
         count: this.deletedIssuesLabelsCount
       },
       {
-        name: 'Deleted PRs labels',
+        name: 'Deleted PR labels',
         count: this.deletedPullRequestsLabelsCount
       }
     ]);
   }
 
   private _logDeletedCloseIssuesAndPullRequestsLabelsCount(): void {
-    this._logGroup('Deleted close items labels', [
+    this._logGroup('Deleted closed item labels', [
       {
-        name: 'Deleted close issues labels',
+        name: 'Deleted closed issue labels',
         count: this.deletedCloseIssuesLabelsCount
       },
       {
-        name: 'Deleted close PRs labels',
+        name: 'Deleted closed PR labels',
         count: this.deletedClosePullRequestsLabelsCount
       }
     ]);
@@ -393,26 +393,26 @@ export class Statistics {
   }
 
   private _logAddedIssuesAndPullRequestsLabelsCount(): void {
-    this._logGroup('Added items labels', [
+    this._logGroup('Added item labels', [
       {
-        name: 'Added issues labels',
+        name: 'Added issue labels',
         count: this.addedIssuesLabelsCount
       },
       {
-        name: 'Added PRs labels',
+        name: 'Added PR labels',
         count: this.addedPullRequestsLabelsCount
       }
     ]);
   }
 
   private _logAddedIssuesAndPullRequestsCommentsCount(): void {
-    this._logGroup('Added items comments', [
+    this._logGroup('Added item comments', [
       {
-        name: 'Added issues comments',
+        name: 'Added issue comments',
         count: this.addedIssuesCommentsCount
       },
       {
-        name: 'Added PRs comments',
+        name: 'Added PR comments',
         count: this.addedPullRequestsCommentsCount
       }
     ]);
@@ -423,11 +423,11 @@ export class Statistics {
   }
 
   private _logFetchedItemsEventsCount(): void {
-    this._logCount('Fetched items events', this.fetchedItemsEventsCount);
+    this._logCount('Fetched item events', this.fetchedItemsEventsCount);
   }
 
   private _logFetchedItemsCommentsCount(): void {
-    this._logCount('Fetched items comments', this.fetchedItemsCommentsCount);
+    this._logCount('Fetched item comments', this.fetchedItemsCommentsCount);
   }
 
   private _logFetchedPullRequestsCount(): void {

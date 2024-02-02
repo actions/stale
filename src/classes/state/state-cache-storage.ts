@@ -2,12 +2,15 @@ import {IStateStorage} from '../../interfaces/state/state-storage';
 import fs from 'fs';
 import path from 'path';
 import os from 'os';
+import process from 'process';
 import * as core from '@actions/core';
 import {context, getOctokit} from '@actions/github';
 import {retry as octokitRetry} from '@octokit/plugin-retry';
 import * as cache from '@actions/cache';
 
-const CACHE_KEY = '_state';
+const CACHE_KEY = encodeURIComponent(
+  '_state' + process.env.GITHUB_WORKFLOW + '-' + process.env.GITHUB_JOB
+);
 const STATE_FILE = 'state.txt';
 const STALE_DIR = '56acbeaa-1fef-4c79-8f84-7565e560fb03';
 

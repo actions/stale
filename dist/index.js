@@ -1591,11 +1591,12 @@ exports.StateCacheStorage = void 0;
 const fs_1 = __importDefault(__nccwpck_require__(7147));
 const path_1 = __importDefault(__nccwpck_require__(1017));
 const os_1 = __importDefault(__nccwpck_require__(2037));
+const process_1 = __importDefault(__nccwpck_require__(7282));
 const core = __importStar(__nccwpck_require__(2186));
 const github_1 = __nccwpck_require__(5438);
 const plugin_retry_1 = __nccwpck_require__(6298);
 const cache = __importStar(__nccwpck_require__(7799));
-const CACHE_KEY = '_state';
+const CACHE_KEY = encodeURIComponent('_state' + process_1.default.env.GITHUB_WORKFLOW + '-' + process_1.default.env.GITHUB_JOB);
 const STATE_FILE = 'state.txt';
 const STALE_DIR = '56acbeaa-1fef-4c79-8f84-7565e560fb03';
 const mkTempDir = () => {
@@ -89196,6 +89197,14 @@ module.exports = require("path");
 
 "use strict";
 module.exports = require("perf_hooks");
+
+/***/ }),
+
+/***/ 7282:
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("process");
 
 /***/ }),
 

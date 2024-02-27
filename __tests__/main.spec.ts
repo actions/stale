@@ -159,11 +159,12 @@ test('processing an issue with no label and a start date as ECMAScript epoch in 
 });
 
 test('processing an issue with no label and a start date as ISO 8601 being before the issue creation date will make it stale and close it when it is old enough and days-before-close is set to 0', async () => {
-  expect.assertions(2);
+  expect.assertions(3);
   const january2000 = '2000-01-01T00:00:00Z';
   const opts: IIssuesProcessorOptions = {
     ...DefaultProcessorOptions,
     daysBeforeClose: 0,
+    daysBeforeRotten: 0,
     startDate: january2000.toString()
   };
   const TestIssueList: Issue[] = [
@@ -187,6 +188,7 @@ test('processing an issue with no label and a start date as ISO 8601 being befor
   await processor.processIssues(1);
 
   expect(processor.staleIssues.length).toStrictEqual(1);
+  expect(processor.rottenIssues.length).toStrictEqual(1);
   expect(processor.closedIssues.length).toStrictEqual(1);
 });
 
@@ -219,6 +221,39 @@ test('processing an issue with no label and a start date as ISO 8601 being after
   await processor.processIssues(1);
 
   expect(processor.staleIssues.length).toStrictEqual(0);
+  expect(processor.closedIssues.length).toStrictEqual(0);
+});
+
+test('processing an issue with no label and a start date as ISO 8601 being after the issue creation date will not make it stale , rotten or close it when it is old enough and days-before-close is set to 0', async () => {
+  expect.assertions(3);
+  const january2021 = '2021-01-01T00:00:00Z';
+  const opts: IIssuesProcessorOptions = {
+    ...DefaultProcessorOptions,
+    daysBeforeClose: 0,
+    startDate: january2021.toString()
+  };
+  const TestIssueList: Issue[] = [
+    generateIssue(
+      opts,
+      1,
+      'An issue with no label',
+      '2020-01-01T17:00:00Z',
+      '2020-01-01T17:00:00Z'
+    )
+  ];
+  const processor = new IssuesProcessorMock(
+    opts,
+    alwaysFalseStateMock,
+    async p => (p === 1 ? TestIssueList : []),
+    async () => [],
+    async () => new Date().toDateString()
+  );
+
+  // process our fake issue list
+  await processor.processIssues(1);
+
+  expect(processor.staleIssues.length).toStrictEqual(0);
+  expect(processor.rottenIssues.length).toStrictEqual(0);
   expect(processor.closedIssues.length).toStrictEqual(0);
 });
 
@@ -290,6 +325,7 @@ test('processing an issue with no label will make it stale and close it, if it i
   const opts: IIssuesProcessorOptions = {
     ...DefaultProcessorOptions,
     daysBeforeClose: 1,
+    daysBeforeRotten: 0,
     daysBeforeIssueClose: 0
   };
   const TestIssueList: Issue[] = [
@@ -307,6 +343,7 @@ test('processing an issue with no label will make it stale and close it, if it i
   await processor.processIssues(1);
 
   expect(processor.staleIssues).toHaveLength(1);
+  expect(processor.rottenIssues).toHaveLength(1);
   expect(processor.closedIssues).toHaveLength(1);
   expect(processor.deletedBranchIssues).toHaveLength(0);
 });
@@ -488,6 +525,7 @@ test('processing a stale issue will close it', async () => {
   await processor.processIssues(1);
 
   expect(processor.staleIssues).toHaveLength(0);
+  expect(processor.rottenIssues).toHaveLength(1);
   expect(processor.closedIssues).toHaveLength(1);
 });
 

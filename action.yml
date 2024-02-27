@@ -1,6 +1,6 @@
-name: 'Close Stale Issues'
+name: 'Close, Rotten and Stale Issues'
 description: 'Close issues and pull requests with no recent activity'
-author: 'GitHub'
+author: 'M Viswanath Sai'
 inputs:
   repo-token:
     description: 'Token for the repository. Can be passed in using `{{ secrets.GITHUB_TOKEN }}`.'
@@ -12,6 +12,12 @@ inputs:
   stale-pr-message:
     description: 'The message to post on the pull request when tagging it. If none provided, will not mark pull requests stale.'
     required: false
+  rotten-issue-message:
+    description: 'The message to post on the issue when tagging it. If none provided, will not mark issues rotten.'
+    required: false
+  rotten-pr-message:
+    description: 'The message to post on the pull request when tagging it. If none provided, will not mark pull requests rotten.'
+    required: false
   close-issue-message:
     description: 'The message to post on the issue when closing it. If none provided, will not comment when closing an issue.'
     required: false
@@ -21,17 +27,27 @@ inputs:
   days-before-stale:
     description: 'The number of days old an issue or a pull request can be before marking it stale. Set to -1 to never mark issues or pull requests as stale automatically.'
     required: false
-    default: '60'
+    default: '90'
   days-before-issue-stale:
     description: 'The number of days old an issue can be before marking it stale. Set to -1 to never mark issues as stale automatically. Override "days-before-stale" option regarding only the issues.'
     required: false
   days-before-pr-stale:
     description: 'The number of days old a pull request can be before marking it stale. Set to -1 to never mark pull requests as stale automatically. Override "days-before-stale" option regarding only the pull requests.'
     required: false
+  days-before-rotten:
+    description: 'The number of days old an issue or a pull request can be before marking it rotten. Set to -1 to never mark issues or pull requests as rotten automatically.'
+    required: false
+    default: '30'
+  days-before-issue-rotten:
+    description: 'The number of days old an issue can be before marking it rotten. Set to -1 to never mark issues as rotten automatically. Override "days-before-rotten" option regarding only the issues.'
+    required: false
+  days-before-pr-rotten:
+    description: 'The number of days old a pull request can be before marking it rotten. Set to -1 to never mark pull requests as rotten automatically. Override "days-before-rotten" option regarding only the pull requests.'
+    required: false
   days-before-close:
     description: 'The number of days to wait to close an issue or a pull request after it being marked stale. Set to -1 to never close stale issues or pull requests.'
     required: false
-    default: '7'
+    default: '30'
   days-before-issue-close:
     description: 'The number of days to wait to close an issue after it being marked stale. Set to -1 to never close stale issues. Override "days-before-close" option regarding only the issues.'
     required: false
@@ -42,6 +58,10 @@ inputs:
     description: 'The label to apply when an issue is stale.'
     required: false
     default: 'Stale'
+  rotten-issue-label:
+    description: 'The label to apply when an issue is rotten.'
+    required: false
+    default: 'Rotten'
   close-issue-label:
     description: 'The label to apply when an issue is closed.'
     required: false
@@ -56,6 +76,10 @@ inputs:
   stale-pr-label:
     description: 'The label to apply when a pull request is stale.'
     default: 'Stale'
+    required: false
+  rotten-pr-label:
+    description: 'The label to apply when a pull request is rotten.'
+    default: 'Rotten'
     required: false
   close-pr-label:
     description: 'The label to apply when a pull request is closed.'
@@ -128,6 +152,18 @@ inputs:
     description: 'Remove stale labels from pull requests when they are updated or commented on. Override "remove-stale-when-updated" option regarding only the pull requests.'
     default: ''
     required: false
+  remove-rotten-when-updated:
+    description: 'Remove rotten labels from issues and pull requests when they are updated or commented on.'
+    default: 'true'
+    required: false
+  remove-issue-rotten-when-updated:
+    description: 'Remove rotten labels from issues when they are updated or commented on. Override "remove-rotten-when-updated" option regarding only the issues.'
+    default: ''
+    required: false
+  remove-pr-rotten-when-updated:
+    description: 'Remove rotten labels from pull requests when they are updated or commented on. Override "remove-rotten-when-updated" option regarding only the pull requests.'
+    default: ''
+    required: false
   debug-only:
     description: 'Run the processor in debug mode without actually performing any operations on live issues.'
     default: 'false'
@@ -186,6 +222,18 @@ inputs:
     required: false
   labels-to-remove-when-unstale:
     description: 'A comma delimited list of labels to remove when an issue or pull request becomes unstale.'
+    default: ''
+    required: false
+  labels-to-add-when-unrotten:
+    description: 'A comma delimited list of labels to add when an issue or pull request becomes unrotten.'
+    default: ''
+    required: false
+  labels-to-remove-when-rotten:
+    description: 'A comma delimited list of labels to remove when an issue or pull request becomes rotten.'
+    default: ''
+    required: false
+  labels-to-remove-when-unrotten:
+    description: 'A comma delimited list of labels to remove when an issue or pull request becomes unrotten.'
     default: ''
     required: false
   ignore-updates:

@@ -11,7 +11,7 @@ export const DefaultProcessorOptions: IIssuesProcessorOptions = Object.freeze({
   closeIssueMessage: 'This issue is being closed',
   closePrMessage: 'This PR is being closed',
   daysBeforeStale: 1,
-  daysBeforeRotten: 0,
+  daysBeforeRotten: -1,
   daysBeforeIssueStale: NaN,
   daysBeforePrStale: NaN,
   daysBeforeIssueRotten: NaN,

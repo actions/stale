@@ -724,6 +724,8 @@ export class IssuesProcessor {
     ) {
         const issueLogger: IssueLogger = new IssueLogger(issue);
 
+        var issueHasClosed: boolean = false
+
         // We can get the label creation date from the getLableCreationDate function
         const markedStaleOn: string =
             (await this.getLabelCreationDate(issue, staleLabel)) || issue.updated_at;
@@ -820,13 +822,25 @@ export class IssuesProcessor {
 
         if (daysBeforeRotten < 0) {
             if (daysBeforeClose < 0) {
+                issueLogger.info(
+                    `Stale $$type cannot be rotten or closed because days before rotten: ${daysBeforeRotten}, and days before close: ${daysBeforeClose}`
+                );
                 return;
             }
             else {
+                issueLogger.info(
+                    `Closing issue without rottening it because days before $$type rotten: ${LoggerService.cyan(daysBeforeRotten)}`
+                );
+
                 let issueHasUpdateInCloseWindow: boolean
-                issueHasUpdateInCloseWindow = !IssuesProcessor._updatedSince(
+                issueHasUpdateInCloseWindow = IssuesProcessor._updatedSince(
                     issue.updated_at,
                     daysBeforeClose
+                );
+                issueLogger.info(
+                    `$$type has been updated in the last ${daysBeforeClose} days: ${LoggerService.cyan(
+                        issueHasUpdateInCloseWindow
+                    )}`
                 );
                 if (!issueHasUpdateInCloseWindow && !issueHasCommentsSinceStale) {
                     issueLogger.info(
@@ -835,6 +849,8 @@ export class IssuesProcessor {
                         )}`
                     );
                     await this._closeIssue(issue, closeMessage, closeLabel);
+
+                    issueHasClosed = true;
 
                     if (this.options.deleteBranch && issue.pull_request) {
                         issueLogger.info(
@@ -855,6 +871,13 @@ export class IssuesProcessor {
 
         // TODO: make a function for shouldMarkWhenRotten
         const shouldMarkAsRotten: boolean = shouldMarkWhenStale(daysBeforeRotten);
+
+        if (issueHasClosed) {
+            issueLogger.info(
+                `Issue $$type has been closed, no need to process it further.`
+            );
+            return;
+        }
 
         if (!issue.isRotten) {
             issueLogger.info(`This $$type is not rotten`);
@@ -918,7 +941,7 @@ export class IssuesProcessor {
                 }
             }
         }
-        if(issue.isRotten){
+        if (issue.isRotten) {
             issueLogger.info(`This $$type is already rotten`);
             // process the rotten issues
             this._processRottenIssue(
@@ -1223,7 +1246,7 @@ export class IssuesProcessor {
     ): Promise<void> {
         const issueLogger: IssueLogger = new IssueLogger(issue);
 
-        issueLogger.info(`Closing $$type for being stale`);
+        issueLogger.info(`Closing $$type for being stale/rotten`);
         this.closedIssues.push(issue);
 
         if (closeMessage) {
@@ -1397,9 +1420,9 @@ export class IssuesProcessor {
     }
 
     private _getDaysBeforePrRotten(): number {
-        return isNaN(this.options.daysBeforePrStale)
-            ? this.options.daysBeforeStale
-            : this.options.daysBeforePrStale;
+        return isNaN(this.options.daysBeforePrRotten)
+            ? this.options.daysBeforeRotten
+            : this.options.daysBeforePrRotten;
     }
 
     private _getDaysBeforeIssueClose(): number {

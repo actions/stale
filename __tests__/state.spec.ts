@@ -175,7 +175,7 @@ describe('state', (): void => {
   it('state should be reset if all issues are proceeded', async () => {
     const opts: IIssuesProcessorOptions = {
       ...DefaultProcessorOptions,
-      daysBeforeClose: 0
+      daysBeforeClose: 0,
     };
     const testIssue1 = generateIssue(
       opts,

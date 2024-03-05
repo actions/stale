@@ -569,7 +569,6 @@ test('processing a stale issue containing a slash in the label will rotten it bu
     ...DefaultProcessorOptions,
     staleIssueLabel: 'lifecycle/stale',
     daysBeforeRotten: 0
-
   };
   const TestIssueList: Issue[] = [
     generateIssue(
@@ -604,7 +603,6 @@ test('processing a stale issue will rotten it but not close it when days-before-
     ...DefaultProcessorOptions,
     daysBeforeRotten: -1,
     daysBeforeIssueRotten: 30
-    
   };
   const TestIssueList: Issue[] = [
     generateIssue(
@@ -666,7 +664,6 @@ test('processing a stale PR will rotten it but not close it', async () => {
   expect(processor.rottenIssues).toHaveLength(1);
   expect(processor.closedIssues).toHaveLength(0);
 });
-
 
 test('processing a stale PR will rotten it it when days-before-pr-rotten override days-before-rotten', async () => {
   const opts: IIssuesProcessorOptions = {
@@ -815,7 +812,7 @@ test('processing a stale PR will rotten it even if configured not to mark as sta
     ...DefaultProcessorOptions,
     daysBeforeStale: -1,
     daysBeforeRotten: 0,
-    stalePrMessage: '',
+    stalePrMessage: ''
   };
   const TestIssueList: Issue[] = [
     generateIssue(
@@ -850,7 +847,7 @@ test('processing a stale PR will close it even if configured not to mark as stal
     ...DefaultProcessorOptions,
     daysBeforeStale: -1,
     stalePrMessage: '',
-    daysBeforeRotten: -1,
+    daysBeforeRotten: -1
   };
   const TestIssueList: Issue[] = [
     generateIssue(
@@ -1410,7 +1407,10 @@ test('stale issues should not be closed if days is set to -1', async () => {
 });
 
 test('stale label should be removed if a comment was added to a stale issue', async () => {
-  const opts = {...DefaultProcessorOptions, removeStaleWhenUpdated: true, daysBeforeRotten: 0,
+  const opts = {
+    ...DefaultProcessorOptions,
+    removeStaleWhenUpdated: true,
+    daysBeforeRotten: 0
   };
   const TestIssueList: Issue[] = [
     generateIssue(
@@ -1539,7 +1539,10 @@ test('when the option "labelsToRemoveWhenStale" is set, the labels should be rem
 });
 
 test('stale label should not be removed if a comment was added by the bot (and the issue should be rotten)', async () => {
-  const opts = {...DefaultProcessorOptions, removeStaleWhenUpdated: true,     daysBeforeRotten: 0,
+  const opts = {
+    ...DefaultProcessorOptions,
+    removeStaleWhenUpdated: true,
+    daysBeforeRotten: 0
   };
   github.context.actor = 'abot';
   const TestIssueList: Issue[] = [
@@ -1895,7 +1898,11 @@ test('send stale message on prs when stale-pr-message is not empty', async () =>
 });
 
 test('git branch is deleted when option is enabled and days before rotten is set to -1', async () => {
-  const opts = {...DefaultProcessorOptions, deleteBranch: true, daysBeforeRotten: -1,};
+  const opts = {
+    ...DefaultProcessorOptions,
+    deleteBranch: true,
+    daysBeforeRotten: -1
+  };
   const isPullRequest = true;
   const TestIssueList: Issue[] = [
     generateIssue(
@@ -1926,7 +1933,11 @@ test('git branch is deleted when option is enabled and days before rotten is set
 });
 
 test('git branch is not deleted when issue is not pull request and days before rotten is set to -1', async () => {
-  const opts = {...DefaultProcessorOptions, deleteBranch: true, daysBeforeRotten: -1,};
+  const opts = {
+    ...DefaultProcessorOptions,
+    deleteBranch: true,
+    daysBeforeRotten: -1
+  };
   const isPullRequest = false;
   const TestIssueList: Issue[] = [
     generateIssue(
@@ -2762,7 +2773,7 @@ test('processing an issue stale since less than the daysBeforeStale with a stale
   expect(processor.removedLabelIssues).toHaveLength(0);
   expect(processor.rottenIssues).toHaveLength(1); // Expected at 0 by the user
   expect(processor.deletedBranchIssues).toHaveLength(0);
-  expect(processor.closedIssues).toHaveLength(0); 
+  expect(processor.closedIssues).toHaveLength(0);
 });
 
 test('processing an issue stale since less than the daysBeforeStale without a stale label should close the issue', async () => {
@@ -2816,7 +2827,7 @@ test('processing a pull request to be stale with the "stalePrMessage" option set
     stalePrMessage: 'This PR is stale',
     daysBeforeStale: 10,
     daysBeforePrStale: 1,
-    daysBeforeRotten: -1,
+    daysBeforeRotten: -1
   };
   const issueDate = new Date();
   issueDate.setDate(issueDate.getDate() - 2);

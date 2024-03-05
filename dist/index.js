@@ -877,6 +877,8 @@ class IssuesProcessor {
                     }
                     if (shouldMarkAsRotten) {
                         issueLogger.info(`This $$type should be marked as rotten based on the option ${issueLogger.createOptionLink(this._getDaysBeforeRottenUsedOptionName(issue))} (${logger_service_1.LoggerService.cyan(daysBeforeRotten)})`);
+                        // remove the stale label before marking the issue as rotten
+                        yield this._removeStaleLabel(issue, staleLabel);
                         yield this._markRotten(issue, rottenMessage, rottenLabel, skipMessage);
                         issue.isRotten = true; // This issue is now considered rotten
                         issue.markedRottenThisRun = true;

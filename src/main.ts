@@ -72,7 +72,9 @@ function _getAndValidateArgs(): IIssuesProcessorOptions {
     ),
     daysBeforeIssueStale: parseFloat(core.getInput('days-before-issue-stale')),
     daysBeforePrStale: parseFloat(core.getInput('days-before-pr-stale')),
-    daysBeforeIssueRotten: parseFloat(core.getInput('days-before-issue-rotten')),
+    daysBeforeIssueRotten: parseFloat(
+      core.getInput('days-before-issue-rotten')
+    ),
     daysBeforePrRotten: parseFloat(core.getInput('days-before-pr-rotten')),
     daysBeforeClose: parseInt(
       core.getInput('days-before-close', {required: true})

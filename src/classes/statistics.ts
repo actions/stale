@@ -80,7 +80,6 @@ export class Statistics {
     return this._incrementUndoRottenIssuesCount(increment);
   }
 
-
   setOperationsCount(operationsCount: Readonly<number>): Statistics {
     this.operationsCount = operationsCount;
 

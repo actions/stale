@@ -1,88 +1,88 @@
-import { isLabeled } from '../functions/is-labeled';
-import { isPullRequest } from '../functions/is-pull-request';
-import { Assignee } from '../interfaces/assignee';
-import { IIssue, OctokitIssue } from '../interfaces/issue';
-import { IIssuesProcessorOptions } from '../interfaces/issues-processor-options';
-import { ILabel } from '../interfaces/label';
-import { IMilestone } from '../interfaces/milestone';
-import { IsoDateString } from '../types/iso-date-string';
-import { Operations } from './operations';
+import {isLabeled} from '../functions/is-labeled';
+import {isPullRequest} from '../functions/is-pull-request';
+import {Assignee} from '../interfaces/assignee';
+import {IIssue, OctokitIssue} from '../interfaces/issue';
+import {IIssuesProcessorOptions} from '../interfaces/issues-processor-options';
+import {ILabel} from '../interfaces/label';
+import {IMilestone} from '../interfaces/milestone';
+import {IsoDateString} from '../types/iso-date-string';
+import {Operations} from './operations';
 
 export class Issue implements IIssue {
-    readonly title: string;
-    readonly number: number;
-    created_at: IsoDateString;
-    updated_at: IsoDateString;
-    readonly draft: boolean;
-    readonly labels: ILabel[];
-    readonly pull_request: object | null | undefined;
-    readonly state: string | 'closed' | 'open';
-    readonly locked: boolean;
-    readonly milestone?: IMilestone | null;
-    readonly assignees: Assignee[];
-    isStale: boolean;
-    isRotten: boolean;
-    markedStaleThisRun: boolean;
-    markedRottenThisRun: boolean;
-    operations = new Operations();
-    private readonly _options: IIssuesProcessorOptions;
+  readonly title: string;
+  readonly number: number;
+  created_at: IsoDateString;
+  updated_at: IsoDateString;
+  readonly draft: boolean;
+  readonly labels: ILabel[];
+  readonly pull_request: object | null | undefined;
+  readonly state: string | 'closed' | 'open';
+  readonly locked: boolean;
+  readonly milestone?: IMilestone | null;
+  readonly assignees: Assignee[];
+  isStale: boolean;
+  isRotten: boolean;
+  markedStaleThisRun: boolean;
+  markedRottenThisRun: boolean;
+  operations = new Operations();
+  private readonly _options: IIssuesProcessorOptions;
 
-    constructor(
-        options: Readonly<IIssuesProcessorOptions>,
-        issue: Readonly<OctokitIssue> | Readonly<IIssue>
-    ) {
-        this._options = options;
-        this.title = issue.title;
-        this.number = issue.number;
-        this.created_at = issue.created_at;
-        this.updated_at = issue.updated_at;
-        this.draft = Boolean(issue.draft);
-        this.labels = mapLabels(issue.labels);
-        this.pull_request = issue.pull_request;
-        this.state = issue.state;
-        this.locked = issue.locked;
-        this.milestone = issue.milestone;
-        this.assignees = issue.assignees || [];
-        this.isStale = isLabeled(this, this.staleLabel);
-        this.isRotten = isLabeled(this, this.rottenLabel);
-        this.markedStaleThisRun = false;
-        this.markedRottenThisRun = false;
-    }
+  constructor(
+    options: Readonly<IIssuesProcessorOptions>,
+    issue: Readonly<OctokitIssue> | Readonly<IIssue>
+  ) {
+    this._options = options;
+    this.title = issue.title;
+    this.number = issue.number;
+    this.created_at = issue.created_at;
+    this.updated_at = issue.updated_at;
+    this.draft = Boolean(issue.draft);
+    this.labels = mapLabels(issue.labels);
+    this.pull_request = issue.pull_request;
+    this.state = issue.state;
+    this.locked = issue.locked;
+    this.milestone = issue.milestone;
+    this.assignees = issue.assignees || [];
+    this.isStale = isLabeled(this, this.staleLabel);
+    this.isRotten = isLabeled(this, this.rottenLabel);
+    this.markedStaleThisRun = false;
+    this.markedRottenThisRun = false;
+  }
 
-    get isPullRequest(): boolean {
-        return isPullRequest(this);
-    }
+  get isPullRequest(): boolean {
+    return isPullRequest(this);
+  }
 
-    get staleLabel(): string {
-        return this._getStaleLabel();
-    }
-    get rottenLabel(): string {
-        return this._getRottenLabel();
-    }
+  get staleLabel(): string {
+    return this._getStaleLabel();
+  }
+  get rottenLabel(): string {
+    return this._getRottenLabel();
+  }
 
-    get hasAssignees(): boolean {
-        return this.assignees.length > 0;
-    }
+  get hasAssignees(): boolean {
+    return this.assignees.length > 0;
+  }
 
-    private _getStaleLabel(): string {
-        return this.isPullRequest
-            ? this._options.stalePrLabel
-            : this._options.staleIssueLabel;
-    }
-    private _getRottenLabel(): string {
-        return this.isPullRequest
-            ? this._options.rottenPrLabel
-            : this._options.rottenIssueLabel;
-    }
+  private _getStaleLabel(): string {
+    return this.isPullRequest
+      ? this._options.stalePrLabel
+      : this._options.staleIssueLabel;
+  }
+  private _getRottenLabel(): string {
+    return this.isPullRequest
+      ? this._options.rottenPrLabel
+      : this._options.rottenIssueLabel;
+  }
 }
 
 function mapLabels(labels: (string | ILabel)[] | ILabel[]): ILabel[] {
-    return labels.map(label => {
-        if (typeof label == 'string') {
-            return {
-                name: label
-            };
-        }
-        return label;
-    });
+  return labels.map(label => {
+    if (typeof label == 'string') {
+      return {
+        name: label
+      };
+    }
+    return label;
+  });
 }

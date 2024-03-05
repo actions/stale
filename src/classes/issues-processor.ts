@@ -908,6 +908,9 @@ export class IssuesProcessor {
               this._getDaysBeforeRottenUsedOptionName(issue)
             )} (${LoggerService.cyan(daysBeforeRotten)})`
           );
+          // remove the stale label before marking the issue as rotten
+          await this._removeStaleLabel(issue, staleLabel);
+
           await this._markRotten(
             issue,
             rottenMessage,

@@ -704,7 +704,6 @@ test('processing a stale PR will rotten it but not close it when days-before-pr-
     ...DefaultProcessorOptions,
     daysBeforeClose: 30,
     daysBeforeRotten: 0,
-
     daysBeforePrClose: 30
   };
   const TestIssueList: Issue[] = [
@@ -1538,11 +1537,11 @@ test('when the option "labelsToRemoveWhenStale" is set, the labels should be rem
   expect(processor.removedLabelIssues).toHaveLength(1);
 });
 
-test('stale label should not be removed if a comment was added by the bot (and the issue should be rotten)', async () => {
+test('stale label should not be removed if a comment was added by the bot, given that it does not get rotten', async () => {
   const opts = {
     ...DefaultProcessorOptions,
     removeStaleWhenUpdated: true,
-    daysBeforeRotten: 0
+    daysBeforeRotten: -1
   };
   github.context.actor = 'abot';
   const TestIssueList: Issue[] = [
@@ -1576,8 +1575,8 @@ test('stale label should not be removed if a comment was added by the bot (and t
   // process our fake issue list
   await processor.processIssues(1);
 
-  expect(processor.closedIssues).toHaveLength(0);
-  expect(processor.rottenIssues).toHaveLength(1);
+  expect(processor.closedIssues).toHaveLength(1);
+  expect(processor.rottenIssues).toHaveLength(0);
   expect(processor.staleIssues).toHaveLength(0);
   expect(processor.removedLabelIssues).toHaveLength(0);
 });
@@ -1651,7 +1650,7 @@ test('stale issues should not be closed until after the closed number of days', 
 test('stale issues should be rotten if the rotten nubmer of days (additive) is also passed', async () => {
   const opts = {...DefaultProcessorOptions};
   opts.daysBeforeStale = 5; // stale after 5 days
-  opts.daysBeforeRotten = 1; // closes after 6 days
+  opts.daysBeforeRotten = 1; // rotten after 6 days
   const lastUpdate = new Date();
   lastUpdate.setDate(lastUpdate.getDate() - 7);
   const TestIssueList: Issue[] = [
@@ -1679,7 +1678,7 @@ test('stale issues should be rotten if the rotten nubmer of days (additive) is a
 
   expect(processor.closedIssues).toHaveLength(0);
   expect(processor.rottenIssues).toHaveLength(1);
-  expect(processor.removedLabelIssues).toHaveLength(0);
+  expect(processor.removedLabelIssues).toHaveLength(1); // the stale label should be removed on rotten label being added
   expect(processor.staleIssues).toHaveLength(0);
 });
 
@@ -2770,7 +2769,7 @@ test('processing an issue stale since less than the daysBeforeStale with a stale
   // process our fake issue list
   await processor.processIssues(1);
 
-  expect(processor.removedLabelIssues).toHaveLength(0);
+  expect(processor.removedLabelIssues).toHaveLength(1); // The stale label should be removed on adding the rotten label
   expect(processor.rottenIssues).toHaveLength(1); // Expected at 0 by the user
   expect(processor.deletedBranchIssues).toHaveLength(0);
   expect(processor.closedIssues).toHaveLength(0);

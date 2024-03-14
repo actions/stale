@@ -2,6 +2,7 @@ import {IUserAssignee} from '../interfaces/assignee';
 import {IIssue} from '../interfaces/issue';
 import {IIssuesProcessorOptions} from '../interfaces/issues-processor-options';
 import {ILabel} from '../interfaces/label';
+import {IOwnerRepo} from '../interfaces/owner-repo';
 import {IMilestone} from '../interfaces/milestone';
 import {Issue} from './issue';
 
@@ -29,6 +30,7 @@ describe('Issue', (): void => {
       exemptPrLabels: '',
       onlyLabels: '',
       onlyIssueLabels: '',
+      onlyMatchingFilter: [],
       onlyPrLabels: '',
       anyOfLabels: '',
       anyOfIssueLabels: '',
@@ -88,7 +90,8 @@ describe('Issue', (): void => {
           login: 'dummy-login',
           type: 'User'
         }
-      ]
+      ],
+      repository_url: 'https://api.github.com/repos/dummy/dummy'
     };
     issue = new Issue(optionsInterface, issueInterface);
   });

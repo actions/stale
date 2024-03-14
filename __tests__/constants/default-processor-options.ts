@@ -19,6 +19,7 @@ export const DefaultProcessorOptions: IIssuesProcessorOptions = Object.freeze({
   exemptIssueLabels: '',
   stalePrLabel: 'Stale',
   closePrLabel: '',
+  onlyMatchingFilter: [],
   exemptPrLabels: '',
   onlyLabels: '',
   onlyIssueLabels: '',

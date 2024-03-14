@@ -39,6 +39,7 @@ export function generateIssue(
         login: assignee,
         type: 'User'
       };
-    })
+    }),
+    repository_url: 'https://api.github.com/repos/dummy/dummy'
   });
 }

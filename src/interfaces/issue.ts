@@ -3,6 +3,7 @@ import {Assignee} from './assignee';
 import {ILabel} from './label';
 import {IMilestone} from './milestone';
 import {components} from '@octokit/openapi-types';
+
 export interface IIssue {
   title: string;
   number: number;
@@ -15,6 +16,7 @@ export interface IIssue {
   locked: boolean;
   milestone?: IMilestone | null;
   assignees?: Assignee[] | null;
+  repository_url?: string;
 }
 
 export type OctokitIssue = components['schemas']['issue'];

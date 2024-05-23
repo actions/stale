@@ -1591,12 +1591,10 @@ exports.StateCacheStorage = void 0;
 const fs_1 = __importDefault(__nccwpck_require__(7147));
 const path_1 = __importDefault(__nccwpck_require__(1017));
 const os_1 = __importDefault(__nccwpck_require__(2037));
-const process_1 = __importDefault(__nccwpck_require__(7282));
 const core = __importStar(__nccwpck_require__(2186));
 const github_1 = __nccwpck_require__(5438);
 const plugin_retry_1 = __nccwpck_require__(6298);
 const cache = __importStar(__nccwpck_require__(7799));
-const CACHE_KEY = encodeURIComponent('_state' + process_1.default.env.GITHUB_WORKFLOW + '-' + process_1.default.env.GITHUB_JOB);
 const STATE_FILE = 'state.txt';
 const STALE_DIR = '56acbeaa-1fef-4c79-8f84-7565e560fb03';
 const mkTempDir = () => {
@@ -1645,22 +1643,25 @@ const resetCacheWithOctokit = (cacheKey) => __awaiter(void 0, void 0, void 0, fu
     }
 });
 class StateCacheStorage {
+    constructor(cacheKey) {
+        this.cacheKey = cacheKey;
+    }
     save(serializedState) {
         return __awaiter(this, void 0, void 0, function* () {
             const tmpDir = mkTempDir();
             const filePath = path_1.default.join(tmpDir, STATE_FILE);
             fs_1.default.writeFileSync(filePath, serializedState);
             try {
-                const cacheExists = yield checkIfCacheExists(CACHE_KEY);
+                const cacheExists = yield checkIfCacheExists(this.cacheKey);
                 if (cacheExists) {
-                    yield resetCacheWithOctokit(CACHE_KEY);
+                    yield resetCacheWithOctokit(this.cacheKey);
                 }
                 const fileSize = fs_1.default.statSync(filePath).size;
                 if (fileSize === 0) {
                     core.info(`the state will be removed`);
                     return;
                 }
-                yield cache.saveCache([path_1.default.dirname(filePath)], CACHE_KEY);
+                yield cache.saveCache([path_1.default.dirname(filePath)], this.cacheKey);
             }
             catch (error) {
                 core.warning(`Saving the state was not successful due to "${error.message || 'unknown reason'}"`);
@@ -1676,12 +1677,12 @@ class StateCacheStorage {
             const filePath = path_1.default.join(tmpDir, STATE_FILE);
             unlinkSafely(filePath);
             try {
-                const cacheExists = yield checkIfCacheExists(CACHE_KEY);
+                const cacheExists = yield checkIfCacheExists(this.cacheKey);
                 if (!cacheExists) {
                     core.info('The saved state was not found, the process starts from the first issue.');
                     return '';
                 }
-                yield cache.restoreCache([path_1.default.dirname(filePath)], CACHE_KEY);
+                yield cache.restoreCache([path_1.default.dirname(filePath)], this.cacheKey);
                 if (!fs_1.default.existsSync(filePath)) {
                     core.warning('Unknown error when unpacking the cache, the process starts from the first issue.');
                     return '';
@@ -2686,16 +2687,46 @@ exports.LoggerService = LoggerService;
 /***/ }),
 
 /***/ 6330:
-/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
 
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.getStateInstance = void 0;
+const crypto = __importStar(__nccwpck_require__(6113));
 const state_1 = __nccwpck_require__(5186);
 const state_cache_storage_1 = __nccwpck_require__(3709);
+function sha256(message) {
+    const hash = crypto.createHash('sha256');
+    hash.update(message);
+    return hash.digest('hex');
+}
 const getStateInstance = (options) => {
-    const storage = new state_cache_storage_1.StateCacheStorage();
+    const cacheKey = sha256(JSON.stringify(options));
+    const storage = new state_cache_storage_1.StateCacheStorage(cacheKey);
     return new state_1.State(storage, options);
 };
 exports.getStateInstance = getStateInstance;
@@ -89197,14 +89228,6 @@ module.exports = require("path");
 
 "use strict";
 module.exports = require("perf_hooks");
-
-/***/ }),
-
-/***/ 7282:
-/***/ ((module) => {
-
-"use strict";
-module.exports = require("process");
 
 /***/ }),
 

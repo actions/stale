@@ -4,6 +4,6 @@ import {IIssuesProcessorOptions} from '../interfaces/issues-processor-options';
 import {StateCacheStorage} from '../classes/state/state-cache-storage';
 
 export const getStateInstance = (options: IIssuesProcessorOptions): IState => {
-  const storage = new StateCacheStorage();
+  const storage = new StateCacheStorage(options);
   return new State(storage, options);
 };

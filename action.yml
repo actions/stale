@@ -204,6 +204,10 @@ inputs:
     description: 'Only the issues or the pull requests with an assignee will be marked as stale automatically.'
     default: 'false'
     required: false
+  cache-prefix:
+    description: 'Add a prefix to the stored cache. Useful when using this action multiple times with different params.'
+    default: ''
+    required: false
 outputs:
   closed-issues-prs:
     description: 'List of all closed issues and pull requests.'

@@ -551,7 +551,7 @@ Default value: `false`
 
 #### cache-prefix
 
-Beneficial so the action has a more unique cahce key. Useful when calling this action multiple times, independent of each other.
+Beneficial so the action has a more unique cache key. Useful when calling this action multiple times, independent of each other.
 An example for usage would be closing all PRs with `x` label after 7 days in one action and closing all PRs except for `x` label after 10 days in another.
 
 ### Usage

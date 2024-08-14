@@ -930,6 +930,38 @@ test('locked issues will not be marked stale', async () => {
   expect(processor.closedIssues).toHaveLength(0);
 });
 
+test('locked issues are marked stale', async () => {
+  const opts: IIssuesProcessorOptions = {...DefaultProcessorOptions};
+  opts.exemptLocked = false;
+  const TestIssueList: Issue[] = [
+    generateIssue(
+      opts,
+      1,
+      'A locked issue that will be stale',
+      '2020-01-01T17:00:00Z',
+      '2020-01-01T17:00:00Z',
+      false,
+      false,
+      [],
+      false,
+      true
+    )
+  ];
+  const processor = new IssuesProcessorMock(
+    opts,
+    alwaysFalseStateMock,
+    async p => (p === 1 ? TestIssueList : []),
+    async () => [],
+    async () => new Date().toDateString()
+  );
+
+  // process our fake issue list
+  await processor.processIssues(1);
+
+  expect(processor.staleIssues).toHaveLength(1);
+  expect(processor.closedIssues).toHaveLength(0);
+});
+
 test('stale locked issues will not be closed', async () => {
   const TestIssueList: Issue[] = [
     generateIssue(
@@ -960,6 +992,38 @@ test('stale locked issues will not be closed', async () => {
   expect(processor.closedIssues).toHaveLength(0);
 });
 
+test('stale locked issues will be closed', async () => {
+  const opts: IIssuesProcessorOptions = {...DefaultProcessorOptions};
+  opts.exemptLocked = false;
+  const TestIssueList: Issue[] = [
+    generateIssue(
+      opts,
+      1,
+      'A stale locked issue that will not be closed',
+      '2020-01-01T17:00:00Z',
+      '2020-01-01T17:00:00Z',
+      false,
+      false,
+      ['Stale'],
+      false,
+      true
+    )
+  ];
+  const processor = new IssuesProcessorMock(
+    opts,
+    alwaysFalseStateMock,
+    async p => (p === 1 ? TestIssueList : []),
+    async () => [],
+    async () => new Date().toDateString()
+  );
+
+  // process our fake issue list
+  await processor.processIssues(1);
+
+  expect(processor.staleIssues).toHaveLength(0);
+  expect(processor.closedIssues).toHaveLength(1);
+});
+
 test('locked prs will not be marked stale', async () => {
   const TestIssueList: Issue[] = [
     generateIssue(
@@ -985,6 +1049,38 @@ test('locked prs will not be marked stale', async () => {
   await processor.processIssues(1);
 
   expect(processor.staleIssues).toHaveLength(0);
+  expect(processor.closedIssues).toHaveLength(0);
+});
+
+test('locked prs will be marked stale', async () => {
+  const opts: IIssuesProcessorOptions = {...DefaultProcessorOptions};
+  opts.exemptLocked = false;
+  const TestIssueList: Issue[] = [
+    generateIssue(
+      opts,
+      1,
+      'A locked PR that will not be marked stale',
+      '2020-01-01T17:00:00Z',
+      '2020-01-01T17:00:00Z',
+      false,
+      true,
+      [],
+      false,
+      true
+    )
+  ];
+  const processor = new IssuesProcessorMock(
+    opts,
+    alwaysFalseStateMock,
+    async p => (p === 1 ? TestIssueList : []),
+    async () => [],
+    async () => new Date().toDateString()
+  );
+
+  // process our fake issue list
+  await processor.processIssues(1);
+
+  expect(processor.staleIssues).toHaveLength(1);
   expect(processor.closedIssues).toHaveLength(0);
 });
 
@@ -1016,6 +1112,38 @@ test('stale locked prs will not be closed', async () => {
 
   expect(processor.staleIssues).toHaveLength(0);
   expect(processor.closedIssues).toHaveLength(0);
+});
+
+test('stale locked prs will be closed', async () => {
+  const opts: IIssuesProcessorOptions = {...DefaultProcessorOptions};
+  opts.exemptLocked = false;
+  const TestIssueList: Issue[] = [
+    generateIssue(
+      opts,
+      1,
+      'A stale locked PR that will not be closed',
+      '2020-01-01T17:00:00Z',
+      '2020-01-01T17:00:00Z',
+      false,
+      true,
+      ['Stale'],
+      false,
+      true
+    )
+  ];
+  const processor = new IssuesProcessorMock(
+    opts,
+    alwaysFalseStateMock,
+    async p => (p === 1 ? TestIssueList : []),
+    async () => [],
+    async () => new Date().toDateString()
+  );
+
+  // process our fake issue list
+  await processor.processIssues(1);
+
+  expect(processor.staleIssues).toHaveLength(0);
+  expect(processor.closedIssues).toHaveLength(1);
 });
 
 test('exempt issue labels will not be marked stale', async () => {
@@ -2514,6 +2642,44 @@ test('processing a locked issue with a close label will not remove the close lab
   await processor.processIssues(1);
 
   expect(processor.removedLabelIssues).toHaveLength(0);
+});
+
+test('processing a locked issue with a close label will remove the close label', async () => {
+  expect.assertions(1);
+  const opts: IIssuesProcessorOptions = {
+    ...DefaultProcessorOptions,
+    closeIssueLabel: 'close',
+    staleIssueLabel: 'stale',
+    exemptLocked: false
+  };
+  const now: Date = new Date();
+  const oneWeekAgo: Date = new Date(now.setDate(now.getDate() - 7));
+  const TestIssueList: Issue[] = [
+    generateIssue(
+      opts,
+      1,
+      'A closed issue with a close label',
+      oneWeekAgo.toDateString(),
+      now.toDateString(),
+      false,
+      false,
+      ['close'],
+      false,
+      true
+    )
+  ];
+  const processor = new IssuesProcessorMock(
+    opts,
+    alwaysFalseStateMock,
+    async p => (p === 1 ? TestIssueList : []),
+    async () => [],
+    async () => new Date().toDateString()
+  );
+
+  // process our fake issue list
+  await processor.processIssues(1);
+
+  expect(processor.removedLabelIssues).toHaveLength(1);
 });
 
 test('processing an issue stale since less than the daysBeforeStale with a stale label created after daysBeforeClose should close the issue', async () => {

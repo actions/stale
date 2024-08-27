@@ -274,10 +274,16 @@ const is_pull_request_1 = __nccwpck_require__(5400);
 const operations_1 = __nccwpck_require__(7957);
 class Issue {
     constructor(options, issue) {
+        var _a, _b, _c, _d;
         this.operations = new operations_1.Operations();
         this._options = options;
         this.title = issue.title;
         this.number = issue.number;
+        //this.user = issue.user;
+        this.user = {
+            login: (_b = (_a = issue.user) === null || _a === void 0 ? void 0 : _a.login) !== null && _b !== void 0 ? _b : "",
+            type: (_d = (_c = issue.user) === null || _c === void 0 ? void 0 : _c.type) !== null && _d !== void 0 ? _d : "User"
+        };
         this.created_at = issue.created_at;
         this.updated_at = issue.updated_at;
         this.draft = Boolean(issue.draft);
@@ -558,6 +564,13 @@ class IssuesProcessor {
             const hasExemptLabel = exemptLabels.some((exemptLabel) => (0, is_labeled_1.isLabeled)(issue, exemptLabel));
             if (hasExemptLabel) {
                 issueLogger.info(`Skipping this $$type because it contains an exempt label, see ${issueLogger.createOptionLink(issue.isPullRequest ? option_1.Option.ExemptPrLabels : option_1.Option.ExemptIssueLabels)} for more details`);
+                IssuesProcessor._endIssueProcessing(issue);
+                return; // Don't process exempt issues
+            }
+            const exemptAuthors = (0, words_to_list_1.wordsToList)(this.options.exemptAuthors);
+            const hasExemptAuthors = exemptAuthors.some((exemptAuthor) => issue.user.login == exemptAuthor);
+            if (hasExemptAuthors) {
+                issueLogger.info(`Skipping this $$type because it contains an exempt author, see ${issueLogger.createOptionLink(option_1.Option.ExemptAuthors)} for more details`);
                 IssuesProcessor._endIssueProcessing(issue);
                 return; // Don't process exempt issues
             }
@@ -2222,6 +2235,7 @@ var Option;
     Option["IgnorePrUpdates"] = "ignore-pr-updates";
     Option["ExemptDraftPr"] = "exempt-draft-pr";
     Option["CloseIssueReason"] = "close-issue-reason";
+    Option["ExemptAuthors"] = "exempt-authors";
 })(Option || (exports.Option = Option = {}));
 
 
@@ -2567,7 +2581,8 @@ function _getAndValidateArgs() {
         ignorePrUpdates: _toOptionalBoolean('ignore-pr-updates'),
         exemptDraftPr: core.getInput('exempt-draft-pr') === 'true',
         closeIssueReason: core.getInput('close-issue-reason'),
-        includeOnlyAssigned: core.getInput('include-only-assigned') === 'true'
+        includeOnlyAssigned: core.getInput('include-only-assigned') === 'true',
+        exemptAuthors: core.getInput('exempt-authors'),
     };
     for (const numberInput of ['days-before-stale']) {
         if (isNaN(parseFloat(core.getInput(numberInput)))) {

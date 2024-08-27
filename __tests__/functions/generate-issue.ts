@@ -15,10 +15,15 @@ export function generateIssue(
   isClosed = false,
   isLocked = false,
   milestone: string | undefined = undefined,
-  assignees: string[] = []
+  assignees: string[] = [],
+  author: string = 'author'
 ): Issue {
   return new Issue(options, {
     number: id,
+    user: {
+      login: author,
+      type: 'User'
+    },
     labels: labels.map(l => {
       return {name: l};
     }),

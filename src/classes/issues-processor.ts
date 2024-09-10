@@ -810,7 +810,7 @@ export class IssuesProcessor {
 
     const filteredComments = comments.filter(
       comment =>
-        comment.user?.type === 'User' &&
+        comment.user?.type === 'User' ||
         comment.body?.toLowerCase() !== staleMessage.toLowerCase()
     );
 

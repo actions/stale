@@ -1360,7 +1360,7 @@ test('stale label should not be removed if a comment was added by the bot (and t
       {
         user: {
           login: 'abot',
-          type: 'User'
+          type: 'Bot'
         },
         body: 'This issue is stale'
       }

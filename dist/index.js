@@ -823,7 +823,7 @@ class IssuesProcessor {
             const comments = yield this.listIssueComments(issue, sinceDate);
             const filteredComments = comments.filter(comment => {
                 var _a, _b;
-                return ((_a = comment.user) === null || _a === void 0 ? void 0 : _a.type) === 'User' ||
+                return ((_a = comment.user) === null || _a === void 0 ? void 0 : _a.type) !== 'Bot' &&
                     ((_b = comment.body) === null || _b === void 0 ? void 0 : _b.toLowerCase()) !== staleMessage.toLowerCase();
             });
             issueLogger.info(`Comments that are not the stale comment or another bot: ${logger_service_1.LoggerService.cyan(filteredComments.length)}`);

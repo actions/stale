@@ -1018,6 +1018,8 @@ export class IssuesProcessor {
     );
 
     try {
+      this._consumeIssueOperation(issue);
+
       if (!this.options.debugOnly) {
         await this.client.rest.issues.removeLabel({
           owner: context.repo.owner,
@@ -1033,7 +1035,6 @@ export class IssuesProcessor {
         }The label "${LoggerService.cyan(label)}" was removed`
       );
 
-      this._consumeIssueOperation(issue);
       this.statistics?.incrementDeletedItemsLabelsCount(issue);
       this.removedLabelIssues.push(issue);
     } catch (error) {

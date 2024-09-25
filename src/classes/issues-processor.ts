@@ -1016,7 +1016,6 @@ export class IssuesProcessor {
         isSubStep ? LoggerService.white('├── ') : ''
       }Removing the label "${LoggerService.cyan(label)}" from this $$type...`
     );
-    this.removedLabelIssues.push(issue);
 
     try {
       this._consumeIssueOperation(issue);
@@ -1036,6 +1035,8 @@ export class IssuesProcessor {
           isSubStep ? LoggerService.white('└── ') : ''
         }The label "${LoggerService.cyan(label)}" was removed`
       );
+
+      this.removedLabelIssues.push(issue);
     } catch (error) {
       issueLogger.error(
         `${

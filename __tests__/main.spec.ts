@@ -159,11 +159,12 @@ test('processing an issue with no label and a start date as ECMAScript epoch in 
 });
 
 test('processing an issue with no label and a start date as ISO 8601 being before the issue creation date will make it stale and close it when it is old enough and days-before-close is set to 0', async () => {
-  expect.assertions(2);
+  expect.assertions(3);
   const january2000 = '2000-01-01T00:00:00Z';
   const opts: IIssuesProcessorOptions = {
     ...DefaultProcessorOptions,
     daysBeforeClose: 0,
+    daysBeforeRotten: 0,
     startDate: january2000.toString()
   };
   const TestIssueList: Issue[] = [
@@ -187,6 +188,7 @@ test('processing an issue with no label and a start date as ISO 8601 being befor
   await processor.processIssues(1);
 
   expect(processor.staleIssues.length).toStrictEqual(1);
+  expect(processor.rottenIssues.length).toStrictEqual(1);
   expect(processor.closedIssues.length).toStrictEqual(1);
 });
 
@@ -219,6 +221,39 @@ test('processing an issue with no label and a start date as ISO 8601 being after
   await processor.processIssues(1);
 
   expect(processor.staleIssues.length).toStrictEqual(0);
+  expect(processor.closedIssues.length).toStrictEqual(0);
+});
+
+test('processing an issue with no label and a start date as ISO 8601 being after the issue creation date will not make it stale , rotten or close it when it is old enough and days-before-close is set to 0', async () => {
+  expect.assertions(3);
+  const january2021 = '2021-01-01T00:00:00Z';
+  const opts: IIssuesProcessorOptions = {
+    ...DefaultProcessorOptions,
+    daysBeforeClose: 0,
+    startDate: january2021.toString()
+  };
+  const TestIssueList: Issue[] = [
+    generateIssue(
+      opts,
+      1,
+      'An issue with no label',
+      '2020-01-01T17:00:00Z',
+      '2020-01-01T17:00:00Z'
+    )
+  ];
+  const processor = new IssuesProcessorMock(
+    opts,
+    alwaysFalseStateMock,
+    async p => (p === 1 ? TestIssueList : []),
+    async () => [],
+    async () => new Date().toDateString()
+  );
+
+  // process our fake issue list
+  await processor.processIssues(1);
+
+  expect(processor.staleIssues.length).toStrictEqual(0);
+  expect(processor.rottenIssues.length).toStrictEqual(0);
   expect(processor.closedIssues.length).toStrictEqual(0);
 });
 
@@ -290,6 +325,7 @@ test('processing an issue with no label will make it stale and close it, if it i
   const opts: IIssuesProcessorOptions = {
     ...DefaultProcessorOptions,
     daysBeforeClose: 1,
+    daysBeforeRotten: 0,
     daysBeforeIssueClose: 0
   };
   const TestIssueList: Issue[] = [
@@ -307,6 +343,7 @@ test('processing an issue with no label will make it stale and close it, if it i
   await processor.processIssues(1);
 
   expect(processor.staleIssues).toHaveLength(1);
+  expect(processor.rottenIssues).toHaveLength(1);
   expect(processor.closedIssues).toHaveLength(1);
   expect(processor.deletedBranchIssues).toHaveLength(0);
 });
@@ -459,10 +496,11 @@ test('processing an issue with no label will make it stale but not close it', as
   expect(processor.closedIssues).toHaveLength(0);
 });
 
-test('processing a stale issue will close it', async () => {
+test('processing a stale issue will rot it but not close it, given days before rotten is > -1', async () => {
   const opts: IIssuesProcessorOptions = {
     ...DefaultProcessorOptions,
-    daysBeforeClose: 30
+    daysBeforeClose: 30,
+    daysBeforeRotten: 0
   };
   const TestIssueList: Issue[] = [
     generateIssue(
@@ -488,13 +526,15 @@ test('processing a stale issue will close it', async () => {
   await processor.processIssues(1);
 
   expect(processor.staleIssues).toHaveLength(0);
-  expect(processor.closedIssues).toHaveLength(1);
+  expect(processor.rottenIssues).toHaveLength(1);
+  expect(processor.closedIssues).toHaveLength(0);
 });
 
-test('processing a stale issue containing a space in the label will close it', async () => {
+test('processing a stale issue containing a space in the label will rotten it but not close it, given days before rotten is > -1', async () => {
   const opts: IIssuesProcessorOptions = {
     ...DefaultProcessorOptions,
-    staleIssueLabel: 'state: stale'
+    staleIssueLabel: 'state: stale',
+    daysBeforeRotten: 0
   };
   const TestIssueList: Issue[] = [
     generateIssue(
@@ -520,13 +560,15 @@ test('processing a stale issue containing a space in the label will close it', a
   await processor.processIssues(1);
 
   expect(processor.staleIssues).toHaveLength(0);
-  expect(processor.closedIssues).toHaveLength(1);
+  expect(processor.rottenIssues).toHaveLength(1);
+  expect(processor.closedIssues).toHaveLength(0);
 });
 
-test('processing a stale issue containing a slash in the label will close it', async () => {
+test('processing a stale issue containing a slash in the label will rotten it but not close it', async () => {
   const opts: IIssuesProcessorOptions = {
     ...DefaultProcessorOptions,
-    staleIssueLabel: 'lifecycle/stale'
+    staleIssueLabel: 'lifecycle/stale',
+    daysBeforeRotten: 0
   };
   const TestIssueList: Issue[] = [
     generateIssue(
@@ -552,20 +594,21 @@ test('processing a stale issue containing a slash in the label will close it', a
   await processor.processIssues(1);
 
   expect(processor.staleIssues).toHaveLength(0);
-  expect(processor.closedIssues).toHaveLength(1);
+  expect(processor.rottenIssues).toHaveLength(1);
+  expect(processor.closedIssues).toHaveLength(0);
 });
 
-test('processing a stale issue will close it when days-before-issue-stale override days-before-stale', async () => {
+test('processing a stale issue will rotten it but not close it when days-before-issue-rotten override days-before-rotten', async () => {
   const opts: IIssuesProcessorOptions = {
     ...DefaultProcessorOptions,
-    daysBeforeClose: 30,
-    daysBeforeIssueStale: 30
+    daysBeforeRotten: -1,
+    daysBeforeIssueRotten: 30
   };
   const TestIssueList: Issue[] = [
     generateIssue(
       opts,
       1,
-      'A stale issue that should be closed',
+      'A stale issue that should be rotten',
       '2020-01-01T17:00:00Z',
       '2020-01-01T17:00:00Z',
       false,
@@ -585,13 +628,14 @@ test('processing a stale issue will close it when days-before-issue-stale overri
   await processor.processIssues(1);
 
   expect(processor.staleIssues).toHaveLength(0);
-  expect(processor.closedIssues).toHaveLength(1);
+  expect(processor.rottenIssues).toHaveLength(1);
+  expect(processor.closedIssues).toHaveLength(0);
 });
 
-test('processing a stale PR will close it', async () => {
+test('processing a stale PR will rotten it but not close it', async () => {
   const opts: IIssuesProcessorOptions = {
     ...DefaultProcessorOptions,
-    daysBeforeClose: 30
+    daysBeforePrRotten: 30
   };
   const TestIssueList: Issue[] = [
     generateIssue(
@@ -617,13 +661,49 @@ test('processing a stale PR will close it', async () => {
   await processor.processIssues(1);
 
   expect(processor.staleIssues).toHaveLength(0);
-  expect(processor.closedIssues).toHaveLength(1);
+  expect(processor.rottenIssues).toHaveLength(1);
+  expect(processor.closedIssues).toHaveLength(0);
 });
 
-test('processing a stale PR will close it when days-before-pr-stale override days-before-stale', async () => {
+test('processing a stale PR will rotten it it when days-before-pr-rotten override days-before-rotten', async () => {
+  const opts: IIssuesProcessorOptions = {
+    ...DefaultProcessorOptions,
+    daysBeforeRotten: 30,
+    daysBeforePrRotten: 30
+  };
+  const TestIssueList: Issue[] = [
+    generateIssue(
+      opts,
+      1,
+      'A stale PR that should be closed',
+      '2020-01-01T17:00:00Z',
+      '2020-01-01T17:00:00Z',
+      false,
+      true,
+      ['Stale']
+    )
+  ];
+  const processor = new IssuesProcessorMock(
+    opts,
+    alwaysFalseStateMock,
+    async p => (p === 1 ? TestIssueList : []),
+    async () => [],
+    async () => new Date().toDateString()
+  );
+
+  // process our fake issue list
+  await processor.processIssues(1);
+
+  expect(processor.staleIssues).toHaveLength(0);
+  expect(processor.rottenIssues).toHaveLength(1);
+  expect(processor.closedIssues).toHaveLength(0);
+});
+
+test('processing a stale PR will rotten it but not close it when days-before-pr-stale override days-before-stale', async () => {
   const opts: IIssuesProcessorOptions = {
     ...DefaultProcessorOptions,
     daysBeforeClose: 30,
+    daysBeforeRotten: 0,
     daysBeforePrClose: 30
   };
   const TestIssueList: Issue[] = [
@@ -650,13 +730,15 @@ test('processing a stale PR will close it when days-before-pr-stale override day
   await processor.processIssues(1);
 
   expect(processor.staleIssues).toHaveLength(0);
-  expect(processor.closedIssues).toHaveLength(1);
+  expect(processor.rottenIssues).toHaveLength(1);
+  expect(processor.closedIssues).toHaveLength(0);
 });
 
-test('processing a stale issue will close it even if configured not to mark as stale', async () => {
+test('processing a stale issue will rotten it even if configured not to mark as stale', async () => {
   const opts = {
     ...DefaultProcessorOptions,
     daysBeforeStale: -1,
+    daysBeforeRotten: 0,
     staleIssueMessage: ''
   };
   const TestIssueList: Issue[] = [
@@ -683,13 +765,16 @@ test('processing a stale issue will close it even if configured not to mark as s
   await processor.processIssues(1);
 
   expect(processor.staleIssues).toHaveLength(0);
-  expect(processor.closedIssues).toHaveLength(1);
+  expect(processor.rottenIssues).toHaveLength(1);
+  expect(processor.closedIssues).toHaveLength(0);
 });
 
 test('processing a stale issue will close it even if configured not to mark as stale when days-before-issue-stale override days-before-stale', async () => {
   const opts = {
     ...DefaultProcessorOptions,
     daysBeforeStale: 0,
+    daysBeforeRotten: 0,
+
     daysBeforeIssueStale: -1,
     staleIssueMessage: ''
   };
@@ -717,13 +802,15 @@ test('processing a stale issue will close it even if configured not to mark as s
   await processor.processIssues(1);
 
   expect(processor.staleIssues).toHaveLength(0);
-  expect(processor.closedIssues).toHaveLength(1);
+  expect(processor.rottenIssues).toHaveLength(1);
+  expect(processor.closedIssues).toHaveLength(0);
 });
 
-test('processing a stale PR will close it even if configured not to mark as stale', async () => {
+test('processing a stale PR will rotten it even if configured not to mark as stale', async () => {
   const opts = {
     ...DefaultProcessorOptions,
     daysBeforeStale: -1,
+    daysBeforeRotten: 0,
     stalePrMessage: ''
   };
   const TestIssueList: Issue[] = [
@@ -750,14 +837,52 @@ test('processing a stale PR will close it even if configured not to mark as stal
   await processor.processIssues(1);
 
   expect(processor.staleIssues).toHaveLength(0);
+  expect(processor.rottenIssues).toHaveLength(1);
+  expect(processor.closedIssues).toHaveLength(0);
+});
+
+test('processing a stale PR will close it even if configured not to mark as stale or rotten', async () => {
+  const opts = {
+    ...DefaultProcessorOptions,
+    daysBeforeStale: -1,
+    stalePrMessage: '',
+    daysBeforeRotten: -1
+  };
+  const TestIssueList: Issue[] = [
+    generateIssue(
+      opts,
+      1,
+      'An issue with no label',
+      '2020-01-01T17:00:00Z',
+      '2020-01-01T17:00:00Z',
+      false,
+      true,
+      ['Stale']
+    )
+  ];
+  const processor = new IssuesProcessorMock(
+    opts,
+    alwaysFalseStateMock,
+    async p => (p === 1 ? TestIssueList : []),
+    async () => [],
+    async () => new Date().toDateString()
+  );
+
+  // process our fake issue list
+  await processor.processIssues(1);
+
+  expect(processor.staleIssues).toHaveLength(0);
+  expect(processor.rottenIssues).toHaveLength(0);
   expect(processor.closedIssues).toHaveLength(1);
 });
 
-test('processing a stale PR will close it even if configured not to mark as stale when days-before-pr-stale override days-before-stale', async () => {
+test('processing a stale PR will rotten it even if configured not to mark as stale when days-before-pr-stale override days-before-stale', async () => {
   const opts = {
     ...DefaultProcessorOptions,
     daysBeforeStale: 0,
     daysBeforePrStale: -1,
+    daysBeforeRotten: 0,
+
     stalePrMessage: ''
   };
   const TestIssueList: Issue[] = [
@@ -784,10 +909,11 @@ test('processing a stale PR will close it even if configured not to mark as stal
   await processor.processIssues(1);
 
   expect(processor.staleIssues).toHaveLength(0);
-  expect(processor.closedIssues).toHaveLength(1);
+  expect(processor.rottenIssues).toHaveLength(1);
+  expect(processor.closedIssues).toHaveLength(0);
 });
 
-test('closed issues will not be marked stale', async () => {
+test('closed issues will not be marked stale or rotten', async () => {
   const TestIssueList: Issue[] = [
     generateIssue(
       DefaultProcessorOptions,
@@ -812,10 +938,41 @@ test('closed issues will not be marked stale', async () => {
   await processor.processIssues(1);
 
   expect(processor.staleIssues).toHaveLength(0);
+  expect(processor.rottenIssues).toHaveLength(0);
   expect(processor.closedIssues).toHaveLength(0);
 });
 
-test('stale closed issues will not be closed', async () => {
+test('rotten closed issues will not be closed', async () => {
+  const TestIssueList: Issue[] = [
+    generateIssue(
+      DefaultProcessorOptions,
+      1,
+      'A rotten closed issue',
+      '2020-01-01T17:00:00Z',
+      '2020-01-01T17:00:00Z',
+      false,
+      false,
+      ['Rotten'],
+      true
+    )
+  ];
+  const processor = new IssuesProcessorMock(
+    DefaultProcessorOptions,
+    alwaysFalseStateMock,
+    async p => (p === 1 ? TestIssueList : []),
+    async () => [],
+    async () => new Date().toDateString()
+  );
+
+  // process our fake issue list
+  await processor.processIssues(1);
+
+  expect(processor.staleIssues).toHaveLength(0);
+  expect(processor.rottenIssues).toHaveLength(0);
+  expect(processor.closedIssues).toHaveLength(0);
+});
+
+test('stale closed issues will not be closed or rotten', async () => {
   const TestIssueList: Issue[] = [
     generateIssue(
       DefaultProcessorOptions,
@@ -841,10 +998,11 @@ test('stale closed issues will not be closed', async () => {
   await processor.processIssues(1);
 
   expect(processor.staleIssues).toHaveLength(0);
+  expect(processor.rottenIssues).toHaveLength(0);
   expect(processor.closedIssues).toHaveLength(0);
 });
 
-test('closed prs will not be marked stale', async () => {
+test('closed prs will not be marked stale or rotten', async () => {
   const TestIssueList: Issue[] = [
     generateIssue(
       DefaultProcessorOptions,
@@ -870,6 +1028,7 @@ test('closed prs will not be marked stale', async () => {
   await processor.processIssues(1);
 
   expect(processor.staleIssues).toHaveLength(0);
+  expect(processor.rottenIssues).toHaveLength(0);
   expect(processor.closedIssues).toHaveLength(0);
 });
 
@@ -902,7 +1061,7 @@ test('stale closed prs will not be closed', async () => {
   expect(processor.closedIssues).toHaveLength(0);
 });
 
-test('locked issues will not be marked stale', async () => {
+test('locked issues will not be marked stale or rotten', async () => {
   const TestIssueList: Issue[] = [
     generateIssue(
       DefaultProcessorOptions,
@@ -927,10 +1086,11 @@ test('locked issues will not be marked stale', async () => {
   await processor.processIssues(1);
 
   expect(processor.staleIssues).toHaveLength(0);
+  expect(processor.rottenIssues).toHaveLength(0);
   expect(processor.closedIssues).toHaveLength(0);
 });
 
-test('stale locked issues will not be closed', async () => {
+test('stale locked issues will not be rotten or closed', async () => {
   const TestIssueList: Issue[] = [
     generateIssue(
       DefaultProcessorOptions,
@@ -957,10 +1117,42 @@ test('stale locked issues will not be closed', async () => {
   await processor.processIssues(1);
 
   expect(processor.staleIssues).toHaveLength(0);
+  expect(processor.rottenIssues).toHaveLength(0);
   expect(processor.closedIssues).toHaveLength(0);
 });
 
-test('locked prs will not be marked stale', async () => {
+test('rotten locked issues will not be rotten or closed', async () => {
+  const TestIssueList: Issue[] = [
+    generateIssue(
+      DefaultProcessorOptions,
+      1,
+      'A stale locked issue that will not be closed',
+      '2020-01-01T17:00:00Z',
+      '2020-01-01T17:00:00Z',
+      false,
+      false,
+      ['Rotten'],
+      false,
+      true
+    )
+  ];
+  const processor = new IssuesProcessorMock(
+    DefaultProcessorOptions,
+    alwaysFalseStateMock,
+    async p => (p === 1 ? TestIssueList : []),
+    async () => [],
+    async () => new Date().toDateString()
+  );
+
+  // process our fake issue list
+  await processor.processIssues(1);
+
+  expect(processor.staleIssues).toHaveLength(0);
+  expect(processor.rottenIssues).toHaveLength(0);
+  expect(processor.closedIssues).toHaveLength(0);
+});
+
+test('locked prs will not be marked stale or rotten', async () => {
   const TestIssueList: Issue[] = [
     generateIssue(
       DefaultProcessorOptions,
@@ -985,10 +1177,11 @@ test('locked prs will not be marked stale', async () => {
   await processor.processIssues(1);
 
   expect(processor.staleIssues).toHaveLength(0);
+  expect(processor.rottenIssues).toHaveLength(0);
   expect(processor.closedIssues).toHaveLength(0);
 });
 
-test('stale locked prs will not be closed', async () => {
+test('stale locked prs will not be rotten or closed', async () => {
   const TestIssueList: Issue[] = [
     generateIssue(
       DefaultProcessorOptions,
@@ -1015,11 +1208,12 @@ test('stale locked prs will not be closed', async () => {
   await processor.processIssues(1);
 
   expect(processor.staleIssues).toHaveLength(0);
+  expect(processor.rottenIssues).toHaveLength(0);
   expect(processor.closedIssues).toHaveLength(0);
 });
 
-test('exempt issue labels will not be marked stale', async () => {
-  expect.assertions(3);
+test('exempt issue labels will not be marked stale or rotten', async () => {
+  expect.assertions(4);
   const opts = {...DefaultProcessorOptions};
   opts.exemptIssueLabels = 'Exempt';
   const TestIssueList: Issue[] = [
@@ -1046,11 +1240,12 @@ test('exempt issue labels will not be marked stale', async () => {
   await processor.processIssues(1);
 
   expect(processor.staleIssues.length).toStrictEqual(0);
+  expect(processor.rottenIssues).toHaveLength(0);
   expect(processor.closedIssues.length).toStrictEqual(0);
   expect(processor.removedLabelIssues.length).toStrictEqual(0);
 });
 
-test('exempt issue labels will not be marked stale (multi issue label with spaces)', async () => {
+test('exempt issue labels will not be marked stale or rotten (multi issue label with spaces)', async () => {
   const opts = {...DefaultProcessorOptions};
   opts.exemptIssueLabels = 'Exempt, Cool, None';
   const TestIssueList: Issue[] = [
@@ -1077,6 +1272,7 @@ test('exempt issue labels will not be marked stale (multi issue label with space
   await processor.processIssues(1);
 
   expect(processor.staleIssues).toHaveLength(0);
+  expect(processor.rottenIssues).toHaveLength(0);
   expect(processor.closedIssues).toHaveLength(0);
 });
 
@@ -1210,7 +1406,11 @@ test('stale issues should not be closed if days is set to -1', async () => {
 });
 
 test('stale label should be removed if a comment was added to a stale issue', async () => {
-  const opts = {...DefaultProcessorOptions, removeStaleWhenUpdated: true};
+  const opts = {
+    ...DefaultProcessorOptions,
+    removeStaleWhenUpdated: true,
+    daysBeforeRotten: 0
+  };
   const TestIssueList: Issue[] = [
     generateIssue(
       opts,
@@ -1337,8 +1537,12 @@ test('when the option "labelsToRemoveWhenStale" is set, the labels should be rem
   expect(processor.removedLabelIssues).toHaveLength(1);
 });
 
-test('stale label should not be removed if a comment was added by the bot (and the issue should be closed)', async () => {
-  const opts = {...DefaultProcessorOptions, removeStaleWhenUpdated: true};
+test('stale label should not be removed if a comment was added by the bot, given that it does not get rotten', async () => {
+  const opts = {
+    ...DefaultProcessorOptions,
+    removeStaleWhenUpdated: true,
+    daysBeforeRotten: -1
+  };
   github.context.actor = 'abot';
   const TestIssueList: Issue[] = [
     generateIssue(
@@ -1372,6 +1576,7 @@ test('stale label should not be removed if a comment was added by the bot (and t
   await processor.processIssues(1);
 
   expect(processor.closedIssues).toHaveLength(1);
+  expect(processor.rottenIssues).toHaveLength(0);
   expect(processor.staleIssues).toHaveLength(0);
   expect(processor.removedLabelIssues).toHaveLength(0);
 });
@@ -1442,10 +1647,10 @@ test('stale issues should not be closed until after the closed number of days', 
   expect(processor.staleIssues).toHaveLength(1);
 });
 
-test('stale issues should be closed if the closed nubmer of days (additive) is also passed', async () => {
+test('stale issues should be rotten if the rotten nubmer of days (additive) is also passed', async () => {
   const opts = {...DefaultProcessorOptions};
   opts.daysBeforeStale = 5; // stale after 5 days
-  opts.daysBeforeClose = 1; // closes after 6 days
+  opts.daysBeforeRotten = 1; // rotten after 6 days
   const lastUpdate = new Date();
   lastUpdate.setDate(lastUpdate.getDate() - 7);
   const TestIssueList: Issue[] = [
@@ -1471,8 +1676,9 @@ test('stale issues should be closed if the closed nubmer of days (additive) is a
   // process our fake issue list
   await processor.processIssues(1);
 
-  expect(processor.closedIssues).toHaveLength(1);
-  expect(processor.removedLabelIssues).toHaveLength(0);
+  expect(processor.closedIssues).toHaveLength(0);
+  expect(processor.rottenIssues).toHaveLength(1);
+  expect(processor.removedLabelIssues).toHaveLength(1); // the stale label should be removed on rotten label being added
   expect(processor.staleIssues).toHaveLength(0);
 });
 
@@ -1690,8 +1896,12 @@ test('send stale message on prs when stale-pr-message is not empty', async () =>
   );
 });
 
-test('git branch is deleted when option is enabled', async () => {
-  const opts = {...DefaultProcessorOptions, deleteBranch: true};
+test('git branch is deleted when option is enabled and days before rotten is set to -1', async () => {
+  const opts = {
+    ...DefaultProcessorOptions,
+    deleteBranch: true,
+    daysBeforeRotten: -1
+  };
   const isPullRequest = true;
   const TestIssueList: Issue[] = [
     generateIssue(
@@ -1721,8 +1931,12 @@ test('git branch is deleted when option is enabled', async () => {
   expect(processor.deletedBranchIssues).toHaveLength(1);
 });
 
-test('git branch is not deleted when issue is not pull request', async () => {
-  const opts = {...DefaultProcessorOptions, deleteBranch: true};
+test('git branch is not deleted when issue is not pull request and days before rotten is set to -1', async () => {
+  const opts = {
+    ...DefaultProcessorOptions,
+    deleteBranch: true,
+    daysBeforeRotten: -1
+  };
   const isPullRequest = false;
   const TestIssueList: Issue[] = [
     generateIssue(
@@ -2516,13 +2730,14 @@ test('processing a locked issue with a close label will not remove the close lab
   expect(processor.removedLabelIssues).toHaveLength(0);
 });
 
-test('processing an issue stale since less than the daysBeforeStale with a stale label created after daysBeforeClose should close the issue', async () => {
-  expect.assertions(3);
+test('processing an issue stale since less than the daysBeforeStale with a stale label created after daysBeforeRotten should rotten the issue', async () => {
+  expect.assertions(4);
   const opts: IIssuesProcessorOptions = {
     ...DefaultProcessorOptions,
     staleIssueLabel: 'stale-label',
     daysBeforeStale: 30,
     daysBeforeClose: 7,
+    daysBeforeRotten: 0,
     closeIssueMessage: 'close message',
     removeStaleWhenUpdated: false
   };
@@ -2554,9 +2769,10 @@ test('processing an issue stale since less than the daysBeforeStale with a stale
   // process our fake issue list
   await processor.processIssues(1);
 
-  expect(processor.removedLabelIssues).toHaveLength(0);
+  expect(processor.removedLabelIssues).toHaveLength(1); // The stale label should be removed on adding the rotten label
+  expect(processor.rottenIssues).toHaveLength(1); // Expected at 0 by the user
   expect(processor.deletedBranchIssues).toHaveLength(0);
-  expect(processor.closedIssues).toHaveLength(1); // Expected at 0 by the user
+  expect(processor.closedIssues).toHaveLength(0);
 });
 
 test('processing an issue stale since less than the daysBeforeStale without a stale label should close the issue', async () => {
@@ -2566,6 +2782,8 @@ test('processing an issue stale since less than the daysBeforeStale without a st
     staleIssueLabel: 'stale-label',
     daysBeforeStale: 30,
     daysBeforeClose: 7,
+    daysBeforeRotten: 0,
+
     closeIssueMessage: 'close message',
     removeStaleWhenUpdated: false
   };
@@ -2601,13 +2819,14 @@ test('processing an issue stale since less than the daysBeforeStale without a st
   expect(processor.closedIssues).toHaveLength(0);
 });
 
-test('processing a pull request to be stale with the "stalePrMessage" option set will send a PR comment', async () => {
+test('processing a pull request to be stale with the "stalePrMessage" option set will send a PR comment, given that days before rotten is set to -1', async () => {
   expect.assertions(3);
   const opts: IIssuesProcessorOptions = {
     ...DefaultProcessorOptions,
     stalePrMessage: 'This PR is stale',
     daysBeforeStale: 10,
-    daysBeforePrStale: 1
+    daysBeforePrStale: 1,
+    daysBeforeRotten: -1
   };
   const issueDate = new Date();
   issueDate.setDate(issueDate.getDate() - 2);
@@ -2638,12 +2857,52 @@ test('processing a pull request to be stale with the "stalePrMessage" option set
   expect(processor.statistics?.addedPullRequestsCommentsCount).toStrictEqual(1);
 });
 
-test('processing a pull request to be stale with the "stalePrMessage" option set to empty will not send a PR comment', async () => {
+test('processing a pull request to be stale with the "stalePrMessage" option set will send two PR comments, given that days before rotten is set to 0', async () => {
+  expect.assertions(3);
+  const opts: IIssuesProcessorOptions = {
+    ...DefaultProcessorOptions,
+    stalePrMessage: 'This PR is stale',
+    daysBeforeStale: 10,
+    daysBeforePrStale: 1,
+    daysBeforeRotten: 0
+  };
+  const issueDate = new Date();
+  issueDate.setDate(issueDate.getDate() - 2);
+  const TestIssueList: Issue[] = [
+    generateIssue(
+      opts,
+      1,
+      'A pull request with no label and a stale message',
+      issueDate.toDateString(),
+      issueDate.toDateString(),
+      false,
+      true
+    )
+  ];
+  const processor = new IssuesProcessorMock(
+    opts,
+    alwaysFalseStateMock,
+    async p => (p === 1 ? TestIssueList : []),
+    async () => [],
+    async () => new Date().toDateString()
+  );
+
+  // process our fake issue list
+  await processor.processIssues(1);
+
+  expect(processor.staleIssues).toHaveLength(1);
+  expect(processor.closedIssues).toHaveLength(0);
+  expect(processor.statistics?.addedPullRequestsCommentsCount).toStrictEqual(2);
+});
+
+test('processing a pull request to be stale with the "stalePrMessage" option set to empty will not send a PR comment, given that "rottenPRMessage" is also an empty string and days before rotten is not -1', async () => {
   expect.assertions(3);
   const opts: IIssuesProcessorOptions = {
     ...DefaultProcessorOptions,
     stalePrMessage: '',
+    rottenPrMessage: '',
     daysBeforeStale: 10,
+    daysBeforeRotten: 0,
     daysBeforePrStale: 1
   };
   const issueDate = new Date();
@@ -2673,6 +2932,45 @@ test('processing a pull request to be stale with the "stalePrMessage" option set
   expect(processor.staleIssues).toHaveLength(1);
   expect(processor.closedIssues).toHaveLength(0);
   expect(processor.statistics?.addedPullRequestsCommentsCount).toStrictEqual(0);
+});
+
+test('processing a pull request to be stale with the "stalePrMessage" option set to empty will send a PR comment from "rottenPRMessage" given that it is also an empty string', async () => {
+  expect.assertions(3);
+  const opts: IIssuesProcessorOptions = {
+    ...DefaultProcessorOptions,
+    stalePrMessage: '',
+    daysBeforeStale: 10,
+    daysBeforeRotten: 0,
+
+    daysBeforePrStale: 1
+  };
+  const issueDate = new Date();
+  issueDate.setDate(issueDate.getDate() - 2);
+  const TestIssueList: Issue[] = [
+    generateIssue(
+      opts,
+      1,
+      'A pull request with no label and a stale message',
+      issueDate.toDateString(),
+      issueDate.toDateString(),
+      false,
+      true
+    )
+  ];
+  const processor = new IssuesProcessorMock(
+    opts,
+    alwaysFalseStateMock,
+    async p => (p === 1 ? TestIssueList : []),
+    async () => [],
+    async () => new Date().toDateString()
+  );
+
+  // process our fake issue list
+  await processor.processIssues(1);
+
+  expect(processor.staleIssues).toHaveLength(1);
+  expect(processor.closedIssues).toHaveLength(0);
+  expect(processor.statistics?.addedPullRequestsCommentsCount).toStrictEqual(1);
 });
 
 test('processing an issue with the "includeOnlyAssigned" option and nonempty assignee list will stale the issue', async () => {

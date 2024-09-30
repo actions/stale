@@ -74,6 +74,7 @@ function _getAndValidateArgs(): IIssuesProcessorOptions {
     staleIssueLabel: core.getInput('stale-issue-label', {required: true}),
     closeIssueLabel: core.getInput('close-issue-label'),
     exemptIssueLabels: core.getInput('exempt-issue-labels'),
+    exemptPinnedIssues: core.getInput('exempt-pinned-issues') === 'true',
     stalePrLabel: core.getInput('stale-pr-label', {required: true}),
     closePrLabel: core.getInput('close-pr-label'),
     exemptPrLabels: core.getInput('exempt-pr-labels'),

@@ -368,6 +368,22 @@ export class IssuesProcessor {
       return; // Don't process exempt issues
     }
 
+    const exemptAuthors: string[] = wordsToList(this.options.exemptAuthors);
+
+    const hasExemptAuthors = exemptAuthors.some((exemptAuthor: Readonly<string>) =>
+      issue.user.login == exemptAuthor
+    );
+
+    if (hasExemptAuthors) {
+      issueLogger.info(
+        `Skipping this $$type because it contains an exempt author, see ${issueLogger.createOptionLink(
+          Option.ExemptAuthors
+        )} for more details`
+      );
+      IssuesProcessor._endIssueProcessing(issue);
+      return; // Don't process exempt issues
+    }
+
     const anyOfLabels: string[] = wordsToList(this._getAnyOfLabels(issue));
 
     if (anyOfLabels.length > 0) {

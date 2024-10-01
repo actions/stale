@@ -14,6 +14,7 @@ export interface IIssuesProcessorOptions {
   daysBeforePrClose: number; // Could be NaN
   staleIssueLabel: string;
   closeIssueLabel: string;
+  onlyMatchingFilter: string[];
   exemptIssueLabels: string;
   stalePrLabel: string;
   closePrLabel: string;

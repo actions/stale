@@ -54,4 +54,5 @@ export interface IIssuesProcessorOptions {
   exemptDraftPr: boolean;
   closeIssueReason: string;
   includeOnlyAssigned: boolean;
+  cachePrefix: string;
 }

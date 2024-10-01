@@ -676,12 +676,33 @@ class IssuesProcessor {
     getIssues(page) {
         var _a;
         return __awaiter(this, void 0, void 0, function* () {
+            // Compute labels filter.
+            let labels = '';
+            // We can filter issues already when listing them if neither only-pr-labels
+            // nor only-issue-labels are specified or both are the same.
+            if (this.options.onlyPrLabels === '' &&
+                this.options.onlyIssueLabels === '') {
+                labels = this.options.onlyLabels;
+            }
+            else if (this.options.onlyPrLabels == this.options.onlyIssueLabels) {
+                labels = this.options.onlyIssueLabels;
+            }
+            // If we don't have to mark issues and pull requests stale and
+            // both the stale labels are the same then we can use it as a filter:
+            // because we only want to process stale issues.
+            if (!(0, should_mark_when_stale_1.shouldMarkWhenStale)(this._getDaysBeforeIssueStale()) &&
+                !(0, should_mark_when_stale_1.shouldMarkWhenStale)(this._getDaysBeforePrStale()) &&
+                this.options.stalePrLabel === this.options.staleIssueLabel &&
+                !labels.includes(this.options.staleIssueLabel)) {
+                labels += (labels !== '' ? ',' : '') + this.options.staleIssueLabel;
+            }
             try {
                 this.operations.consumeOperation();
                 const issueResult = yield this.client.rest.issues.listForRepo({
                     owner: github_1.context.repo.owner,
                     repo: github_1.context.repo.repo,
                     state: 'open',
+                    labels,
                     per_page: 100,
                     direction: this.options.ascending ? 'asc' : 'desc',
                     page

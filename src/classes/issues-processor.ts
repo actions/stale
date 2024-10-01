@@ -495,8 +495,13 @@ export class IssuesProcessor {
           );
           await this._markStale(issue, staleMessage, staleLabel, skipMessage);
           issue.isStale = true; // This issue is now considered stale
-          issue.markedStaleThisRun = true;
           issueLogger.info(`This $$type is now stale`);
+
+          await this._removeLabelsOnStatusTransition(
+            issue,
+            labelsToRemoveWhenStale,
+            Option.LabelsToRemoveWhenStale
+          );
         } else {
           issueLogger.info(
             `This $$type should not be marked as stale based on the option ${issueLogger.createOptionLink(
@@ -519,10 +524,7 @@ export class IssuesProcessor {
           );
         }
       }
-    }
-
-    // Process the issue if it was marked stale
-    if (issue.isStale) {
+    } else {
       issueLogger.info(`This $$type is already stale`);
       await this._processStaleIssue(
         issue,
@@ -530,7 +532,6 @@ export class IssuesProcessor {
         staleMessage,
         labelsToAddWhenUnstale,
         labelsToRemoveWhenUnstale,
-        labelsToRemoveWhenStale,
         closeMessage,
         closeLabel
       );
@@ -656,7 +657,6 @@ export class IssuesProcessor {
     staleMessage: string,
     labelsToAddWhenUnstale: Readonly<string>[],
     labelsToRemoveWhenUnstale: Readonly<string>[],
-    labelsToRemoveWhenStale: Readonly<string>[],
     closeMessage?: string,
     closeLabel?: string
   ) {
@@ -703,15 +703,6 @@ export class IssuesProcessor {
       );
     }
 
-    if (issue.markedStaleThisRun) {
-      issueLogger.info(`marked stale this run, so don't check for updates`);
-      await this._removeLabelsOnStatusTransition(
-        issue,
-        labelsToRemoveWhenStale,
-        Option.LabelsToRemoveWhenStale
-      );
-    }
-
     // The issue.updated_at and markedStaleOn are not always exactly in sync (they can be off by a second or 2)
     // isDateMoreRecentThan makes sure they are not the same date within a certain tolerance (15 seconds in this case)
     const issueHasUpdateSinceStale = isDateMoreRecentThan(
@@ -729,8 +720,7 @@ export class IssuesProcessor {
     // Should we un-stale this issue?
     if (
       shouldRemoveStaleWhenUpdated &&
-      (issueHasUpdateSinceStale || issueHasCommentsSinceStale) &&
-      !issue.markedStaleThisRun
+      (issueHasUpdateSinceStale || issueHasCommentsSinceStale)
     ) {
       issueLogger.info(
         `Remove the stale label since the $$type has been updated and the workflow should remove the stale label when updated`

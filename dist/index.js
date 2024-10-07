@@ -2725,7 +2725,8 @@ function sha256(message) {
     return hash.digest('hex');
 }
 const getStateInstance = (options) => {
-    const cacheKey = sha256(JSON.stringify(options));
+    const json = JSON.stringify(options, (key, value) => key === 'repoToken' ? undefined : value);
+    const cacheKey = sha256(json);
     const storage = new state_cache_storage_1.StateCacheStorage(cacheKey);
     return new state_1.State(storage, options);
 };

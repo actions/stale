@@ -11,7 +11,10 @@ function sha256(message: string): string {
 }
 
 export const getStateInstance = (options: IIssuesProcessorOptions): IState => {
-  const cacheKey = sha256(JSON.stringify(options));
+  const json = JSON.stringify(options, (key, value) =>
+    key === 'repoToken' ? undefined : value
+  );
+  const cacheKey = sha256(json);
   const storage = new StateCacheStorage(cacheKey);
   return new State(storage, options);
 };

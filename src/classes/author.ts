@@ -33,7 +33,7 @@ export class Author {
             return false;
         }
 
-        // else, return true to skip this issue because the 
+        // else, return true to skip this issue because the user is not in the allow-list
         return true;
     }
 

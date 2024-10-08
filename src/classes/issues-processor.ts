@@ -20,6 +20,7 @@ import {ExemptDraftPullRequest} from './exempt-draft-pull-request';
 import {Issue} from './issue';
 import {IssueLogger} from './loggers/issue-logger';
 import {Logger} from './loggers/logger';
+import {Author} from './author';
 import {Milestones} from './milestones';
 import {StaleOperations} from './stale-operations';
 import {Statistics} from './statistics';
@@ -412,6 +413,13 @@ export class IssuesProcessor {
         LoggerService.white('└──'),
         `Continuing the process for this $$type`
       );
+    }
+
+    const author: Author = new Author(this.options, issue);
+
+    if(author.shouldExemptAuthor()) {
+      IssuesProcessor._endIssueProcessing(issue);
+      return; // Don't process exempt author
     }
 
     const milestones: Milestones = new Milestones(this.options, issue);

@@ -108,6 +108,7 @@ function _getAndValidateArgs(): IIssuesProcessorOptions {
     exemptAllMilestones: core.getInput('exempt-all-milestones') === 'true',
     exemptAllIssueMilestones: _toOptionalBoolean('exempt-all-issue-milestones'),
     exemptAllPrMilestones: _toOptionalBoolean('exempt-all-pr-milestones'),
+    anyOfAuthors: core.getInput('any-of-authors'),
     exemptAssignees: core.getInput('exempt-assignees'),
     exemptIssueAssignees: core.getInput('exempt-issue-assignees'),
     exemptPrAssignees: core.getInput('exempt-pr-assignees'),

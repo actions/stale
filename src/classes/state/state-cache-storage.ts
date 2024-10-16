@@ -44,26 +44,6 @@ const checkIfCacheExists = async (cacheKey: string): Promise<boolean> => {
   }
   return false;
 };
-const resetCacheWithOctokit = async (cacheKey: string): Promise<void> => {
-  const client = getOctokitClient();
-  core.debug(`remove cache "${cacheKey}"`);
-  try {
-    // TODO: replace with client.rest.
-    await client.request(
-      `DELETE /repos/${context.repo.owner}/${context.repo.repo}/actions/caches?key=${cacheKey}`
-    );
-  } catch (error) {
-    if (error.status) {
-      core.warning(
-        `Error delete ${cacheKey}: [${error.status}] ${
-          error.message || 'Unknown reason'
-        }`
-      );
-    } else {
-      throw error;
-    }
-  }
-};
 export class StateCacheStorage implements IStateStorage {
   async save(serializedState: string): Promise<void> {
     const tmpDir = mkTempDir();
@@ -71,10 +51,6 @@ export class StateCacheStorage implements IStateStorage {
     fs.writeFileSync(filePath, serializedState);
 
     try {
-      const cacheExists = await checkIfCacheExists(CACHE_KEY);
-      if (cacheExists) {
-        await resetCacheWithOctokit(CACHE_KEY);
-      }
       const fileSize = fs.statSync(filePath).size;
 
       if (fileSize === 0) {

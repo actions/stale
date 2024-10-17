@@ -1592,8 +1592,6 @@ const fs_1 = __importDefault(__nccwpck_require__(7147));
 const path_1 = __importDefault(__nccwpck_require__(1017));
 const os_1 = __importDefault(__nccwpck_require__(2037));
 const core = __importStar(__nccwpck_require__(2186));
-const github_1 = __nccwpck_require__(5438);
-const plugin_retry_1 = __nccwpck_require__(6298);
 const cache = __importStar(__nccwpck_require__(7799));
 const CACHE_KEY = '_state';
 const STATE_FILE = 'state.txt';
@@ -1611,38 +1609,6 @@ const unlinkSafely = (filePath) => {
         /* ignore */
     }
 };
-const getOctokitClient = () => {
-    const token = core.getInput('repo-token');
-    return (0, github_1.getOctokit)(token, undefined, plugin_retry_1.retry);
-};
-const checkIfCacheExists = (cacheKey) => __awaiter(void 0, void 0, void 0, function* () {
-    const client = getOctokitClient();
-    try {
-        const issueResult = yield client.request(`/repos/${github_1.context.repo.owner}/${github_1.context.repo.repo}/actions/caches`);
-        const caches = issueResult.data['actions_caches'] || [];
-        return Boolean(caches.find(cache => cache['key'] === cacheKey));
-    }
-    catch (error) {
-        core.debug(`Error checking if cache exist: ${error.message}`);
-    }
-    return false;
-});
-const resetCacheWithOctokit = (cacheKey) => __awaiter(void 0, void 0, void 0, function* () {
-    const client = getOctokitClient();
-    core.debug(`remove cache "${cacheKey}"`);
-    try {
-        // TODO: replace with client.rest.
-        yield client.request(`DELETE /repos/${github_1.context.repo.owner}/${github_1.context.repo.repo}/actions/caches?key=${cacheKey}`);
-    }
-    catch (error) {
-        if (error.status) {
-            core.warning(`Error delete ${cacheKey}: [${error.status}] ${error.message || 'Unknown reason'}`);
-        }
-        else {
-            throw error;
-        }
-    }
-});
 class StateCacheStorage {
     save(serializedState) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -1650,10 +1616,6 @@ class StateCacheStorage {
             const filePath = path_1.default.join(tmpDir, STATE_FILE);
             fs_1.default.writeFileSync(filePath, serializedState);
             try {
-                const cacheExists = yield checkIfCacheExists(CACHE_KEY);
-                if (cacheExists) {
-                    yield resetCacheWithOctokit(CACHE_KEY);
-                }
                 const fileSize = fs_1.default.statSync(filePath).size;
                 if (fileSize === 0) {
                     core.info(`the state will be removed`);
@@ -1675,12 +1637,11 @@ class StateCacheStorage {
             const filePath = path_1.default.join(tmpDir, STATE_FILE);
             unlinkSafely(filePath);
             try {
-                const cacheExists = yield checkIfCacheExists(CACHE_KEY);
+                const cacheExists = yield cache.restoreCache([path_1.default.dirname(filePath)], CACHE_KEY);
                 if (!cacheExists) {
                     core.info('The saved state was not found, the process starts from the first issue.');
                     return '';
                 }
-                yield cache.restoreCache([path_1.default.dirname(filePath)], CACHE_KEY);
                 if (!fs_1.default.existsSync(filePath)) {
                     core.warning('Unknown error when unpacking the cache, the process starts from the first issue.');
                     return '';

@@ -54,7 +54,10 @@ export class StateCacheStorage implements IStateStorage {
     const filePath = path.join(tmpDir, STATE_FILE);
     unlinkSafely(filePath);
     try {
-      const cacheExists = await cache.restoreCache([path.dirname(filePath)], CACHE_KEY);
+      const cacheExists = await cache.restoreCache(
+        [path.dirname(filePath)],
+        CACHE_KEY
+      );
       if (!cacheExists) {
         core.info(
           'The saved state was not found, the process starts from the first issue.'

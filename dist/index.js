@@ -744,10 +744,30 @@ class IssuesProcessor {
             const logger = new logger_1.Logger();
             try {
                 const rateLimitResult = yield this.client.rest.rateLimit.get();
-                return new rate_limit_1.RateLimit(rateLimitResult.data.rate);
+                if (rateLimitResult.data.rate) {
+                    return new rate_limit_1.RateLimit(rateLimitResult.data.rate);
+                }
+                else {
+                    logger.warning('Rate limit is disabled or not available.');
+                    return null;
+                }
             }
             catch (error) {
-                logger.error(`Error when getting rateLimit: ${error.message}`);
+                if (error instanceof Error) {
+                    if (error.message.includes('Not Found') ||
+                        error.message.includes('404')) {
+                        logger.warning('Rate limit endpoint not found. Rate limiting may be disabled.');
+                        return null;
+                    }
+                    else {
+                        logger.error(`Error when getting rateLimit: ${error.message}`);
+                        throw error;
+                    }
+                }
+                else {
+                    logger.error('An unknown error occurred when getting rateLimit');
+                    throw error;
+                }
             }
         });
     }

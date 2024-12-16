@@ -1209,7 +1209,7 @@ test('stale issues should not be closed if days is set to -1', async () => {
   expect(processor.removedLabelIssues).toHaveLength(0);
 });
 
-test('stale label should be removed if a User comment was added to a stale issue', async () => {
+test('stale label should be removed if a user comment was added to a stale issue', async () => {
   const opts = {...DefaultProcessorOptions, removeStaleWhenUpdated: true};
   const TestIssueList: Issue[] = [
     generateIssue(
@@ -1247,7 +1247,7 @@ test('stale label should be removed if a User comment was added to a stale issue
   expect(processor.removedLabelIssues).toHaveLength(1);
 });
 
-test('stale label should not be removed if a Bot comment was added to a stale issue', async () => {
+test('stale label should not be removed if a bot comment was added to a stale issue', async () => {
   const opts = {...DefaultProcessorOptions, removeStaleWhenUpdated: true};
   const TestIssueList: Issue[] = [
     generateIssue(

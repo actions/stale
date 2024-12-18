@@ -123,7 +123,8 @@ function _getAndValidateArgs(): IIssuesProcessorOptions {
     ignorePrUpdates: _toOptionalBoolean('ignore-pr-updates'),
     exemptDraftPr: core.getInput('exempt-draft-pr') === 'true',
     closeIssueReason: core.getInput('close-issue-reason'),
-    includeOnlyAssigned: core.getInput('include-only-assigned') === 'true'
+    includeOnlyAssigned: core.getInput('include-only-assigned') === 'true',
+    exemptLocked: core.getInput('exempt-locked') === 'true'
   };
 
   for (const numberInput of ['days-before-stale']) {

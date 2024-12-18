@@ -19,6 +19,7 @@ This can be achieved with the following [configuration in the action](https://do
 
 ```yaml
 permissions:
+  actions: write # for caching state
   contents: write # only for delete-branch option
   issues: write
   pull-requests: write
@@ -97,6 +98,7 @@ Every argument is optional.
 | [ignore-issue-updates](#ignore-issue-updates)                       | Override [ignore-updates](#ignore-updates) for issues only                  |                       |
 | [ignore-pr-updates](#ignore-pr-updates)                             | Override [ignore-updates](#ignore-updates) for PRs only                     |                       |
 | [include-only-assigned](#include-only-assigned)                     | Process only assigned issues                                                | `false`               |
+| [cache-prefix](#cache-prefix)                                       | Add a prefix to the stored cache                                            |                       |
 
 ### List of output options
 
@@ -546,6 +548,11 @@ Default value: unset
 If set to `true`, only the issues or the pull requests with an assignee will be marked as stale automatically.
 
 Default value: `false`
+
+#### cache-prefix
+
+Beneficial so the action has a more unique cache key. Useful when calling this action multiple times, independent of each other.
+An example for usage would be closing all PRs with `x` label after 7 days in one action, and closing all PRs except for `x` label after 10 days in another.
 
 ### Usage
 

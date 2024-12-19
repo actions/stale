@@ -62,6 +62,7 @@ describe('Issue', (): void => {
       ignoreUpdates: false,
       ignoreIssueUpdates: undefined,
       ignorePrUpdates: undefined,
+      ignoreReactions: undefined,
       exemptDraftPr: false,
       closeIssueReason: '',
       includeOnlyAssigned: false

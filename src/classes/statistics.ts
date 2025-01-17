@@ -30,6 +30,7 @@ export class Statistics {
   fetchedItemsCount = 0;
   fetchedItemsEventsCount = 0;
   fetchedItemsCommentsCount = 0;
+  fetchedItemsReactionsCount = 0;
   fetchedPullRequestsCount = 0;
 
   incrementProcessedItemsCount(
@@ -154,6 +155,14 @@ export class Statistics {
     return this;
   }
 
+  incrementFetchedItemsReactionsCount(
+    increment: Readonly<number> = 1
+  ): Statistics {
+    this.fetchedItemsReactionsCount += increment;
+
+    return this;
+  }
+
   incrementFetchedPullRequestsCount(
     increment: Readonly<number> = 1
   ): Statistics {
@@ -176,6 +185,7 @@ export class Statistics {
     this._logFetchedItemsCount();
     this._logFetchedItemsEventsCount();
     this._logFetchedItemsCommentsCount();
+    this._logFetchedItemsReactionsCount();
     this._logFetchedPullRequestsCount();
     this._logOperationsCount();
 
@@ -428,6 +438,10 @@ export class Statistics {
 
   private _logFetchedItemsCommentsCount(): void {
     this._logCount('Fetched items comments', this.fetchedItemsCommentsCount);
+  }
+
+  private _logFetchedItemsReactionsCount(): void {
+    this._logCount('Fetched items reactions', this.fetchedItemsReactionsCount);
   }
 
   private _logFetchedPullRequestsCount(): void {

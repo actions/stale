@@ -51,6 +51,7 @@ describe('state', (): void => {
       state,
       async p => (p === 1 ? TestIssueList : []),
       async () => [],
+      async () => [],
       async () => new Date().toDateString()
     );
 
@@ -77,6 +78,7 @@ describe('state', (): void => {
       opts,
       state,
       async p => (p === 1 ? TestIssueList : []),
+      async () => [],
       async () => [],
       async () => new Date().toDateString()
     );
@@ -116,6 +118,7 @@ describe('state', (): void => {
       opts,
       state,
       async p => (p === 1 ? TestIssueList : []),
+      async () => [],
       async () => [],
       async () => new Date().toDateString()
     );
@@ -159,6 +162,7 @@ describe('state', (): void => {
       state,
       async p => (p === 1 ? TestIssueList : []),
       async () => [],
+      async () => [],
       async () => new Date().toDateString()
     );
 
@@ -197,12 +201,13 @@ describe('state', (): void => {
       state,
       async p => (p === 1 ? TestIssueList : []),
       async () => [],
+      async () => [],
       async () => new Date().toDateString()
     );
 
     await processor.processIssues(1);
     // make sure all issues are proceeded
-    expect(infoSpy.mock.calls[71][0]).toContain(
+    expect(infoSpy.mock.calls[73][0]).toContain(
       'No more issues found to process. Exiting...'
     );
 

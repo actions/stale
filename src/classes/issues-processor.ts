@@ -106,7 +106,7 @@ export class IssuesProcessor {
 
   async processIssues(page: Readonly<number> = 1): Promise<number> {
     // get the next batch of issues
-    const issues: Issue[] = await this.getIssues(page);
+    const issues: Issue[] = await this.getIssuesWrapper(page);
 
     if (issues.length <= 0) {
       this._logger.info(
@@ -549,8 +549,8 @@ export class IssuesProcessor {
       this._consumeIssueOperation(issue);
       this.statistics?.incrementFetchedItemsCommentsCount();
       const comments = await this.client.rest.issues.listComments({
-        owner: context.repo.owner,
-        repo: context.repo.repo,
+        owner: issue.owner_repo.owner,
+        repo: issue.owner_repo.repo,
         issue_number: issue.number,
         since: sinceDate
       });
@@ -574,6 +574,11 @@ export class IssuesProcessor {
         page
       });
       this.statistics?.incrementFetchedItemsCount(issueResult.data.length);
+      this._logger.info(
+        LoggerService.green(
+          `Retrieved ${issueResult.data.length} issues/PRs for repo ${context.repo.owner}/${context.repo.repo}`
+        )
+      );
 
       return issueResult.data.map(
         (issue): Issue =>
@@ -582,6 +587,51 @@ export class IssuesProcessor {
     } catch (error) {
       throw Error(`Getting issues was blocked by the error: ${error.message}`);
     }
+  }
+
+  // grab issues and/or prs from github in batches of 100 using search filter
+  async getIssuesByFilter(page: number, search: string): Promise<Issue[]> {
+    try {
+      this.operations.consumeOperation();
+      const issueResult = await this.client.rest.search.issuesAndPullRequests({
+        q: search,
+        per_page: 100,
+        direction: this.options.ascending ? 'asc' : 'desc',
+        page
+      });
+      this.statistics?.incrementFetchedItemsCount(issueResult.data.total_count);
+      this._logger.info(
+        LoggerService.green(
+          `Retrieved ${issueResult.data.total_count} issues/PRs for search '${search}'`
+        )
+      );
+
+      return issueResult.data.items.map(
+        (issue): Issue =>
+          new Issue(this.options, issue as Readonly<OctokitIssue>)
+      );
+    } catch (error) {
+      throw Error(`Getting issues was blocked by the error: ${error.message}`);
+    }
+  }
+
+  private _removeDupIssues(issues: Issue[]): Issue[] {
+    return issues.reduce(function (a: Issue[], b: Issue) {
+      if (!a.find(o => o.number == b.number)) a.push(b);
+      return a;
+    }, []);
+  }
+
+  async getIssuesWrapper(page: number): Promise<Issue[]> {
+    if (this.options.onlyMatchingFilter.length == 0) {
+      return this.getIssues(page);
+    }
+    const results: Issue[] = [];
+    for (const term of this.options.onlyMatchingFilter) {
+      const r: Issue[] = await this.getIssuesByFilter(page, term);
+      results.push(...r);
+    }
+    return this._removeDupIssues(results);
   }
 
   // returns the creation date of a given label on an issue (or nothing if no label existed)
@@ -597,8 +647,8 @@ export class IssuesProcessor {
     this._consumeIssueOperation(issue);
     this.statistics?.incrementFetchedItemsEventsCount();
     const options = this.client.rest.issues.listEvents.endpoint.merge({
-      owner: context.repo.owner,
-      repo: context.repo.repo,
+      owner: issue.owner_repo.owner,
+      repo: issue.owner_repo.repo,
       per_page: 100,
       issue_number: issue.number
     });
@@ -628,8 +678,8 @@ export class IssuesProcessor {
       this.statistics?.incrementFetchedPullRequestsCount();
 
       const pullRequest = await this.client.rest.pulls.get({
-        owner: context.repo.owner,
-        repo: context.repo.repo,
+        owner: issue.owner_repo.owner,
+        repo: issue.owner_repo.repo,
         pull_number: issue.number
       });
 
@@ -848,8 +898,8 @@ export class IssuesProcessor {
 
         if (!this.options.debugOnly) {
           await this.client.rest.issues.createComment({
-            owner: context.repo.owner,
-            repo: context.repo.repo,
+            owner: issue.owner_repo.owner,
+            repo: issue.owner_repo.repo,
             issue_number: issue.number,
             body: staleMessage
           });
@@ -866,8 +916,8 @@ export class IssuesProcessor {
 
       if (!this.options.debugOnly) {
         await this.client.rest.issues.addLabels({
-          owner: context.repo.owner,
-          repo: context.repo.repo,
+          owner: issue.owner_repo.owner,
+          repo: issue.owner_repo.repo,
           issue_number: issue.number,
           labels: [staleLabel]
         });
@@ -896,8 +946,8 @@ export class IssuesProcessor {
 
         if (!this.options.debugOnly) {
           await this.client.rest.issues.createComment({
-            owner: context.repo.owner,
-            repo: context.repo.repo,
+            owner: issue.owner_repo.owner,
+            repo: issue.owner_repo.repo,
             issue_number: issue.number,
             body: closeMessage
           });
@@ -914,8 +964,8 @@ export class IssuesProcessor {
 
         if (!this.options.debugOnly) {
           await this.client.rest.issues.addLabels({
-            owner: context.repo.owner,
-            repo: context.repo.repo,
+            owner: issue.owner_repo.owner,
+            repo: issue.owner_repo.repo,
             issue_number: issue.number,
             labels: [closeLabel]
           });
@@ -931,8 +981,8 @@ export class IssuesProcessor {
 
       if (!this.options.debugOnly) {
         await this.client.rest.issues.update({
-          owner: context.repo.owner,
-          repo: context.repo.repo,
+          owner: issue.owner_repo.owner,
+          repo: issue.owner_repo.repo,
           issue_number: issue.number,
           state: 'closed',
           state_reason: this.options.closeIssueReason || undefined
@@ -968,7 +1018,7 @@ export class IssuesProcessor {
     if (
       pullRequest.head.repo === null ||
       pullRequest.head.repo.full_name ===
-        `${context.repo.owner}/${context.repo.repo}`
+        `${issue.owner_repo.owner}/${issue.owner_repo.repo}`
     ) {
       issueLogger.info(
         `Deleting the branch "${LoggerService.cyan(branch)}" from closed $$type`
@@ -980,8 +1030,8 @@ export class IssuesProcessor {
 
         if (!this.options.debugOnly) {
           await this.client.rest.git.deleteRef({
-            owner: context.repo.owner,
-            repo: context.repo.repo,
+            owner: issue.owner_repo.owner,
+            repo: issue.owner_repo.repo,
             ref: `heads/${branch}`
           });
         }
@@ -1024,8 +1074,8 @@ export class IssuesProcessor {
 
       if (!this.options.debugOnly) {
         await this.client.rest.issues.removeLabel({
-          owner: context.repo.owner,
-          repo: context.repo.repo,
+          owner: issue.owner_repo.owner,
+          repo: issue.owner_repo.repo,
           issue_number: issue.number,
           name: label
         });
@@ -1162,8 +1212,8 @@ export class IssuesProcessor {
       this.statistics?.incrementAddedItemsLabel(issue);
       if (!this.options.debugOnly) {
         await this.client.rest.issues.addLabels({
-          owner: context.repo.owner,
-          repo: context.repo.repo,
+          owner: issue.owner_repo.owner,
+          repo: issue.owner_repo.repo,
           issue_number: issue.number,
           labels: labelsToAdd
         });

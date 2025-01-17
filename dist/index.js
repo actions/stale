@@ -1618,9 +1618,13 @@ const getOctokitClient = () => {
 const checkIfCacheExists = (cacheKey) => __awaiter(void 0, void 0, void 0, function* () {
     const client = getOctokitClient();
     try {
-        const issueResult = yield client.request(`/repos/${github_1.context.repo.owner}/${github_1.context.repo.repo}/actions/caches`);
-        const caches = issueResult.data['actions_caches'] || [];
-        return Boolean(caches.find(cache => cache['key'] === cacheKey));
+        const cachesResult = yield client.rest.actions.getActionsCacheList({
+            owner: github_1.context.repo.owner,
+            repo: github_1.context.repo.repo,
+            key: cacheKey, // prefix matching
+        });
+        const caches = cachesResult.data['actions_caches'] || [];
+        return caches.some(cache => cache['key'] === cacheKey);
     }
     catch (error) {
         core.debug(`Error checking if cache exist: ${error.message}`);
@@ -1631,8 +1635,11 @@ const resetCacheWithOctokit = (cacheKey) => __awaiter(void 0, void 0, void 0, fu
     const client = getOctokitClient();
     core.debug(`remove cache "${cacheKey}"`);
     try {
-        // TODO: replace with client.rest.
-        yield client.request(`DELETE /repos/${github_1.context.repo.owner}/${github_1.context.repo.repo}/actions/caches?key=${cacheKey}`);
+        yield client.rest.actions.deleteActionsCacheByKey({
+            owner: github_1.context.repo.owner,
+            repo: github_1.context.repo.repo,
+            key: cacheKey,
+        });
     }
     catch (error) {
         if (error.status) {

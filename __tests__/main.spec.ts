@@ -20,6 +20,7 @@ test('processing an issue with no label will make it stale and close it, if it i
     alwaysFalseStateMock,
     async p => (p === 1 ? TestIssueList : []),
     async () => [],
+    async () => [],
     async () => new Date().toDateString()
   );
 
@@ -51,6 +52,7 @@ test('processing an issue with no label and a start date as ECMAScript epoch in 
     opts,
     alwaysFalseStateMock,
     async p => (p === 1 ? TestIssueList : []),
+    async () => [],
     async () => [],
     async () => new Date().toDateString()
   );
@@ -84,6 +86,7 @@ test('processing an issue with no label and a start date as ECMAScript epoch in 
     alwaysFalseStateMock,
     async p => (p === 1 ? TestIssueList : []),
     async () => [],
+    async () => [],
     async () => new Date().toDateString()
   );
 
@@ -115,6 +118,7 @@ test('processing an issue with no label and a start date as ECMAScript epoch in 
     opts,
     alwaysFalseStateMock,
     async p => (p === 1 ? TestIssueList : []),
+    async () => [],
     async () => [],
     async () => new Date().toDateString()
   );
@@ -148,6 +152,7 @@ test('processing an issue with no label and a start date as ECMAScript epoch in 
     alwaysFalseStateMock,
     async p => (p === 1 ? TestIssueList : []),
     async () => [],
+    async () => [],
     async () => new Date().toDateString()
   );
 
@@ -179,6 +184,7 @@ test('processing an issue with no label and a start date as ISO 8601 being befor
     opts,
     alwaysFalseStateMock,
     async p => (p === 1 ? TestIssueList : []),
+    async () => [],
     async () => [],
     async () => new Date().toDateString()
   );
@@ -212,6 +218,7 @@ test('processing an issue with no label and a start date as ISO 8601 being after
     alwaysFalseStateMock,
     async p => (p === 1 ? TestIssueList : []),
     async () => [],
+    async () => [],
     async () => new Date().toDateString()
   );
 
@@ -243,6 +250,7 @@ test('processing an issue with no label and a start date as RFC 2822 being befor
     opts,
     alwaysFalseStateMock,
     async p => (p === 1 ? TestIssueList : []),
+    async () => [],
     async () => [],
     async () => new Date().toDateString()
   );
@@ -276,6 +284,7 @@ test('processing an issue with no label and a start date as RFC 2822 being after
     alwaysFalseStateMock,
     async p => (p === 1 ? TestIssueList : []),
     async () => [],
+    async () => [],
     async () => new Date().toDateString()
   );
 
@@ -299,6 +308,7 @@ test('processing an issue with no label will make it stale and close it, if it i
     opts,
     alwaysFalseStateMock,
     async p => (p === 1 ? TestIssueList : []),
+    async () => [],
     async () => [],
     async () => new Date().toDateString()
   );
@@ -325,6 +335,7 @@ test('processing an issue with no label will make it stale and not close it, if 
     alwaysFalseStateMock,
     async p => (p === 1 ? TestIssueList : []),
     async () => [],
+    async () => [],
     async () => new Date().toDateString()
   );
 
@@ -347,6 +358,7 @@ test('processing an issue with no label will make it stale and not close it if d
     opts,
     alwaysFalseStateMock,
     async p => (p === 1 ? TestIssueList : []),
+    async () => [],
     async () => [],
     async () => new Date().toDateString()
   );
@@ -372,6 +384,7 @@ test('processing an issue with no label will make it stale and not close it if d
     alwaysFalseStateMock,
     async p => (p === 1 ? TestIssueList : []),
     async () => [],
+    async () => [],
     async () => new Date().toDateString()
   );
 
@@ -395,6 +408,7 @@ test('processing an issue with no label will not make it stale if days-before-st
     opts,
     alwaysFalseStateMock,
     async p => (p === 1 ? TestIssueList : []),
+    async () => [],
     async () => [],
     async () => new Date().toDateString()
   );
@@ -420,6 +434,7 @@ test('processing an issue with no label will not make it stale if days-before-st
     opts,
     alwaysFalseStateMock,
     async p => (p === 1 ? TestIssueList : []),
+    async () => [],
     async () => [],
     async () => new Date().toDateString()
   );
@@ -448,6 +463,7 @@ test('processing an issue with no label will make it stale but not close it', as
     DefaultProcessorOptions,
     alwaysFalseStateMock,
     async p => (p === 1 ? TestIssueList : []),
+    async () => [],
     async () => [],
     async () => new Date().toDateString()
   );
@@ -481,6 +497,7 @@ test('processing a stale issue will close it', async () => {
     alwaysFalseStateMock,
     async p => (p === 1 ? TestIssueList : []),
     async () => [],
+    async () => [],
     async () => new Date().toDateString()
   );
 
@@ -513,6 +530,7 @@ test('processing a stale issue containing a space in the label will close it', a
     alwaysFalseStateMock,
     async p => (p === 1 ? TestIssueList : []),
     async () => [],
+    async () => [],
     async () => new Date().toDateString()
   );
 
@@ -544,6 +562,7 @@ test('processing a stale issue containing a slash in the label will close it', a
     opts,
     alwaysFalseStateMock,
     async p => (p === 1 ? TestIssueList : []),
+    async () => [],
     async () => [],
     async () => new Date().toDateString()
   );
@@ -578,6 +597,7 @@ test('processing a stale issue will close it when days-before-issue-stale overri
     alwaysFalseStateMock,
     async p => (p === 1 ? TestIssueList : []),
     async () => [],
+    async () => [],
     async () => new Date().toDateString()
   );
 
@@ -609,6 +629,7 @@ test('processing a stale PR will close it', async () => {
     opts,
     alwaysFalseStateMock,
     async p => (p === 1 ? TestIssueList : []),
+    async () => [],
     async () => [],
     async () => new Date().toDateString()
   );
@@ -643,6 +664,7 @@ test('processing a stale PR will close it when days-before-pr-stale override day
     alwaysFalseStateMock,
     async p => (p === 1 ? TestIssueList : []),
     async () => [],
+    async () => [],
     async () => new Date().toDateString()
   );
 
@@ -675,6 +697,7 @@ test('processing a stale issue will close it even if configured not to mark as s
     opts,
     alwaysFalseStateMock,
     async p => (p === 1 ? TestIssueList : []),
+    async () => [],
     async () => [],
     async () => new Date().toDateString()
   );
@@ -710,6 +733,7 @@ test('processing a stale issue will close it even if configured not to mark as s
     alwaysFalseStateMock,
     async p => (p === 1 ? TestIssueList : []),
     async () => [],
+    async () => [],
     async () => new Date().toDateString()
   );
 
@@ -742,6 +766,7 @@ test('processing a stale PR will close it even if configured not to mark as stal
     opts,
     alwaysFalseStateMock,
     async p => (p === 1 ? TestIssueList : []),
+    async () => [],
     async () => [],
     async () => new Date().toDateString()
   );
@@ -776,6 +801,7 @@ test('processing a stale PR will close it even if configured not to mark as stal
     opts,
     alwaysFalseStateMock,
     async p => (p === 1 ? TestIssueList : []),
+    async () => [],
     async () => [],
     async () => new Date().toDateString()
   );
@@ -834,6 +860,7 @@ test('stale closed issues will not be closed', async () => {
     alwaysFalseStateMock,
     async p => (p === 1 ? TestIssueList : []),
     async () => [],
+    async () => [],
     async () => new Date().toDateString()
   );
 
@@ -863,6 +890,7 @@ test('closed prs will not be marked stale', async () => {
     alwaysFalseStateMock,
     async p => (p === 1 ? TestIssueList : []),
     async () => [],
+    async () => [],
     async () => new Date().toDateString()
   );
 
@@ -891,6 +919,7 @@ test('stale closed prs will not be closed', async () => {
     DefaultProcessorOptions,
     alwaysFalseStateMock,
     async p => (p === 1 ? TestIssueList : []),
+    async () => [],
     async () => [],
     async () => new Date().toDateString()
   );
@@ -950,6 +979,7 @@ test('stale locked issues will not be closed', async () => {
     alwaysFalseStateMock,
     async p => (p === 1 ? TestIssueList : []),
     async () => [],
+    async () => [],
     async () => new Date().toDateString()
   );
 
@@ -1008,6 +1038,7 @@ test('stale locked prs will not be closed', async () => {
     alwaysFalseStateMock,
     async p => (p === 1 ? TestIssueList : []),
     async () => [],
+    async () => [],
     async () => new Date().toDateString()
   );
 
@@ -1038,6 +1069,7 @@ test('exempt issue labels will not be marked stale', async () => {
     opts,
     alwaysFalseStateMock,
     async p => (p === 1 ? TestIssueList : []),
+    async () => [],
     async () => [],
     async () => new Date().toDateString()
   );
@@ -1070,6 +1102,7 @@ test('exempt issue labels will not be marked stale (multi issue label with space
     alwaysFalseStateMock,
     async p => (p === 1 ? TestIssueList : []),
     async () => [],
+    async () => [],
     async () => new Date().toDateString()
   );
 
@@ -1099,6 +1132,7 @@ test('exempt issue labels will not be marked stale (multi issue label)', async (
     opts,
     alwaysFalseStateMock,
     async p => (p === 1 ? TestIssueList : []),
+    async () => [],
     async () => [],
     async () => new Date().toDateString()
   );
@@ -1150,6 +1184,7 @@ test('exempt pr labels will not be marked stale', async () => {
     alwaysFalseStateMock,
     async p => (p === 1 ? TestIssueList : []),
     async () => [],
+    async () => [],
     async () => new Date().toDateString()
   );
 
@@ -1199,6 +1234,7 @@ test('stale issues should not be closed if days is set to -1', async () => {
     alwaysFalseStateMock,
     async p => (p === 1 ? TestIssueList : []),
     async () => [],
+    async () => [],
     async () => new Date().toDateString()
   );
 
@@ -1236,6 +1272,7 @@ test('stale label should be removed if a comment was added to a stale issue', as
         body: 'Body'
       }
     ], // return a fake comment to indicate there was an update
+    async () => [],
     async () => new Date().toDateString()
   );
 
@@ -1245,6 +1282,122 @@ test('stale label should be removed if a comment was added to a stale issue', as
   expect(processor.closedIssues).toHaveLength(0);
   expect(processor.staleIssues).toHaveLength(0);
   expect(processor.removedLabelIssues).toHaveLength(1);
+});
+
+test('when the option "ignoreReactions" is set to false, stale label should be removed if a reaction was added to a stale issue', async () => {
+  const opts = {
+    ...DefaultProcessorOptions,
+    removeStaleWhenUpdated: true,
+    ignoreReactions: false
+  };
+  const TestIssueList: Issue[] = [
+    generateIssue(
+      opts,
+      1,
+      'An issue that should un-stale',
+      '2020-01-01T17:00:00Z',
+      '2020-01-01T17:00:00Z',
+      false,
+      false,
+      ['Stale']
+    )
+  ];
+  const processor = new IssuesProcessorMock(
+    opts,
+    alwaysFalseStateMock,
+    async p => (p === 1 ? TestIssueList : []),
+    async () => [],
+    async () => [
+      {
+        content: '+1',
+        created_at: '2020-01-07T17:00:00Z'
+      }
+    ], // return a fake reaction to indicate there was an update
+    async () => new Date().toDateString()
+  );
+
+  // process our fake issue list
+  await processor.processIssues(1);
+
+  expect(processor.closedIssues).toHaveLength(0);
+  expect(processor.staleIssues).toHaveLength(0);
+  expect(processor.removedLabelIssues).toHaveLength(1);
+});
+
+test('when the option "ignoreReactions" is not set, stale label should not be removed if a reaction was added to a stale issue', async () => {
+  const opts = {...DefaultProcessorOptions, removeStaleWhenUpdated: true};
+  const TestIssueList: Issue[] = [
+    generateIssue(
+      opts,
+      1,
+      'An issue that should un-stale',
+      '2020-01-01T17:00:00Z',
+      '2020-01-01T17:00:00Z',
+      false,
+      false,
+      ['Stale']
+    )
+  ];
+  const processor = new IssuesProcessorMock(
+    opts,
+    alwaysFalseStateMock,
+    async p => (p === 1 ? TestIssueList : []),
+    async () => [],
+    async () => [
+      {
+        content: '+1',
+        created_at: '2020-01-07T17:00:00Z'
+      }
+    ], // return a fake reaction to indicate there was an update
+    async () => new Date().toDateString()
+  );
+
+  // process our fake issue list
+  await processor.processIssues(1);
+
+  expect(processor.closedIssues).toHaveLength(1);
+  expect(processor.staleIssues).toHaveLength(0);
+  expect(processor.removedLabelIssues).toHaveLength(0);
+});
+
+test('when the option "ignoreReactions" is set to true, stale label should not be removed if a reaction was added to a stale issue', async () => {
+  const opts = {
+    ...DefaultProcessorOptions,
+    removeStaleWhenUpdated: true,
+    ignoreReactions: true
+  };
+  const TestIssueList: Issue[] = [
+    generateIssue(
+      opts,
+      1,
+      'An issue that should un-stale',
+      '2020-01-01T17:00:00Z',
+      '2020-01-01T17:00:00Z',
+      false,
+      false,
+      ['Stale']
+    )
+  ];
+  const processor = new IssuesProcessorMock(
+    opts,
+    alwaysFalseStateMock,
+    async p => (p === 1 ? TestIssueList : []),
+    async () => [],
+    async () => [
+      {
+        content: '+1',
+        created_at: '2020-01-07T17:00:00Z'
+      }
+    ], // return a fake reaction to indicate there was an update
+    async () => new Date().toDateString()
+  );
+
+  // process our fake issue list
+  await processor.processIssues(1);
+
+  expect(processor.closedIssues).toHaveLength(1);
+  expect(processor.staleIssues).toHaveLength(0);
+  expect(processor.removedLabelIssues).toHaveLength(0);
 });
 
 test('when the option "labelsToAddWhenUnstale" is set, the labels should be added when unstale', async () => {
@@ -1279,6 +1432,7 @@ test('when the option "labelsToAddWhenUnstale" is set, the labels should be adde
         body: 'Body'
       }
     ], // return a fake comment to indicate there was an update
+    async () => [],
     async () => new Date().toDateString()
   );
 
@@ -1325,6 +1479,7 @@ test('when the option "labelsToRemoveWhenStale" is set, the labels should be rem
         body: 'Body'
       }
     ], // return a fake comment to indicate there was an update
+    async () => [],
     async () => new Date().toDateString()
   );
 
@@ -1365,6 +1520,7 @@ test('stale label should not be removed if a comment was added by the bot (and t
         body: 'This issue is stale'
       }
     ], // return a fake comment to indicate there was an update by the bot
+    async () => [],
     async () => new Date().toDateString()
   );
 
@@ -1399,6 +1555,7 @@ test('stale label containing a space should be removed if a comment was added to
     alwaysFalseStateMock,
     async p => (p === 1 ? TestIssueList : []),
     async () => [{user: {login: 'notme', type: 'User'}, body: 'Body'}], // return a fake comment to indicate there was an update
+    async () => [],
     async () => new Date().toDateString()
   );
 
@@ -1430,6 +1587,7 @@ test('stale issues should not be closed until after the closed number of days', 
     opts,
     alwaysFalseStateMock,
     async p => (p === 1 ? TestIssueList : []),
+    async () => [],
     async () => [],
     async () => new Date().toDateString()
   );
@@ -1465,6 +1623,7 @@ test('stale issues should be closed if the closed nubmer of days (additive) is a
     alwaysFalseStateMock,
     async p => (p === 1 ? TestIssueList : []),
     async () => [],
+    async () => [],
     async () => new Date().toDateString()
   );
 
@@ -1496,6 +1655,7 @@ test('stale issues should not be closed until after the closed number of days (l
     opts,
     alwaysFalseStateMock,
     async p => (p === 1 ? TestIssueList : []),
+    async () => [],
     async () => [],
     async () => new Date().toDateString()
   );
@@ -1529,6 +1689,7 @@ test('skips stale message on issues when stale-issue-message is empty', async ()
     opts,
     alwaysFalseStateMock,
     async p => (p === 1 ? TestIssueList : []),
+    async () => [],
     async () => [],
     async () => new Date().toDateString()
   );
@@ -1574,6 +1735,7 @@ test('send stale message on issues when stale-issue-message is not empty', async
     opts,
     alwaysFalseStateMock,
     async p => (p === 1 ? TestIssueList : []),
+    async () => [],
     async () => [],
     async () => new Date().toDateString()
   );
@@ -1621,6 +1783,7 @@ test('skips stale message on prs when stale-pr-message is empty', async () => {
     alwaysFalseStateMock,
     async p => (p === 1 ? TestIssueList : []),
     async () => [],
+    async () => [],
     async () => new Date().toDateString()
   );
 
@@ -1667,6 +1830,7 @@ test('send stale message on prs when stale-pr-message is not empty', async () =>
     alwaysFalseStateMock,
     async p => (p === 1 ? TestIssueList : []),
     async () => [],
+    async () => [],
     async () => new Date().toDateString()
   );
 
@@ -1710,6 +1874,7 @@ test('git branch is deleted when option is enabled', async () => {
     alwaysFalseStateMock,
     async p => (p === 1 ? TestIssueList : []),
     async () => [],
+    async () => [],
     async () => new Date().toDateString()
   );
 
@@ -1740,6 +1905,7 @@ test('git branch is not deleted when issue is not pull request', async () => {
     opts,
     alwaysFalseStateMock,
     async p => (p === 1 ? TestIssueList : []),
+    async () => [],
     async () => [],
     async () => new Date().toDateString()
   );
@@ -1773,6 +1939,7 @@ test('an issue without a milestone will be marked as stale', async () => {
     DefaultProcessorOptions,
     alwaysFalseStateMock,
     async p => (p === 1 ? TestIssueList : []),
+    async () => [],
     async () => [],
     async () => new Date().toDateString()
   );
@@ -1809,6 +1976,7 @@ test('an issue without an exempted milestone will be marked as stale', async () 
     alwaysFalseStateMock,
     async p => (p === 1 ? TestIssueList : []),
     async () => [],
+    async () => [],
     async () => new Date().toDateString()
   );
 
@@ -1843,6 +2011,7 @@ test('an issue with an exempted milestone will not be marked as stale', async ()
     opts,
     alwaysFalseStateMock,
     async p => (p === 1 ? TestIssueList : []),
+    async () => [],
     async () => [],
     async () => new Date().toDateString()
   );
@@ -1879,6 +2048,7 @@ test('an issue with an exempted milestone will not be marked as stale (multi mil
     alwaysFalseStateMock,
     async p => (p === 1 ? TestIssueList : []),
     async () => [],
+    async () => [],
     async () => new Date().toDateString()
   );
 
@@ -1913,6 +2083,7 @@ test('an issue with an exempted milestone will not be marked as stale (multi mil
     opts,
     alwaysFalseStateMock,
     async p => (p === 1 ? TestIssueList : []),
+    async () => [],
     async () => [],
     async () => new Date().toDateString()
   );
@@ -1950,6 +2121,7 @@ test('an issue with an exempted milestone but without an exempted issue mileston
     alwaysFalseStateMock,
     async p => (p === 1 ? TestIssueList : []),
     async () => [],
+    async () => [],
     async () => new Date().toDateString()
   );
 
@@ -1985,6 +2157,7 @@ test('an issue with an exempted milestone but with another exempted issue milest
     opts,
     alwaysFalseStateMock,
     async p => (p === 1 ? TestIssueList : []),
+    async () => [],
     async () => [],
     async () => new Date().toDateString()
   );
@@ -2022,6 +2195,7 @@ test('an issue with an exempted milestone and with an exempted issue milestone w
     alwaysFalseStateMock,
     async p => (p === 1 ? TestIssueList : []),
     async () => [],
+    async () => [],
     async () => new Date().toDateString()
   );
 
@@ -2050,6 +2224,7 @@ test('processing an issue opened since 2 days and with the option "daysBeforeIss
     alwaysFalseStateMock,
     async p => (p === 1 ? TestIssueList : []),
     async () => [],
+    async () => [],
     async () => new Date().toDateString()
   );
 
@@ -2076,6 +2251,7 @@ test('processing an issue opened since 2 days and with the option "daysBeforeIss
     opts,
     alwaysFalseStateMock,
     async p => (p === 1 ? TestIssueList : []),
+    async () => [],
     async () => [],
     async () => new Date().toDateString()
   );
@@ -2104,6 +2280,7 @@ test('processing an issue opened since 2 days and with the option "daysBeforeIss
     alwaysFalseStateMock,
     async p => (p === 1 ? TestIssueList : []),
     async () => [],
+    async () => [],
     async () => new Date().toDateString()
   );
 
@@ -2130,6 +2307,7 @@ test('processing an issue opened since 1 hour and with the option "daysBeforeIss
     opts,
     alwaysFalseStateMock,
     async p => (p === 1 ? TestIssueList : []),
+    async () => [],
     async () => [],
     async () => new Date().toISOString()
   );
@@ -2158,6 +2336,7 @@ test('processing an issue opened since 4 hours and with the option "daysBeforeIs
     alwaysFalseStateMock,
     async p => (p === 1 ? TestIssueList : []),
     async () => [],
+    async () => [],
     async () => new Date().toISOString()
   );
 
@@ -2184,6 +2363,7 @@ test('processing an issue opened since 5 hours and with the option "daysBeforeIs
     opts,
     alwaysFalseStateMock,
     async p => (p === 1 ? TestIssueList : []),
+    async () => [],
     async () => [],
     async () => new Date().toISOString()
   );
@@ -2220,6 +2400,7 @@ test('processing a pull request opened since 2 days and with the option "daysBef
     alwaysFalseStateMock,
     async p => (p === 1 ? TestIssueList : []),
     async () => [],
+    async () => [],
     async () => new Date().toDateString()
   );
 
@@ -2254,6 +2435,7 @@ test('processing a pull request opened since 2 days and with the option "daysBef
     opts,
     alwaysFalseStateMock,
     async p => (p === 1 ? TestIssueList : []),
+    async () => [],
     async () => [],
     async () => new Date().toDateString()
   );
@@ -2290,6 +2472,7 @@ test('processing a pull request opened since 2 days and with the option "daysBef
     alwaysFalseStateMock,
     async p => (p === 1 ? TestIssueList : []),
     async () => [],
+    async () => [],
     async () => new Date().toDateString()
   );
 
@@ -2324,6 +2507,7 @@ test('processing a pull request opened since 1 hour and with the option "daysBef
     opts,
     alwaysFalseStateMock,
     async p => (p === 1 ? TestIssueList : []),
+    async () => [],
     async () => [],
     async () => new Date().toISOString()
   );
@@ -2360,6 +2544,7 @@ test('processing a pull request opened since 4 hours and with the option "daysBe
     alwaysFalseStateMock,
     async p => (p === 1 ? TestIssueList : []),
     async () => [],
+    async () => [],
     async () => new Date().toISOString()
   );
 
@@ -2394,6 +2579,7 @@ test('processing a pull request opened since 5 hours and with the option "daysBe
     opts,
     alwaysFalseStateMock,
     async p => (p === 1 ? TestIssueList : []),
+    async () => [],
     async () => [],
     async () => new Date().toISOString()
   );
@@ -2433,6 +2619,7 @@ test('processing a previously closed issue with a close label will remove the cl
     alwaysFalseStateMock,
     async p => (p === 1 ? TestIssueList : []),
     async () => [],
+    async () => [],
     async () => new Date().toDateString()
   );
 
@@ -2470,6 +2657,7 @@ test('processing a closed issue with a close label will not remove the close lab
     alwaysFalseStateMock,
     async p => (p === 1 ? TestIssueList : []),
     async () => [],
+    async () => [],
     async () => new Date().toDateString()
   );
 
@@ -2506,6 +2694,7 @@ test('processing a locked issue with a close label will not remove the close lab
     opts,
     alwaysFalseStateMock,
     async p => (p === 1 ? TestIssueList : []),
+    async () => [],
     async () => [],
     async () => new Date().toDateString()
   );
@@ -2548,6 +2737,7 @@ test('processing an issue stale since less than the daysBeforeStale with a stale
     alwaysFalseStateMock,
     async p => (p === 1 ? TestIssueList : []),
     async (): Promise<IComment[]> => Promise.resolve([]),
+    async () => [],
     async () => labelCreatedAt.toDateString()
   );
 
@@ -2590,6 +2780,7 @@ test('processing an issue stale since less than the daysBeforeStale without a st
     alwaysFalseStateMock,
     async p => (p === 1 ? TestIssueList : []),
     async (): Promise<IComment[]> => Promise.resolve([]),
+    async () => [],
     async () => new Date().toDateString()
   );
 
@@ -2627,6 +2818,7 @@ test('processing a pull request to be stale with the "stalePrMessage" option set
     alwaysFalseStateMock,
     async p => (p === 1 ? TestIssueList : []),
     async () => [],
+    async () => [],
     async () => new Date().toDateString()
   );
 
@@ -2663,6 +2855,7 @@ test('processing a pull request to be stale with the "stalePrMessage" option set
     opts,
     alwaysFalseStateMock,
     async p => (p === 1 ? TestIssueList : []),
+    async () => [],
     async () => [],
     async () => new Date().toDateString()
   );
@@ -2706,6 +2899,7 @@ test('processing an issue with the "includeOnlyAssigned" option and nonempty ass
     alwaysFalseStateMock,
     async p => (p === 1 ? TestIssueList : []),
     async () => [],
+    async () => [],
     async () => new Date().toDateString()
   );
 
@@ -2733,6 +2927,7 @@ test('processing an issue with the "includeOnlyAssigned" option set and no assig
     opts,
     alwaysFalseStateMock,
     async p => (p === 1 ? TestIssueList : []),
+    async () => [],
     async () => [],
     async () => new Date().toDateString()
   );

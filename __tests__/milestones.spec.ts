@@ -44,6 +44,7 @@ describe('milestones options', (): void => {
       alwaysFalseStateMock,
       async p => (p === 1 ? testIssueList : []),
       async () => [],
+      async () => [],
       async () => new Date().toDateString()
     );
   };

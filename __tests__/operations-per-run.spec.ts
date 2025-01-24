@@ -13,7 +13,7 @@ describe('operations-per-run option', (): void => {
     sut = new SUT();
   });
 
-  describe('when one issue should be stale within 10 days and updated 20 days ago', (): void => {
+  describe('when one issue should be stale within 10 days and updated 20 days ago and days before rotten is -1', (): void => {
     beforeEach((): void => {
       sut.staleIn(10).newIssue().updated(20);
     });

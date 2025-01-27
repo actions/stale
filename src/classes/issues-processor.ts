@@ -645,7 +645,7 @@ export class IssuesProcessor {
       const rateLimitResult = await this.client.rest.rateLimit.get();
       return new RateLimit(rateLimitResult.data.rate);
     } catch (error) {
-      logger.error(`Error when getting rateLimit: ${error.message}`);
+      logger.warn(`Error when getting rateLimit: ${error.message}`);
     }
   }
 

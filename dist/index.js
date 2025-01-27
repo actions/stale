@@ -495,7 +495,7 @@ class IssuesProcessor {
                 IssuesProcessor._endIssueProcessing(issue);
                 return; // Don't process closed issues
             }
-            if (issue.locked) {
+            if (issue.locked && this.options.exemptLocked) {
                 issueLogger.info(`Skipping this $$type because it is locked`);
                 IssuesProcessor._endIssueProcessing(issue);
                 return; // Don't process locked issues
@@ -2567,7 +2567,8 @@ function _getAndValidateArgs() {
         ignorePrUpdates: _toOptionalBoolean('ignore-pr-updates'),
         exemptDraftPr: core.getInput('exempt-draft-pr') === 'true',
         closeIssueReason: core.getInput('close-issue-reason'),
-        includeOnlyAssigned: core.getInput('include-only-assigned') === 'true'
+        includeOnlyAssigned: core.getInput('include-only-assigned') === 'true',
+        exemptLocked: core.getInput('exempt-locked') === 'true'
     };
     for (const numberInput of ['days-before-stale']) {
         if (isNaN(parseFloat(core.getInput(numberInput)))) {

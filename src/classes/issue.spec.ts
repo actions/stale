@@ -64,11 +64,16 @@ describe('Issue', (): void => {
       ignorePrUpdates: undefined,
       exemptDraftPr: false,
       closeIssueReason: '',
-      includeOnlyAssigned: false
+      includeOnlyAssigned: false,
+      exemptAuthors: ''
     };
     issueInterface = {
       title: 'dummy-title',
       number: 8,
+      user: {
+        login: 'dummy-author',
+        type: 'User'
+      },
       created_at: 'dummy-created-at',
       updated_at: 'dummy-updated-at',
       draft: false,
@@ -104,6 +109,12 @@ describe('Issue', (): void => {
       expect.assertions(1);
 
       expect(issue.number).toStrictEqual(8);
+    });
+
+    it('should set the author with the given issue author', (): void => {
+      expect.assertions(1);
+
+      expect(issue.user.login).toStrictEqual('dummy-author');
     });
 
     it('should set the created_at with the given issue created_at', (): void => {

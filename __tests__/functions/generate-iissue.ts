@@ -15,6 +15,10 @@ export function generateIIssue(
     title: 'dummy-title',
     locked: false,
     state: 'dummy-state',
+    user: {
+      login: 'dummy-login',
+      type: 'User'
+    },
     ...partialIssue
   };
 }

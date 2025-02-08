@@ -288,7 +288,6 @@ class Issue {
         this.milestone = issue.milestone;
         this.assignees = issue.assignees || [];
         this.isStale = (0, is_labeled_1.isLabeled)(this, this.staleLabel);
-        this.markedStaleThisRun = false;
     }
     get isPullRequest() {
         return (0, is_pull_request_1.isPullRequest)(this);
@@ -626,8 +625,8 @@ class IssuesProcessor {
                         issueLogger.info(`This $$type should be marked as stale based on the option ${issueLogger.createOptionLink(this._getDaysBeforeStaleUsedOptionName(issue))} (${logger_service_1.LoggerService.cyan(daysBeforeStale)})`);
                         yield this._markStale(issue, staleMessage, staleLabel, skipMessage);
                         issue.isStale = true; // This issue is now considered stale
-                        issue.markedStaleThisRun = true;
                         issueLogger.info(`This $$type is now stale`);
+                        yield this._removeLabelsOnStatusTransition(issue, labelsToRemoveWhenStale, option_1.Option.LabelsToRemoveWhenStale);
                     }
                     else {
                         issueLogger.info(`This $$type should not be marked as stale based on the option ${issueLogger.createOptionLink(this._getDaysBeforeStaleUsedOptionName(issue))} (${logger_service_1.LoggerService.cyan(daysBeforeStale)})`);
@@ -642,10 +641,9 @@ class IssuesProcessor {
                     }
                 }
             }
-            // Process the issue if it was marked stale
-            if (issue.isStale) {
+            else {
                 issueLogger.info(`This $$type is already stale`);
-                yield this._processStaleIssue(issue, staleLabel, staleMessage, labelsToAddWhenUnstale, labelsToRemoveWhenUnstale, labelsToRemoveWhenStale, closeMessage, closeLabel);
+                yield this._processStaleIssue(issue, staleLabel, staleMessage, labelsToAddWhenUnstale, labelsToRemoveWhenUnstale, closeMessage, closeLabel);
             }
             IssuesProcessor._endIssueProcessing(issue);
         });
@@ -752,7 +750,7 @@ class IssuesProcessor {
         });
     }
     // handle all of the stale issue logic when we find a stale issue
-    _processStaleIssue(issue, staleLabel, staleMessage, labelsToAddWhenUnstale, labelsToRemoveWhenUnstale, labelsToRemoveWhenStale, closeMessage, closeLabel) {
+    _processStaleIssue(issue, staleLabel, staleMessage, labelsToAddWhenUnstale, labelsToRemoveWhenUnstale, closeMessage, closeLabel) {
         return __awaiter(this, void 0, void 0, function* () {
             const issueLogger = new issue_logger_1.IssueLogger(issue);
             const markedStaleOn = (yield this.getLabelCreationDate(issue, staleLabel)) || issue.updated_at;
@@ -771,18 +769,13 @@ class IssuesProcessor {
             else {
                 issueLogger.info(`The stale label should be removed if all conditions met`);
             }
-            if (issue.markedStaleThisRun) {
-                issueLogger.info(`marked stale this run, so don't check for updates`);
-                yield this._removeLabelsOnStatusTransition(issue, labelsToRemoveWhenStale, option_1.Option.LabelsToRemoveWhenStale);
-            }
             // The issue.updated_at and markedStaleOn are not always exactly in sync (they can be off by a second or 2)
             // isDateMoreRecentThan makes sure they are not the same date within a certain tolerance (15 seconds in this case)
             const issueHasUpdateSinceStale = (0, is_date_more_recent_than_1.isDateMoreRecentThan)(new Date(issue.updated_at), new Date(markedStaleOn), 15);
             issueLogger.info(`$$type has been updated since it was marked stale: ${logger_service_1.LoggerService.cyan(issueHasUpdateSinceStale)}`);
             // Should we un-stale this issue?
             if (shouldRemoveStaleWhenUpdated &&
-                (issueHasUpdateSinceStale || issueHasCommentsSinceStale) &&
-                !issue.markedStaleThisRun) {
+                (issueHasUpdateSinceStale || issueHasCommentsSinceStale)) {
                 issueLogger.info(`Remove the stale label since the $$type has been updated and the workflow should remove the stale label when updated`);
                 yield this._removeStaleLabel(issue, staleLabel);
                 // Are there labels to remove or add when an issue is no longer stale?

@@ -20,8 +20,8 @@
 2. Version 9 of this action updated the runtime to Node.js 20. All scripts are now run with Node.js 20 instead of Node.js 16 and are affected by any breaking changes between Node.js 16 and 20.
 
 ## What Else Changed
-1. Performance optimization that removes unnecessary API calls by @dsame [#1033](https://github.com/actions/stale/pull/1033/) fixes [#792](https://github.com/actions/stale/issues/792)
-2. Logs displaying current github API rate limit by @dsame [#1032](https://github.com/actions/stale/pull/1032) addresses [#1029](https://github.com/actions/stale/issues/1029)
+1. Performance optimization that removes unnecessary API calls by @dsame in [#1033](https://github.com/actions/stale/pull/1033/); fixes [#792](https://github.com/actions/stale/issues/792)
+2. Logs displaying current GitHub API rate limit by @dsame in [#1032](https://github.com/actions/stale/pull/1032); addresses [#1029](https://github.com/actions/stale/issues/1029)
 
 For more information, please read the [action documentation](https://github.com/actions/stale#readme) and its [section about statefulness](https://github.com/actions/stale#statefulness)
 

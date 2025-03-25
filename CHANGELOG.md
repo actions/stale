@@ -1,5 +1,44 @@
 # Changelog
 
+# [9.1.0]
+
+## What's Changed
+* Documentation update by @Marukome0743 in https://github.com/actions/stale/pull/1116
+* Add workflow file for publishing releases to immutable action package by @Jcambass in https://github.com/actions/stale/pull/1179
+* Update undici from 5.28.2 to 5.28.4 by @dependabot in https://github.com/actions/stale/pull/1150
+* Update actions/checkout from 3 to 4 by @dependabot in https://github.com/actions/stale/pull/1091
+* Update actions/publish-action from 0.2.2 to 0.3.0 by @dependabot in https://github.com/actions/stale/pull/1147
+* Update ts-jest from 29.1.1 to 29.2.5 by @dependabot in https://github.com/actions/stale/pull/1175
+* Update @actions/core from 1.10.1 to 1.11.1 by @dependabot in https://github.com/actions/stale/pull/1191
+* Update @types/jest from 29.5.11 to 29.5.14 by @dependabot in https://github.com/actions/stale/pull/1193
+* Update @actions/cache from 3.2.2 to 4.0.0 by @dependabot in https://github.com/actions/stale/pull/1194
+
+# [9.0.0]
+
+## Breaking Changes
+1. Action is now stateful: If the action ends because of [operations-per-run](https://github.com/actions/stale#operations-per-run) then the next run will start from the first unprocessed issue skipping the issues processed during the previous run(s). The state is reset when all the issues are processed. This should be considered for scheduling workflow runs.
+2. Version 9 of this action updated the runtime to Node.js 20. All scripts are now run with Node.js 20 instead of Node.js 16 and are affected by any breaking changes between Node.js 16 and 20.
+
+## What Else Changed
+1. Performance optimization that removes unnecessary API calls by @dsame in [#1033](https://github.com/actions/stale/pull/1033/); fixes [#792](https://github.com/actions/stale/issues/792)
+2. Logs displaying current GitHub API rate limit by @dsame in [#1032](https://github.com/actions/stale/pull/1032); addresses [#1029](https://github.com/actions/stale/issues/1029)
+
+For more information, please read the [action documentation](https://github.com/actions/stale#readme) and its [section about statefulness](https://github.com/actions/stale#statefulness)
+
+
+
+# [4.1.1]
+
+In scope of this release we updated [actions/core to 1.10.0](https://github.com/actions/stale/pull/957) for v4 and [fixed issues operation count](https://github.com/actions/stale/pull/662). 
+
+# [8.0.0]
+
+:warning: This version contains breaking changes :warning:
+
+* New option labels-to-remove-when-stale enables users to specify list of comma delimited labels that will be removed when the issue or PR becomes stale by @panticmilos https://github.com/actions/stale/issues/770
+* Skip deleting the branch in the upstream of a forked repo by @dsame https://github.com/actions/stale/pull/913
+* abort the build on the error by @dsame in https://github.com/actions/stale/pull/935
+
 # [7.0.0]
 
 :warning: Breaking change :warning:
@@ -51,3 +90,4 @@ Various dependabot/dependency updates
 
 - The options `skip-stale-issue-message` and `skip-stale-pr-message` were removed. Instead, setting the options `stale-issue-message` and `stale-pr-message` will be enough to let the stale workflow add a comment. If the options are unset, a comment will not be added which was the equivalent of setting `skip-stale-issue-message` to `true`.
 - The `operations-per-run` option will be more effective. After migrating, you could face a failed-fast process workflow if you let the default value (30) or set it to a small number. In that case, you will see a warning at the end of the logs (if enabled) indicating that the workflow was stopped sooner to avoid consuming too much API calls. In most cases, you can just increase this limit to make sure to process everything in a single run.
+

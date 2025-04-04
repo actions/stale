@@ -45,6 +45,7 @@ Every argument is optional.
 | Input                                                               | Description                                                                 | Default               |
 | ------------------------------------------------------------------- | --------------------------------------------------------------------------- | --------------------- |
 | [repo-token](#repo-token)                                           | PAT for GitHub API authentication                                           | `${{ github.token }}` |
+| [author-allow-list](#author-allow-list)                             | Allow list for Issue or PR authors to consider                              |                       |
 | [days-before-stale](#days-before-stale)                             | Idle number of days before marking issues/PRs stale                         | `60`                  |
 | [days-before-issue-stale](#days-before-issue-stale)                 | Override [days-before-stale](#days-before-stale) for issues only            |                       |
 | [days-before-pr-stale](#days-before-pr-stale)                       | Override [days-before-stale](#days-before-stale) for PRs only               |                       |
@@ -461,6 +462,15 @@ Default value: unset
 #### exempt-all-pr-milestones
 
 Override [exempt-all-milestones](#exempt-all-milestones) but only to exempt the pull requests with a milestone to be marked as stale automatically.
+
+Default value: unset
+
+#### any-of-authors
+
+An allow-list of author(s) to only process the issues or the pull requests for.
+It can be a comma separated list of usernames (e.g: `marco,polo`).
+
+If unset (or an empty string), this option will not alter the stale workflow.
 
 Default value: unset
 

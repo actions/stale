@@ -64,7 +64,8 @@ describe('Issue', (): void => {
       ignorePrUpdates: undefined,
       exemptDraftPr: false,
       closeIssueReason: '',
-      includeOnlyAssigned: false
+      includeOnlyAssigned: false,
+      exemptLocked: true
     };
     issueInterface = {
       title: 'dummy-title',

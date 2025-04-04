@@ -4,6 +4,7 @@ import {isValidDate} from './functions/dates/is-valid-date';
 import {IIssuesProcessorOptions} from './interfaces/issues-processor-options';
 import {Issue} from './classes/issue';
 import {getStateInstance} from './services/state.service';
+import {context} from '@actions/github';
 
 async function _run(): Promise<void> {
   try {
@@ -73,6 +74,7 @@ function _getAndValidateArgs(): IIssuesProcessorOptions {
     daysBeforePrClose: parseInt(core.getInput('days-before-pr-close')),
     staleIssueLabel: core.getInput('stale-issue-label', {required: true}),
     closeIssueLabel: core.getInput('close-issue-label'),
+    onlyMatchingFilter: _toStringArray('only-matching-filter'),
     exemptIssueLabels: core.getInput('exempt-issue-labels'),
     stalePrLabel: core.getInput('stale-pr-label', {required: true}),
     closePrLabel: core.getInput('close-pr-label'),
@@ -125,6 +127,26 @@ function _getAndValidateArgs(): IIssuesProcessorOptions {
     closeIssueReason: core.getInput('close-issue-reason'),
     includeOnlyAssigned: core.getInput('include-only-assigned') === 'true'
   };
+
+  /*
+   * When using onlyMatchingFilter, we don't want an accidental search of
+   * all of GitHub so we make sure each filter in the list has at least
+   * one of repo: owner: org: or user:.  If not, we'll set repo: to the
+   * current owner/repo.
+   *
+   * We'll also include is:open if it wasn't already specified.
+   */
+  const new_omf: string[] = [];
+  for (let term of args.onlyMatchingFilter) {
+    if (term.search(/repo:|owner:|org:|user:/) < 0) {
+      term = `repo:${context.repo.owner}/${context.repo.repo} ${term}`;
+    }
+    if (term.search(/is:open/) < 0) {
+      term += ' is:open';
+    }
+    new_omf.push(term);
+  }
+  args.onlyMatchingFilter = new_omf;
 
   for (const numberInput of ['days-before-stale']) {
     if (isNaN(parseFloat(core.getInput(numberInput)))) {
@@ -196,6 +218,28 @@ function _toOptionalBoolean(
   }
 
   return undefined;
+}
+
+/**
+ * @description
+ * From an argument name, get the value as an optional string array
+ * This is very useful for all the arguments that override others
+ * It will allow us to easily use the original one when the return value is `undefined`
+ *
+ * @param {Readonly<string>} argumentName The name of the argument to check
+ *
+ * @returns {string[]} The value matching the given argument name
+ */
+function _toStringArray(argumentName: Readonly<string>): string[] {
+  const val = core.getInput(argumentName);
+  if (!val) {
+    return [];
+  }
+  try {
+    return JSON.parse(val);
+  } catch (err) {
+    return [val];
+  }
 }
 
 void _run();

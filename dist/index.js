@@ -1650,16 +1650,17 @@ class StateCacheStorage {
             const filePath = path_1.default.join(tmpDir, STATE_FILE);
             fs_1.default.writeFileSync(filePath, serializedState);
             try {
-                const cacheExists = yield checkIfCacheExists(CACHE_KEY);
+                const full_cache_key = CACHE_KEY + '_' + github_1.context.runId;
+                const cacheExists = yield checkIfCacheExists(full_cache_key);
                 if (cacheExists) {
-                    yield resetCacheWithOctokit(CACHE_KEY);
+                    yield resetCacheWithOctokit(full_cache_key);
                 }
                 const fileSize = fs_1.default.statSync(filePath).size;
                 if (fileSize === 0) {
                     core.info(`the state will be removed`);
                     return;
                 }
-                yield cache.saveCache([path_1.default.dirname(filePath)], CACHE_KEY);
+                yield cache.saveCache([path_1.default.dirname(filePath)], full_cache_key);
             }
             catch (error) {
                 core.warning(`Saving the state was not successful due to "${error.message || 'unknown reason'}"`);
@@ -1675,12 +1676,11 @@ class StateCacheStorage {
             const filePath = path_1.default.join(tmpDir, STATE_FILE);
             unlinkSafely(filePath);
             try {
-                const cacheExists = yield checkIfCacheExists(CACHE_KEY);
+                const cacheExists = yield cache.restoreCache([path_1.default.dirname(filePath)], CACHE_KEY);
                 if (!cacheExists) {
                     core.info('The saved state was not found, the process starts from the first issue.');
                     return '';
                 }
-                yield cache.restoreCache([path_1.default.dirname(filePath)], CACHE_KEY);
                 if (!fs_1.default.existsSync(filePath)) {
                     core.warning('Unknown error when unpacking the cache, the process starts from the first issue.');
                     return '';

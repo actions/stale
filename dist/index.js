@@ -368,6 +368,7 @@ const is_valid_date_1 = __nccwpck_require__(891);
 const is_boolean_1 = __nccwpck_require__(8236);
 const is_labeled_1 = __nccwpck_require__(6792);
 const clean_label_1 = __nccwpck_require__(7752);
+const elapsed_millis_excluding_days_1 = __nccwpck_require__(4101);
 const should_mark_when_stale_1 = __nccwpck_require__(2461);
 const words_to_list_1 = __nccwpck_require__(1883);
 const assignees_1 = __nccwpck_require__(7236);
@@ -386,9 +387,9 @@ const rate_limit_1 = __nccwpck_require__(7069);
  * Handle processing of issues for staleness/closure.
  */
 class IssuesProcessor {
-    static _updatedSince(timestamp, num_days) {
-        const daysInMillis = 1000 * 60 * 60 * 24 * num_days;
-        const millisSinceLastUpdated = new Date().getTime() - new Date(timestamp).getTime();
+    static _updatedSince(timestamp, numDays, excludeWeekdays) {
+        const daysInMillis = 1000 * 60 * 60 * 24 * numDays;
+        const millisSinceLastUpdated = (0, elapsed_millis_excluding_days_1.elapsedMillisExcludingDays)(new Date(timestamp), new Date(), excludeWeekdays);
         return millisSinceLastUpdated <= daysInMillis;
     }
     static _endIssueProcessing(issue) {
@@ -609,11 +610,11 @@ class IssuesProcessor {
                 let shouldBeStale;
                 // Ignore the last update and only use the creation date
                 if (shouldIgnoreUpdates) {
-                    shouldBeStale = !IssuesProcessor._updatedSince(issue.created_at, daysBeforeStale);
+                    shouldBeStale = !IssuesProcessor._updatedSince(issue.created_at, daysBeforeStale, this.options.excludeWeekdays);
                 }
                 // Use the last update to check if we need to stale
                 else {
-                    shouldBeStale = !IssuesProcessor._updatedSince(issue.updated_at, daysBeforeStale);
+                    shouldBeStale = !IssuesProcessor._updatedSince(issue.updated_at, daysBeforeStale, this.options.excludeWeekdays);
                 }
                 if (shouldBeStale) {
                     if (shouldIgnoreUpdates) {
@@ -795,7 +796,7 @@ class IssuesProcessor {
             if (daysBeforeClose < 0) {
                 return; // Nothing to do because we aren't closing stale issues
             }
-            const issueHasUpdateInCloseWindow = IssuesProcessor._updatedSince(issue.updated_at, daysBeforeClose);
+            const issueHasUpdateInCloseWindow = IssuesProcessor._updatedSince(issue.updated_at, daysBeforeClose, this.options.excludeWeekdays);
             issueLogger.info(`$$type has been updated in the last ${daysBeforeClose} days: ${logger_service_1.LoggerService.cyan(issueHasUpdateInCloseWindow)}`);
             if (!issueHasCommentsSinceStale && !issueHasUpdateInCloseWindow) {
                 issueLogger.info(`Closing $$type because it was last updated on: ${logger_service_1.LoggerService.cyan(issue.updated_at)}`);
@@ -2335,6 +2336,62 @@ exports.isValidDate = isValidDate;
 
 /***/ }),
 
+/***/ 4101:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.elapsedMillisExcludingDays = void 0;
+const DAY = 1000 * 60 * 60 * 24;
+function startOfDay(date) {
+    return new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0, 0);
+}
+function countWeekdaysBetweenDates(start, end, excludeWeekdays) {
+    const totalDays = Math.floor((end.getTime() - start.getTime()) / DAY);
+    const startDayOfWeek = start.getDay();
+    const excludeWeekdaysMap = new Set(excludeWeekdays);
+    const fullWeeks = Math.floor(totalDays / 7);
+    const remainingDays = totalDays % 7;
+    // Count the number of excluded days in a full week (0-6)
+    let weeklyExcludedCount = 0;
+    for (let day = 0; day < 7; day++) {
+        if (excludeWeekdaysMap.has(day)) {
+            weeklyExcludedCount++;
+        }
+    }
+    // Count excluded days in the remaining days after full weeks
+    let extraExcludedCount = 0;
+    for (let i = 0; i < remainingDays; i++) {
+        const currentDay = (startDayOfWeek + i) % 7;
+        if (excludeWeekdaysMap.has(currentDay)) {
+            extraExcludedCount++;
+        }
+    }
+    // Compute the total excluded days
+    return fullWeeks * weeklyExcludedCount + extraExcludedCount;
+}
+const elapsedMillisExcludingDays = (from, to, excludeWeekdays) => {
+    let elapsedMillis = to.getTime() - from.getTime();
+    if (excludeWeekdays.length > 0) {
+        const startOfNextDayFrom = startOfDay(new Date(from.getTime() + DAY));
+        const startOfDayTo = startOfDay(to);
+        if (excludeWeekdays.includes(from.getDay())) {
+            elapsedMillis -= startOfNextDayFrom.getTime() - from.getTime();
+        }
+        if (excludeWeekdays.includes(to.getDay())) {
+            elapsedMillis -= to.getTime() - startOfDayTo.getTime();
+        }
+        const excludeWeekdaysCount = countWeekdaysBetweenDates(startOfNextDayFrom, startOfDayTo, excludeWeekdays);
+        elapsedMillis -= excludeWeekdaysCount * DAY;
+    }
+    return elapsedMillis;
+};
+exports.elapsedMillisExcludingDays = elapsedMillisExcludingDays;
+
+
+/***/ }),
+
 /***/ 8236:
 /***/ ((__unused_webpack_module, exports) => {
 
@@ -2567,7 +2624,13 @@ function _getAndValidateArgs() {
         ignorePrUpdates: _toOptionalBoolean('ignore-pr-updates'),
         exemptDraftPr: core.getInput('exempt-draft-pr') === 'true',
         closeIssueReason: core.getInput('close-issue-reason'),
-        includeOnlyAssigned: core.getInput('include-only-assigned') === 'true'
+        includeOnlyAssigned: core.getInput('include-only-assigned') === 'true',
+        excludeWeekdays: core.getInput('exclude-weekdays')
+            ? core
+                .getInput('exclude-weekdays')
+                .split(',')
+                .map(day => parseInt(day.trim(), 10))
+            : []
     };
     for (const numberInput of ['days-before-stale']) {
         if (isNaN(parseFloat(core.getInput(numberInput)))) {
@@ -2596,6 +2659,13 @@ function _getAndValidateArgs() {
     const validCloseReasons = ['', 'completed', 'not_planned'];
     if (!validCloseReasons.includes(args.closeIssueReason)) {
         const errorMessage = `Unrecognized close-issue-reason "${args.closeIssueReason}", valid values are: ${validCloseReasons.filter(Boolean).join(', ')}`;
+        core.setFailed(errorMessage);
+        throw new Error(errorMessage);
+    }
+    // Validate weekdays
+    if (args.excludeWeekdays &&
+        args.excludeWeekdays.some(day => isNaN(day) || day < 0 || day > 6)) {
+        const errorMessage = 'Option "exclude-weekdays" must be comma-separated integers between 0 (Sunday) and 6 (Saturday)';
         core.setFailed(errorMessage);
         throw new Error(errorMessage);
     }

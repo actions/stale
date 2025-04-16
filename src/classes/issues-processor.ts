@@ -645,6 +645,11 @@ export class IssuesProcessor {
       const rateLimitResult = await this.client.rest.rateLimit.get();
       return new RateLimit(rateLimitResult.data.rate);
     } catch (error) {
+      if (error.status === 404) {
+        // Rate limiting is not enabled, due to this being GitHub Enterprise Server
+        // and not GitHub Cloud. Ignore the error and carry on.
+        return;
+      }
       logger.error(`Error when getting rateLimit: ${error.message}`);
     }
   }

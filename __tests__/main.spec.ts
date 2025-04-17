@@ -1018,6 +1018,67 @@ test('stale locked prs will not be closed', async () => {
   expect(processor.closedIssues).toHaveLength(0);
 });
 
+test('exempt issue authors will not be marked stale', async () => {
+  const opts = {...DefaultProcessorOptions};
+  opts.exemptAuthors = 'author';
+  const TestIssueList: Issue[] = [
+    generateIssue(
+      opts,
+      1,
+      'My first issue',
+      '2020-01-01T17:00:00Z',
+      '2020-01-01T17:00:00Z',
+      false,
+      false,
+      ['Exempt'],
+    )
+  ];
+  const processor = new IssuesProcessorMock(
+    opts,
+    alwaysFalseStateMock,
+    async p => (p === 1 ? TestIssueList : []),
+    async () => [],
+    async () => new Date().toDateString()
+  );
+
+  // process our fake issue list
+  await processor.processIssues(1);
+
+  expect(processor.staleIssues.length).toStrictEqual(0);
+  expect(processor.closedIssues.length).toStrictEqual(0);
+  expect(processor.removedLabelIssues.length).toStrictEqual(0);
+});
+
+test('non exempt issue authors will be marked stale', async () => {
+  const opts = {...DefaultProcessorOptions};
+  opts.exemptAuthors = 'dummy1,dummy2';
+  const TestIssueList: Issue[] = [
+    generateIssue(
+      opts,
+      1,
+      'My first issue',
+      '2020-01-01T17:00:00Z',
+      '2020-01-01T17:00:00Z',
+      false,
+      false,
+      ['Exempt'],
+    )
+  ];
+  const processor = new IssuesProcessorMock(
+    opts,
+    alwaysFalseStateMock,
+    async p => (p === 1 ? TestIssueList : []),
+    async () => [],
+    async () => new Date().toDateString()
+  );
+
+  // process our fake issue list
+  await processor.processIssues(1);
+
+  expect(processor.staleIssues).toHaveLength(1);
+  expect(processor.closedIssues).toHaveLength(0);
+});
+
 test('exempt issue labels will not be marked stale', async () => {
   expect.assertions(3);
   const opts = {...DefaultProcessorOptions};

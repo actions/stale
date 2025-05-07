@@ -19,6 +19,7 @@ This can be achieved with the following [configuration in the action](https://do
 
 ```yaml
 permissions:
+  actions: write
   contents: write # only for delete-branch option
   issues: write
   pull-requests: write

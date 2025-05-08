@@ -43,61 +43,62 @@ configured for the repo.
 
 Every argument is optional.
 
-| Input                                                               | Description                                                                 | Default               |
-| ------------------------------------------------------------------- | --------------------------------------------------------------------------- | --------------------- |
-| [repo-token](#repo-token)                                           | PAT for GitHub API authentication                                           | `${{ github.token }}` |
-| [days-before-stale](#days-before-stale)                             | Idle number of days before marking issues/PRs stale                         | `60`                  |
-| [days-before-issue-stale](#days-before-issue-stale)                 | Override [days-before-stale](#days-before-stale) for issues only            |                       |
-| [days-before-pr-stale](#days-before-pr-stale)                       | Override [days-before-stale](#days-before-stale) for PRs only               |                       |
-| [days-before-close](#days-before-close)                             | Idle number of days before closing stale issues/PRs                         | `7`                   |
-| [days-before-issue-close](#days-before-issue-close)                 | Override [days-before-close](#days-before-close) for issues only            |                       |
-| [days-before-pr-close](#days-before-pr-close)                       | Override [days-before-close](#days-before-close) for PRs only               |                       |
-| [stale-issue-message](#stale-issue-message)                         | Comment on the staled issues                                                |                       |
-| [stale-pr-message](#stale-pr-message)                               | Comment on the staled PRs                                                   |                       |
-| [close-issue-message](#close-issue-message)                         | Comment on the staled issues while closed                                   |                       |
-| [close-pr-message](#close-pr-message)                               | Comment on the staled PRs while closed                                      |                       |
-| [stale-issue-label](#stale-issue-label)                             | Label to apply on staled issues                                             | `Stale`               |
-| [close-issue-label](#close-issue-label)                             | Label to apply on closed issues                                             |                       |
-| [close-issue-reason](#close-issue-reason)                           | Reason to use when closing issues                                           | `not_planned`         |
-| [stale-pr-label](#stale-pr-label)                                   | Label to apply on staled PRs                                                | `Stale`               |
-| [close-pr-label](#close-pr-label)                                   | Label to apply on closed PRs                                                |                       |
-| [exempt-issue-labels](#exempt-issue-labels)                         | Labels on issues exempted from stale                                        |                       |
-| [exempt-pr-labels](#exempt-pr-labels)                               | Labels on PRs exempted from stale                                           |                       |
-| [only-labels](#only-labels)                                         | Only issues/PRs with ALL these labels are checked                           |                       |
-| [only-issue-labels](#only-issue-labels)                             | Override [only-labels](#only-labels) for issues only                        |                       |
-| [only-pr-labels](#only-pr-labels)                                   | Override [only-labels](#only-labels) for PRs only                           |                       |
-| [any-of-labels](#any-of-labels)                                     | Only issues/PRs with ANY of these labels are checked                        |                       |
-| [any-of-issue-labels](#any-of-issue-labels)                         | Override [any-of-labels](#any-of-labels) for issues only                    |                       |
-| [any-of-pr-labels](#any-of-pr-labels)                               | Override [any-of-labels](#any-of-labels) for PRs only                       |                       |
-| [operations-per-run](#operations-per-run)                           | Max number of operations per run                                            | `30`                  |
-| [remove-stale-when-updated](#remove-stale-when-updated)             | Remove stale label from issues/PRs on updates                               | `true`                |
-| [remove-issue-stale-when-updated](#remove-issue-stale-when-updated) | Remove stale label from issues on updates/comments                          |                       |
-| [remove-pr-stale-when-updated](#remove-pr-stale-when-updated)       | Remove stale label from PRs on updates/comments                             |                       |
-| [labels-to-add-when-unstale](#labels-to-add-when-unstale)           | Add specified labels from issues/PRs when they become unstale               |                       |
-| [labels-to-remove-when-stale](#labels-to-remove-when-stale)         | Remove specified labels from issues/PRs when they become stale              |                       |
-| [labels-to-remove-when-unstale](#labels-to-remove-when-unstale)     | Remove specified labels from issues/PRs when they become unstale            |                       |
-| [debug-only](#debug-only)                                           | Dry-run                                                                     | `false`               |
-| [ascending](#ascending)                                             | Order to get issues/PRs                                                     | `false`               |
-| [start-date](#start-date)                                           | Skip stale action for issues/PRs created before it                          |                       |
-| [delete-branch](#delete-branch)                                     | Delete branch after closing a stale PR                                      | `false`               |
-| [exempt-milestones](#exempt-milestones)                             | Milestones on issues/PRs exempted from stale                                |                       |
-| [exempt-issue-milestones](#exempt-issue-milestones)                 | Override [exempt-milestones](#exempt-milestones) for issues only            |                       |
-| [exempt-pr-milestones](#exempt-pr-milestones)                       | Override [exempt-milestones](#exempt-milestones) for PRs only               |                       |
-| [exempt-all-milestones](#exempt-all-milestones)                     | Exempt all issues/PRs with milestones from stale                            | `false`               |
-| [exempt-all-issue-milestones](#exempt-all-issue-milestones)         | Override [exempt-all-milestones](#exempt-all-milestones) for issues only    |                       |
-| [exempt-all-pr-milestones](#exempt-all-pr-milestones)               | Override [exempt-all-milestones](#exempt-all-milestones) for PRs only       |                       |
-| [exempt-assignees](#exempt-assignees)                               | Assignees on issues/PRs exempted from stale                                 |                       |
-| [exempt-issue-assignees](#exempt-issue-assignees)                   | Override [exempt-assignees](#exempt-assignees) for issues only              |                       |
-| [exempt-pr-assignees](#exempt-pr-assignees)                         | Override [exempt-assignees](#exempt-assignees) for PRs only                 |                       |
-| [exempt-all-assignees](#exempt-all-assignees)                       | Exempt all issues/PRs with assignees from stale                             | `false`               |
-| [exempt-all-issue-assignees](#exempt-all-issue-assignees)           | Override [exempt-all-assignees](#exempt-all-assignees) for issues only      |                       |
-| [exempt-all-pr-assignees](#exempt-all-pr-assignees)                 | Override [exempt-all-assignees](#exempt-all-assignees) for PRs only         |                       |
-| [exempt-draft-pr](#exempt-draft-pr)                                 | Skip the stale action for draft PRs                                         | `false`               |
-| [enable-statistics](#enable-statistics)                             | Display statistics in the logs                                              | `true`                |
+| Input                                                               | Description                                                                | Default               |
+|---------------------------------------------------------------------|----------------------------------------------------------------------------|-----------------------|
+| [repo-token](#repo-token)                                           | PAT for GitHub API authentication                                          | `${{ github.token }}` |
+| [days-before-stale](#days-before-stale)                             | Idle number of days before marking issues/PRs stale                        | `60`                  |
+| [days-before-issue-stale](#days-before-issue-stale)                 | Override [days-before-stale](#days-before-stale) for issues only           |                       |
+| [days-before-pr-stale](#days-before-pr-stale)                       | Override [days-before-stale](#days-before-stale) for PRs only              |                       |
+| [days-before-close](#days-before-close)                             | Idle number of days before closing stale issues/PRs                        | `7`                   |
+| [days-before-issue-close](#days-before-issue-close)                 | Override [days-before-close](#days-before-close) for issues only           |                       |
+| [days-before-pr-close](#days-before-pr-close)                       | Override [days-before-close](#days-before-close) for PRs only              |                       |
+| [stale-issue-message](#stale-issue-message)                         | Comment on the staled issues                                               |                       |
+| [stale-pr-message](#stale-pr-message)                               | Comment on the staled PRs                                                  |                       |
+| [close-issue-message](#close-issue-message)                         | Comment on the staled issues while closed                                  |                       |
+| [close-pr-message](#close-pr-message)                               | Comment on the staled PRs while closed                                     |                       |
+| [stale-issue-label](#stale-issue-label)                             | Label to apply on staled issues                                            | `Stale`               |
+| [close-issue-label](#close-issue-label)                             | Label to apply on closed issues                                            |                       |
+| [close-issue-reason](#close-issue-reason)                           | Reason to use when closing issues                                          | `not_planned`         |
+| [stale-pr-label](#stale-pr-label)                                   | Label to apply on staled PRs                                               | `Stale`               |
+| [close-pr-label](#close-pr-label)                                   | Label to apply on closed PRs                                               |                       |
+| [exempt-issue-labels](#exempt-issue-labels)                         | Labels on issues exempted from stale                                       |                       |
+| [exempt-pr-labels](#exempt-pr-labels)                               | Labels on PRs exempted from stale                                          |                       |
+| [only-labels](#only-labels)                                         | Only issues/PRs with ALL these labels are checked                          |                       |
+| [only-issue-labels](#only-issue-labels)                             | Override [only-labels](#only-labels) for issues only                       |                       |
+| [only-pr-labels](#only-pr-labels)                                   | Override [only-labels](#only-labels) for PRs only                          |                       |
+| [any-of-labels](#any-of-labels)                                     | Only issues/PRs with ANY of these labels are checked                       |                       |
+| [any-of-issue-labels](#any-of-issue-labels)                         | Override [any-of-labels](#any-of-labels) for issues only                   |                       |
+| [any-of-pr-labels](#any-of-pr-labels)                               | Override [any-of-labels](#any-of-labels) for PRs only                      |                       |
+| [operations-per-run](#operations-per-run)                           | Max number of operations per run                                           | `30`                  |
+| [remove-stale-when-updated](#remove-stale-when-updated)             | Remove stale label from issues/PRs on updates                              | `true`                |
+| [remove-issue-stale-when-updated](#remove-issue-stale-when-updated) | Remove stale label from issues on updates/comments                         |                       |
+| [remove-pr-stale-when-updated](#remove-pr-stale-when-updated)       | Remove stale label from PRs on updates/comments                            |                       |
+| [labels-to-add-when-unstale](#labels-to-add-when-unstale)           | Add specified labels from issues/PRs when they become unstale              |                       |
+| [labels-to-remove-when-stale](#labels-to-remove-when-stale)         | Remove specified labels from issues/PRs when they become stale             |                       |
+| [labels-to-remove-when-unstale](#labels-to-remove-when-unstale)     | Remove specified labels from issues/PRs when they become unstale           |                       |
+| [debug-only](#debug-only)                                           | Dry-run                                                                    | `false`               |
+| [ascending](#ascending)                                             | Order to get issues/PRs                                                    | `false`               |
+| [start-date](#start-date)                                           | Skip stale action for issues/PRs created before it                         |                       |
+| [delete-branch](#delete-branch)                                     | Delete branch after closing a stale PR                                     | `false`               |
+| [exempt-milestones](#exempt-milestones)                             | Milestones on issues/PRs exempted from stale                               |                       |
+| [exempt-issue-milestones](#exempt-issue-milestones)                 | Override [exempt-milestones](#exempt-milestones) for issues only           |                       |
+| [exempt-pr-milestones](#exempt-pr-milestones)                       | Override [exempt-milestones](#exempt-milestones) for PRs only              |                       |
+| [exempt-all-milestones](#exempt-all-milestones)                     | Exempt all issues/PRs with milestones from stale                           | `false`               |
+| [exempt-all-issue-milestones](#exempt-all-issue-milestones)         | Override [exempt-all-milestones](#exempt-all-milestones) for issues only   |                       |
+| [exempt-all-pr-milestones](#exempt-all-pr-milestones)               | Override [exempt-all-milestones](#exempt-all-milestones) for PRs only      |                       |
+| [exempt-assignees](#exempt-assignees)                               | Assignees on issues/PRs exempted from stale                                |                       |
+| [exempt-issue-assignees](#exempt-issue-assignees)                   | Override [exempt-assignees](#exempt-assignees) for issues only             |                       |
+| [exempt-pr-assignees](#exempt-pr-assignees)                         | Override [exempt-assignees](#exempt-assignees) for PRs only                |                       |
+| [exempt-pinned-issues](#exempt-pinned-issues)                       | Exempt pinned issues from stale                                            | `false`               |
+| [exempt-all-assignees](#exempt-all-assignees)                       | Exempt all issues/PRs with assignees from stale                            | `false`               |
+| [exempt-all-issue-assignees](#exempt-all-issue-assignees)           | Override [exempt-all-assignees](#exempt-all-assignees) for issues only     |                       |
+| [exempt-all-pr-assignees](#exempt-all-pr-assignees)                 | Override [exempt-all-assignees](#exempt-all-assignees) for PRs only        |                       |
+| [exempt-draft-pr](#exempt-draft-pr)                                 | Skip the stale action for draft PRs                                        | `false`               |
+| [enable-statistics](#enable-statistics)                             | Display statistics in the logs                                             | `true`                |
 | [ignore-updates](#ignore-updates)                                   | Any update (update/comment) can reset the stale idle time on the issues/PRs | `false`               |
-| [ignore-issue-updates](#ignore-issue-updates)                       | Override [ignore-updates](#ignore-updates) for issues only                  |                       |
-| [ignore-pr-updates](#ignore-pr-updates)                             | Override [ignore-updates](#ignore-updates) for PRs only                     |                       |
-| [include-only-assigned](#include-only-assigned)                     | Process only assigned issues                                                | `false`               |
+| [ignore-issue-updates](#ignore-issue-updates)                       | Override [ignore-updates](#ignore-updates) for issues only                 |                       |
+| [ignore-pr-updates](#ignore-pr-updates)                             | Override [ignore-updates](#ignore-updates) for PRs only                    |                       |
+| [include-only-assigned](#include-only-assigned)                     | Process only assigned issues                                               | `false`               |
 
 ### List of output options
 

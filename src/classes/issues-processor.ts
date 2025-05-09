@@ -570,6 +570,7 @@ export class IssuesProcessor {
         repo: context.repo.repo,
         state: 'open',
         per_page: 100,
+        sort: 'updated',
         direction: this.options.ascending ? 'asc' : 'desc',
         page
       });

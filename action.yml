@@ -204,6 +204,10 @@ inputs:
     description: 'Only the issues or the pull requests with an assignee will be marked as stale automatically.'
     default: 'false'
     required: false
+  exclude-weekdays:
+    description: 'Comma-separated list of weekdays to exclude from elapsed days calculation (0=Sunday, 6=Saturday)'
+    required: false
+    default: ''
 outputs:
   closed-issues-prs:
     description: 'List of all closed issues and pull requests.'

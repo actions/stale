@@ -5,12 +5,14 @@ import {IIssue, OctokitIssue} from '../interfaces/issue';
 import {IIssuesProcessorOptions} from '../interfaces/issues-processor-options';
 import {ILabel} from '../interfaces/label';
 import {IMilestone} from '../interfaces/milestone';
+import { IUser } from '../interfaces/user';
 import {IsoDateString} from '../types/iso-date-string';
 import {Operations} from './operations';
 
 export class Issue implements IIssue {
   readonly title: string;
   readonly number: number;
+  readonly user: IUser;
   created_at: IsoDateString;
   updated_at: IsoDateString;
   readonly draft: boolean;
@@ -32,6 +34,11 @@ export class Issue implements IIssue {
     this._options = options;
     this.title = issue.title;
     this.number = issue.number;
+    //this.user = issue.user;
+    this.user = {
+      login: issue.user?.login ?? "",
+      type: issue.user?.type ?? "User"
+    };
     this.created_at = issue.created_at;
     this.updated_at = issue.updated_at;
     this.draft = Boolean(issue.draft);

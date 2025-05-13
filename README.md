@@ -98,6 +98,7 @@ Every argument is optional.
 | [ignore-issue-updates](#ignore-issue-updates)                       | Override [ignore-updates](#ignore-updates) for issues only                  |                       |
 | [ignore-pr-updates](#ignore-pr-updates)                             | Override [ignore-updates](#ignore-updates) for PRs only                     |                       |
 | [include-only-assigned](#include-only-assigned)                     | Process only assigned issues                                                | `false`               |
+| [exempt-authors](#exempt-authors)                                   | Skip issues or pull requests by these authors                               |                       |
 
 ### List of output options
 
@@ -547,6 +548,12 @@ Default value: unset
 If set to `true`, only the issues or the pull requests with an assignee will be marked as stale automatically.
 
 Default value: `false`
+
+#### exempt-authors
+
+Comma separated list of authors to exclude from being marked as stale (e.g: issue, pull request).
+
+Default value: unset
 
 ### Usage
 

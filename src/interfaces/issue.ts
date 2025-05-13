@@ -3,9 +3,11 @@ import {Assignee} from './assignee';
 import {ILabel} from './label';
 import {IMilestone} from './milestone';
 import {components} from '@octokit/openapi-types';
+import { IUser } from './user';
 export interface IIssue {
   title: string;
   number: number;
+  user: IUser;
   created_at: IsoDateString;
   updated_at: IsoDateString;
   draft: boolean;

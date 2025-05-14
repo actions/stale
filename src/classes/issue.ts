@@ -4,9 +4,11 @@ import {Assignee} from '../interfaces/assignee';
 import {IIssue, OctokitIssue} from '../interfaces/issue';
 import {IIssuesProcessorOptions} from '../interfaces/issues-processor-options';
 import {ILabel} from '../interfaces/label';
+import {IOwnerRepo} from '../interfaces/owner-repo';
 import {IMilestone} from '../interfaces/milestone';
 import {IsoDateString} from '../types/iso-date-string';
 import {Operations} from './operations';
+import {OwnerRepo} from './owner-repo';
 
 export class Issue implements IIssue {
   readonly title: string;
@@ -20,8 +22,10 @@ export class Issue implements IIssue {
   readonly locked: boolean;
   readonly milestone?: IMilestone | null;
   readonly assignees: Assignee[];
+  readonly repository_url?: string;
   isStale: boolean;
   markedStaleThisRun: boolean;
+  readonly owner_repo: IOwnerRepo;
   operations = new Operations();
   private readonly _options: IIssuesProcessorOptions;
 
@@ -41,8 +45,10 @@ export class Issue implements IIssue {
     this.locked = issue.locked;
     this.milestone = issue.milestone;
     this.assignees = issue.assignees || [];
+    this.repository_url = issue.repository_url;
     this.isStale = isLabeled(this, this.staleLabel);
     this.markedStaleThisRun = false;
+    this.owner_repo = new OwnerRepo(issue.repository_url || '');
   }
 
   get isPullRequest(): boolean {

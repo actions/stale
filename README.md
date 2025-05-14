@@ -61,6 +61,7 @@ Every argument is optional.
 | [close-issue-reason](#close-issue-reason)                           | Reason to use when closing issues                                           | `not_planned`         |
 | [stale-pr-label](#stale-pr-label)                                   | Label to apply on staled PRs                                                | `Stale`               |
 | [close-pr-label](#close-pr-label)                                   | Label to apply on closed PRs                                                |                       |
+| [only-matching-filter](#only-matching-filter)                       | Only issues/PRs matching the search filter(s) will be retrieved and tested  | `[]`                   |
 | [exempt-issue-labels](#exempt-issue-labels)                         | Labels on issues exempted from stale                                        |                       |
 | [exempt-pr-labels](#exempt-pr-labels)                               | Labels on PRs exempted from stale                                           |                       |
 | [only-labels](#only-labels)                                         | Only issues/PRs with ALL these labels are checked                           |                       |
@@ -258,6 +259,51 @@ It will be automatically removed if the pull requests are no longer closed nor l
 
 Default value: unset  
 Required Permission: `pull-requests: write`
+
+#### only-matching-filter
+
+_Context:_  
+Normally, all open issues/PRs in the repository that's running this action are retrieved then all the label, assignee, milestone, etc. criteria you provide to the action are applied.  Unfortunately, this limits the action to only those issues and PRs in this repository.  It also prevents operating on only a subset of issues or PRs that can't be filtered by the existing action criteria.  A good example of this are PRs that are in a `review:changes_requested` state.  While additional filtering criteria could be added to the action, it would result in additional callbacks to GitHub which could trigger rate-limits to be applied.
+
+_Purpose:_  
+This option is an array of one or more standard [GitHub Issues and Pull Requests search queries](https://docs.github.com/en/search-github/searching-on-github/searching-issues-and-pull-requests) which will be used to retrieve the set of issues/PRs to test and take action on. These queries will be used in place of the default retrieval of all open issues and PRs for the context's owner/repo.  It can be used to expand or limit the set of issues and PRs operated on beyond what is retuned by the standard query.  When the retrieval is complete, all the other label, assignee, milestone, etc. criteria will be applied.  
+
+You may also use this option to improve performance when you have a large number of open issues or PRs but only a small subset might be eligible for action.  For instance, let's say you have 1000 open issues in your repository but only those with label `auto-closable` should ever be automatically marked as stale or closed.  By default, this action would retrieve all 1000 issues _and all open PRs_ and iterate over them looking for the label you specified in the `only-issues-label` parameter. If you use the `only-matching-filter` parameter with `repo:myorg/myrepo is:issue label:auto-closable` this would limit the download to just those issues you  _know_ should  have further criteria applied.
+
+_Syntax:_  
+
+```
+only-matching-filter: [ "<query_string>", ... ]
+```
+
+Or if there's only one query string...
+
+```
+only-matching-filter: '<query_string>'
+```
+
+_Examples:_  
+To operate only on the open PRs in your organization that have a review state of `changes_requested`:
+
+```
+only-matching-filter: 'org:myorg is:pr is:open review:changes_requested'
+```
+
+Since there's only one query specified, you can omit the array syntax and just specify the string directly.
+
+GitHub only allows boolean logic and grouping in a Code Searches not in Issues and Pull Requests searches so there's no way to do an "OR" operation but you can get around this to a limited degree by specifying multiple search queries in the form of a string array. Each query is run separately and the results are accumulated and duplicates removed before any further processing is done.
+
+To retrieve all of the open PRs in your organization that have a review state of `changes_requested` or a label named `submitter-action-required`, you'd use:
+
+```
+only-matching-filter: '[ "org:myorg is:pr is:open review:changes_requested", "org:myorg is:pr is:open label:submitter-action-required" ]'
+```
+
+_Notes:_  
+* Each query is checked to ensure it contains an `owner:`, `org:`, `user:` or `repo:` search term.  If it doesn't, the search will automatically be scoped to the owner and repository in the context to prevent accidental global searches.  If the request doesn't already contain an `is:open` search term, it will automatically be added as well.
+* If using the array form, the value of this parameter MUST be valid JSON which means using double quotes around each query string, not single quotes.
+
+Default value: '[]'
 
 #### exempt-issue-labels
 

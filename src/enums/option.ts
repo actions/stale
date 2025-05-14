@@ -12,6 +12,7 @@ export enum Option {
   DaysBeforePrClose = 'days-before-pr-close',
   StaleIssueLabel = 'stale-issue-label',
   CloseIssueLabel = 'close-issue-label',
+  OnlyMatchingFilter = 'only-matching-filter',
   ExemptIssueLabels = 'exempt-issue-labels',
   StalePrLabel = 'stale-pr-label',
   ClosePrLabel = 'close-pr-label',

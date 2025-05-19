@@ -98,6 +98,7 @@ Every argument is optional.
 | [ignore-issue-updates](#ignore-issue-updates)                       | Override [ignore-updates](#ignore-updates) for issues only                  |                       |
 | [ignore-pr-updates](#ignore-pr-updates)                             | Override [ignore-updates](#ignore-updates) for PRs only                     |                       |
 | [include-only-assigned](#include-only-assigned)                     | Process only assigned issues                                                | `false`               |
+| [only-issue-types](#only-issue-types)                                 | Only issues with a matching type are processed as stale/closed. |                     |
 
 ### List of output options
 
@@ -547,6 +548,14 @@ Default value: unset
 If set to `true`, only the issues or the pull requests with an assignee will be marked as stale automatically.
 
 Default value: `false`
+
+#### only-issue-types
+
+A comma separated list of allowed issue types. Only issues with a matching type will be processed (e.g.: `bug,question`).
+
+If unset (or an empty string), this option will not alter the stale workflow.
+
+Default value: unset
 
 ### Usage
 

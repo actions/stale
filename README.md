@@ -98,7 +98,7 @@ Every argument is optional.
 | [ignore-issue-updates](#ignore-issue-updates)                       | Override [ignore-updates](#ignore-updates) for issues only                  |                       |
 | [ignore-pr-updates](#ignore-pr-updates)                             | Override [ignore-updates](#ignore-updates) for PRs only                     |                       |
 | [include-only-assigned](#include-only-assigned)                     | Process only assigned issues                                                | `false`               |
-| [only-issue-types](#only-issue-types)                                 | Only issues with a matching type are processed as stale/closed. |                     |
+| [only-issue-types](#only-issue-types)                               | Only issues with a matching type are processed as stale/closed. |                     |
 
 ### List of output options
 

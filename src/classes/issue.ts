@@ -24,6 +24,7 @@ export class Issue implements IIssue {
   markedStaleThisRun: boolean;
   operations = new Operations();
   private readonly _options: IIssuesProcessorOptions;
+  readonly issue_type?: string;
 
   constructor(
     options: Readonly<IIssuesProcessorOptions>,
@@ -43,6 +44,15 @@ export class Issue implements IIssue {
     this.assignees = issue.assignees || [];
     this.isStale = isLabeled(this, this.staleLabel);
     this.markedStaleThisRun = false;
+
+    if (
+      typeof (issue as any).type === 'object' &&
+      (issue as any).type !== null
+    ) {
+      this.issue_type = (issue as any).type.name;
+    } else {
+      this.issue_type = undefined;
+    }
   }
 
   get isPullRequest(): boolean {

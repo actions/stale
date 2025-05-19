@@ -137,7 +137,7 @@ inputs:
     default: 'false'
     required: false
   sort-issues-by:
-    description: 'What to sort results by'
+    description: 'What to sort results by. Valid options are `created`, `updated`, and `comments`. Defaults to `created`.'
     default: 'created'
     required: false
   delete-branch:

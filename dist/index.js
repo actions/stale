@@ -1,3 +1,5 @@
+const { sort } = require('semver');
+
 /******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
@@ -684,6 +686,12 @@ class IssuesProcessor {
                     state: 'open',
                     per_page: 100,
                     direction: this.options.ascending ? 'asc' : 'desc',
+                    sort:
+                    this.options.sortIssuesBy === 'updated'
+                      ? 'updated'
+                      : this.options.sortIssuesBy === 'comments'
+                      ? 'comments'
+                      : 'created',
                     page
                 });
                 (_a = this.statistics) === null || _a === void 0 ? void 0 : _a.incrementFetchedItemsCount(issueResult.data.length);
@@ -2199,6 +2207,7 @@ var Option;
     Option["RemovePrStaleWhenUpdated"] = "remove-pr-stale-when-updated";
     Option["DebugOnly"] = "debug-only";
     Option["Ascending"] = "ascending";
+    Option["SortIssuesBy"] = 'sort-issues-by';
     Option["DeleteBranch"] = "delete-branch";
     Option["StartDate"] = "start-date";
     Option["ExemptMilestones"] = "exempt-milestones";
@@ -2542,6 +2551,7 @@ function _getAndValidateArgs() {
         removePrStaleWhenUpdated: _toOptionalBoolean('remove-pr-stale-when-updated'),
         debugOnly: core.getInput('debug-only') === 'true',
         ascending: core.getInput('ascending') === 'true',
+        sortIssuesBy: core.getInput('sort-issues-by'),
         deleteBranch: core.getInput('delete-branch') === 'true',
         startDate: core.getInput('start-date') !== ''
             ? core.getInput('start-date')

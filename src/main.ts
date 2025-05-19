@@ -97,6 +97,7 @@ function _getAndValidateArgs(): IIssuesProcessorOptions {
     ),
     debugOnly: core.getInput('debug-only') === 'true',
     ascending: core.getInput('ascending') === 'true',
+    sortIssuesBy: core.getInput('sort-issues-by'),
     deleteBranch: core.getInput('delete-branch') === 'true',
     startDate:
       core.getInput('start-date') !== ''

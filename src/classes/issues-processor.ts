@@ -571,6 +571,12 @@ export class IssuesProcessor {
         state: 'open',
         per_page: 100,
         direction: this.options.ascending ? 'asc' : 'desc',
+        sort:
+          this.options.sortIssuesBy === 'updated'
+            ? 'updated'
+            : this.options.sortIssuesBy === 'comments'
+            ? 'comments'
+            : 'created',
         page
       });
       this.statistics?.incrementFetchedItemsCount(issueResult.data.length);

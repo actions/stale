@@ -551,7 +551,7 @@ Default value: `false`
 
 #### sort-issues-by
 
-Useful to sort the issues by the specified field. It accepts 'created', 'updated', 'comments'.
+Useful to sort the issues by the specified field. It accepts `created`, `updated`, `comments`.
 
 Default value: `created`
 

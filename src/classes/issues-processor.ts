@@ -29,12 +29,11 @@ import {retry} from '@octokit/plugin-retry';
 import {IState} from '../interfaces/state/state';
 import {IRateLimit} from '../interfaces/rate-limit';
 import {RateLimit} from './rate-limit';
+import {getSortField} from '../functions/get-sort-field';
 
 /***
  * Handle processing of issues for staleness/closure.
  */
-
-type sortOption = 'created' | 'updated' | 'comments';
 
 export class IssuesProcessor {
   private static _updatedSince(timestamp: string, num_days: number): boolean {
@@ -563,15 +562,6 @@ export class IssuesProcessor {
     }
   }
 
-  _getSortField(sortOption: sortOption): sortOption {
-    console.log("sort ",sortOption)
-    return sortOption === 'updated'
-      ? 'updated'
-      : sortOption === 'comments'
-      ? 'comments'
-      : 'created';
-  }
-
   // grab issues from github in batches of 100
   async getIssues(page: number): Promise<Issue[]> {
     try {
@@ -582,7 +572,7 @@ export class IssuesProcessor {
         state: 'open',
         per_page: 100,
         direction: this.options.ascending ? 'asc' : 'desc',
-        sort: this._getSortField(this.options.sortIssuesBy),
+        sort: getSortField(this.options.sortIssuesBy),
         page
       });
       this.statistics?.incrementFetchedItemsCount(issueResult.data.length);

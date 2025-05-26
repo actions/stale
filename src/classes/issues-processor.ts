@@ -34,6 +34,8 @@ import {RateLimit} from './rate-limit';
  * Handle processing of issues for staleness/closure.
  */
 
+type sortOption = 'created' | 'updated' | 'comments';
+
 export class IssuesProcessor {
   private static _updatedSince(timestamp: string, num_days: number): boolean {
     const daysInMillis = 1000 * 60 * 60 * 24 * num_days;
@@ -559,6 +561,14 @@ export class IssuesProcessor {
       this._logger.error(`List issue comments error: ${error.message}`);
       return Promise.resolve([]);
     }
+  }
+
+  _getSortField(sortOption: sortOption): sortOption {
+    return sortOption === 'updated'
+      ? 'updated'
+      : sortOption === 'comments'
+      ? 'comments'
+      : 'created';
   }
 
   // grab issues from github in batches of 100

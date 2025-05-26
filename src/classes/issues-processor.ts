@@ -564,6 +564,7 @@ export class IssuesProcessor {
   }
 
   _getSortField(sortOption: sortOption): sortOption {
+    console.log("sort ",sortOption)
     return sortOption === 'updated'
       ? 'updated'
       : sortOption === 'comments'

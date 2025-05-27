@@ -5,7 +5,6 @@ import {IIssuesProcessorOptions} from './interfaces/issues-processor-options';
 import {Issue} from './classes/issue';
 import {getStateInstance} from './services/state.service';
 
-
 async function _run(): Promise<void> {
   try {
     const args = _getAndValidateArgs();
@@ -200,7 +199,9 @@ function _toOptionalBoolean(
   return undefined;
 }
 
-function _processParamtoString(sortByValueInput: string): 'created' | 'updated' | 'comments' {
+function _processParamtoString(
+  sortByValueInput: string
+): 'created' | 'updated' | 'comments' {
   return sortByValueInput === 'updated'
     ? 'updated'
     : sortByValueInput === 'comments'

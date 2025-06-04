@@ -9,7 +9,7 @@ $ npm install
 Build the typescript and package it for distribution.
 
 ```bash
-$ npm run build && npm run pack
+$ npm run build
 ```
 
 Run the tests :heavy_check_mark:
@@ -49,7 +49,7 @@ $ npm run all
 IMPORTANT:
 Be sure to commit the result of:
 ```bash
-$ npm run pack
+$ npm run build
 ```
 Otherwise PR checks will fail. 
 

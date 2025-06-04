@@ -98,6 +98,7 @@ Every argument is optional.
 | [ignore-issue-updates](#ignore-issue-updates)                       | Override [ignore-updates](#ignore-updates) for issues only                  |                       |
 | [ignore-pr-updates](#ignore-pr-updates)                             | Override [ignore-updates](#ignore-updates) for PRs only                     |                       |
 | [include-only-assigned](#include-only-assigned)                     | Process only assigned issues                                                | `false`               |
+| [exempt-locked](#exempt-locked)                                     | Issues and pull requests that are locked will not be marked as stale.       | `true`                |
 
 ### List of output options
 
@@ -547,6 +548,16 @@ Default value: unset
 If set to `true`, only the issues or the pull requests with an assignee will be marked as stale automatically.
 
 Default value: `false`
+
+#### exempt-locked
+
+If set to `false` issues or pull requests that are locked will be marked as
+stale automatically. If you process locked issues and pull requests and want to
+add a closing message the default repo-token will not be sufficient. For that
+you will have to use a PAT which has write access, is repository owner or
+collaborator.
+
+Default value: `true`
 
 ### Usage
 

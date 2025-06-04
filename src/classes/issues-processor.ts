@@ -237,7 +237,7 @@ export class IssuesProcessor {
       return; // Don't process closed issues
     }
 
-    if (issue.locked) {
+    if (issue.locked && this.options.exemptLocked) {
       issueLogger.info(`Skipping this $$type because it is locked`);
       IssuesProcessor._endIssueProcessing(issue);
       return; // Don't process locked issues
@@ -1196,7 +1196,9 @@ export class IssuesProcessor {
     const issueLogger: IssueLogger = new IssueLogger(issue);
 
     issueLogger.info(
-      `The $$type is not closed nor locked. Trying to remove the close label...`
+      `The $$type is not closed${
+        this.options.exemptLocked ? ' nor locked' : ''
+      }. Trying to remove the close label...`
     );
 
     if (!closeLabel) {

@@ -98,7 +98,7 @@ Every argument is optional.
 | [ignore-issue-updates](#ignore-issue-updates)                       | Override [ignore-updates](#ignore-updates) for issues only                  |                       |
 | [ignore-pr-updates](#ignore-pr-updates)                             | Override [ignore-updates](#ignore-updates) for PRs only                     |                       |
 | [include-only-assigned](#include-only-assigned)                     | Process only assigned issues                                                | `false`               |
-| [sort-issues-by](#sort-issues-by)                                   | What to sort issues by                                                      | `created`             |
+| [sort-issues-by](#sort-issues-by)                                   | What to sort issues and PRs by                                                      | `created`             |
 
 ### List of output options
 

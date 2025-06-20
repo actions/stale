@@ -26,7 +26,7 @@ export enum Option {
   RemovePrStaleWhenUpdated = 'remove-pr-stale-when-updated',
   DebugOnly = 'debug-only',
   Ascending = 'ascending',
-  SortIssuesBy = 'sort-issues-by',
+  SortBy = 'sort-by',
   DeleteBranch = 'delete-branch',
   StartDate = 'start-date',
   ExemptMilestones = 'exempt-milestones',

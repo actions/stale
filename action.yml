@@ -136,7 +136,7 @@ inputs:
     description: 'The order to get issues or pull requests. Defaults to false, which is descending.'
     default: 'false'
     required: false
-  sort-issues-by:
+  sort-by:
     description: 'What to sort results by. Valid options are `created`, `updated`, and `comments`. Defaults to `created`.'
     default: 'created'
     required: false

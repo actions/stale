@@ -382,7 +382,6 @@ const statistics_1 = __nccwpck_require__(3334);
 const logger_service_1 = __nccwpck_require__(1973);
 const plugin_retry_1 = __nccwpck_require__(6298);
 const rate_limit_1 = __nccwpck_require__(7069);
-const get_sort_field_1 = __nccwpck_require__(9551);
 /***
  * Handle processing of issues for staleness/closure.
  */
@@ -685,7 +684,6 @@ class IssuesProcessor {
                     state: 'open',
                     per_page: 100,
                     direction: this.options.ascending ? 'asc' : 'desc',
-                    sort: (0, get_sort_field_1.getSortField)(this.options.sortIssuesBy),
                     page
                 });
                 (_a = this.statistics) === null || _a === void 0 ? void 0 : _a.incrementFetchedItemsCount(issueResult.data.length);
@@ -2201,7 +2199,6 @@ var Option;
     Option["RemovePrStaleWhenUpdated"] = "remove-pr-stale-when-updated";
     Option["DebugOnly"] = "debug-only";
     Option["Ascending"] = "ascending";
-    Option["SortIssuesBy"] = "sort-issues-by";
     Option["DeleteBranch"] = "delete-branch";
     Option["StartDate"] = "start-date";
     Option["ExemptMilestones"] = "exempt-milestones";
@@ -2334,25 +2331,6 @@ function isValidDate(date) {
     return false;
 }
 exports.isValidDate = isValidDate;
-
-
-/***/ }),
-
-/***/ 9551:
-/***/ ((__unused_webpack_module, exports) => {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getSortField = void 0;
-function getSortField(sortOption) {
-    return sortOption === 'updated'
-        ? 'updated'
-        : sortOption === 'comments'
-            ? 'comments'
-            : 'created';
-}
-exports.getSortField = getSortField;
 
 
 /***/ }),
@@ -2564,7 +2542,6 @@ function _getAndValidateArgs() {
         removePrStaleWhenUpdated: _toOptionalBoolean('remove-pr-stale-when-updated'),
         debugOnly: core.getInput('debug-only') === 'true',
         ascending: core.getInput('ascending') === 'true',
-        sortIssuesBy: _processParamtoString(core.getInput('sort-issues-by')),
         deleteBranch: core.getInput('delete-branch') === 'true',
         startDate: core.getInput('start-date') !== ''
             ? core.getInput('start-date')
@@ -2650,13 +2627,6 @@ function _toOptionalBoolean(argumentName) {
         return false;
     }
     return undefined;
-}
-function _processParamtoString(sortByValueInput) {
-    return sortByValueInput === 'updated'
-        ? 'updated'
-        : sortByValueInput === 'comments'
-            ? 'comments'
-            : 'created';
 }
 void _run();
 

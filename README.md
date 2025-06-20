@@ -549,7 +549,7 @@ If set to `true`, only the issues or the pull requests with an assignee will be 
 
 Default value: `false`
 
-#### sort-issues-by
+#### sort-by
 
 Useful to sort the issues and PRs by the specified field. It accepts `created`, `updated`, `comments`.
 

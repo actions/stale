@@ -64,7 +64,9 @@ describe('Issue', (): void => {
       ignorePrUpdates: undefined,
       exemptDraftPr: false,
       closeIssueReason: '',
-      includeOnlyAssigned: false
+      includeOnlyAssigned: false,
+      owner: 'dummy-owner',
+      repo: 'dummy-repo'
     };
     issueInterface = {
       title: 'dummy-title',

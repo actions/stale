@@ -764,6 +764,24 @@ jobs:
           exempt-all-pr-assignees: true
 ```
 
+Close stale issues and PRs in different repository:
+
+```yaml
+name: 'Close stale issues and PRs'
+on:
+  schedule:
+    - cron: '30 1 * * *'
+
+jobs:
+  stale:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/stale@v9
+        with:
+          repo-token: # A PAT that has a minimum of triage permissions on my-org/my-repo
+          repository: my-org/my-repo
+```
+
 ### Debugging
 
 **Logs:**  

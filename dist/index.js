@@ -2513,11 +2513,7 @@ function _run() {
     });
 }
 function _getAndValidateArgs() {
-    let { owner, repo } = github_1.context.repo;
-    const repository = core.getInput('repository');
-    if (repository && repository.includes('/')) {
-        [owner, repo] = repository.split('/');
-    }
+    const { owner, repo } = getOwnerRepo();
     const args = {
         owner,
         repo,
@@ -2635,6 +2631,18 @@ function _toOptionalBoolean(argumentName) {
         return false;
     }
     return undefined;
+}
+function getOwnerRepo() {
+    let { owner, repo } = github_1.context.repo;
+    const repository = core.getInput('repository');
+    if (repository) {
+        const components = repository.split('/');
+        if (components.length !== 2) {
+            throw new Error(`Invalid repository format "${repository}". Expected "owner/repo".`);
+        }
+        [owner, repo] = components;
+    }
+    return { owner, repo };
 }
 void _run();
 

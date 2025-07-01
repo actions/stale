@@ -56,12 +56,7 @@ async function _run(): Promise<void> {
 }
 
 function _getAndValidateArgs(): IIssuesProcessorOptions {
-  let {owner, repo} = context.repo;
-  const repository = core.getInput('repository');
-  if (repository && repository.includes('/')) {
-    [owner, repo] = repository.split('/');
-  }
-
+  const {owner, repo} = getOwnerRepo();
   const args: IIssuesProcessorOptions = {
     owner,
     repo,
@@ -205,6 +200,21 @@ function _toOptionalBoolean(
   }
 
   return undefined;
+}
+
+function getOwnerRepo(): {owner: string; repo: string} {
+  let {owner, repo} = context.repo;
+  const repository = core.getInput('repository');
+  if (repository) {
+    const components = repository.split('/');
+    if (components.length !== 2) {
+      throw new Error(
+        `Invalid repository format "${repository}". Expected "owner/repo".`
+      );
+    }
+    [owner, repo] = components;
+  }
+  return {owner, repo};
 }
 
 void _run();

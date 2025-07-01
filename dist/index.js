@@ -659,8 +659,8 @@ class IssuesProcessor {
                 this._consumeIssueOperation(issue);
                 (_a = this.statistics) === null || _a === void 0 ? void 0 : _a.incrementFetchedItemsCommentsCount();
                 const comments = yield this.client.rest.issues.listComments({
-                    owner: github_1.context.repo.owner,
-                    repo: github_1.context.repo.repo,
+                    owner: this.options.owner,
+                    repo: this.options.repo,
                     issue_number: issue.number,
                     since: sinceDate
                 });
@@ -679,8 +679,8 @@ class IssuesProcessor {
             try {
                 this.operations.consumeOperation();
                 const issueResult = yield this.client.rest.issues.listForRepo({
-                    owner: github_1.context.repo.owner,
-                    repo: github_1.context.repo.repo,
+                    owner: this.options.owner,
+                    repo: this.options.repo,
                     state: 'open',
                     per_page: 100,
                     direction: this.options.ascending ? 'asc' : 'desc',
@@ -704,8 +704,8 @@ class IssuesProcessor {
             this._consumeIssueOperation(issue);
             (_a = this.statistics) === null || _a === void 0 ? void 0 : _a.incrementFetchedItemsEventsCount();
             const options = this.client.rest.issues.listEvents.endpoint.merge({
-                owner: github_1.context.repo.owner,
-                repo: github_1.context.repo.repo,
+                owner: this.options.owner,
+                repo: this.options.repo,
                 per_page: 100,
                 issue_number: issue.number
             });
@@ -728,8 +728,8 @@ class IssuesProcessor {
                 this._consumeIssueOperation(issue);
                 (_a = this.statistics) === null || _a === void 0 ? void 0 : _a.incrementFetchedPullRequestsCount();
                 const pullRequest = yield this.client.rest.pulls.get({
-                    owner: github_1.context.repo.owner,
-                    repo: github_1.context.repo.repo,
+                    owner: this.options.owner,
+                    repo: this.options.repo,
                     pull_number: issue.number
                 });
                 return pullRequest.data;
@@ -848,8 +848,8 @@ class IssuesProcessor {
                     (_a = this.statistics) === null || _a === void 0 ? void 0 : _a.incrementAddedItemsComment(issue);
                     if (!this.options.debugOnly) {
                         yield this.client.rest.issues.createComment({
-                            owner: github_1.context.repo.owner,
-                            repo: github_1.context.repo.repo,
+                            owner: this.options.owner,
+                            repo: this.options.repo,
                             issue_number: issue.number,
                             body: staleMessage
                         });
@@ -865,8 +865,8 @@ class IssuesProcessor {
                 (_c = this.statistics) === null || _c === void 0 ? void 0 : _c.incrementStaleItemsCount(issue);
                 if (!this.options.debugOnly) {
                     yield this.client.rest.issues.addLabels({
-                        owner: github_1.context.repo.owner,
-                        repo: github_1.context.repo.repo,
+                        owner: this.options.owner,
+                        repo: this.options.repo,
                         issue_number: issue.number,
                         labels: [staleLabel]
                     });
@@ -891,8 +891,8 @@ class IssuesProcessor {
                     this.addedCloseCommentIssues.push(issue);
                     if (!this.options.debugOnly) {
                         yield this.client.rest.issues.createComment({
-                            owner: github_1.context.repo.owner,
-                            repo: github_1.context.repo.repo,
+                            owner: this.options.owner,
+                            repo: this.options.repo,
                             issue_number: issue.number,
                             body: closeMessage
                         });
@@ -908,8 +908,8 @@ class IssuesProcessor {
                     (_b = this.statistics) === null || _b === void 0 ? void 0 : _b.incrementAddedItemsLabel(issue);
                     if (!this.options.debugOnly) {
                         yield this.client.rest.issues.addLabels({
-                            owner: github_1.context.repo.owner,
-                            repo: github_1.context.repo.repo,
+                            owner: this.options.owner,
+                            repo: this.options.repo,
                             issue_number: issue.number,
                             labels: [closeLabel]
                         });
@@ -924,8 +924,8 @@ class IssuesProcessor {
                 (_c = this.statistics) === null || _c === void 0 ? void 0 : _c.incrementClosedItemsCount(issue);
                 if (!this.options.debugOnly) {
                     yield this.client.rest.issues.update({
-                        owner: github_1.context.repo.owner,
-                        repo: github_1.context.repo.repo,
+                        owner: this.options.owner,
+                        repo: this.options.repo,
                         issue_number: issue.number,
                         state: 'closed',
                         state_reason: this.options.closeIssueReason || undefined
@@ -955,15 +955,15 @@ class IssuesProcessor {
             const branch = pullRequest.head.ref;
             if (pullRequest.head.repo === null ||
                 pullRequest.head.repo.full_name ===
-                    `${github_1.context.repo.owner}/${github_1.context.repo.repo}`) {
+                    `${this.options.owner}/${this.options.repo}`) {
                 issueLogger.info(`Deleting the branch "${logger_service_1.LoggerService.cyan(branch)}" from closed $$type`);
                 try {
                     this._consumeIssueOperation(issue);
                     (_a = this.statistics) === null || _a === void 0 ? void 0 : _a.incrementDeletedBranchesCount();
                     if (!this.options.debugOnly) {
                         yield this.client.rest.git.deleteRef({
-                            owner: github_1.context.repo.owner,
-                            repo: github_1.context.repo.repo,
+                            owner: this.options.owner,
+                            repo: this.options.repo,
                             ref: `heads/${branch}`
                         });
                     }
@@ -989,8 +989,8 @@ class IssuesProcessor {
                 (_a = this.statistics) === null || _a === void 0 ? void 0 : _a.incrementDeletedItemsLabelsCount(issue);
                 if (!this.options.debugOnly) {
                     yield this.client.rest.issues.removeLabel({
-                        owner: github_1.context.repo.owner,
-                        repo: github_1.context.repo.repo,
+                        owner: this.options.owner,
+                        repo: this.options.repo,
                         issue_number: issue.number,
                         name: label
                     });
@@ -1089,8 +1089,8 @@ class IssuesProcessor {
                 (_a = this.statistics) === null || _a === void 0 ? void 0 : _a.incrementAddedItemsLabel(issue);
                 if (!this.options.debugOnly) {
                     yield this.client.rest.issues.addLabels({
-                        owner: github_1.context.repo.owner,
-                        repo: github_1.context.repo.repo,
+                        owner: this.options.owner,
+                        repo: this.options.repo,
                         issue_number: issue.number,
                         labels: labelsToAdd
                     });
@@ -2483,6 +2483,7 @@ const core = __importStar(__nccwpck_require__(2186));
 const issues_processor_1 = __nccwpck_require__(3292);
 const is_valid_date_1 = __nccwpck_require__(891);
 const state_service_1 = __nccwpck_require__(6330);
+const github_1 = __nccwpck_require__(5438);
 function _run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -2512,7 +2513,10 @@ function _run() {
     });
 }
 function _getAndValidateArgs() {
+    const { owner, repo } = getOwnerRepo();
     const args = {
+        owner,
+        repo,
         repoToken: core.getInput('repo-token'),
         staleIssueMessage: core.getInput('stale-issue-message'),
         stalePrMessage: core.getInput('stale-pr-message'),
@@ -2627,6 +2631,18 @@ function _toOptionalBoolean(argumentName) {
         return false;
     }
     return undefined;
+}
+function getOwnerRepo() {
+    let { owner, repo } = github_1.context.repo;
+    const repository = core.getInput('repository');
+    if (repository) {
+        const components = repository.split('/');
+        if (components.length !== 2) {
+            throw new Error(`Invalid repository format "${repository}". Expected "owner/repo".`);
+        }
+        [owner, repo] = components;
+    }
+    return { owner, repo };
 }
 void _run();
 

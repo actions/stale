@@ -4,6 +4,7 @@ import {isValidDate} from './functions/dates/is-valid-date';
 import {IIssuesProcessorOptions} from './interfaces/issues-processor-options';
 import {Issue} from './classes/issue';
 import {getStateInstance} from './services/state.service';
+import {context} from '@actions/github';
 
 async function _run(): Promise<void> {
   try {
@@ -55,7 +56,10 @@ async function _run(): Promise<void> {
 }
 
 function _getAndValidateArgs(): IIssuesProcessorOptions {
+  const {owner, repo} = getOwnerRepo();
   const args: IIssuesProcessorOptions = {
+    owner,
+    repo,
     repoToken: core.getInput('repo-token'),
     staleIssueMessage: core.getInput('stale-issue-message'),
     stalePrMessage: core.getInput('stale-pr-message'),
@@ -196,6 +200,21 @@ function _toOptionalBoolean(
   }
 
   return undefined;
+}
+
+function getOwnerRepo(): {owner: string; repo: string} {
+  let {owner, repo} = context.repo;
+  const repository = core.getInput('repository');
+  if (repository) {
+    const components = repository.split('/');
+    if (components.length !== 2) {
+      throw new Error(
+        `Invalid repository format "${repository}". Expected "owner/repo".`
+      );
+    }
+    [owner, repo] = components;
+  }
+  return {owner, repo};
 }
 
 void _run();

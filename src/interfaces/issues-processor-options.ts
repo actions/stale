@@ -54,4 +54,6 @@ export interface IIssuesProcessorOptions {
   exemptDraftPr: boolean;
   closeIssueReason: string;
   includeOnlyAssigned: boolean;
+  owner: string;
+  repo: string;
 }

@@ -136,6 +136,10 @@ inputs:
     description: 'The order to get issues or pull requests. Defaults to false, which is descending.'
     default: 'false'
     required: false
+  sort-by:
+    description: 'What to sort results by. Valid options are `created`, `updated`, and `comments`. Defaults to `created`.'
+    default: 'created'
+    required: false
   delete-branch:
     description: 'Delete the git branch after closing a stale pull request.'
     default: 'false'

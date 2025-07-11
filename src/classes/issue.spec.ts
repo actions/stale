@@ -13,6 +13,7 @@ describe('Issue', (): void => {
   beforeEach((): void => {
     optionsInterface = {
       ascending: false,
+      sortBy: 'created',
       closeIssueLabel: '',
       closeIssueMessage: '',
       closePrLabel: '',

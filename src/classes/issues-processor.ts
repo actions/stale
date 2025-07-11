@@ -29,6 +29,7 @@ import {retry} from '@octokit/plugin-retry';
 import {IState} from '../interfaces/state/state';
 import {IRateLimit} from '../interfaces/rate-limit';
 import {RateLimit} from './rate-limit';
+import {getSortField} from '../functions/get-sort-field';
 
 /***
  * Handle processing of issues for staleness/closure.
@@ -571,6 +572,7 @@ export class IssuesProcessor {
         state: 'open',
         per_page: 100,
         direction: this.options.ascending ? 'asc' : 'desc',
+        sort: getSortField(this.options.sortBy),
         page
       });
       this.statistics?.incrementFetchedItemsCount(issueResult.data.length);

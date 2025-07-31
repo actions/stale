@@ -1,5 +1,7 @@
 export enum Option {
   RepoToken = 'repo-token',
+  RepoOwner = 'repo-owner',
+  RepoName = 'repo-name',
   StaleIssueMessage = 'stale-issue-message',
   StalePrMessage = 'stale-pr-message',
   CloseIssueMessage = 'close-issue-message',

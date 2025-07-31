@@ -641,16 +641,129 @@ export class IssuesProcessor {
     }
   }
 
-  async getRateLimit(): Promise<IRateLimit | undefined> {
+  // async getRateLimit(): Promise<IRateLimit | undefined> {
+  //   const logger: Logger = new Logger();
+  //   try {
+  //     const rateLimitResult = await this.client.rest.rateLimit.get();
+  //     logger.info(
+  //       `Rate limit result: ${JSON.stringify(rateLimitResult.data, null, 2)}`
+  //     );
+  //     return new RateLimit(rateLimitResult.data.rate);
+  //   } catch (error) {
+  //     logger.error(`Error when getting rateLimit: ${error.message}`);
+  //   }
+  // }
+  async getRateLimit(retries = 3): Promise<IRateLimit | undefined> {
     const logger: Logger = new Logger();
-    try {
-      const rateLimitResult = await this.client.rest.rateLimit.get();
-      logger.info(
-        `Rate limit result: ${JSON.stringify(rateLimitResult.data, null, 2)}`
-      );
-      return new RateLimit(rateLimitResult.data.rate);
-    } catch (error) {
-      logger.error(`Error when getting rateLimit: ${error.message}`);
+    let attempt = 0;
+
+    while (attempt < retries) {
+      try {
+        // Use the mock response instead of real API
+        const mockResponse = this._mockRateLimitResponse(attempt);
+        const {status, message, headers, data} = mockResponse;
+
+        if (status === 200 && data) {
+          logger.info(`Rate limit result: ${JSON.stringify(data, null, 2)}`);
+          return new RateLimit(data.rate);
+        }
+
+        const retryAfterRaw = headers?.['retry-after'];
+        const resetTimeRaw = headers?.['x-ratelimit-reset'];
+        const retryAfter = parseInt(retryAfterRaw);
+        const resetEpoch = parseInt(resetTimeRaw);
+
+        if (status === 403 || status === 429) {
+          if (!isNaN(retryAfter)) {
+            logger.warning(
+              `Rate limit exceeded. Retrying after ${retryAfter} seconds...`
+            );
+            await new Promise(resolve =>
+              setTimeout(resolve, retryAfter * 1000)
+            );
+          } else if (!isNaN(resetEpoch)) {
+            const waitTime = Math.max(0, resetEpoch * 1000 - Date.now());
+            logger.warning(
+              `Rate limit exceeded. Waiting until reset at ${new Date(
+                resetEpoch * 1000
+              ).toISOString()}...`
+            );
+            await new Promise(resolve => setTimeout(resolve, waitTime));
+          } else {
+            // Fallback exponential backoff
+            const baseDelay = 30000; // 0.5 minute
+            const backoff = Math.min(baseDelay * 2 ** attempt, 10 * 60 * 1000);
+            logger.warning(
+              `Rate limit exceeded. Retrying in ${backoff / 1000} seconds...`
+            );
+            await new Promise(resolve => setTimeout(resolve, backoff));
+          }
+
+          logger.warning(`Retry attempt ${attempt + 1} of ${retries}`);
+          attempt++;
+        } else if (
+          status === 404 &&
+          message?.includes('Rate limiting is not enabled')
+        ) {
+          logger.warning(
+            'Rate limiting is not enabled on this GHES instance. Proceeding without rate limit checks.'
+          );
+          return undefined;
+        } else {
+          logger.error(`Unexpected error when getting rateLimit: ${message}`);
+          throw new Error(message || 'Unknown error');
+        }
+      } catch (error: any) {
+        logger.error(`Error during getRateLimit: ${error.message}`);
+        throw error;
+      }
+    }
+
+    logger.error('Failed to retrieve rate limit after all retries.');
+    return undefined;
+  }
+
+  private _mockRateLimitResponse(attempt: number): any {
+    const nowEpoch = Math.floor(Date.now() / 1000);
+
+    if (attempt === 0) {
+      // Simulate primary rate limit (403) with x-ratelimit-reset
+      return {
+        status: 403,
+        message: 'API rate limit exceeded',
+        headers: {
+          'x-ratelimit-reset': `${nowEpoch + 2}` // wait 2 seconds
+        }
+      };
+    } else if (attempt === 1) {
+      // Simulate secondary rate limit (429) with retry-after
+      return {
+        status: 429,
+        message: 'You have exceeded a secondary rate limit',
+        headers: {
+          'retry-after': '3' // wait 3 seconds
+        }
+      };
+    } else if (attempt === 2) {
+      // Simulate a successful response
+      return {
+        status: 200,
+        data: {
+          rate: {
+            limit: 5000,
+            used: 12,
+            remaining: 4988,
+            reset: nowEpoch + 3600 // 1 hour from now
+          }
+        }
+      };
+    } else {
+      // Simulate GHES with rate limiting disabled (404)
+      return {
+        status: 404,
+        message: 'Rate limiting is not enabled on this GHES instance.',
+        headers: {}
+      };
     }
   }
 

@@ -31,7 +31,7 @@
     "stale"
   ],
   "engines": {
-    "node": "20",
+    "node": "24",
     "npm": ">=7.0.0 <10.0.0-0"
   },
   "author": "GitHub",

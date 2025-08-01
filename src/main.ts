@@ -46,6 +46,7 @@ async function _run(): Promise<void> {
 
     await processOutput(
       issueProcessor.staleIssues,
+      issueProcessor.rottenIssues,
       issueProcessor.closedIssues
     );
   } catch (error) {
@@ -59,22 +60,33 @@ function _getAndValidateArgs(): IIssuesProcessorOptions {
     repoToken: core.getInput('repo-token'),
     staleIssueMessage: core.getInput('stale-issue-message'),
     stalePrMessage: core.getInput('stale-pr-message'),
+    rottenIssueMessage: core.getInput('rotten-issue-message'),
+    rottenPrMessage: core.getInput('rotten-pr-message'),
     closeIssueMessage: core.getInput('close-issue-message'),
     closePrMessage: core.getInput('close-pr-message'),
     daysBeforeStale: parseFloat(
       core.getInput('days-before-stale', {required: true})
     ),
+    daysBeforeRotten: parseFloat(
+      core.getInput('days-before-rotten', {required: true})
+    ),
     daysBeforeIssueStale: parseFloat(core.getInput('days-before-issue-stale')),
     daysBeforePrStale: parseFloat(core.getInput('days-before-pr-stale')),
+    daysBeforeIssueRotten: parseFloat(
+      core.getInput('days-before-issue-rotten')
+    ),
+    daysBeforePrRotten: parseFloat(core.getInput('days-before-pr-rotten')),
     daysBeforeClose: parseInt(
       core.getInput('days-before-close', {required: true})
     ),
     daysBeforeIssueClose: parseInt(core.getInput('days-before-issue-close')),
     daysBeforePrClose: parseInt(core.getInput('days-before-pr-close')),
     staleIssueLabel: core.getInput('stale-issue-label', {required: true}),
+    rottenIssueLabel: core.getInput('rotten-issue-label', {required: true}),
     closeIssueLabel: core.getInput('close-issue-label'),
     exemptIssueLabels: core.getInput('exempt-issue-labels'),
     stalePrLabel: core.getInput('stale-pr-label', {required: true}),
+    rottenPrLabel: core.getInput('rotten-pr-label', {required: true}),
     closePrLabel: core.getInput('close-pr-label'),
     exemptPrLabels: core.getInput('exempt-pr-labels'),
     onlyLabels: core.getInput('only-labels'),
@@ -94,6 +106,15 @@ function _getAndValidateArgs(): IIssuesProcessorOptions {
     ),
     removePrStaleWhenUpdated: _toOptionalBoolean(
       'remove-pr-stale-when-updated'
+    ),
+    removeRottenWhenUpdated: !(
+      core.getInput('remove-rotten-when-updated') === 'false'
+    ),
+    removeIssueRottenWhenUpdated: _toOptionalBoolean(
+      'remove-issue-rotten-when-updated'
+    ),
+    removePrRottenWhenUpdated: _toOptionalBoolean(
+      'remove-pr-rotten-when-updated'
     ),
     debugOnly: core.getInput('debug-only') === 'true',
     ascending: core.getInput('ascending') === 'true',
@@ -119,6 +140,9 @@ function _getAndValidateArgs(): IIssuesProcessorOptions {
     labelsToRemoveWhenStale: core.getInput('labels-to-remove-when-stale'),
     labelsToRemoveWhenUnstale: core.getInput('labels-to-remove-when-unstale'),
     labelsToAddWhenUnstale: core.getInput('labels-to-add-when-unstale'),
+    labelsToRemoveWhenRotten: core.getInput('labels-to-remove-when-rotten'),
+    labelsToRemoveWhenUnrotten: core.getInput('labels-to-remove-when-unrotten'),
+    labelsToAddWhenUnrotten: core.getInput('labels-to-add-when-unrotten'),
     ignoreUpdates: core.getInput('ignore-updates') === 'true',
     ignoreIssueUpdates: _toOptionalBoolean('ignore-issue-updates'),
     ignorePrUpdates: _toOptionalBoolean('ignore-pr-updates'),
@@ -128,6 +152,13 @@ function _getAndValidateArgs(): IIssuesProcessorOptions {
   };
 
   for (const numberInput of ['days-before-stale']) {
+    if (isNaN(parseFloat(core.getInput(numberInput)))) {
+      const errorMessage = `Option "${numberInput}" did not parse to a valid float`;
+      core.setFailed(errorMessage);
+      throw new Error(errorMessage);
+    }
+  }
+  for (const numberInput of ['days-before-rotten']) {
     if (isNaN(parseFloat(core.getInput(numberInput)))) {
       const errorMessage = `Option "${numberInput}" did not parse to a valid float`;
       core.setFailed(errorMessage);
@@ -168,9 +199,11 @@ function _getAndValidateArgs(): IIssuesProcessorOptions {
 
 async function processOutput(
   staledIssues: Issue[],
+  rottenIssues: Issue[],
   closedIssues: Issue[]
 ): Promise<void> {
   core.setOutput('staled-issues-prs', JSON.stringify(staledIssues));
+  core.setOutput('rotten-issues-prs', JSON.stringify(rottenIssues));
   core.setOutput('closed-issues-prs', JSON.stringify(closedIssues));
 }
 

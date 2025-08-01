@@ -1144,6 +1144,7 @@ class IssuesProcessorBuilder {
       new StateMock(),
       async p => (p === 1 ? this._issues : []),
       async () => [],
+      async () => [],
       async () => new Date().toDateString()
     );
   }

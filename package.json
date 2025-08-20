@@ -1,6 +1,6 @@
 {
   "name": "stale-action",
-  "version": "9.0.0",
+  "version": "10.0.0",
   "private": true,
   "description": "Marks old issues and PRs as stale",
   "main": "lib/main.js",
@@ -31,8 +31,8 @@
     "stale"
   ],
   "engines": {
-    "node": "20",
-    "npm": ">=7.0.0 <10.0.0-0"
+    "node": "24",
+    "npm": ">=7.0.0"
   },
   "author": "GitHub",
   "license": "MIT",
@@ -48,7 +48,7 @@
   "devDependencies": {
     "@types/jest": "^29.5.14",
     "@types/lodash.deburr": "^4.1.6",
-    "@types/node": "^20.5.1",
+    "@types/node": "^24.1.0",
     "@types/semver": "^7.5.0",
     "@typescript-eslint/eslint-plugin": "^6.2.1",
     "@typescript-eslint/parser": "^6.2.1",

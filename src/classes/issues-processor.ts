@@ -641,73 +641,26 @@ export class IssuesProcessor {
     }
   }
 
-  async getRateLimit(retries = 3): Promise<IRateLimit | undefined> {
+  async getRateLimit(): Promise<IRateLimit | undefined> {
     const logger: Logger = new Logger();
-    let attempt = 0;
 
-    while (attempt < retries) {
-      try {
-        const rateLimitResult = await this.client.rest.rateLimit.get();
-        return new RateLimit(rateLimitResult.data.rate);
-      } catch (error: any) {
-        const status = error?.status;
-        const message = error?.message || error?.response?.data?.message;
-        const headers = error?.response?.headers || {};
-
-        const retryAfterRaw = headers?.['retry-after'];
-        const resetTimeRaw = headers?.['x-ratelimit-reset'];
-
-        // Handle GitHub API rate limit errors
-        if (status === 403 || status === 429) {
-          const retryAfter = parseInt(retryAfterRaw);
-          const resetEpoch = parseInt(resetTimeRaw);
-
-          if (!isNaN(retryAfter)) {
-            logger.warning(
-              `Rate limit exceeded. Retrying after ${retryAfter} seconds...`
-            );
-            await new Promise(resolve =>
-              setTimeout(resolve, retryAfter * 1000)
-            );
-          } else if (!isNaN(resetEpoch)) {
-            const waitTime = Math.max(0, resetEpoch * 1000 - Date.now());
-            logger.warning(
-              `Rate limit exceeded. Waiting until reset at ${new Date(
-                resetEpoch * 1000
-              ).toISOString()}...`
-            );
-            await new Promise(resolve => setTimeout(resolve, waitTime));
-          } else {
-            // Fallback exponential backoff
-            const baseDelay = 30000; // 0.5 minute in ms
-            const backoff = Math.min(baseDelay * 2 ** attempt, 10 * 60 * 1000);
-            logger.warning(
-              `Rate limit exceeded. Retrying in ${backoff / 1000} seconds...`
-            );
-            await new Promise(resolve => setTimeout(resolve, backoff));
-          }
-
-          logger.warning(`Retry attempt ${attempt + 1} of ${retries}`);
-          attempt++;
-        } else if (
-          status === 404 &&
-          message?.includes('Rate limiting is not enabled')
-        ) {
-          // GHES with rate limiting disabled
-          logger.warning(
-            'Rate limiting is not enabled on this GHES instance. Proceeding without rate limit checks.'
-          );
-          return undefined;
-        } else {
-          // Other errors (e.g., permission issues, unexpected, etc.)
-          logger.error(`Error when getting rateLimit: ${message}`);
-          throw error;
-        }
+    try {
+      const rateLimitResult = await this.client.rest.rateLimit.get();
+      return new RateLimit(rateLimitResult.data.rate);
+    } catch (error: any) {
+      if (
+        error.status === 404 &&
+        error.message?.includes('Rate limiting is not enabled')
+      ) {
+        logger.warning(
+          'Rate limiting is not enabled on this GHES instance. Proceeding without rate limit checks.'
+        );
+        return undefined; // Gracefully skip rate limiting logic
+      } else {
+        logger.error(`Error when getting rateLimit: ${error.message}`);
+        return undefined; // Ensure fallback return in all error paths
       }
     }
-
-    logger.error('Failed to retrieve rate limit after all retries.');
-    return undefined;
   }
 
   // handle all of the stale issue logic when we find a stale issue

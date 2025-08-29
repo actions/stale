@@ -1,0 +1,29 @@
+name: Stale PRs Management
+
+on:
+  workflow_dispatch: # manual trigger for testing
+
+permissions:
+  issues: write
+  pull-requests: write
+
+jobs:
+  stale:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/stale@v9
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+
+          # Disable issues completely
+          days-before-issue-stale: -1
+          days-before-issue-close: -1
+
+          # PR stale rules
+          days-before-pr-stale: 3
+          days-before-pr-close: -1   # never close automatically
+          stale-pr-label: stale
+          stale-pr-message: >
+            👋 This PR has been open for more than 3 business days without updates. 
+            Please review or take action.
+          operations-per-run: 100

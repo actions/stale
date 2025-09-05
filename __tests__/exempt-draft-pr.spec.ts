@@ -128,6 +128,7 @@ class IssuesProcessorBuilder {
       alwaysFalseStateMock,
       async p => (p === 1 ? this._issues : []),
       async () => [],
+      async () => [],
       async () => new Date().toDateString(),
       async (): Promise<IPullRequest> => {
         return Promise.resolve({

@@ -5,11 +5,10 @@
 
 ## Breaking changes in V6
 
-- Upgrade to node 24 in [#1279](https://github.com/actions/stale/pull/1279)
+- Upgraded action from node20 to node 24
+  > Make sure your runner is on version v2.327.1 or later to ensure compatibility with this release. [Release Notes](https://github.com/actions/runner/releases/tag/v2.327.1)
 
-Make sure your runner is on version v2.327.1 or later to ensure compatibility with this release. [Release Notes](https://github.com/actions/runner/releases/tag/v2.327.1)
-
-For more detailed release notes with documntation updates and dependency upgrades, please track [release notes](https://github.com/actions/stale/releases/tag/v10.0.0)
+For more detailed release notes, see the full release notes on the [release page](https://github.com/actions/stale/releases/tag/v10.0.0)
 
 Warns and then closes issues and PRs that have had no activity for a specified amount of time.
 

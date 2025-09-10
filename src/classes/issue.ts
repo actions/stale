@@ -21,7 +21,9 @@ export class Issue implements IIssue {
   readonly milestone?: IMilestone | null;
   readonly assignees: Assignee[];
   isStale: boolean;
+  isRotten: boolean;
   markedStaleThisRun: boolean;
+  markedRottenThisRun: boolean;
   operations = new Operations();
   private readonly _options: IIssuesProcessorOptions;
 
@@ -42,7 +44,9 @@ export class Issue implements IIssue {
     this.milestone = issue.milestone;
     this.assignees = issue.assignees || [];
     this.isStale = isLabeled(this, this.staleLabel);
+    this.isRotten = isLabeled(this, this.rottenLabel);
     this.markedStaleThisRun = false;
+    this.markedRottenThisRun = false;
   }
 
   get isPullRequest(): boolean {
@@ -51,6 +55,9 @@ export class Issue implements IIssue {
 
   get staleLabel(): string {
     return this._getStaleLabel();
+  }
+  get rottenLabel(): string {
+    return this._getRottenLabel();
   }
 
   get hasAssignees(): boolean {
@@ -61,6 +68,11 @@ export class Issue implements IIssue {
     return this.isPullRequest
       ? this._options.stalePrLabel
       : this._options.staleIssueLabel;
+  }
+  private _getRottenLabel(): string {
+    return this.isPullRequest
+      ? this._options.rottenPrLabel
+      : this._options.rottenIssueLabel;
   }
 }
 

@@ -202,7 +202,7 @@ describe('state', (): void => {
 
     await processor.processIssues(1);
     // make sure all issues are proceeded
-    expect(infoSpy.mock.calls[71][0]).toContain(
+    expect(infoSpy.mock.calls[77][0]).toContain(
       'No more issues found to process. Exiting...'
     );
 

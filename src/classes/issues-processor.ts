@@ -70,6 +70,7 @@ export class IssuesProcessor {
   readonly client: InstanceType<typeof GitHub>;
   readonly options: IIssuesProcessorOptions;
   readonly staleIssues: Issue[] = [];
+  readonly rottenIssues: Issue[] = [];
   readonly closedIssues: Issue[] = [];
   readonly deletedBranchIssues: Issue[] = [];
   readonly removedLabelIssues: Issue[] = [];
@@ -142,6 +143,16 @@ export class IssuesProcessor {
     const labelsToRemoveWhenUnstale: string[] = wordsToList(
       this.options.labelsToRemoveWhenUnstale
     );
+    const labelsToRemoveWhenRotten: string[] = wordsToList(
+      this.options.labelsToRemoveWhenRotten
+    );
+
+    const labelsToAddWhenUnrotten: string[] = wordsToList(
+      this.options.labelsToAddWhenUnrotten
+    );
+    const labelsToRemoveWhenUnrotten: string[] = wordsToList(
+      this.options.labelsToRemoveWhenUnrotten
+    );
 
     for (const issue of issues.values()) {
       // Stop the processing if no more operations remains
@@ -161,7 +172,10 @@ export class IssuesProcessor {
           issue,
           labelsToAddWhenUnstale,
           labelsToRemoveWhenUnstale,
-          labelsToRemoveWhenStale
+          labelsToRemoveWhenStale,
+          labelsToAddWhenUnrotten,
+          labelsToRemoveWhenUnrotten,
+          labelsToRemoveWhenRotten
         );
       });
       this.state.addIssueToProcessed(issue);
@@ -201,7 +215,10 @@ export class IssuesProcessor {
     issue: Issue,
     labelsToAddWhenUnstale: Readonly<string>[],
     labelsToRemoveWhenUnstale: Readonly<string>[],
-    labelsToRemoveWhenStale: Readonly<string>[]
+    labelsToRemoveWhenStale: Readonly<string>[],
+    labelsToAddWhenUnrotten: Readonly<string>[],
+    labelsToRemoveWhenUnrotten: Readonly<string>[],
+    labelsToRemoveWhenRotten: Readonly<string>[]
   ): Promise<void> {
     this.statistics?.incrementProcessedItemsCount(issue);
 
@@ -216,12 +233,21 @@ export class IssuesProcessor {
     const staleMessage: string = issue.isPullRequest
       ? this.options.stalePrMessage
       : this.options.staleIssueMessage;
+    const rottenMessage: string = issue.isPullRequest
+      ? this.options.rottenPrMessage
+      : this.options.rottenIssueMessage;
     const closeMessage: string = issue.isPullRequest
       ? this.options.closePrMessage
       : this.options.closeIssueMessage;
+    const skipRottenMessage = issue.isPullRequest
+      ? this.options.rottenPrMessage.length === 0
+      : this.options.rottenIssueMessage.length === 0;
     const staleLabel: string = issue.isPullRequest
       ? this.options.stalePrLabel
       : this.options.staleIssueLabel;
+    const rottenLabel: string = issue.isPullRequest
+      ? this.options.rottenPrLabel
+      : this.options.rottenIssueLabel;
     const closeLabel: string = issue.isPullRequest
       ? this.options.closePrLabel
       : this.options.closeIssueLabel;
@@ -343,10 +369,16 @@ export class IssuesProcessor {
       }
     }
 
+    // Check if the issue is stale, if not, check if it is rotten and then log the findings.
     if (issue.isStale) {
       issueLogger.info(`This $$type includes a stale label`);
     } else {
       issueLogger.info(`This $$type does not include a stale label`);
+      if (issue.isRotten) {
+        issueLogger.info(`This $$type includes a rotten label`);
+      } else {
+        issueLogger.info(`This $$type does not include a rotten label`);
+      }
     }
 
     const exemptLabels: string[] = wordsToList(
@@ -446,78 +478,92 @@ export class IssuesProcessor {
       return; // Don't process draft PR
     }
 
+    // Here we are looking into if the issue is stale or not, and then adding the label. This same code will also be used for the rotten label.
     // Determine if this issue needs to be marked stale first
     if (!issue.isStale) {
       issueLogger.info(`This $$type is not stale`);
 
-      const shouldIgnoreUpdates: boolean = new IgnoreUpdates(
-        this.options,
-        issue
-      ).shouldIgnoreUpdates();
-
-      // Should this issue be marked as stale?
-      let shouldBeStale: boolean;
-
-      // Ignore the last update and only use the creation date
-      if (shouldIgnoreUpdates) {
-        shouldBeStale = !IssuesProcessor._updatedSince(
-          issue.created_at,
-          daysBeforeStale
+      if (issue.isRotten) {
+        await this._processRottenIssue(
+          issue,
+          rottenLabel,
+          rottenMessage,
+          labelsToAddWhenUnrotten,
+          labelsToRemoveWhenUnrotten,
+          labelsToRemoveWhenRotten,
+          closeMessage,
+          closeLabel
         );
-      }
-      // Use the last update to check if we need to stale
-      else {
-        shouldBeStale = !IssuesProcessor._updatedSince(
-          issue.updated_at,
-          daysBeforeStale
-        );
-      }
-
-      if (shouldBeStale) {
-        if (shouldIgnoreUpdates) {
-          issueLogger.info(
-            `This $$type should be stale based on the creation date the ${getHumanizedDate(
-              new Date(issue.created_at)
-            )} (${LoggerService.cyan(issue.created_at)})`
-          );
-        } else {
-          issueLogger.info(
-            `This $$type should be stale based on the last update date the ${getHumanizedDate(
-              new Date(issue.updated_at)
-            )} (${LoggerService.cyan(issue.updated_at)})`
-          );
-        }
-
-        if (shouldMarkAsStale) {
-          issueLogger.info(
-            `This $$type should be marked as stale based on the option ${issueLogger.createOptionLink(
-              this._getDaysBeforeStaleUsedOptionName(issue)
-            )} (${LoggerService.cyan(daysBeforeStale)})`
-          );
-          await this._markStale(issue, staleMessage, staleLabel, skipMessage);
-          issue.isStale = true; // This issue is now considered stale
-          issue.markedStaleThisRun = true;
-          issueLogger.info(`This $$type is now stale`);
-        } else {
-          issueLogger.info(
-            `This $$type should not be marked as stale based on the option ${issueLogger.createOptionLink(
-              this._getDaysBeforeStaleUsedOptionName(issue)
-            )} (${LoggerService.cyan(daysBeforeStale)})`
-          );
-        }
       } else {
+        const shouldIgnoreUpdates: boolean = new IgnoreUpdates(
+          this.options,
+          issue
+        ).shouldIgnoreUpdates();
+
+        // Should this issue be marked as stale?
+        let shouldBeStale: boolean;
+
+        // Ignore the last update and only use the creation date
         if (shouldIgnoreUpdates) {
-          issueLogger.info(
-            `This $$type should not be stale based on the creation date the ${getHumanizedDate(
-              new Date(issue.created_at)
-            )} (${LoggerService.cyan(issue.created_at)})`
+          shouldBeStale = !IssuesProcessor._updatedSince(
+            issue.created_at,
+            daysBeforeStale
           );
+        }
+        // Use the last update to check if we need to stale
+        else {
+          shouldBeStale = !IssuesProcessor._updatedSince(
+            issue.updated_at,
+            daysBeforeStale
+          );
+        }
+
+        if (shouldBeStale) {
+          if (shouldIgnoreUpdates) {
+            issueLogger.info(
+              `This $$type should be stale based on the creation date the ${getHumanizedDate(
+                new Date(issue.created_at)
+              )} (${LoggerService.cyan(issue.created_at)})`
+            );
+          } else {
+            issueLogger.info(
+              `This $$type should be stale based on the last update date the ${getHumanizedDate(
+                new Date(issue.updated_at)
+              )} (${LoggerService.cyan(issue.updated_at)})`
+            );
+          }
+
+          if (shouldMarkAsStale) {
+            issueLogger.info(
+              `This $$type should be marked as stale based on the option ${issueLogger.createOptionLink(
+                this._getDaysBeforeStaleUsedOptionName(issue)
+              )} (${LoggerService.cyan(daysBeforeStale)})`
+            );
+            await this._markStale(issue, staleMessage, staleLabel, skipMessage);
+            issue.isStale = true; // This issue is now considered stale
+            issue.markedStaleThisRun = true;
+            issueLogger.info(`This $$type is now stale`);
+          } else {
+            issueLogger.info(
+              `This $$type should not be marked as stale based on the option ${issueLogger.createOptionLink(
+                this._getDaysBeforeStaleUsedOptionName(issue)
+              )} (${LoggerService.cyan(daysBeforeStale)})`
+            );
+          }
         } else {
-          issueLogger.info(
-            `This $$type should not be stale based on the last update date the ${getHumanizedDate(
-              new Date(issue.updated_at)
-            )} (${LoggerService.cyan(issue.updated_at)})`
-          );
+          if (shouldIgnoreUpdates) {
+            issueLogger.info(
+              `This $$type should not be stale based on the creation date the ${getHumanizedDate(
+                new Date(issue.created_at)
+              )} (${LoggerService.cyan(issue.created_at)})`
+            );
+          } else {
+            issueLogger.info(
+              `This $$type should not be stale based on the last update date the ${getHumanizedDate(
+                new Date(issue.updated_at)
+              )} (${LoggerService.cyan(issue.updated_at)})`
+            );
+          }
         }
       }
     }
@@ -529,11 +575,17 @@ export class IssuesProcessor {
         issue,
         staleLabel,
         staleMessage,
+        rottenLabel,
+        rottenMessage,
+        closeLabel,
+        closeMessage,
         labelsToAddWhenUnstale,
         labelsToRemoveWhenUnstale,
         labelsToRemoveWhenStale,
-        closeMessage,
-        closeLabel
+        labelsToAddWhenUnrotten,
+        labelsToRemoveWhenUnrotten,
+        labelsToRemoveWhenRotten,
+        skipRottenMessage
       );
     }
 
@@ -652,17 +704,28 @@ export class IssuesProcessor {
   }
 
   // handle all of the stale issue logic when we find a stale issue
+  // This whole thing needs to be altered, to be calculated based on the days to rotten, rather than days to close or whatever
   private async _processStaleIssue(
     issue: Issue,
     staleLabel: string,
     staleMessage: string,
+    rottenLabel: string,
+    rottenMessage: string,
+    closeLabel: string,
+    closeMessage: string,
     labelsToAddWhenUnstale: Readonly<string>[],
     labelsToRemoveWhenUnstale: Readonly<string>[],
     labelsToRemoveWhenStale: Readonly<string>[],
-    closeMessage?: string,
-    closeLabel?: string
+    labelsToAddWhenUnrotten: Readonly<string>[],
+    labelsToRemoveWhenUnrotten: Readonly<string>[],
+    labelsToRemoveWhenRotten: Readonly<string>[],
+    skipMessage: boolean
   ) {
     const issueLogger: IssueLogger = new IssueLogger(issue);
+
+    let issueHasClosed: boolean = false;
+
+    // We can get the label creation date from the getLableCreationDate function
     const markedStaleOn: string =
       (await this.getLabelCreationDate(issue, staleLabel)) || issue.updated_at;
     issueLogger.info(
@@ -680,12 +743,15 @@ export class IssuesProcessor {
       )}`
     );
 
+    const daysBeforeRotten: number = issue.isPullRequest
+      ? this._getDaysBeforePrRotten()
+      : this._getDaysBeforeIssueRotten();
+
     const daysBeforeClose: number = issue.isPullRequest
       ? this._getDaysBeforePrClose()
       : this._getDaysBeforeIssueClose();
-
     issueLogger.info(
-      `Days before $$type close: ${LoggerService.cyan(daysBeforeClose)}`
+      `Days before $$type rotten: ${LoggerService.cyan(daysBeforeRotten)}`
     );
 
     const shouldRemoveStaleWhenUpdated: boolean =
@@ -705,6 +771,7 @@ export class IssuesProcessor {
       );
     }
 
+    // we will need to use a variation of this for the rotten state
     if (issue.markedStaleThisRun) {
       issueLogger.info(`marked stale this run, so don't check for updates`);
       await this._removeLabelsOnStatusTransition(
@@ -752,9 +819,254 @@ export class IssuesProcessor {
       return; // Nothing to do because it is no longer stale
     }
 
+    if (daysBeforeRotten < 0) {
+      if (daysBeforeClose < 0) {
+        issueLogger.info(
+          `Stale $$type cannot be rotten or closed because days before rotten: ${daysBeforeRotten}, and days before close: ${daysBeforeClose}`
+        );
+        return;
+      } else {
+        issueLogger.info(
+          `Closing issue without rottening it because days before $$type rotten: ${LoggerService.cyan(
+            daysBeforeRotten
+          )}`
+        );
+
+        const issueHasUpdateInCloseWindow: boolean =
+          IssuesProcessor._updatedSince(issue.updated_at, daysBeforeClose);
+        issueLogger.info(
+          `$$type has been updated in the last ${daysBeforeClose} days: ${LoggerService.cyan(
+            issueHasUpdateInCloseWindow
+          )}`
+        );
+        if (!issueHasUpdateInCloseWindow && !issueHasCommentsSinceStale) {
+          issueLogger.info(
+            `Closing $$type because it was last updated on: ${LoggerService.cyan(
+              issue.updated_at
+            )}`
+          );
+          await this._closeIssue(issue, closeMessage, closeLabel);
+
+          issueHasClosed = true;
+
+          if (this.options.deleteBranch && issue.pull_request) {
+            issueLogger.info(
+              `Deleting the branch since the option ${issueLogger.createOptionLink(
+                Option.DeleteBranch
+              )} is enabled`
+            );
+            await this._deleteBranch(issue);
+            this.deletedBranchIssues.push(issue);
+          }
+        } else {
+          issueLogger.info(
+            `Stale $$type is not old enough to close yet (hasComments? ${issueHasCommentsSinceStale}, hasUpdate? ${issueHasUpdateInCloseWindow})`
+          );
+        }
+      }
+    }
+
+    // TODO: make a function for shouldMarkWhenRotten
+    const shouldMarkAsRotten: boolean = shouldMarkWhenStale(daysBeforeRotten);
+
+    if (issueHasClosed) {
+      issueLogger.info(
+        `Issue $$type has been closed, no need to process it further.`
+      );
+      return;
+    }
+
+    if (!issue.isRotten) {
+      issueLogger.info(`This $$type is not rotten`);
+
+      const shouldIgnoreUpdates: boolean = new IgnoreUpdates(
+        this.options,
+        issue
+      ).shouldIgnoreUpdates();
+
+      const shouldBeRotten: boolean = !IssuesProcessor._updatedSince(
+        issue.updated_at,
+        daysBeforeRotten
+      );
+
+      if (shouldBeRotten) {
+        if (shouldIgnoreUpdates) {
+          issueLogger.info(
+            `This $$type should be rotten based on the creation date the ${getHumanizedDate(
+              new Date(issue.created_at)
+            )} (${LoggerService.cyan(issue.created_at)})`
+          );
+        } else {
+          issueLogger.info(
+            `This $$type should be rotten based on the last update date the ${getHumanizedDate(
+              new Date(issue.updated_at)
+            )} (${LoggerService.cyan(issue.updated_at)})`
+          );
+        }
+
+        if (shouldMarkAsRotten) {
+          issueLogger.info(
+            `This $$type should be marked as rotten based on the option ${issueLogger.createOptionLink(
+              this._getDaysBeforeRottenUsedOptionName(issue)
+            )} (${LoggerService.cyan(daysBeforeRotten)})`
+          );
+          // remove the stale label before marking the issue as rotten
+          await this._removeStaleLabel(issue, staleLabel);
+
+          await this._markRotten(
+            issue,
+            rottenMessage,
+            rottenLabel,
+            skipMessage
+          );
+          issue.isRotten = true; // This issue is now considered rotten
+          issue.markedRottenThisRun = true;
+          issueLogger.info(`This $$type is now rotten`);
+        } else {
+          issueLogger.info(
+            `This $$type should not be marked as rotten based on the option ${issueLogger.createOptionLink(
+              this._getDaysBeforeStaleUsedOptionName(issue)
+            )} (${LoggerService.cyan(daysBeforeRotten)})`
+          );
+        }
+      } else {
+        if (shouldIgnoreUpdates) {
+          issueLogger.info(
+            `This $$type is not old enough to be rotten based on the creation date the ${getHumanizedDate(
+              new Date(issue.created_at)
+            )} (${LoggerService.cyan(issue.created_at)})`
+          );
+        } else {
+          issueLogger.info(
+            `This $$type is not old enough to be rotten based on the creation date the ${getHumanizedDate(
+              new Date(issue.updated_at)
+            )} (${LoggerService.cyan(issue.updated_at)})`
+          );
+        }
+      }
+    }
+    if (issue.isRotten) {
+      issueLogger.info(`This $$type is already rotten`);
+      // process the rotten issues
+      this._processRottenIssue(
+        issue,
+        rottenLabel,
+        rottenMessage,
+        labelsToAddWhenUnrotten,
+        labelsToRemoveWhenUnrotten,
+        labelsToRemoveWhenRotten,
+        closeMessage,
+        closeLabel
+      );
+    }
+  }
+  private async _processRottenIssue(
+    issue: Issue,
+    rottenLabel: string,
+    rottenMessage: string,
+    labelsToAddWhenUnrotten: Readonly<string>[],
+    labelsToRemoveWhenUnrotten: Readonly<string>[],
+    labelsToRemoveWhenRotten: Readonly<string>[],
+    closeMessage?: string,
+    closeLabel?: string
+  ) {
+    const issueLogger: IssueLogger = new IssueLogger(issue);
+    // We can get the label creation date from the getLableCreationDate function
+    const markedRottenOn: string =
+      (await this.getLabelCreationDate(issue, rottenLabel)) || issue.updated_at;
+    issueLogger.info(
+      `$$type marked rotten on: ${LoggerService.cyan(markedRottenOn)}`
+    );
+
+    const issueHasCommentsSinceRotten: boolean = await this._hasCommentsSince(
+      issue,
+      markedRottenOn,
+      rottenMessage
+    );
+    issueLogger.info(
+      `$$type has been commented on: ${LoggerService.cyan(
+        issueHasCommentsSinceRotten
+      )}`
+    );
+
+    const daysBeforeClose: number = issue.isPullRequest
+      ? this._getDaysBeforePrClose()
+      : this._getDaysBeforeIssueClose();
+
+    issueLogger.info(
+      `Days before $$type close: ${LoggerService.cyan(daysBeforeClose)}`
+    );
+
+    const shouldRemoveRottenWhenUpdated: boolean =
+      this._shouldRemoveRottenWhenUpdated(issue);
+
+    issueLogger.info(
+      `The option ${issueLogger.createOptionLink(
+        this._getRemoveRottenWhenUpdatedUsedOptionName(issue)
+      )} is: ${LoggerService.cyan(shouldRemoveRottenWhenUpdated)}`
+    );
+
+    if (shouldRemoveRottenWhenUpdated) {
+      issueLogger.info(`The rotten label should not be removed`);
+    } else {
+      issueLogger.info(
+        `The rotten label should be removed if all conditions met`
+      );
+    }
+
+    if (issue.markedRottenThisRun) {
+      issueLogger.info(`marked rotten this run, so don't check for updates`);
+      await this._removeLabelsOnStatusTransition(
+        issue,
+        labelsToRemoveWhenRotten,
+        Option.LabelsToRemoveWhenRotten
+      );
+    }
+
+    // The issue.updated_at and markedRottenOn are not always exactly in sync (they can be off by a second or 2)
+    // isDateMoreRecentThan makes sure they are not the same date within a certain tolerance (15 seconds in this case)
+    const issueHasUpdateSinceRotten = isDateMoreRecentThan(
+      new Date(issue.updated_at),
+      new Date(markedRottenOn),
+      15
+    );
+
+    issueLogger.info(
+      `$$type has been updated since it was marked rotten: ${LoggerService.cyan(
+        issueHasUpdateSinceRotten
+      )}`
+    );
+
+    // Should we un-rotten this issue?
+    if (
+      shouldRemoveRottenWhenUpdated &&
+      (issueHasUpdateSinceRotten || issueHasCommentsSinceRotten) &&
+      !issue.markedRottenThisRun
+    ) {
+      issueLogger.info(
+        `Remove the rotten label since the $$type has been updated and the workflow should remove the stale label when updated`
+      );
+      await this._removeRottenLabel(issue, rottenLabel);
+
+      // Are there labels to remove or add when an issue is no longer rotten?
+      // This logic takes care of removing labels when unrotten
+      await this._removeLabelsOnStatusTransition(
+        issue,
+        labelsToRemoveWhenUnrotten,
+        Option.LabelsToRemoveWhenUnrotten
+      );
+      await this._addLabelsWhenUnrotten(issue, labelsToAddWhenUnrotten);
+
+      issueLogger.info(
+        `Skipping the process since the $$type is now un-rotten`
+      );
+
+      return; // Nothing to do because it is no longer rotten
+    }
+
     // Now start closing logic
     if (daysBeforeClose < 0) {
-      return; // Nothing to do because we aren't closing stale issues
+      return; // Nothing to do because we aren't closing rotten issues
     }
 
     const issueHasUpdateInCloseWindow: boolean = IssuesProcessor._updatedSince(
@@ -767,7 +1079,7 @@ export class IssuesProcessor {
       )}`
     );
 
-    if (!issueHasCommentsSinceStale && !issueHasUpdateInCloseWindow) {
+    if (!issueHasCommentsSinceRotten && !issueHasUpdateInCloseWindow) {
       issueLogger.info(
         `Closing $$type because it was last updated on: ${LoggerService.cyan(
           issue.updated_at
@@ -786,7 +1098,7 @@ export class IssuesProcessor {
       }
     } else {
       issueLogger.info(
-        `Stale $$type is not old enough to close yet (hasComments? ${issueHasCommentsSinceStale}, hasUpdate? ${issueHasUpdateInCloseWindow})`
+        `Rotten $$type is not old enough to close yet (hasComments? ${issueHasCommentsSinceRotten}, hasUpdate? ${issueHasUpdateInCloseWindow})`
       );
     }
   }
@@ -878,6 +1190,57 @@ export class IssuesProcessor {
       issueLogger.error(`Error when adding a label: ${error.message}`);
     }
   }
+  private async _markRotten(
+    issue: Issue,
+    rottenMessage: string,
+    rottenLabel: string,
+    skipMessage: boolean
+  ): Promise<void> {
+    const issueLogger: IssueLogger = new IssueLogger(issue);
+
+    issueLogger.info(`Marking this $$type as rotten`);
+    this.rottenIssues.push(issue);
+
+    // if the issue is being marked rotten, the updated date should be changed to right now
+    // so that close calculations work correctly
+    const newUpdatedAtDate: Date = new Date();
+    issue.updated_at = newUpdatedAtDate.toString();
+
+    if (!skipMessage) {
+      try {
+        this._consumeIssueOperation(issue);
+        this.statistics?.incrementAddedItemsComment(issue);
+
+        if (!this.options.debugOnly) {
+          await this.client.rest.issues.createComment({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            issue_number: issue.number,
+            body: rottenMessage
+          });
+        }
+      } catch (error) {
+        issueLogger.error(`Error when creating a comment: ${error.message}`);
+      }
+    }
+
+    try {
+      this._consumeIssueOperation(issue);
+      this.statistics?.incrementAddedItemsLabel(issue);
+      this.statistics?.incrementStaleItemsCount(issue);
+
+      if (!this.options.debugOnly) {
+        await this.client.rest.issues.addLabels({
+          owner: context.repo.owner,
+          repo: context.repo.repo,
+          issue_number: issue.number,
+          labels: [rottenLabel]
+        });
+      }
+    } catch (error) {
+      issueLogger.error(`Error when adding a label: ${error.message}`);
+    }
+  }
 
   // Close an issue based on staleness
   private async _closeIssue(
@@ -887,7 +1250,7 @@ export class IssuesProcessor {
   ): Promise<void> {
     const issueLogger: IssueLogger = new IssueLogger(issue);
 
-    issueLogger.info(`Closing $$type for being stale`);
+    issueLogger.info(`Closing $$type for being stale/rotten`);
     this.closedIssues.push(issue);
 
     if (closeMessage) {
@@ -1058,6 +1421,17 @@ export class IssuesProcessor {
       ? this.options.daysBeforeStale
       : this.options.daysBeforePrStale;
   }
+  private _getDaysBeforeIssueRotten(): number {
+    return isNaN(this.options.daysBeforeIssueRotten)
+      ? this.options.daysBeforeRotten
+      : this.options.daysBeforeIssueRotten;
+  }
+
+  private _getDaysBeforePrRotten(): number {
+    return isNaN(this.options.daysBeforePrRotten)
+      ? this.options.daysBeforeRotten
+      : this.options.daysBeforePrRotten;
+  }
 
   private _getDaysBeforeIssueClose(): number {
     return isNaN(this.options.daysBeforeIssueClose)
@@ -1118,6 +1492,21 @@ export class IssuesProcessor {
 
     return this.options.removeStaleWhenUpdated;
   }
+  private _shouldRemoveRottenWhenUpdated(issue: Issue): boolean {
+    if (issue.isPullRequest) {
+      if (isBoolean(this.options.removePrRottenWhenUpdated)) {
+        return this.options.removePrRottenWhenUpdated;
+      }
+
+      return this.options.removeRottenWhenUpdated;
+    }
+
+    if (isBoolean(this.options.removeIssueRottenWhenUpdated)) {
+      return this.options.removeIssueRottenWhenUpdated;
+    }
+
+    return this.options.removeRottenWhenUpdated;
+  }
 
   private async _removeLabelsOnStatusTransition(
     issue: Issue,
@@ -1177,6 +1566,42 @@ export class IssuesProcessor {
     }
   }
 
+  private async _addLabelsWhenUnrotten(
+    issue: Issue,
+    labelsToAdd: Readonly<string>[]
+  ): Promise<void> {
+    if (!labelsToAdd.length) {
+      return;
+    }
+
+    const issueLogger: IssueLogger = new IssueLogger(issue);
+
+    issueLogger.info(
+      `Adding all the labels specified via the ${this._logger.createOptionLink(
+        Option.LabelsToAddWhenUnrotten
+      )} option.`
+    );
+
+    // TODO: this might need to be changed to a set to avoiod repetition
+    this.addedLabelIssues.push(issue);
+
+    try {
+      this._consumeIssueOperation(issue);
+      this.statistics?.incrementAddedItemsLabel(issue);
+      if (!this.options.debugOnly) {
+        await this.client.rest.issues.addLabels({
+          owner: context.repo.owner,
+          repo: context.repo.repo,
+          issue_number: issue.number,
+          labels: labelsToAdd
+        });
+      }
+    } catch (error) {
+      this._logger.error(
+        `Error when adding labels after updated from rotten: ${error.message}`
+      );
+    }
+  }
   private async _removeStaleLabel(
     issue: Issue,
     staleLabel: Readonly<string>
@@ -1189,6 +1614,19 @@ export class IssuesProcessor {
 
     await this._removeLabel(issue, staleLabel);
     this.statistics?.incrementUndoStaleItemsCount(issue);
+  }
+  private async _removeRottenLabel(
+    issue: Issue,
+    rottenLabel: Readonly<string>
+  ): Promise<void> {
+    const issueLogger: IssueLogger = new IssueLogger(issue);
+
+    issueLogger.info(
+      `The $$type is no longer rotten. Removing the rotten label...`
+    );
+
+    await this._removeLabel(issue, rottenLabel);
+    this.statistics?.incrementUndoRottenItemsCount(issue);
   }
 
   private async _removeCloseLabel(
@@ -1268,6 +1706,32 @@ export class IssuesProcessor {
       : Option.DaysBeforePrStale;
   }
 
+  private _getDaysBeforeRottenUsedOptionName(
+    issue: Readonly<Issue>
+  ):
+    | Option.DaysBeforeRotten
+    | Option.DaysBeforeIssueRotten
+    | Option.DaysBeforePrRotten {
+    return issue.isPullRequest
+      ? this._getDaysBeforePrRottenUsedOptionName()
+      : this._getDaysBeforeIssueRottenUsedOptionName();
+  }
+
+  private _getDaysBeforeIssueRottenUsedOptionName():
+    | Option.DaysBeforeRotten
+    | Option.DaysBeforeIssueRotten {
+    return isNaN(this.options.daysBeforeIssueRotten)
+      ? Option.DaysBeforeRotten
+      : Option.DaysBeforeIssueRotten;
+  }
+
+  private _getDaysBeforePrRottenUsedOptionName():
+    | Option.DaysBeforeRotten
+    | Option.DaysBeforePrRotten {
+    return isNaN(this.options.daysBeforePrRotten)
+      ? Option.DaysBeforeRotten
+      : Option.DaysBeforePrRotten;
+  }
   private _getRemoveStaleWhenUpdatedUsedOptionName(
     issue: Readonly<Issue>
   ):
@@ -1287,5 +1751,25 @@ export class IssuesProcessor {
     }
 
     return Option.RemoveStaleWhenUpdated;
+  }
+  private _getRemoveRottenWhenUpdatedUsedOptionName(
+    issue: Readonly<Issue>
+  ):
+    | Option.RemovePrRottenWhenUpdated
+    | Option.RemoveRottenWhenUpdated
+    | Option.RemoveIssueRottenWhenUpdated {
+    if (issue.isPullRequest) {
+      if (isBoolean(this.options.removePrRottenWhenUpdated)) {
+        return Option.RemovePrRottenWhenUpdated;
+      }
+
+      return Option.RemoveRottenWhenUpdated;
+    }
+
+    if (isBoolean(this.options.removeIssueRottenWhenUpdated)) {
+      return Option.RemoveIssueRottenWhenUpdated;
+    }
+
+    return Option.RemoveRottenWhenUpdated;
   }
 }

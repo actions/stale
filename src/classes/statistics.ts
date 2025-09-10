@@ -15,6 +15,10 @@ export class Statistics {
   stalePullRequestsCount = 0;
   undoStaleIssuesCount = 0;
   undoStalePullRequestsCount = 0;
+  rottenIssuesCount = 0;
+  rottenPullRequestsCount = 0;
+  undoRottenIssuesCount = 0;
+  undoRottenPullRequestsCount = 0;
   operationsCount = 0;
   closedIssuesCount = 0;
   closedPullRequestsCount = 0;
@@ -63,6 +67,17 @@ export class Statistics {
     }
 
     return this._incrementUndoStaleIssuesCount(increment);
+  }
+
+  incrementUndoRottenItemsCount(
+    issue: Readonly<Issue>,
+    increment: Readonly<number> = 1
+  ): Statistics {
+    if (issue.isPullRequest) {
+      return this._incrementUndoRottenPullRequestsCount(increment);
+    }
+
+    return this._incrementUndoRottenIssuesCount(increment);
   }
 
   setOperationsCount(operationsCount: Readonly<number>): Statistics {
@@ -218,6 +233,21 @@ export class Statistics {
     increment: Readonly<number> = 1
   ): Statistics {
     this.undoStaleIssuesCount += increment;
+
+    return this;
+  }
+
+  private _incrementUndoRottenPullRequestsCount(
+    increment: Readonly<number> = 1
+  ): Statistics {
+    this.undoRottenPullRequestsCount += increment;
+
+    return this;
+  }
+  private _incrementUndoRottenIssuesCount(
+    increment: Readonly<number> = 1
+  ): Statistics {
+    this.undoRottenIssuesCount += increment;
 
     return this;
   }

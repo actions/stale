@@ -106,6 +106,7 @@ Every argument is optional.
 | [ignore-pr-updates](#ignore-pr-updates)                             | Override [ignore-updates](#ignore-updates) for PRs only                     |                       |
 | [include-only-assigned](#include-only-assigned)                     | Process only assigned issues                                                | `false`               |
 | [sort-by](#sort-by)                                                 | What to sort issues and PRs by                                              | `created`             |
+| [exempt-issue-types](#exempt-issue-types)                           | Issue types on issues exempted from stale/closed.                           |                       |
 | [only-issue-types](#only-issue-types)                               | Only issues with a matching type are processed as stale/closed.             |                       |
 
 ### List of output options
@@ -562,6 +563,15 @@ Default value: `false`
 Useful to sort the issues and PRs by the specified field. It accepts `created`, `updated`, `comments`.
 
 Default value: `created`
+
+#### exempt-issue-types
+
+A comma separated list of issue types that can be assigned to issues to exclude them from being marked as stale
+(e.g: `Bug,Feature`)
+
+If unset (or an empty string), this option will not alter the stale workflow.
+
+Default value: unset
 
 #### only-issue-types
 

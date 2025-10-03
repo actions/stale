@@ -97,6 +97,7 @@ function _getAndValidateArgs(): IIssuesProcessorOptions {
     ),
     debugOnly: core.getInput('debug-only') === 'true',
     ascending: core.getInput('ascending') === 'true',
+    sortBy: _processParamtoString(core.getInput('sort-by')),
     deleteBranch: core.getInput('delete-branch') === 'true',
     startDate:
       core.getInput('start-date') !== ''
@@ -196,6 +197,16 @@ function _toOptionalBoolean(
   }
 
   return undefined;
+}
+
+function _processParamtoString(
+  sortByValueInput: string
+): 'created' | 'updated' | 'comments' {
+  return sortByValueInput === 'updated'
+    ? 'updated'
+    : sortByValueInput === 'comments'
+    ? 'comments'
+    : 'created';
 }
 
 void _run();

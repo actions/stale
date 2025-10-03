@@ -289,6 +289,13 @@ class Issue {
         this.assignees = issue.assignees || [];
         this.isStale = (0, is_labeled_1.isLabeled)(this, this.staleLabel);
         this.markedStaleThisRun = false;
+        if (typeof issue.type === 'object' &&
+            issue.type !== null) {
+            this.issue_type = issue.type.name;
+        }
+        else {
+            this.issue_type = undefined;
+        }
     }
     get isPullRequest() {
         return (0, is_pull_request_1.isPullRequest)(this);
@@ -505,6 +512,18 @@ class IssuesProcessor {
                 issueLogger.info(`Skipping this $$type because its assignees list is empty`);
                 IssuesProcessor._endIssueProcessing(issue);
                 return; // If the issue has an 'include-only-assigned' option set, process only issues with nonempty assignees list
+            }
+            if (this.options.onlyIssueTypes) {
+                const allowedTypes = this.options.onlyIssueTypes
+                    .split(',')
+                    .map(t => t.trim().toLowerCase())
+                    .filter(Boolean);
+                const issueType = (issue.issue_type || '').toLowerCase();
+                if (!allowedTypes.includes(issueType)) {
+                    issueLogger.info(`Skipping this $$type because its type ('${issue.issue_type}') is not in onlyIssueTypes (${allowedTypes.join(', ')})`);
+                    IssuesProcessor._endIssueProcessing(issue);
+                    return;
+                }
             }
             const onlyLabels = (0, words_to_list_1.wordsToList)(this._getOnlyLabels(issue));
             if (onlyLabels.length > 0) {
@@ -2225,6 +2244,7 @@ var Option;
     Option["IgnorePrUpdates"] = "ignore-pr-updates";
     Option["ExemptDraftPr"] = "exempt-draft-pr";
     Option["CloseIssueReason"] = "close-issue-reason";
+    Option["OnlyIssueTypes"] = "only-issue-types";
 })(Option || (exports.Option = Option = {}));
 
 

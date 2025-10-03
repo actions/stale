@@ -252,6 +252,23 @@ export class IssuesProcessor {
       return; // If the issue has an 'include-only-assigned' option set, process only issues with nonempty assignees list
     }
 
+    if (this.options.onlyIssueTypes) {
+      const allowedTypes = this.options.onlyIssueTypes
+        .split(',')
+        .map(t => t.trim().toLowerCase())
+        .filter(Boolean);
+      const issueType = (issue.issue_type || '').toLowerCase();
+      if (!allowedTypes.includes(issueType)) {
+        issueLogger.info(
+          `Skipping this $$type because its type ('${
+            issue.issue_type
+          }') is not in onlyIssueTypes (${allowedTypes.join(', ')})`
+        );
+        IssuesProcessor._endIssueProcessing(issue);
+        return;
+      }
+    }
+
     const onlyLabels: string[] = wordsToList(this._getOnlyLabels(issue));
 
     if (onlyLabels.length > 0) {

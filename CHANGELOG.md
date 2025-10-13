@@ -1,4 +1,11 @@
 # Changelog
+
+# [10.1.0]
+
+## What's Changed
+
+* Add only-issue-types option to filter issues by type by @Bibo-Joshi in https://github.com/actions/stale/pull/1255
+
 # [10.0.0]
 
 ## What's Changed

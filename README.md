@@ -3,6 +3,13 @@
 [![Basic validation](https://github.com/actions/stale/actions/workflows/basic-validation.yml/badge.svg?branch=main)](https://github.com/actions/stale/actions/workflows/basic-validation.yml)
 [![e2e tests](https://github.com/actions/stale/actions/workflows/e2e-tests.yml/badge.svg?branch=main)](https://github.com/actions/stale/actions/workflows/e2e-tests.yml)
 
+## Breaking changes in V10
+
+- Upgraded action from node20 to node 24
+  > Make sure your runner is on version v2.327.1 or later to ensure compatibility with this release. [Release Notes](https://github.com/actions/runner/releases/tag/v2.327.1)
+
+For more details, see the full release notes on the [release page](https://github.com/actions/stale/releases/tag/v10.0.0)
+
 Warns and then closes issues and PRs that have had no activity for a specified amount of time.
 
 The configuration must be on the default branch and the default values will:

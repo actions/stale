@@ -1,5 +1,35 @@
 # Changelog
 
+# [10.1.0]
+
+## What's Changed
+
+* Add only-issue-types option to filter issues by type by @Bibo-Joshi in https://github.com/actions/stale/pull/1255
+
+# [10.0.0]
+
+## What's Changed
+
+## Breaking Changes
+* Upgrade to node 24 by @salmanmkc in https://github.com/actions/stale/pull/1279
+Make sure your runner is on version v2.327.1 or later to ensure compatibility with this release. [Release Notes](https://github.com/actions/runner/releases/tag/v2.327.1)
+
+## Enhancement
+- Introducing sort-by option by @suyashgaonkar in https://github.com/actions/stale/pull/1254
+
+## Dependency Upgrades
+* Upgrade actions/publish-immutable-action from 0.0.3 to 0.0.4 by @dependabot[bot] in https://github.com/actions/stale/pull/1186
+* Upgrade undici from 5.28.4 to 5.28.5 by @dependabot[bot] in https://github.com/actions/stale/pull/1201
+* Upgrade @action/cache from 4.0.0 to 4.0.2 by @aparnajyothi-y in https://github.com/actions/stale/pull/1226
+* Upgrade @action/cache from 4.0.2 to 4.0.3 by @suyashgaonkar in https://github.com/actions/stale/pull/1233
+* Upgrade undici from 5.28.5 to 5.29.0 by @dependabot[bot] in https://github.com/actions/stale/pull/1251
+* Upgrade form-data to bring in fix for critical vulnerability by @gowridurgad in https://github.com/actions/stale/pull/1277
+
+## Documentation changes
+
+- Changelog update for recent releases by @suyashgaonkar in https://github.com/actions/stale/pull/1224
+- Permissions update in Readme by @ghadimir in https://github.com/actions/stale/pull/1248
+
 # [9.1.0]
 
 ## What's Changed

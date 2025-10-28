@@ -655,10 +655,10 @@ export class IssuesProcessor {
         logger.warning(
           'Rate limiting is not enabled on this instance. Proceeding without rate limit checks.'
         );
-        return undefined; // Gracefully skip rate limiting logic
+        return undefined;
       } else {
         logger.error(`Error when getting rateLimit: ${error.message}`);
-        return undefined; // Ensure fallback return in all error paths
+        return undefined;
       }
     }
   }

@@ -653,7 +653,7 @@ export class IssuesProcessor {
         error.message?.includes('Rate limiting is not enabled')
       ) {
         logger.warning(
-          'Rate limiting is not enabled on this GHES instance. Proceeding without rate limit checks.'
+          'Rate limiting is not enabled on this instance. Proceeding without rate limit checks.'
         );
         return undefined; // Gracefully skip rate limiting logic
       } else {

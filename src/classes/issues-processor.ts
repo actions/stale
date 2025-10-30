@@ -647,19 +647,18 @@ export class IssuesProcessor {
     try {
       const rateLimitResult = await this.client.rest.rateLimit.get();
       return new RateLimit(rateLimitResult.data.rate);
-    } catch (error: any) {
-      if (
-        error.status === 404 &&
-        error.message?.includes('Rate limiting is not enabled')
-      ) {
+    } catch (error: unknown) {
+      const status = (error as {status?: number})?.status;
+      const message = (error as {message?: string})?.message ?? String(error);
+
+      if (status === 404 && message.includes('Rate limiting is not enabled')) {
         logger.warning(
           'Rate limiting is not enabled on this instance. Proceeding without rate limit checks.'
         );
         return undefined;
-      } else {
-        logger.error(`Error when getting rateLimit: ${error.message}`);
-        return undefined;
       }
+
+      logger.error(`Error when getting rateLimit: ${message}`);
     }
   }
 

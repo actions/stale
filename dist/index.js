@@ -433,16 +433,16 @@ class IssuesProcessor {
     processIssues(page = 1) {
         var _a, _b;
         return __awaiter(this, void 0, void 0, function* () {
-            // get the next batch of issues
+            // get the next batch of items
             const issues = yield this.getIssues(page);
             if (issues.length <= 0) {
-                this._logger.info(logger_service_1.LoggerService.green(`No more issues found to process. Exiting...`));
+                this._logger.info(logger_service_1.LoggerService.green(`No more items found to process. Exiting...`));
                 (_a = this.statistics) === null || _a === void 0 ? void 0 : _a.setOperationsCount(this.operations.getConsumedOperationsCount()).logStats();
                 this.state.reset();
                 return this.operations.getRemainingOperationsCount();
             }
             else {
-                this._logger.info(`${logger_service_1.LoggerService.yellow('Processing the batch of issues ')} ${logger_service_1.LoggerService.cyan(`#${page}`)} ${logger_service_1.LoggerService.yellow(' containing ')} ${logger_service_1.LoggerService.cyan(issues.length)} ${logger_service_1.LoggerService.yellow(` issue${issues.length > 1 ? 's' : ''}...`)}`);
+                this._logger.info(`${logger_service_1.LoggerService.yellow('Processing the batch of items ')} ${logger_service_1.LoggerService.cyan(`#${page}`)} ${logger_service_1.LoggerService.yellow(' containing ')} ${logger_service_1.LoggerService.cyan(issues.length)} ${logger_service_1.LoggerService.yellow(` item${issues.length > 1 ? 's' : ''}...`)}`);
             }
             const labelsToRemoveWhenStale = (0, words_to_list_1.wordsToList)(this.options.labelsToRemoveWhenStale);
             const labelsToAddWhenUnstale = (0, words_to_list_1.wordsToList)(this.options.labelsToAddWhenUnstale);
@@ -464,7 +464,7 @@ class IssuesProcessor {
             }
             if (!this.operations.hasRemainingOperations()) {
                 this._logger.warning(logger_service_1.LoggerService.yellowBright(`No more operations left! Exiting...`));
-                this._logger.warning(`${logger_service_1.LoggerService.yellowBright('If you think that not enough issues were processed you could try to increase the quantity related to the ')} ${this._logger.createOptionLink(option_1.Option.OperationsPerRun)} ${logger_service_1.LoggerService.yellowBright(' option which is currently set to ')} ${logger_service_1.LoggerService.cyan(this.options.operationsPerRun)}`);
+                this._logger.warning(`${logger_service_1.LoggerService.yellowBright('If you think that not enough items were processed you could try to increase the quantity related to the ')} ${this._logger.createOptionLink(option_1.Option.OperationsPerRun)} ${logger_service_1.LoggerService.yellowBright(' option which is currently set to ')} ${logger_service_1.LoggerService.cyan(this.options.operationsPerRun)}`);
                 (_b = this.statistics) === null || _b === void 0 ? void 0 : _b.setOperationsCount(this.operations.getConsumedOperationsCount()).logStats();
                 return 0;
             }
@@ -623,7 +623,7 @@ class IssuesProcessor {
             }
             // Determine if this issue needs to be marked stale first
             if (!issue.isStale) {
-                issueLogger.info(`This $$type is not stale`);
+                issueLogger.info(`This $$type is not marked stale`);
                 const shouldIgnoreUpdates = new ignore_updates_1.IgnoreUpdates(this.options, issue).shouldIgnoreUpdates();
                 // Should this issue be marked as stale?
                 let shouldBeStale;
@@ -687,7 +687,7 @@ class IssuesProcessor {
                 return comments.data;
             }
             catch (error) {
-                this._logger.error(`List issue comments error: ${error.message}`);
+                this._logger.error(`List $$type comments error: ${error.message}`);
                 return Promise.resolve([]);
             }
         });
@@ -711,7 +711,7 @@ class IssuesProcessor {
                 return issueResult.data.map((issue) => new issue_1.Issue(this.options, issue));
             }
             catch (error) {
-                throw Error(`Getting issues was blocked by the error: ${error.message}`);
+                throw Error(`Getting items was blocked by the error: ${error.message}`);
             }
         });
     }
@@ -1026,7 +1026,7 @@ class IssuesProcessor {
                 issueLogger.info(`${isSubStep ? logger_service_1.LoggerService.white('└── ') : ''}The label "${logger_service_1.LoggerService.cyan(label)}" was removed`);
             }
             catch (error) {
-                issueLogger.error(`${isSubStep ? logger_service_1.LoggerService.white('└── ') : ''}Error when removing the label: "${logger_service_1.LoggerService.cyan(error.message)}"`);
+                issueLogger.error(`${isSubStep ? logger_service_1.LoggerService.white('└── ') : ''}Error when removing the label: ${logger_service_1.LoggerService.cyan(error.message)}`);
             }
         });
     }

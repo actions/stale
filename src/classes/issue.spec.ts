@@ -63,6 +63,7 @@ describe('Issue', (): void => {
       ignoreUpdates: false,
       ignoreIssueUpdates: undefined,
       ignorePrUpdates: undefined,
+      ignoreLabelsActivityUpdatesOnPr: '',
       exemptDraftPr: false,
       closeIssueReason: '',
       includeOnlyAssigned: false

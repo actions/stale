@@ -16,6 +16,7 @@ import {IIssuesProcessorOptions} from '../interfaces/issues-processor-options';
 import {IPullRequest} from '../interfaces/pull-request';
 import {Assignees} from './assignees';
 import {IgnoreUpdates} from './ignore-updates';
+import {IgnoredLabels} from './ignored-labels';
 import {ExemptDraftPullRequest} from './exempt-draft-pull-request';
 import {Issue} from './issue';
 import {IssueLogger} from './loggers/issue-logger';
@@ -603,15 +604,16 @@ export class IssuesProcessor {
     }
   }
 
-  // returns the creation date of a given label on an issue (or nothing if no label existed)
-  ///see https://developer.github.com/v3/activity/events/
-  async getLabelCreationDate(
-    issue: Issue,
-    label: string
-  ): Promise<string | undefined> {
+  /**
+   * Fetch all events for an issue. Returns the creation date of a given label on an issue (or nothing if no label existed).
+   * See https://developer.github.com/v3/activity/events/
+   *
+   * @param issue The issue to fetch events for
+   */
+  private async _getIssueEvents(issue: Issue): Promise<IIssueEvent[]> {
     const issueLogger: IssueLogger = new IssueLogger(issue);
 
-    issueLogger.info(`Checking for label on this $$type`);
+    issueLogger.info(`Fetching events for this $$type...`);
 
     this._consumeIssueOperation(issue);
     this.statistics?.incrementFetchedItemsEventsCount();
@@ -622,8 +624,15 @@ export class IssuesProcessor {
       issue_number: issue.number
     });
 
-    const events: IIssueEvent[] = await this.client.paginate(options);
-    const reversedEvents = events.reverse();
+    return await this.client.paginate(options);
+  }
+
+  // Extract the creation date of a given label from events
+  private _getLabelCreationDateFromEvents(
+    label: string,
+    events: IIssueEvent[]
+  ): string | undefined {
+    const reversedEvents = events.slice().reverse();
 
     const staleLabeledEvent = reversedEvents.find(
       event =>
@@ -637,6 +646,16 @@ export class IssuesProcessor {
     }
 
     return staleLabeledEvent.created_at;
+  }
+
+  // returns the creation date of a given label on an issue (or nothing if no label existed)
+  ///see https://developer.github.com/v3/activity/events/
+  async getLabelCreationDate(
+    issue: Issue,
+    label: string
+  ): Promise<string | undefined> {
+    const events = await this._getIssueEvents(issue);
+    return this._getLabelCreationDateFromEvents(label, events);
   }
 
   async getPullRequest(issue: Issue): Promise<IPullRequest | undefined | void> {
@@ -691,8 +710,12 @@ export class IssuesProcessor {
     closeLabel?: string
   ) {
     const issueLogger: IssueLogger = new IssueLogger(issue);
+
+    const events = await this._getIssueEvents(issue);
+
     const markedStaleOn: string =
-      (await this.getLabelCreationDate(issue, staleLabel)) || issue.updated_at;
+      this._getLabelCreationDateFromEvents(staleLabel, events) ||
+      issue.updated_at;
     issueLogger.info(
       `$$type marked stale on: ${LoggerService.cyan(markedStaleOn)}`
     );
@@ -742,10 +765,14 @@ export class IssuesProcessor {
       );
     }
 
+    // Calculate the effective update date, excluding ignored label activities
+    const ignoredLabels = new IgnoredLabels(this.options, issue);
+    const effectiveUpdateDate = ignoredLabels.getEffectiveUpdateDate(events);
+
     // The issue.updated_at and markedStaleOn are not always exactly in sync (they can be off by a second or 2)
     // isDateMoreRecentThan makes sure they are not the same date within a certain tolerance (15 seconds in this case)
     const issueHasUpdateSinceStale = isDateMoreRecentThan(
-      new Date(issue.updated_at),
+      new Date(effectiveUpdateDate),
       new Date(markedStaleOn),
       15
     );
@@ -786,7 +813,7 @@ export class IssuesProcessor {
     }
 
     const issueHasUpdateInCloseWindow: boolean = IssuesProcessor._updatedSince(
-      issue.updated_at,
+      effectiveUpdateDate,
       daysBeforeClose
     );
     issueLogger.info(

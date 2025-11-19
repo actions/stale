@@ -104,6 +104,7 @@ Every argument is optional.
 | [ignore-updates](#ignore-updates)                                   | Any update (update/comment) can reset the stale idle time on the issues/PRs | `false`               |
 | [ignore-issue-updates](#ignore-issue-updates)                       | Override [ignore-updates](#ignore-updates) for issues only                  |                       |
 | [ignore-pr-updates](#ignore-pr-updates)                             | Override [ignore-updates](#ignore-updates) for PRs only                     |                       |
+| [ignore-labels-activity-updates-on-pr](#ignore-labels-activity-updates-on-pr) | Ignore label activity from specified labels when checking for PR updates |                       |
 | [include-only-assigned](#include-only-assigned)                     | Process only assigned issues                                                | `false`               |
 | [sort-by](#sort-by)                                                 | What to sort issues and PRs by                                              | `created`             |
 | [only-issue-types](#only-issue-types)                               | Only issues with a matching type are processed as stale/closed.             |                       |
@@ -551,6 +552,25 @@ Useful to override [ignore-updates](#ignore-updates) but only to ignore the upda
 
 Default value: unset
 
+#### ignore-labels-activity-updates-on-pr
+
+A comma-separated list of label names (case-insensitive) that should be ignored when determining if a pull request has been updated.
+
+This is particularly useful when you have automated systems that add labels to PRs (like merge conflict detection, CI status updates, or automated review requests) and you don't want those automated label changes to reset the stale timer or prevent stale PRs from being closed.
+
+When this option is set, the action will:
+- Fetch all events for the PR
+- Filter out any `labeled` or `unlabeled` events for the specified labels
+- Calculate an "effective update date" based on the most recent non-ignored activity
+- Use this effective date when determining if the PR has been updated since being marked stale
+
+**Example:**
+```yaml
+ignore-labels-activity-updates-on-pr: 'merge-conflict, ci-failed, needs-rebase, merges-blocked'
+```
+
+Default value: unset
+
 #### include-only-assigned
 
 If set to `true`, only the issues or the pull requests with an assignee will be marked as stale automatically.
@@ -680,6 +700,29 @@ jobs:
           exempt-pr-labels: 'awaiting-approval,work-in-progress'
           only-labels: 'awaiting-feedback,awaiting-answers'
 ```
+
+Ignore automated label activity when checking for updates:
+
+```yaml
+name: 'Close stale issues and PRs'
+on:
+  schedule:
+    - cron: '30 1 * * *'
+
+jobs:
+  stale:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/stale@v10
+        with:
+          stale-pr-message: 'This PR is stale because it has been open 30 days with no activity.'
+          days-before-stale: 30
+          days-before-close: 7
+          # Ignore automated labels that shouldn't reset the stale timer
+          ignore-labels-activity-updates-on-pr: 'merge-conflict,ci-failed,needs-rebase,merges-blocked'
+```
+
+This is useful when you have automated systems that add labels to PRs (like CI status, merge conflicts, or automated checks) and you don't want those label changes to prevent stale PRs from being closed.
 
 Configure the stale action to only stale issue/PR created after the 18th april 2020:
 

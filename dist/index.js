@@ -262,6 +262,97 @@ exports.IgnoreUpdates = IgnoreUpdates;
 
 /***/ }),
 
+/***/ 5632:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.IgnoredLabels = void 0;
+const option_1 = __nccwpck_require__(5931);
+const words_to_list_1 = __nccwpck_require__(1883);
+const issue_logger_1 = __nccwpck_require__(2984);
+/**
+ * @description
+ * This class is responsible for calculating the effective update time of an issue/PR
+ * by filtering out label events that should be ignored when determining if an issue has been updated.
+ * This is useful for excluding bot-added labels from being considered as human activity.
+ */
+class IgnoredLabels {
+    constructor(options, issue) {
+        this._options = options;
+        this._issue = issue;
+        this._issueLogger = new issue_logger_1.IssueLogger(issue);
+    }
+    /**
+     * @description
+     * Get the list of labels that should be ignored when determining if a PR has been updated
+     *
+     * @returns {string[]} The list of label names to ignore (case-insensitive)
+     */
+    getIgnoredLabels() {
+        if (!this._issue.isPullRequest) {
+            return [];
+        }
+        return this._getIgnoredPrLabels();
+    }
+    /**
+     * @description
+     * Calculate the effective update time for the issue/PR by filtering out ignored label events.
+     * If there are events to filter, returns the most recent non-ignored event time.
+     * If all events are ignored, returns the creation date.
+     * If there are no ignored labels configured or no events, returns the original updated_at time.
+     *
+     * @param {IIssueEvent[]} events All events for the issue/PR
+     * @returns {string} The effective update timestamp
+     */
+    getEffectiveUpdateDate(events) {
+        const ignoredLabels = this.getIgnoredLabels();
+        // If no labels to ignore, or no events found, return original updated_at
+        if (ignoredLabels.length === 0 || events.length === 0) {
+            return this._issue.updated_at;
+        }
+        // Filter events to find the most recent non-ignored event
+        // We look for events that are NOT labeled/unlabeled events with ignored labels
+        const nonIgnoredEvents = events.filter(event => {
+            var _a, _b;
+            // If it's not a label event, keep it
+            if (event.event !== 'labeled' && event.event !== 'unlabeled') {
+                return true;
+            }
+            // If it's a label event, check if the label is in the ignored list and filter it out
+            const isEventFromIgnoredLabel = ignoredLabels
+                .map(label => label.toLowerCase())
+                .includes(((_b = (_a = event.label) === null || _a === void 0 ? void 0 : _a.name) === null || _b === void 0 ? void 0 : _b.toLowerCase()) || '');
+            return !isEventFromIgnoredLabel;
+        });
+        // If we have non-ignored events, return the most recent one
+        if (nonIgnoredEvents.length > 0) {
+            const mostRecentEvent = nonIgnoredEvents.reduce((latest, current) => {
+                return new Date(latest.created_at) > new Date(current.created_at)
+                    ? latest
+                    : current;
+            });
+            this._issueLogger.info(`Most recent non-ignored activity: ${mostRecentEvent.event} at ${mostRecentEvent.created_at} (ignoring activity from labels: ${ignoredLabels})`);
+            return mostRecentEvent.created_at;
+        }
+        // If all events are ignored label events, use the creation date
+        this._issueLogger.info(`All recent activity is from ignored labels (${ignoredLabels}). Using creation date as effective update date: ${this._issue.created_at}`);
+        return this._issue.created_at;
+    }
+    _getIgnoredPrLabels() {
+        if (this._options.ignoreLabelsActivityUpdatesOnPr) {
+            this._issueLogger.info(`The option ${this._issueLogger.createOptionLink(option_1.Option.IgnoreLabelsActivityUpdatesOnPr)} is set. Activity from these labels will be ignored when checking for updates: ${this._options.ignoreLabelsActivityUpdatesOnPr}`);
+            return (0, words_to_list_1.wordsToList)(this._options.ignoreLabelsActivityUpdatesOnPr);
+        }
+        return [];
+    }
+}
+exports.IgnoredLabels = IgnoredLabels;
+
+
+/***/ }),
+
 /***/ 4783:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
@@ -379,6 +470,7 @@ const should_mark_when_stale_1 = __nccwpck_require__(2461);
 const words_to_list_1 = __nccwpck_require__(1883);
 const assignees_1 = __nccwpck_require__(7236);
 const ignore_updates_1 = __nccwpck_require__(2935);
+const ignored_labels_1 = __nccwpck_require__(5632);
 const exempt_draft_pull_request_1 = __nccwpck_require__(854);
 const issue_1 = __nccwpck_require__(4783);
 const issue_logger_1 = __nccwpck_require__(2984);
@@ -715,13 +807,17 @@ class IssuesProcessor {
             }
         });
     }
-    // returns the creation date of a given label on an issue (or nothing if no label existed)
-    ///see https://developer.github.com/v3/activity/events/
-    getLabelCreationDate(issue, label) {
+    /**
+     * Fetch all events for an issue. Returns the creation date of a given label on an issue (or nothing if no label existed).
+     * See https://developer.github.com/v3/activity/events/
+     *
+     * @param issue The issue to fetch events for
+     */
+    _getIssueEvents(issue) {
         var _a;
         return __awaiter(this, void 0, void 0, function* () {
             const issueLogger = new issue_logger_1.IssueLogger(issue);
-            issueLogger.info(`Checking for label on this $$type`);
+            issueLogger.info(`Fetching events for this $$type...`);
             this._consumeIssueOperation(issue);
             (_a = this.statistics) === null || _a === void 0 ? void 0 : _a.incrementFetchedItemsEventsCount();
             const options = this.client.rest.issues.listEvents.endpoint.merge({
@@ -730,15 +826,26 @@ class IssuesProcessor {
                 per_page: 100,
                 issue_number: issue.number
             });
-            const events = yield this.client.paginate(options);
-            const reversedEvents = events.reverse();
-            const staleLabeledEvent = reversedEvents.find(event => event.event === 'labeled' &&
-                (0, clean_label_1.cleanLabel)(event.label.name) === (0, clean_label_1.cleanLabel)(label));
-            if (!staleLabeledEvent) {
-                // Must be old rather than labeled
-                return undefined;
-            }
-            return staleLabeledEvent.created_at;
+            return yield this.client.paginate(options);
+        });
+    }
+    // Extract the creation date of a given label from events
+    _getLabelCreationDateFromEvents(label, events) {
+        const reversedEvents = events.slice().reverse();
+        const staleLabeledEvent = reversedEvents.find(event => event.event === 'labeled' &&
+            (0, clean_label_1.cleanLabel)(event.label.name) === (0, clean_label_1.cleanLabel)(label));
+        if (!staleLabeledEvent) {
+            // Must be old rather than labeled
+            return undefined;
+        }
+        return staleLabeledEvent.created_at;
+    }
+    // returns the creation date of a given label on an issue (or nothing if no label existed)
+    ///see https://developer.github.com/v3/activity/events/
+    getLabelCreationDate(issue, label) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const events = yield this._getIssueEvents(issue);
+            return this._getLabelCreationDateFromEvents(label, events);
         });
     }
     getPullRequest(issue) {
@@ -783,7 +890,9 @@ class IssuesProcessor {
     _processStaleIssue(issue, staleLabel, staleMessage, labelsToAddWhenUnstale, labelsToRemoveWhenUnstale, labelsToRemoveWhenStale, closeMessage, closeLabel) {
         return __awaiter(this, void 0, void 0, function* () {
             const issueLogger = new issue_logger_1.IssueLogger(issue);
-            const markedStaleOn = (yield this.getLabelCreationDate(issue, staleLabel)) || issue.updated_at;
+            const events = yield this._getIssueEvents(issue);
+            const markedStaleOn = this._getLabelCreationDateFromEvents(staleLabel, events) ||
+                issue.updated_at;
             issueLogger.info(`$$type marked stale on: ${logger_service_1.LoggerService.cyan(markedStaleOn)}`);
             const issueHasCommentsSinceStale = yield this._hasCommentsSince(issue, markedStaleOn, staleMessage);
             issueLogger.info(`$$type has been commented on: ${logger_service_1.LoggerService.cyan(issueHasCommentsSinceStale)}`);
@@ -803,9 +912,12 @@ class IssuesProcessor {
                 issueLogger.info(`marked stale this run, so don't check for updates`);
                 yield this._removeLabelsOnStatusTransition(issue, labelsToRemoveWhenStale, option_1.Option.LabelsToRemoveWhenStale);
             }
+            // Calculate the effective update date, excluding ignored label activities
+            const ignoredLabels = new ignored_labels_1.IgnoredLabels(this.options, issue);
+            const effectiveUpdateDate = ignoredLabels.getEffectiveUpdateDate(events);
             // The issue.updated_at and markedStaleOn are not always exactly in sync (they can be off by a second or 2)
             // isDateMoreRecentThan makes sure they are not the same date within a certain tolerance (15 seconds in this case)
-            const issueHasUpdateSinceStale = (0, is_date_more_recent_than_1.isDateMoreRecentThan)(new Date(issue.updated_at), new Date(markedStaleOn), 15);
+            const issueHasUpdateSinceStale = (0, is_date_more_recent_than_1.isDateMoreRecentThan)(new Date(effectiveUpdateDate), new Date(markedStaleOn), 15);
             issueLogger.info(`$$type has been updated since it was marked stale: ${logger_service_1.LoggerService.cyan(issueHasUpdateSinceStale)}`);
             // Should we un-stale this issue?
             if (shouldRemoveStaleWhenUpdated &&
@@ -823,7 +935,7 @@ class IssuesProcessor {
             if (daysBeforeClose < 0) {
                 return; // Nothing to do because we aren't closing stale issues
             }
-            const issueHasUpdateInCloseWindow = IssuesProcessor._updatedSince(issue.updated_at, daysBeforeClose);
+            const issueHasUpdateInCloseWindow = IssuesProcessor._updatedSince(effectiveUpdateDate, daysBeforeClose);
             issueLogger.info(`$$type has been updated in the last ${daysBeforeClose} days: ${logger_service_1.LoggerService.cyan(issueHasUpdateInCloseWindow)}`);
             if (!issueHasCommentsSinceStale && !issueHasUpdateInCloseWindow) {
                 issueLogger.info(`Closing $$type because it was last updated on: ${logger_service_1.LoggerService.cyan(issue.updated_at)}`);
@@ -2249,6 +2361,7 @@ var Option;
     Option["IgnoreUpdates"] = "ignore-updates";
     Option["IgnoreIssueUpdates"] = "ignore-issue-updates";
     Option["IgnorePrUpdates"] = "ignore-pr-updates";
+    Option["IgnoreLabelsActivityUpdatesOnPr"] = "ignore-labels-activity-updates-on-pr";
     Option["ExemptDraftPr"] = "exempt-draft-pr";
     Option["CloseIssueReason"] = "close-issue-reason";
     Option["OnlyIssueTypes"] = "only-issue-types";
@@ -2615,6 +2728,7 @@ function _getAndValidateArgs() {
         ignoreUpdates: core.getInput('ignore-updates') === 'true',
         ignoreIssueUpdates: _toOptionalBoolean('ignore-issue-updates'),
         ignorePrUpdates: _toOptionalBoolean('ignore-pr-updates'),
+        ignoreLabelsActivityUpdatesOnPr: core.getInput('ignore-labels-activity-updates-on-pr'),
         exemptDraftPr: core.getInput('exempt-draft-pr') === 'true',
         closeIssueReason: core.getInput('close-issue-reason'),
         includeOnlyAssigned: core.getInput('include-only-assigned') === 'true',

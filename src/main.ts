@@ -122,6 +122,9 @@ function _getAndValidateArgs(): IIssuesProcessorOptions {
     ignoreUpdates: core.getInput('ignore-updates') === 'true',
     ignoreIssueUpdates: _toOptionalBoolean('ignore-issue-updates'),
     ignorePrUpdates: _toOptionalBoolean('ignore-pr-updates'),
+    ignoreLabelsActivityUpdatesOnPr: core.getInput(
+      'ignore-labels-activity-updates-on-pr'
+    ),
     exemptDraftPr: core.getInput('exempt-draft-pr') === 'true',
     closeIssueReason: core.getInput('close-issue-reason'),
     includeOnlyAssigned: core.getInput('include-only-assigned') === 'true',

@@ -1,6 +1,7 @@
 import {Issue} from '../../src/classes/issue';
 import {IssuesProcessor} from '../../src/classes/issues-processor';
 import {IComment} from '../../src/interfaces/comment';
+import {IIssueEvent} from '../../src/interfaces/issue-event';
 import {IIssuesProcessorOptions} from '../../src/interfaces/issues-processor-options';
 import {IPullRequest} from '../../src/interfaces/pull-request';
 import {IState} from '../../src/interfaces/state/state';
@@ -37,5 +38,10 @@ export class IssuesProcessorMock extends IssuesProcessor {
     if (getPullRequest) {
       this.getPullRequest = getPullRequest;
     }
+
+    // Mock _getIssueEvents to return empty array by default to avoid API calls in tests
+    (this as any)._getIssueEvents = async (): Promise<IIssueEvent[]> => {
+      return [];
+    };
   }
 }

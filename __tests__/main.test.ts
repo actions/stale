@@ -585,7 +585,7 @@ test('stale issues should not be closed if days is set to -1', async () => {
   expect(processor.removedLabelIssues.length).toEqual(0);
 });
 
-test('stale label should be removed if a comment was added to a stale issue', async () => {
+test('stale label should be removed if a user comment was added to a stale issue', async () => {
   const TestIssueList: Issue[] = [
     generateIssue(
       1,
@@ -614,6 +614,44 @@ test('stale label should be removed if a comment was added to a stale issue', as
   expect(processor.removedLabelIssues.length).toEqual(1);
 });
 
+test('stale label should not be removed if a bot comment was added to a stale issue', async () => {
+  const opts = {...DefaultProcessorOptions, removeStaleWhenUpdated: true};
+  const TestIssueList: Issue[] = [
+    generateIssue(
+        opts,
+        1,
+        'An issue that should un-stale',
+        '2020-01-01T17:00:00Z',
+        '2020-01-01T17:00:00Z',
+        false,
+        false,
+        ['Stale']
+    )
+  ];
+  const processor = new IssuesProcessorMock(
+      opts,
+      alwaysFalseStateMock,
+      async p => (p === 1 ? TestIssueList : []),
+      async () => [
+        {
+          user: {
+            login: 'notme',
+            type: 'Bot'
+          },
+          body: 'Body'
+        }
+      ], // return a fake comment to indicate there was an update
+      async () => new Date().toDateString()
+  );
+
+  // process our fake issue list
+  await processor.processIssues(1);
+
+  expect(processor.closedIssues).toHaveLength(1);
+  expect(processor.staleIssues).toHaveLength(0);
+  expect(processor.removedLabelIssues).toHaveLength(0);
+});
+
 test('stale label should not be removed if a comment was added by the bot (and the issue should be closed)', async () => {
   github.context.actor = 'abot';
   const TestIssueList: Issue[] = [
@@ -632,7 +670,7 @@ test('stale label should not be removed if a comment was added by the bot (and t
   const processor = new IssueProcessor(
     opts,
     async p => (p == 1 ? TestIssueList : []),
-    async (num, dt) => [{user: {login: 'abot', type: 'User'}}], // return a fake comment to indicate there was an update by the bot
+    async (num, dt) => [{user: {login: 'abot', type: 'Bot'}}], // return a fake comment to indicate there was an update by the bot
     async (issue, label) => new Date().toDateString()
   );
 

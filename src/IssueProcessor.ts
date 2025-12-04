@@ -263,7 +263,7 @@ export class IssueProcessor {
 
     const filteredComments = comments.filter(
       comment =>
-        comment.user.type === 'User' &&
+        comment.user.type !== 'Bot' &&
         comment.user.login !== github.context.actor
     );
 

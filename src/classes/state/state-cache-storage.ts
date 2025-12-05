@@ -33,12 +33,14 @@ const getOctokitClient = () => {
 const checkIfCacheExists = async (cacheKey: string): Promise<boolean> => {
   const client = getOctokitClient();
   try {
-    const issueResult = await client.request(
-      `/repos/${context.repo.owner}/${context.repo.repo}/actions/caches`
-    );
+    const cachesResult = await client.rest.actions.getActionsCacheList({
+      owner: context.repo.owner,
+      repo: context.repo.repo,
+      key: cacheKey // prefix matching
+    });
     const caches: Array<{key?: string}> =
-      issueResult.data['actions_caches'] || [];
-    return Boolean(caches.find(cache => cache['key'] === cacheKey));
+      cachesResult.data['actions_caches'] || [];
+    return caches.some(cache => cache['key'] === cacheKey);
   } catch (error) {
     core.debug(`Error checking if cache exist: ${error.message}`);
   }
@@ -48,10 +50,11 @@ const resetCacheWithOctokit = async (cacheKey: string): Promise<void> => {
   const client = getOctokitClient();
   core.debug(`remove cache "${cacheKey}"`);
   try {
-    // TODO: replace with client.rest.
-    await client.request(
-      `DELETE /repos/${context.repo.owner}/${context.repo.repo}/actions/caches?key=${cacheKey}`
-    );
+    await client.rest.actions.deleteActionsCacheByKey({
+      owner: context.repo.owner,
+      repo: context.repo.repo,
+      key: cacheKey
+    });
   } catch (error) {
     if (error.status) {
       core.warning(

@@ -125,7 +125,14 @@ function _getAndValidateArgs(): IIssuesProcessorOptions {
     exemptDraftPr: core.getInput('exempt-draft-pr') === 'true',
     closeIssueReason: core.getInput('close-issue-reason'),
     includeOnlyAssigned: core.getInput('include-only-assigned') === 'true',
-    onlyIssueTypes: core.getInput('only-issue-types')
+    onlyIssueTypes: core.getInput('only-issue-types'),
+    excludeWeekdays:
+      core.getInput('exclude-weekdays')
+        ? core
+          .getInput('exclude-weekdays')
+          .split(',')
+          .map(day => parseInt(day.trim(), 10))
+        : []
   };
 
   for (const numberInput of ['days-before-stale']) {
@@ -160,6 +167,17 @@ function _getAndValidateArgs(): IIssuesProcessorOptions {
     const errorMessage = `Unrecognized close-issue-reason "${
       args.closeIssueReason
     }", valid values are: ${validCloseReasons.filter(Boolean).join(', ')}`;
+    core.setFailed(errorMessage);
+    throw new Error(errorMessage);
+  }
+
+  // Validate weekdays
+  if (
+    args.excludeWeekdays &&
+    args.excludeWeekdays.some(day => isNaN(day) || day < 0 || day > 6)
+  ) {
+    const errorMessage =
+      'Option "exclude-weekdays" must be comma-separated integers between 0 (Sunday) and 6 (Saturday)';
     core.setFailed(errorMessage);
     throw new Error(errorMessage);
   }

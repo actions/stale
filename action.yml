@@ -212,6 +212,10 @@ inputs:
     description: 'Only issues with a matching type are processed as stale/closed. Defaults to `[]` (disabled) and can be a comma-separated list of issue types.'
     default: ''
     required: false
+  exclude-weekdays:
+    description: 'Comma-separated list of weekdays to exclude from elapsed days calculation (0=Sunday, 6=Saturday)'
+    required: false
+    default: ''
 outputs:
   closed-issues-prs:
     description: 'List of all closed issues and pull requests.'

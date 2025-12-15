@@ -2743,3 +2743,45 @@ test('processing an issue with the "includeOnlyAssigned" option set and no assig
   expect(processor.staleIssues).toHaveLength(0);
   expect(processor.closedIssues).toHaveLength(0);
 });
+
+test('processing an issue should not count specific weekdays when calculating stale days', async () => {
+  const now: Date = new Date();
+  const day = 1000 * 60 * 60 * 24;
+  const yesterday: Date = new Date(now.getTime() - day);
+
+  const opts: IIssuesProcessorOptions = {
+    ...DefaultProcessorOptions,
+    daysBeforeStale: 5,
+    daysBeforeClose: 2,
+    excludeWeekdays: [yesterday.getDay()]
+  };
+
+  const TestIssueList: Issue[] = [
+    generateIssue(
+      opts,
+      1,
+      'not stale yet',
+      new Date(now.getTime() - 5 * day).toDateString()
+    ),
+    generateIssue(
+      opts,
+      2,
+      'stale',
+      new Date(now.getTime() - 6 * day).toDateString()
+    )
+  ];
+
+  const processor = new IssuesProcessorMock(
+    opts,
+    alwaysFalseStateMock,
+    async p => (p === 1 ? TestIssueList : []),
+    async () => [],
+    async () => new Date().toDateString()
+  );
+
+  await processor.processIssues(1);
+
+  expect(processor.staleIssues).toHaveLength(1);
+  expect(processor.staleIssues[0]!.number).toEqual(2);
+  expect(processor.closedIssues).toHaveLength(0);
+});

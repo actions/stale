@@ -29,10 +29,12 @@ import {retry} from '@octokit/plugin-retry';
 import {IState} from '../interfaces/state/state';
 import {IRateLimit} from '../interfaces/rate-limit';
 import {RateLimit} from './rate-limit';
+import {getSortField} from '../functions/get-sort-field';
 
 /***
  * Handle processing of issues for staleness/closure.
  */
+
 export class IssuesProcessor {
   private static _updatedSince(timestamp: string, num_days: number): boolean {
     const daysInMillis = 1000 * 60 * 60 * 24 * num_days;
@@ -254,6 +256,23 @@ export class IssuesProcessor {
       );
       IssuesProcessor._endIssueProcessing(issue);
       return; // If the issue has an 'include-only-assigned' option set, process only issues with nonempty assignees list
+    }
+
+    if (this.options.onlyIssueTypes) {
+      const allowedTypes = this.options.onlyIssueTypes
+        .split(',')
+        .map(t => t.trim().toLowerCase())
+        .filter(Boolean);
+      const issueType = (issue.issue_type || '').toLowerCase();
+      if (!allowedTypes.includes(issueType)) {
+        issueLogger.info(
+          `Skipping this $$type because its type ('${
+            issue.issue_type
+          }') is not in onlyIssueTypes (${allowedTypes.join(', ')})`
+        );
+        IssuesProcessor._endIssueProcessing(issue);
+        return;
+      }
     }
 
     const onlyLabels: string[] = wordsToList(this._getOnlyLabels(issue));
@@ -576,6 +595,7 @@ export class IssuesProcessor {
         state: 'open',
         per_page: 100,
         direction: this.options.ascending ? 'asc' : 'desc',
+        sort: getSortField(this.options.sortBy),
         page
       });
       this.statistics?.incrementFetchedItemsCount(issueResult.data.length);
@@ -646,11 +666,22 @@ export class IssuesProcessor {
 
   async getRateLimit(): Promise<IRateLimit | undefined> {
     const logger: Logger = new Logger();
+
     try {
       const rateLimitResult = await this.client.rest.rateLimit.get();
       return new RateLimit(rateLimitResult.data.rate);
-    } catch (error) {
-      logger.error(`Error when getting rateLimit: ${error.message}`);
+    } catch (error: unknown) {
+      const status = (error as {status?: number})?.status;
+      const message = (error as {message?: string})?.message ?? String(error);
+
+      if (status === 404 && message.includes('Rate limiting is not enabled')) {
+        logger.warning(
+          'Rate limiting is not enabled on this instance. Proceeding without rate limit checks.'
+        );
+        return undefined;
+      }
+
+      logger.error(`Error when getting rateLimit: ${message}`);
     }
   }
 

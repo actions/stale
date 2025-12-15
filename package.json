@@ -1,6 +1,6 @@
 {
   "name": "stale-action",
-  "version": "7.0.0",
+  "version": "10.0.0",
   "private": true,
   "description": "Marks old issues and PRs as stale",
   "main": "lib/main.js",
@@ -31,14 +31,14 @@
     "stale"
   ],
   "engines": {
-    "node": "16",
-    "npm": ">=7.0.0 <10.0.0-0"
+    "node": "24",
+    "npm": ">=7.0.0"
   },
   "author": "GitHub",
   "license": "MIT",
   "dependencies": {
-    "@actions/cache": "^3.2.1",
-    "@actions/core": "^1.10.0",
+    "@actions/cache": "^4.0.3",
+    "@actions/core": "^1.11.1",
     "@actions/github": "^5.1.1",
     "@octokit/core": "^4.2.0",
     "@octokit/plugin-retry": "^4.1.1",
@@ -46,16 +46,16 @@
     "semver": "^7.5.4"
   },
   "devDependencies": {
-    "@types/jest": "^29.5.3",
+    "@types/jest": "^29.5.14",
     "@types/lodash.deburr": "^4.1.6",
-    "@types/node": "^20.5.1",
+    "@types/node": "^24.3.1",
     "@types/semver": "^7.5.0",
     "@typescript-eslint/eslint-plugin": "^6.2.1",
     "@typescript-eslint/parser": "^6.2.1",
     "@vercel/ncc": "^0.36.1",
     "ansi-styles": "5.2.0",
     "eslint": "^8.46.0",
-    "eslint-config-prettier": "^8.8.0",
+    "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-jest": "^27.2.3",
     "eslint-plugin-node": "^11.1.0",
     "jest": "^29.6.2",
@@ -65,7 +65,7 @@
     "prettier": "^2.8.7",
     "standard-version": "^9.3.1",
     "terminal-link": "^2.1.1",
-    "ts-jest": "^29.0.5",
+    "ts-jest": "^29.2.5",
     "typescript": "^5.2.2"
   }
 }

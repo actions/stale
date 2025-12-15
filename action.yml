@@ -136,6 +136,10 @@ inputs:
     description: 'The order to get issues or pull requests. Defaults to false, which is descending.'
     default: 'false'
     required: false
+  sort-by:
+    description: 'What to sort results by. Valid options are `created`, `updated`, and `comments`. Defaults to `created`.'
+    default: 'created'
+    required: false
   delete-branch:
     description: 'Delete the git branch after closing a stale pull request.'
     default: 'false'
@@ -204,11 +208,15 @@ inputs:
     description: 'Only the issues or the pull requests with an assignee will be marked as stale automatically.'
     default: 'false'
     required: false
+  only-issue-types:
+    description: 'Only issues with a matching type are processed as stale/closed. Defaults to `[]` (disabled) and can be a comma-separated list of issue types.'
+    default: ''
+    required: false
 outputs:
   closed-issues-prs:
     description: 'List of all closed issues and pull requests.'
   staled-issues-prs:
     description: 'List of all staled issues and pull requests.'
 runs:
-  using: 'node16'
+  using: 'node24'
   main: 'dist/index.js'

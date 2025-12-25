@@ -742,12 +742,12 @@ export class IssuesProcessor {
       );
     }
 
-    // The issue.updated_at and markedStaleOn are not always exactly in sync (they can be off by a second or 2)
-    // isDateMoreRecentThan makes sure they are not the same date within a certain tolerance (15 seconds in this case)
+    // The issue.updated_at and markedStaleOn are not always exactly in sync (they can be off by several seconds)
+    // isDateMoreRecentThan makes sure they are not the same date within a certain tolerance (30 seconds in this case)
     const issueHasUpdateSinceStale = isDateMoreRecentThan(
       new Date(issue.updated_at),
       new Date(markedStaleOn),
-      15
+      30
     );
 
     issueLogger.info(

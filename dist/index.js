@@ -803,9 +803,9 @@ class IssuesProcessor {
                 issueLogger.info(`marked stale this run, so don't check for updates`);
                 yield this._removeLabelsOnStatusTransition(issue, labelsToRemoveWhenStale, option_1.Option.LabelsToRemoveWhenStale);
             }
-            // The issue.updated_at and markedStaleOn are not always exactly in sync (they can be off by a second or 2)
-            // isDateMoreRecentThan makes sure they are not the same date within a certain tolerance (15 seconds in this case)
-            const issueHasUpdateSinceStale = (0, is_date_more_recent_than_1.isDateMoreRecentThan)(new Date(issue.updated_at), new Date(markedStaleOn), 15);
+            // The issue.updated_at and markedStaleOn are not always exactly in sync (they can be off by several seconds)
+            // isDateMoreRecentThan makes sure they are not the same date within a certain tolerance (30 seconds in this case)
+            const issueHasUpdateSinceStale = (0, is_date_more_recent_than_1.isDateMoreRecentThan)(new Date(issue.updated_at), new Date(markedStaleOn), 30);
             issueLogger.info(`$$type has been updated since it was marked stale: ${logger_service_1.LoggerService.cyan(issueHasUpdateSinceStale)}`);
             // Should we un-stale this issue?
             if (shouldRemoveStaleWhenUpdated &&

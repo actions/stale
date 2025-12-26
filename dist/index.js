@@ -417,6 +417,7 @@ class IssuesProcessor {
         this.addedLabelIssues = [];
         this.addedCloseCommentIssues = [];
         this._logger = new logger_1.Logger();
+        this._issueEventsCache = new Map();
         this.options = options;
         this.state = state;
         this.client = (0, github_1.getOctokit)(this.options.repoToken, undefined, plugin_retry_1.retry);
@@ -722,15 +723,19 @@ class IssuesProcessor {
         return __awaiter(this, void 0, void 0, function* () {
             const issueLogger = new issue_logger_1.IssueLogger(issue);
             issueLogger.info(`Checking for label on this $$type`);
-            this._consumeIssueOperation(issue);
-            (_a = this.statistics) === null || _a === void 0 ? void 0 : _a.incrementFetchedItemsEventsCount();
-            const options = this.client.rest.issues.listEvents.endpoint.merge({
-                owner: github_1.context.repo.owner,
-                repo: github_1.context.repo.repo,
-                per_page: 100,
-                issue_number: issue.number
-            });
-            const events = yield this.client.paginate(options);
+            let events = this._issueEventsCache.get(issue.number);
+            if (!events) {
+                this._consumeIssueOperation(issue);
+                (_a = this.statistics) === null || _a === void 0 ? void 0 : _a.incrementFetchedItemsEventsCount();
+                const options = this.client.rest.issues.listEvents.endpoint.merge({
+                    owner: github_1.context.repo.owner,
+                    repo: github_1.context.repo.repo,
+                    per_page: 100,
+                    issue_number: issue.number
+                });
+                events = yield this.client.paginate(options);
+                this._issueEventsCache.set(issue.number, events);
+            }
             const reversedEvents = events.reverse();
             const staleLabeledEvent = reversedEvents.find(event => event.event === 'labeled' &&
                 (0, clean_label_1.cleanLabel)(event.label.name) === (0, clean_label_1.cleanLabel)(label));
@@ -739,6 +744,32 @@ class IssuesProcessor {
                 return undefined;
             }
             return staleLabeledEvent.created_at;
+        });
+    }
+    hasOnlyStaleLabelingEventsSince(issue, sinceDate, staleLabel, events) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const issueLogger = new issue_logger_1.IssueLogger(issue);
+            issueLogger.info(`Checking if only stale label added events on $$type since: ${logger_service_1.LoggerService.cyan(sinceDate)}`);
+            if (!sinceDate) {
+                return false;
+            }
+            const sinceTimestamp = new Date(sinceDate).getTime();
+            if (Number.isNaN(sinceTimestamp)) {
+                return false;
+            }
+            const relevantEvents = events.filter(event => {
+                const eventTimestamp = new Date(event.created_at).getTime();
+                return !Number.isNaN(eventTimestamp) && eventTimestamp >= sinceTimestamp;
+            });
+            if (relevantEvents.length === 0) {
+                return false;
+            }
+            return relevantEvents.every(event => {
+                if (event.event !== 'labeled') {
+                    return false;
+                }
+                return (0, clean_label_1.cleanLabel)(event.label.name) === (0, clean_label_1.cleanLabel)(staleLabel);
+            });
         });
     }
     getPullRequest(issue) {
@@ -805,7 +836,20 @@ class IssuesProcessor {
             }
             // The issue.updated_at and markedStaleOn are not always exactly in sync (they can be off by a second or 2)
             // isDateMoreRecentThan makes sure they are not the same date within a certain tolerance (15 seconds in this case)
-            const issueHasUpdateSinceStale = (0, is_date_more_recent_than_1.isDateMoreRecentThan)(new Date(issue.updated_at), new Date(markedStaleOn), 15);
+            let issueHasUpdateSinceStale = (0, is_date_more_recent_than_1.isDateMoreRecentThan)(new Date(issue.updated_at), new Date(markedStaleOn), 15);
+            // Check if the only update was the stale label being added
+            if (issueHasUpdateSinceStale &&
+                shouldRemoveStaleWhenUpdated &&
+                !issue.markedStaleThisRun) {
+                const cachedEvents = this._issueEventsCache.get(issue.number);
+                if (cachedEvents) {
+                    const onlyStaleLabelAdded = yield this.hasOnlyStaleLabelingEventsSince(issue, markedStaleOn, staleLabel, cachedEvents);
+                    if (onlyStaleLabelAdded) {
+                        issueHasUpdateSinceStale = false;
+                        issueLogger.info(`Ignoring $$type update since only the stale label was added`);
+                    }
+                }
+            }
             issueLogger.info(`$$type has been updated since it was marked stale: ${logger_service_1.LoggerService.cyan(issueHasUpdateSinceStale)}`);
             // Should we un-stale this issue?
             if (shouldRemoveStaleWhenUpdated &&

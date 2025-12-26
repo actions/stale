@@ -672,6 +672,8 @@ export class IssuesProcessor {
 
       const events: IIssueEvent[] = [];
       let pagesFetched = 0;
+      let reachedSinceDate = false;
+      let hitEventsCap = false;
 
       for await (const page of this.client.paginate.iterator(options)) {
         pagesFetched += 1;
@@ -680,6 +682,7 @@ export class IssuesProcessor {
 
         const pageEvents = page.data as IIssueEvent[];
         if (pageEvents.length === 0) {
+          reachedSinceDate = true;
           break;
         }
 
@@ -690,18 +693,26 @@ export class IssuesProcessor {
           .filter(timestamp => !Number.isNaN(timestamp));
 
         if (pageTimestamps.length === 0) {
+          reachedSinceDate = true;
           break;
         }
 
         const oldestTimestampInPage = Math.min(...pageTimestamps);
 
         if (oldestTimestampInPage < sinceTimestamp) {
+          reachedSinceDate = true;
           break;
         }
 
         if (pagesFetched >= 3) {
+          hitEventsCap = true;
           break;
         }
+      }
+
+      if (hitEventsCap && !reachedSinceDate) {
+        // May be more events to process, but we hit our cap, so fall back to issue.updated_at
+        return false;
       }
 
       const relevantEvents = events.filter(event => {

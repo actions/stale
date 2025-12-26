@@ -77,6 +77,7 @@ export class IssuesProcessor {
   readonly addedCloseCommentIssues: Issue[] = [];
   readonly statistics: Statistics | undefined;
   private readonly _logger: Logger = new Logger();
+  private readonly _issueEventsCache: Map<number, IIssueEvent[]> = new Map();
   private readonly state: IState;
 
   constructor(options: IIssuesProcessorOptions, state: IState) {
@@ -613,16 +614,22 @@ export class IssuesProcessor {
 
     issueLogger.info(`Checking for label on this $$type`);
 
-    this._consumeIssueOperation(issue);
-    this.statistics?.incrementFetchedItemsEventsCount();
-    const options = this.client.rest.issues.listEvents.endpoint.merge({
-      owner: context.repo.owner,
-      repo: context.repo.repo,
-      per_page: 100,
-      issue_number: issue.number
-    });
+    let events = this._issueEventsCache.get(issue.number);
 
-    const events: IIssueEvent[] = await this.client.paginate(options);
+    if (!events) {
+      this._consumeIssueOperation(issue);
+      this.statistics?.incrementFetchedItemsEventsCount();
+      const options = this.client.rest.issues.listEvents.endpoint.merge({
+        owner: context.repo.owner,
+        repo: context.repo.repo,
+        per_page: 100,
+        issue_number: issue.number
+      });
+
+      events = await this.client.paginate(options);
+      this._issueEventsCache.set(issue.number, events);
+    }
+
     const reversedEvents = events.reverse();
 
     const staleLabeledEvent = reversedEvents.find(
@@ -659,84 +666,32 @@ export class IssuesProcessor {
       return false;
     }
 
-    try {
-      // Note: listEvents doesn't support server-side filtering by date, so we
-      // cap pagination (max 3 pages / 300 events) and stop when
-      // events are older than sinceDate.
-      const options = this.client.rest.issues.listEvents.endpoint.merge({
-        owner: context.repo.owner,
-        repo: context.repo.repo,
-        per_page: 100,
-        issue_number: issue.number
-      });
+    // Should have been cached already
+    const events = this._issueEventsCache.get(issue.number);
 
-      const events: IIssueEvent[] = [];
-      let pagesFetched = 0;
-      let reachedSinceDate = false;
-      let hitEventsCap = false;
-
-      for await (const page of this.client.paginate.iterator(options)) {
-        pagesFetched += 1;
-        this._consumeIssueOperation(issue);
-        this.statistics?.incrementFetchedItemsEventsCount();
-
-        const pageEvents = page.data as IIssueEvent[];
-        if (pageEvents.length === 0) {
-          reachedSinceDate = true;
-          break;
-        }
-
-        events.push(...pageEvents);
-
-        const pageTimestamps = pageEvents
-          .map(event => new Date(event.created_at).getTime())
-          .filter(timestamp => !Number.isNaN(timestamp));
-
-        if (pageTimestamps.length === 0) {
-          reachedSinceDate = true;
-          break;
-        }
-
-        const oldestTimestampInPage = Math.min(...pageTimestamps);
-
-        if (oldestTimestampInPage < sinceTimestamp) {
-          reachedSinceDate = true;
-          break;
-        }
-
-        if (pagesFetched >= 3) {
-          hitEventsCap = true;
-          break;
-        }
-      }
-
-      if (hitEventsCap && !reachedSinceDate) {
-        // May be more events to process, but we hit our cap, so fall back to issue.updated_at
-        return false;
-      }
-
-      const relevantEvents = events.filter(event => {
-        const eventTimestamp = new Date(event.created_at).getTime();
-        return !Number.isNaN(eventTimestamp) && eventTimestamp >= sinceTimestamp;
-      });
-
-      if (relevantEvents.length === 0) {
-        return false;
-      }
-
-      return relevantEvents.every(event => {
-        if (event.event !== 'labeled') {
-          return false;
-        }
-
-        return cleanLabel(event.label.name) === cleanLabel(staleLabel);
-      });
-    } catch (error) {
-      issueLogger.error(
-        `Error when listing events for this $$type: ${error.message}`
+    if (!events) {
+      issueLogger.warning(
+        `No cached events found for this $$type; defaulting to update check`
       );
       return false;
     }
+
+    const relevantEvents = events.filter(event => {
+      const eventTimestamp = new Date(event.created_at).getTime();
+      return !Number.isNaN(eventTimestamp) && eventTimestamp >= sinceTimestamp;
+    });
+
+    if (relevantEvents.length === 0) {
+      return false;
+    }
+
+    return relevantEvents.every(event => {
+      if (event.event !== 'labeled') {
+        return false;
+      }
+
+      return cleanLabel(event.label.name) === cleanLabel(staleLabel);
+    });
   }
 
   async getPullRequest(issue: Issue): Promise<IPullRequest | undefined | void> {

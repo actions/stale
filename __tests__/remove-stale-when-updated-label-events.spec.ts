@@ -121,6 +121,14 @@ describe('hasOnlyStaleLabelingEventsSince', (): void => {
     };
   });
 
+  const seedEventsCache = (
+    processor: TestIssuesProcessor,
+    issue: Issue,
+    events: IIssueEvent[]
+  ): void => {
+    (processor as any)._issueEventsCache.set(issue.number, events);
+  };
+
   afterEach((): void => {
     if (originalRepo === undefined) {
       delete process.env.GITHUB_REPOSITORY;
@@ -162,6 +170,7 @@ describe('hasOnlyStaleLabelingEventsSince', (): void => {
       alwaysFalseStateMock,
       events
     );
+    seedEventsCache(processor, issue, events);
 
     const result = await processor.callhasOnlyStaleLabelingEventsSince(
       issue,
@@ -187,6 +196,7 @@ describe('hasOnlyStaleLabelingEventsSince', (): void => {
       alwaysFalseStateMock,
       events
     );
+    seedEventsCache(processor, issue, events);
 
     const result = await processor.callhasOnlyStaleLabelingEventsSince(
       issue,
@@ -212,6 +222,7 @@ describe('hasOnlyStaleLabelingEventsSince', (): void => {
       alwaysFalseStateMock,
       events
     );
+    seedEventsCache(processor, issue, events);
 
     const result = await processor.callhasOnlyStaleLabelingEventsSince(
       issue,
@@ -237,6 +248,7 @@ describe('hasOnlyStaleLabelingEventsSince', (): void => {
       alwaysFalseStateMock,
       events
     );
+    seedEventsCache(processor, issue, events);
 
     const result = await processor.callhasOnlyStaleLabelingEventsSince(
       issue,
@@ -262,6 +274,7 @@ describe('hasOnlyStaleLabelingEventsSince', (): void => {
       alwaysFalseStateMock,
       events
     );
+    seedEventsCache(processor, issue, events);
 
     const result = await processor.callhasOnlyStaleLabelingEventsSince(
       issue,

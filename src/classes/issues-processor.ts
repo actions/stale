@@ -639,6 +639,50 @@ export class IssuesProcessor {
     return staleLabeledEvent.created_at;
   }
 
+  private async hasOnlyStaleLabelUpdateSince(
+    issue: Issue,
+    sinceDate: string,
+    staleLabel: string
+  ): Promise<boolean> {
+    if (!sinceDate) {
+      return false;
+    }
+
+    const sinceTimestamp = new Date(sinceDate).getTime();
+    if (Number.isNaN(sinceTimestamp)) {
+      return false;
+    }
+
+    this._consumeIssueOperation(issue);
+    this.statistics?.incrementFetchedItemsEventsCount();
+    const options = this.client.rest.issues.listEvents.endpoint.merge({
+      owner: context.repo.owner,
+      repo: context.repo.repo,
+      per_page: 100,
+      issue_number: issue.number
+    });
+
+    const events: IIssueEvent[] = await this.client.paginate(options);
+    const relevantEvents = events.filter(event => {
+      const eventTimestamp = new Date(event.created_at).getTime();
+      return !Number.isNaN(eventTimestamp) && eventTimestamp >= sinceTimestamp;
+    });
+
+    if (relevantEvents.length === 0) {
+      return false;
+    }
+
+    return relevantEvents.every(event => {
+      if (event.event !== 'labeled' && event.event !== 'unlabeled') {
+        return false;
+      }
+
+      return (
+        cleanLabel(event.label?.name) === cleanLabel(staleLabel)
+      );
+    });
+  }
+
   async getPullRequest(issue: Issue): Promise<IPullRequest | undefined | void> {
     const issueLogger: IssueLogger = new IssueLogger(issue);
 
@@ -742,13 +786,32 @@ export class IssuesProcessor {
       );
     }
 
-    // The issue.updated_at and markedStaleOn are not always exactly in sync (they can be off by a second or 2)
-    // isDateMoreRecentThan makes sure they are not the same date within a certain tolerance (15 seconds in this case)
-    const issueHasUpdateSinceStale = isDateMoreRecentThan(
+    // Check for updates since being marked stale
+    let issueHasUpdateSinceStale = isDateMoreRecentThan(
       new Date(issue.updated_at),
       new Date(markedStaleOn),
       15
     );
+
+    // Check if the only update was the stale label being added/removed
+    if (
+      issueHasUpdateSinceStale &&
+      shouldRemoveStaleWhenUpdated &&
+      !issue.markedStaleThisRun
+    ) {
+      const onlyStaleLabelUpdate = await this.hasOnlyStaleLabelUpdateSince(
+        issue,
+        markedStaleOn,
+        staleLabel
+      );
+
+      if (onlyStaleLabelUpdate) {
+        issueHasUpdateSinceStale = false;
+        issueLogger.info(
+          `Ignoring $$type update since only the stale label was modified`
+        );
+      }
+    }
 
     issueLogger.info(
       `$$type has been updated since it was marked stale: ${LoggerService.cyan(

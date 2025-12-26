@@ -87,7 +87,11 @@ class TestIssuesProcessor extends IssuesProcessor {
           }
         }
       },
-      paginate: async () => events
+      paginate: {
+        iterator: async function* () {
+          yield {data: events};
+        }
+      }
     };
     (this as any).client = client;
   }

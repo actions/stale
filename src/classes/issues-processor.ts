@@ -660,8 +660,9 @@ export class IssuesProcessor {
     }
 
     try {
-      this._consumeIssueOperation(issue);
-      this.statistics?.incrementFetchedItemsEventsCount();
+      // Note: listEvents doesn't support server-side filtering by date, so we
+      // cap pagination (max 3 pages / 300 events) and stop when
+      // events are older than sinceDate.
       const options = this.client.rest.issues.listEvents.endpoint.merge({
         owner: context.repo.owner,
         repo: context.repo.repo,
@@ -669,7 +670,34 @@ export class IssuesProcessor {
         issue_number: issue.number
       });
 
-      const events: IIssueEvent[] = await this.client.paginate(options);
+      const events: IIssueEvent[] = [];
+      let pagesFetched = 0;
+
+      for await (const page of this.client.paginate.iterator(options)) {
+        pagesFetched += 1;
+        this._consumeIssueOperation(issue);
+        this.statistics?.incrementFetchedItemsEventsCount();
+
+        const pageEvents = page.data as IIssueEvent[];
+        if (pageEvents.length === 0) {
+          break;
+        }
+
+        events.push(...pageEvents);
+
+        const oldestTimestampInPage = Math.min(
+          ...pageEvents.map(event => new Date(event.created_at).getTime())
+        );
+
+        if (oldestTimestampInPage < sinceTimestamp) {
+          break;
+        }
+
+        if (pagesFetched >= 3) {
+          break;
+        }
+      }
+
       const relevantEvents = events.filter(event => {
         const eventTimestamp = new Date(event.created_at).getTime();
         return !Number.isNaN(eventTimestamp) && eventTimestamp >= sinceTimestamp;

@@ -659,32 +659,39 @@ export class IssuesProcessor {
       return false;
     }
 
-    this._consumeIssueOperation(issue);
-    this.statistics?.incrementFetchedItemsEventsCount();
-    const options = this.client.rest.issues.listEvents.endpoint.merge({
-      owner: context.repo.owner,
-      repo: context.repo.repo,
-      per_page: 100,
-      issue_number: issue.number
-    });
+    try {
+      this._consumeIssueOperation(issue);
+      this.statistics?.incrementFetchedItemsEventsCount();
+      const options = this.client.rest.issues.listEvents.endpoint.merge({
+        owner: context.repo.owner,
+        repo: context.repo.repo,
+        per_page: 100,
+        issue_number: issue.number
+      });
 
-    const events: IIssueEvent[] = await this.client.paginate(options);
-    const relevantEvents = events.filter(event => {
-      const eventTimestamp = new Date(event.created_at).getTime();
-      return !Number.isNaN(eventTimestamp) && eventTimestamp >= sinceTimestamp;
-    });
+      const events: IIssueEvent[] = await this.client.paginate(options);
+      const relevantEvents = events.filter(event => {
+        const eventTimestamp = new Date(event.created_at).getTime();
+        return !Number.isNaN(eventTimestamp) && eventTimestamp >= sinceTimestamp;
+      });
 
-    if (relevantEvents.length === 0) {
-      return false;
-    }
-
-    return relevantEvents.every(event => {
-      if (event.event !== 'labeled') {
+      if (relevantEvents.length === 0) {
         return false;
       }
 
-      return cleanLabel(event.label?.name) === cleanLabel(staleLabel);
-    });
+      return relevantEvents.every(event => {
+        if (event.event !== 'labeled') {
+          return false;
+        }
+
+        return cleanLabel(event.label?.name) === cleanLabel(staleLabel);
+      });
+    } catch (error) {
+      issueLogger.error(
+        `Error when listing events for this $$type: ${error.message}`
+      );
+      return false;
+    }
   }
 
   async getPullRequest(issue: Issue): Promise<IPullRequest | undefined | void> {

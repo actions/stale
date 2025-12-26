@@ -649,7 +649,7 @@ export class IssuesProcessor {
     issueLogger.info(
       `Checking if only stale label added events on $$type since: ${LoggerService.cyan(sinceDate)}`
     );
-    
+
     if (!sinceDate) {
       return false;
     }

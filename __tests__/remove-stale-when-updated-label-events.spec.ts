@@ -92,16 +92,16 @@ class TestIssuesProcessor extends IssuesProcessor {
     (this as any).client = client;
   }
 
-  async callHasOnlyStaleLabelUpdateSince(
+  async callhasOnlyStaleLabelAddedSince(
     issue: Issue,
     sinceDate: string,
     staleLabel: string
   ): Promise<boolean> {
-    return this.hasOnlyStaleLabelUpdateSince(issue, sinceDate, staleLabel);
+    return this.hasOnlyStaleLabelAddedSince(issue, sinceDate, staleLabel);
   }
 }
 
-describe('hasOnlyStaleLabelUpdateSince', (): void => {
+describe('hasOnlyStaleLabelAddedSince', (): void => {
   const staleLabel = 'Stale';
   const sinceDate = '2025-01-01T00:00:00Z';
   const originalRepo = process.env.GITHUB_REPOSITORY;
@@ -150,11 +150,6 @@ describe('hasOnlyStaleLabelUpdateSince', (): void => {
         event: 'labeled',
         created_at: '2025-01-01T00:00:10Z',
         label: {name: staleLabel}
-      },
-      {
-        event: 'unlabeled',
-        created_at: '2025-01-01T00:00:20Z',
-        label: {name: staleLabel}
       }
     ];
     const processor = new TestIssuesProcessor(
@@ -163,7 +158,7 @@ describe('hasOnlyStaleLabelUpdateSince', (): void => {
       events
     );
 
-    const result = await processor.callHasOnlyStaleLabelUpdateSince(
+    const result = await processor.callhasOnlyStaleLabelAddedSince(
       issue,
       sinceDate,
       staleLabel
@@ -188,7 +183,32 @@ describe('hasOnlyStaleLabelUpdateSince', (): void => {
       events
     );
 
-    const result = await processor.callHasOnlyStaleLabelUpdateSince(
+    const result = await processor.callhasOnlyStaleLabelAddedSince(
+      issue,
+      sinceDate,
+      staleLabel
+    );
+
+    expect(result).toBe(false);
+  });
+
+  test('returns false when stale label is removed after the since date', async (): Promise<void> => {
+    expect.assertions(1);
+    const issue = buildIssue();
+    const events: IIssueEvent[] = [
+      {
+        event: 'unlabeled',
+        created_at: '2025-01-01T00:00:10Z',
+        label: {name: staleLabel}
+      }
+    ];
+    const processor = new TestIssuesProcessor(
+      options,
+      alwaysFalseStateMock,
+      events
+    );
+
+    const result = await processor.callhasOnlyStaleLabelAddedSince(
       issue,
       sinceDate,
       staleLabel

@@ -639,7 +639,7 @@ export class IssuesProcessor {
     return staleLabeledEvent.created_at;
   }
 
-  protected async hasOnlyStaleLabelUpdateSince(
+  protected async hasOnlyStaleLabelAddedSince(
     issue: Issue,
     sinceDate: string,
     staleLabel: string
@@ -673,13 +673,11 @@ export class IssuesProcessor {
     }
 
     return relevantEvents.every(event => {
-      if (event.event !== 'labeled' && event.event !== 'unlabeled') {
+      if (event.event !== 'labeled') {
         return false;
       }
 
-      return (
-        cleanLabel(event.label?.name) === cleanLabel(staleLabel)
-      );
+      return cleanLabel(event.label?.name) === cleanLabel(staleLabel);
     });
   }
 
@@ -793,22 +791,22 @@ export class IssuesProcessor {
       15
     );
 
-    // Check if the only update was the stale label being added/removed
+    // Check if the only update was the stale label being added
     if (
       issueHasUpdateSinceStale &&
       shouldRemoveStaleWhenUpdated &&
       !issue.markedStaleThisRun
     ) {
-      const onlyStaleLabelUpdate = await this.hasOnlyStaleLabelUpdateSince(
+      const onlyStaleLabelAdded = await this.hasOnlyStaleLabelAddedSince(
         issue,
         markedStaleOn,
         staleLabel
       );
 
-      if (onlyStaleLabelUpdate) {
+      if (onlyStaleLabelAdded) {
         issueHasUpdateSinceStale = false;
         issueLogger.info(
-          `Ignoring $$type update since only the stale label was modified`
+          `Ignoring $$type update since only the stale label was added`
         );
       }
     }

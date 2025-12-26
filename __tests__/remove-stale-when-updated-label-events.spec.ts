@@ -141,6 +141,7 @@ describe('hasOnlyStaleLabelAddedSince', (): void => {
     expect.assertions(1);
     const issue = buildIssue();
     const events: IIssueEvent[] = [
+      // Event before the sinceDate should be ignored.
       {
         event: 'labeled',
         created_at: '2024-12-31T23:59:00Z',

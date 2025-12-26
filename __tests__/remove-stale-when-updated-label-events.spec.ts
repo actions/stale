@@ -4,6 +4,9 @@ import {IssuesProcessorMock} from './classes/issues-processor-mock';
 import {DefaultProcessorOptions} from './constants/default-processor-options';
 import {generateIssue} from './functions/generate-issue';
 import {alwaysFalseStateMock} from './classes/state-mock';
+import {IState} from '../src/interfaces/state/state';
+import {IIssueEvent} from '../src/interfaces/issue-event';
+import {IssuesProcessor} from '../src/classes/issues-processor';
 
 describe('remove-stale-when-updated with stale label events', (): void => {
   const markedStaleOn = '2025-01-01T00:00:00Z';
@@ -64,5 +67,133 @@ describe('remove-stale-when-updated with stale label events', (): void => {
     await processor.processIssues();
 
     expect(processor.removedLabelIssues).toHaveLength(1);
+  });
+});
+
+class TestIssuesProcessor extends IssuesProcessor {
+  constructor(
+    options: IIssuesProcessorOptions,
+    state: IState,
+    events: IIssueEvent[]
+  ) {
+    super(options, state);
+    const client = {
+      rest: {
+        issues: {
+          listEvents: {
+            endpoint: {
+              merge: () => ({})
+            }
+          }
+        }
+      },
+      paginate: async () => events
+    };
+    (this as any).client = client;
+  }
+
+  async callHasOnlyStaleLabelUpdateSince(
+    issue: Issue,
+    sinceDate: string,
+    staleLabel: string
+  ): Promise<boolean> {
+    return this.hasOnlyStaleLabelUpdateSince(issue, sinceDate, staleLabel);
+  }
+}
+
+describe('hasOnlyStaleLabelUpdateSince', (): void => {
+  const staleLabel = 'Stale';
+  const sinceDate = '2025-01-01T00:00:00Z';
+  const originalRepo = process.env.GITHUB_REPOSITORY;
+
+  let options: IIssuesProcessorOptions;
+
+  beforeEach((): void => {
+    process.env.GITHUB_REPOSITORY = 'owner/repo';
+    options = {
+      ...DefaultProcessorOptions,
+      staleIssueLabel: staleLabel,
+      removeStaleWhenUpdated: true
+    };
+  });
+
+  afterEach((): void => {
+    if (originalRepo === undefined) {
+      delete process.env.GITHUB_REPOSITORY;
+    } else {
+      process.env.GITHUB_REPOSITORY = originalRepo;
+    }
+  });
+
+  const buildIssue = (): Issue =>
+    generateIssue(
+      options,
+      1,
+      'dummy-title',
+      '2025-01-01T00:02:00Z',
+      sinceDate,
+      false,
+      false,
+      [staleLabel]
+    );
+
+  test('returns true when only stale label events exist after the since date', async (): Promise<void> => {
+    expect.assertions(1);
+    const issue = buildIssue();
+    const events: IIssueEvent[] = [
+      {
+        event: 'labeled',
+        created_at: '2024-12-31T23:59:00Z',
+        label: {name: staleLabel}
+      },
+      {
+        event: 'labeled',
+        created_at: '2025-01-01T00:00:10Z',
+        label: {name: staleLabel}
+      },
+      {
+        event: 'unlabeled',
+        created_at: '2025-01-01T00:00:20Z',
+        label: {name: staleLabel}
+      }
+    ];
+    const processor = new TestIssuesProcessor(
+      options,
+      alwaysFalseStateMock,
+      events
+    );
+
+    const result = await processor.callHasOnlyStaleLabelUpdateSince(
+      issue,
+      sinceDate,
+      staleLabel
+    );
+
+    expect(result).toBe(true);
+  });
+
+  test('returns false when a non-stale label event exists after the since date', async (): Promise<void> => {
+    expect.assertions(1);
+    const issue = buildIssue();
+    const events: IIssueEvent[] = [
+      {
+        event: 'labeled',
+        created_at: '2025-01-01T00:00:10Z',
+        label: {name: 'other-label'}
+      }
+    ];
+    const processor = new TestIssuesProcessor(
+      options,
+      alwaysFalseStateMock,
+      events
+    );
+
+    const result = await processor.callHasOnlyStaleLabelUpdateSince(
+      issue,
+      sinceDate,
+      staleLabel
+    );
+
+    expect(result).toBe(false);
   });
 });

@@ -18,7 +18,7 @@ export class IssuesProcessorMock extends IssuesProcessor {
       issue: Issue,
       label: string
     ) => Promise<string | undefined>,
-    hasOnlyStaleLabelAddedSince?: (
+    hasOnlyStaleLabelingEventsSince?: (
       issue: Issue,
       sinceDate: string,
       staleLabel: string
@@ -39,8 +39,8 @@ export class IssuesProcessorMock extends IssuesProcessor {
       this.getLabelCreationDate = getLabelCreationDate;
     }
 
-    if (hasOnlyStaleLabelAddedSince) {
-      this.hasOnlyStaleLabelAddedSince = hasOnlyStaleLabelAddedSince;
+    if (hasOnlyStaleLabelingEventsSince) {
+      this.hasOnlyStaleLabelingEventsSince = hasOnlyStaleLabelingEventsSince;
     }
 
     if (getPullRequest) {

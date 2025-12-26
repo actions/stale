@@ -639,7 +639,7 @@ export class IssuesProcessor {
     return staleLabeledEvent.created_at;
   }
 
-  protected async hasOnlyStaleLabelAddedSince(
+  protected async hasOnlyStaleLabelingEventsSince(
     issue: Issue,
     sinceDate: string,
     staleLabel: string
@@ -838,7 +838,7 @@ export class IssuesProcessor {
       shouldRemoveStaleWhenUpdated &&
       !issue.markedStaleThisRun
     ) {
-      const onlyStaleLabelAdded = await this.hasOnlyStaleLabelAddedSince(
+      const onlyStaleLabelAdded = await this.hasOnlyStaleLabelingEventsSince(
         issue,
         markedStaleOn,
         staleLabel

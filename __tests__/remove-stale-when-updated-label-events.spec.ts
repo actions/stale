@@ -96,16 +96,16 @@ class TestIssuesProcessor extends IssuesProcessor {
     (this as any).client = client;
   }
 
-  async callhasOnlyStaleLabelAddedSince(
+  async callhasOnlyStaleLabelingEventsSince(
     issue: Issue,
     sinceDate: string,
     staleLabel: string
   ): Promise<boolean> {
-    return this.hasOnlyStaleLabelAddedSince(issue, sinceDate, staleLabel);
+    return this.hasOnlyStaleLabelingEventsSince(issue, sinceDate, staleLabel);
   }
 }
 
-describe('hasOnlyStaleLabelAddedSince', (): void => {
+describe('hasOnlyStaleLabelingEventsSince', (): void => {
   const staleLabel = 'Stale';
   const sinceDate = '2025-01-01T00:00:00Z';
   const originalRepo = process.env.GITHUB_REPOSITORY;
@@ -163,7 +163,7 @@ describe('hasOnlyStaleLabelAddedSince', (): void => {
       events
     );
 
-    const result = await processor.callhasOnlyStaleLabelAddedSince(
+    const result = await processor.callhasOnlyStaleLabelingEventsSince(
       issue,
       sinceDate,
       staleLabel
@@ -188,7 +188,7 @@ describe('hasOnlyStaleLabelAddedSince', (): void => {
       events
     );
 
-    const result = await processor.callhasOnlyStaleLabelAddedSince(
+    const result = await processor.callhasOnlyStaleLabelingEventsSince(
       issue,
       sinceDate,
       staleLabel
@@ -213,7 +213,7 @@ describe('hasOnlyStaleLabelAddedSince', (): void => {
       events
     );
 
-    const result = await processor.callhasOnlyStaleLabelAddedSince(
+    const result = await processor.callhasOnlyStaleLabelingEventsSince(
       issue,
       sinceDate,
       staleLabel
@@ -238,7 +238,7 @@ describe('hasOnlyStaleLabelAddedSince', (): void => {
       events
     );
 
-    const result = await processor.callhasOnlyStaleLabelAddedSince(
+    const result = await processor.callhasOnlyStaleLabelingEventsSince(
       issue,
       sinceDate,
       staleLabel
@@ -263,7 +263,7 @@ describe('hasOnlyStaleLabelAddedSince', (): void => {
       events
     );
 
-    const result = await processor.callhasOnlyStaleLabelAddedSince(
+    const result = await processor.callhasOnlyStaleLabelingEventsSince(
       issue,
       sinceDate,
       staleLabel

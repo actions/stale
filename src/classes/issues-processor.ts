@@ -684,7 +684,7 @@ export class IssuesProcessor {
           return false;
         }
 
-        return cleanLabel(event.label?.name) === cleanLabel(staleLabel);
+        return cleanLabel(event.label.name) === cleanLabel(staleLabel);
       });
     } catch (error) {
       issueLogger.error(

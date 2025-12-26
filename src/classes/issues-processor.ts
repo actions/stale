@@ -685,9 +685,15 @@ export class IssuesProcessor {
 
         events.push(...pageEvents);
 
-        const oldestTimestampInPage = Math.min(
-          ...pageEvents.map(event => new Date(event.created_at).getTime())
-        );
+        const pageTimestamps = pageEvents
+          .map(event => new Date(event.created_at).getTime())
+          .filter(timestamp => !Number.isNaN(timestamp));
+
+        if (pageTimestamps.length === 0) {
+          break;
+        }
+
+        const oldestTimestampInPage = Math.min(...pageTimestamps);
 
         if (oldestTimestampInPage < sinceTimestamp) {
           break;

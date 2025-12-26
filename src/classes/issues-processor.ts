@@ -649,7 +649,8 @@ export class IssuesProcessor {
   protected async hasOnlyStaleLabelingEventsSince(
     issue: Issue,
     sinceDate: string,
-    staleLabel: string
+    staleLabel: string,
+    events: IIssueEvent[]
   ): Promise<boolean> {
     const issueLogger: IssueLogger = new IssueLogger(issue);
 
@@ -663,16 +664,6 @@ export class IssuesProcessor {
 
     const sinceTimestamp = new Date(sinceDate).getTime();
     if (Number.isNaN(sinceTimestamp)) {
-      return false;
-    }
-
-    // Should have been cached already
-    const events = this._issueEventsCache.get(issue.number);
-
-    if (!events) {
-      issueLogger.warning(
-        `No cached events found for this $$type; defaulting to update check`
-      );
       return false;
     }
 
@@ -797,7 +788,8 @@ export class IssuesProcessor {
       );
     }
 
-    // Check for updates since being marked stale
+    // The issue.updated_at and markedStaleOn are not always exactly in sync (they can be off by a second or 2)
+    // isDateMoreRecentThan makes sure they are not the same date within a certain tolerance (15 seconds in this case)
     let issueHasUpdateSinceStale = isDateMoreRecentThan(
       new Date(issue.updated_at),
       new Date(markedStaleOn),
@@ -810,17 +802,21 @@ export class IssuesProcessor {
       shouldRemoveStaleWhenUpdated &&
       !issue.markedStaleThisRun
     ) {
-      const onlyStaleLabelAdded = await this.hasOnlyStaleLabelingEventsSince(
-        issue,
-        markedStaleOn,
-        staleLabel
-      );
-
-      if (onlyStaleLabelAdded) {
-        issueHasUpdateSinceStale = false;
-        issueLogger.info(
-          `Ignoring $$type update since only the stale label was added`
+      const cachedEvents = this._issueEventsCache.get(issue.number);
+      if (cachedEvents) {
+        const onlyStaleLabelAdded = await this.hasOnlyStaleLabelingEventsSince(
+          issue,
+          markedStaleOn,
+          staleLabel,
+          cachedEvents
         );
+  
+        if (onlyStaleLabelAdded) {
+          issueHasUpdateSinceStale = false;
+          issueLogger.info(
+            `Ignoring $$type update since only the stale label was added`
+          );
+        }
       }
     }
 

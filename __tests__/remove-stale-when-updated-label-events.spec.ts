@@ -33,6 +33,18 @@ describe('remove-stale-when-updated with stale label events', (): void => {
       ['Stale']
     );
 
+  const seedEventsCache = (processor: IssuesProcessorMock): void => {
+    const cachedEvents: IIssueEvent[] = [
+      {
+        event: 'labeled',
+        created_at: markedStaleOn,
+        label: {name: 'Stale'}
+      }
+    ];
+
+    (processor as any)._issueEventsCache.set(1, cachedEvents);
+  };
+
   test('does not remove stale label when only stale label events occurred', async (): Promise<void> => {
     expect.assertions(1);
     const issue = buildIssue();
@@ -46,6 +58,7 @@ describe('remove-stale-when-updated with stale label events', (): void => {
       async () => true
     );
 
+    seedEventsCache(processor);
     await processor.processIssues();
 
     expect(processor.removedLabelIssues).toHaveLength(0);
@@ -64,6 +77,7 @@ describe('remove-stale-when-updated with stale label events', (): void => {
       async () => false
     );
 
+    seedEventsCache(processor);
     await processor.processIssues();
 
     expect(processor.removedLabelIssues).toHaveLength(1);
@@ -99,9 +113,15 @@ class TestIssuesProcessor extends IssuesProcessor {
   async callhasOnlyStaleLabelingEventsSince(
     issue: Issue,
     sinceDate: string,
-    staleLabel: string
+    staleLabel: string,
+    events: IIssueEvent[]
   ): Promise<boolean> {
-    return this.hasOnlyStaleLabelingEventsSince(issue, sinceDate, staleLabel);
+    return this.hasOnlyStaleLabelingEventsSince(
+      issue,
+      sinceDate,
+      staleLabel,
+      events
+    );
   }
 }
 
@@ -120,14 +140,6 @@ describe('hasOnlyStaleLabelingEventsSince', (): void => {
       removeStaleWhenUpdated: true
     };
   });
-
-  const seedEventsCache = (
-    processor: TestIssuesProcessor,
-    issue: Issue,
-    events: IIssueEvent[]
-  ): void => {
-    (processor as any)._issueEventsCache.set(issue.number, events);
-  };
 
   afterEach((): void => {
     if (originalRepo === undefined) {
@@ -170,12 +182,11 @@ describe('hasOnlyStaleLabelingEventsSince', (): void => {
       alwaysFalseStateMock,
       events
     );
-    seedEventsCache(processor, issue, events);
-
     const result = await processor.callhasOnlyStaleLabelingEventsSince(
       issue,
       sinceDate,
-      staleLabel
+      staleLabel,
+      events
     );
 
     expect(result).toBe(true);
@@ -196,12 +207,11 @@ describe('hasOnlyStaleLabelingEventsSince', (): void => {
       alwaysFalseStateMock,
       events
     );
-    seedEventsCache(processor, issue, events);
-
     const result = await processor.callhasOnlyStaleLabelingEventsSince(
       issue,
       sinceDate,
-      staleLabel
+      staleLabel,
+      events
     );
 
     expect(result).toBe(false);
@@ -222,12 +232,11 @@ describe('hasOnlyStaleLabelingEventsSince', (): void => {
       alwaysFalseStateMock,
       events
     );
-    seedEventsCache(processor, issue, events);
-
     const result = await processor.callhasOnlyStaleLabelingEventsSince(
       issue,
       sinceDate,
-      staleLabel
+      staleLabel,
+      events
     );
 
     expect(result).toBe(false);
@@ -248,12 +257,11 @@ describe('hasOnlyStaleLabelingEventsSince', (): void => {
       alwaysFalseStateMock,
       events
     );
-    seedEventsCache(processor, issue, events);
-
     const result = await processor.callhasOnlyStaleLabelingEventsSince(
       issue,
       sinceDate,
-      staleLabel
+      staleLabel,
+      events
     );
 
     expect(result).toBe(false);
@@ -274,12 +282,11 @@ describe('hasOnlyStaleLabelingEventsSince', (): void => {
       alwaysFalseStateMock,
       events
     );
-    seedEventsCache(processor, issue, events);
-
     const result = await processor.callhasOnlyStaleLabelingEventsSince(
       issue,
       sinceDate,
-      staleLabel
+      staleLabel,
+      events
     );
 
     expect(result).toBe(true);

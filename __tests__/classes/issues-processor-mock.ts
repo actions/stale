@@ -4,6 +4,7 @@ import {IComment} from '../../src/interfaces/comment';
 import {IIssuesProcessorOptions} from '../../src/interfaces/issues-processor-options';
 import {IPullRequest} from '../../src/interfaces/pull-request';
 import {IState} from '../../src/interfaces/state/state';
+import {IIssueEvent} from '../../src/interfaces/issue-event';
 
 export class IssuesProcessorMock extends IssuesProcessor {
   constructor(
@@ -21,7 +22,8 @@ export class IssuesProcessorMock extends IssuesProcessor {
     hasOnlyStaleLabelingEventsSince?: (
       issue: Issue,
       sinceDate: string,
-      staleLabel: string
+      staleLabel: string,
+      events: IIssueEvent[]
     ) => Promise<boolean>,
     getPullRequest?: (issue: Issue) => Promise<IPullRequest | undefined | void>
   ) {

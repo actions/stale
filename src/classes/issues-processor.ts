@@ -655,7 +655,9 @@ export class IssuesProcessor {
     const issueLogger: IssueLogger = new IssueLogger(issue);
 
     issueLogger.info(
-      `Checking if only stale label added events on $$type since: ${LoggerService.cyan(sinceDate)}`
+      `Checking if only stale label added events on $$type since: ${LoggerService.cyan(
+        sinceDate
+      )}`
     );
 
     if (!sinceDate) {
@@ -810,7 +812,7 @@ export class IssuesProcessor {
           staleLabel,
           cachedEvents
         );
-  
+
         if (onlyStaleLabelAdded) {
           issueHasUpdateSinceStale = false;
           issueLogger.info(

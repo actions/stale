@@ -216,4 +216,29 @@ describe('hasOnlyStaleLabelAddedSince', (): void => {
 
     expect(result).toBe(false);
   });
+
+  test('returns false when a non-label event exists after the since date', async (): Promise<void> => {
+    expect.assertions(1);
+    const issue = buildIssue();
+    const events: IIssueEvent[] = [
+      {
+        event: 'commented',
+        created_at: '2025-01-01T00:00:10Z',
+        label: {name: staleLabel}
+      }
+    ];
+    const processor = new TestIssuesProcessor(
+      options,
+      alwaysFalseStateMock,
+      events
+    );
+
+    const result = await processor.callhasOnlyStaleLabelAddedSince(
+      issue,
+      sinceDate,
+      staleLabel
+    );
+
+    expect(result).toBe(false);
+  });
 });

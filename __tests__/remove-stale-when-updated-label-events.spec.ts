@@ -241,4 +241,29 @@ describe('hasOnlyStaleLabelAddedSince', (): void => {
 
     expect(result).toBe(false);
   });
+
+  test('includes events that occur exactly at the since date boundary', async (): Promise<void> => {
+    expect.assertions(1);
+    const issue = buildIssue();
+    const events: IIssueEvent[] = [
+      {
+        event: 'labeled',
+        created_at: sinceDate,
+        label: {name: staleLabel}
+      }
+    ];
+    const processor = new TestIssuesProcessor(
+      options,
+      alwaysFalseStateMock,
+      events
+    );
+
+    const result = await processor.callhasOnlyStaleLabelAddedSince(
+      issue,
+      sinceDate,
+      staleLabel
+    );
+
+    expect(result).toBe(true);
+  });
 });

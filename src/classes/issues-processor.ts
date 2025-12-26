@@ -77,6 +77,7 @@ export class IssuesProcessor {
   readonly addedCloseCommentIssues: Issue[] = [];
   readonly statistics: Statistics | undefined;
   private readonly _logger: Logger = new Logger();
+  private readonly _issueEventsCache: Map<number, IIssueEvent[]> = new Map();
   private readonly state: IState;
 
   constructor(options: IIssuesProcessorOptions, state: IState) {
@@ -613,16 +614,22 @@ export class IssuesProcessor {
 
     issueLogger.info(`Checking for label on this $$type`);
 
-    this._consumeIssueOperation(issue);
-    this.statistics?.incrementFetchedItemsEventsCount();
-    const options = this.client.rest.issues.listEvents.endpoint.merge({
-      owner: context.repo.owner,
-      repo: context.repo.repo,
-      per_page: 100,
-      issue_number: issue.number
-    });
+    let events = this._issueEventsCache.get(issue.number);
 
-    const events: IIssueEvent[] = await this.client.paginate(options);
+    if (!events) {
+      this._consumeIssueOperation(issue);
+      this.statistics?.incrementFetchedItemsEventsCount();
+      const options = this.client.rest.issues.listEvents.endpoint.merge({
+        owner: context.repo.owner,
+        repo: context.repo.repo,
+        per_page: 100,
+        issue_number: issue.number
+      });
+
+      events = await this.client.paginate(options);
+      this._issueEventsCache.set(issue.number, events);
+    }
+
     const reversedEvents = events.reverse();
 
     const staleLabeledEvent = reversedEvents.find(
@@ -637,6 +644,47 @@ export class IssuesProcessor {
     }
 
     return staleLabeledEvent.created_at;
+  }
+
+  protected async hasOnlyStaleLabelingEventsSince(
+    issue: Issue,
+    sinceDate: string,
+    staleLabel: string,
+    events: IIssueEvent[]
+  ): Promise<boolean> {
+    const issueLogger: IssueLogger = new IssueLogger(issue);
+
+    issueLogger.info(
+      `Checking if only stale label added events on $$type since: ${LoggerService.cyan(
+        sinceDate
+      )}`
+    );
+
+    if (!sinceDate) {
+      return false;
+    }
+
+    const sinceTimestamp = new Date(sinceDate).getTime();
+    if (Number.isNaN(sinceTimestamp)) {
+      return false;
+    }
+
+    const relevantEvents = events.filter(event => {
+      const eventTimestamp = new Date(event.created_at).getTime();
+      return !Number.isNaN(eventTimestamp) && eventTimestamp >= sinceTimestamp;
+    });
+
+    if (relevantEvents.length === 0) {
+      return false;
+    }
+
+    return relevantEvents.every(event => {
+      if (event.event !== 'labeled') {
+        return false;
+      }
+
+      return cleanLabel(event.label.name) === cleanLabel(staleLabel);
+    });
   }
 
   async getPullRequest(issue: Issue): Promise<IPullRequest | undefined | void> {
@@ -744,11 +792,35 @@ export class IssuesProcessor {
 
     // The issue.updated_at and markedStaleOn are not always exactly in sync (they can be off by a second or 2)
     // isDateMoreRecentThan makes sure they are not the same date within a certain tolerance (15 seconds in this case)
-    const issueHasUpdateSinceStale = isDateMoreRecentThan(
+    let issueHasUpdateSinceStale = isDateMoreRecentThan(
       new Date(issue.updated_at),
       new Date(markedStaleOn),
       15
     );
+
+    // Check if the only update was the stale label being added
+    if (
+      issueHasUpdateSinceStale &&
+      shouldRemoveStaleWhenUpdated &&
+      !issue.markedStaleThisRun
+    ) {
+      const cachedEvents = this._issueEventsCache.get(issue.number);
+      if (cachedEvents) {
+        const onlyStaleLabelAdded = await this.hasOnlyStaleLabelingEventsSince(
+          issue,
+          markedStaleOn,
+          staleLabel,
+          cachedEvents
+        );
+
+        if (onlyStaleLabelAdded) {
+          issueHasUpdateSinceStale = false;
+          issueLogger.info(
+            `Ignoring $$type update since only the stale label was added`
+          );
+        }
+      }
+    }
 
     issueLogger.info(
       `$$type has been updated since it was marked stale: ${LoggerService.cyan(

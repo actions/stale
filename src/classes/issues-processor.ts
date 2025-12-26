@@ -639,7 +639,7 @@ export class IssuesProcessor {
     return staleLabeledEvent.created_at;
   }
 
-  private async hasOnlyStaleLabelUpdateSince(
+  protected async hasOnlyStaleLabelUpdateSince(
     issue: Issue,
     sinceDate: string,
     staleLabel: string

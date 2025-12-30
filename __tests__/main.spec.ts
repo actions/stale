@@ -30,7 +30,7 @@ test('processing an issue with no label will make it stale and close it, if it i
   expect(processor.closedIssues).toHaveLength(1);
 });
 
-test('processing an issue with no label and a start date as ECMAScript epoch in seconds being before the issue creation date will not make it stale nor close it when it is old enough and days-before-close is set to 0', async () => {
+test('processing an issue with no label and a start date as ECMAScript epoch in seconds being before the issue creation date will neither make it stale nor close it when it is old enough and days-before-close is set to 0', async () => {
   expect.assertions(2);
   const january2000 = 946681200000;
   const opts: IIssuesProcessorOptions = {
@@ -62,7 +62,7 @@ test('processing an issue with no label and a start date as ECMAScript epoch in 
   expect(processor.closedIssues.length).toStrictEqual(0);
 });
 
-test('processing an issue with no label and a start date as ECMAScript epoch in seconds being after the issue creation date will not make it stale nor close it when it is old enough and days-before-close is set to 0', async () => {
+test('processing an issue with no label and a start date as ECMAScript epoch in seconds being after the issue creation date will neither make it stale nor close it when it is old enough and days-before-close is set to 0', async () => {
   expect.assertions(2);
   const january2021 = 1609455600000;
   const opts: IIssuesProcessorOptions = {
@@ -94,7 +94,7 @@ test('processing an issue with no label and a start date as ECMAScript epoch in 
   expect(processor.closedIssues.length).toStrictEqual(0);
 });
 
-test('processing an issue with no label and a start date as ECMAScript epoch in milliseconds being before the issue creation date will not make it stale nor close it when it is old enough and days-before-close is set to 0', async () => {
+test('processing an issue with no label and a start date as ECMAScript epoch in milliseconds being before the issue creation date will neither make it stale nor close it when it is old enough and days-before-close is set to 0', async () => {
   expect.assertions(2);
   const january2000 = 946681200000000;
   const opts: IIssuesProcessorOptions = {
@@ -126,7 +126,7 @@ test('processing an issue with no label and a start date as ECMAScript epoch in 
   expect(processor.closedIssues.length).toStrictEqual(0);
 });
 
-test('processing an issue with no label and a start date as ECMAScript epoch in milliseconds being after the issue creation date will not make it stale nor close it when it is old enough and days-before-close is set to 0', async () => {
+test('processing an issue with no label and a start date as ECMAScript epoch in milliseconds being after the issue creation date will neither make it stale nor close it when it is old enough and days-before-close is set to 0', async () => {
   expect.assertions(2);
   const january2021 = 1609455600000;
   const opts: IIssuesProcessorOptions = {
@@ -190,7 +190,7 @@ test('processing an issue with no label and a start date as ISO 8601 being befor
   expect(processor.closedIssues.length).toStrictEqual(1);
 });
 
-test('processing an issue with no label and a start date as ISO 8601 being after the issue creation date will not make it stale nor close it when it is old enough and days-before-close is set to 0', async () => {
+test('processing an issue with no label and a start date as ISO 8601 being after the issue creation date will neither make it stale nor close it when it is old enough and days-before-close is set to 0', async () => {
   expect.assertions(2);
   const january2021 = '2021-01-01T00:00:00Z';
   const opts: IIssuesProcessorOptions = {
@@ -254,7 +254,7 @@ test('processing an issue with no label and a start date as RFC 2822 being befor
   expect(processor.closedIssues.length).toStrictEqual(1);
 });
 
-test('processing an issue with no label and a start date as RFC 2822 being after the issue creation date will not make it stale nor close it when it is old enough and days-before-close is set to 0', async () => {
+test('processing an issue with no label and a start date as RFC 2822 being after the issue creation date will neither make it stale nor close it when it is old enough and days-before-close is set to 0', async () => {
   expect.assertions(2);
   const january2021 = 'January 1, 2021 00:00:00';
   const opts: IIssuesProcessorOptions = {
@@ -1442,7 +1442,7 @@ test('stale issues should not be closed until after the closed number of days', 
   expect(processor.staleIssues).toHaveLength(1);
 });
 
-test('stale issues should be closed if the closed nubmer of days (additive) is also passed', async () => {
+test('stale issues should be closed if the closed number of days (additive) is also passed', async () => {
   const opts = {...DefaultProcessorOptions};
   opts.daysBeforeStale = 5; // stale after 5 days
   opts.daysBeforeClose = 1; // closes after 6 days

@@ -612,8 +612,8 @@ class IssuesProcessor {
                 return; // Don't process exempt assignees
             }
             // Ignore draft PR
-            // Note that this check is so far below because it cost one read operation
-            // So it's simply better to do all the stale checks which don't cost more operation before this one
+            // Note that this check is so far below because it costs one read operation
+            // So it's simply better to do all the stale checks which don't cost an operation before this one
             const exemptDraftPullRequest = new exempt_draft_pull_request_1.ExemptDraftPullRequest(this.options, issue);
             if (yield exemptDraftPullRequest.shouldExemptDraftPullRequest(() => __awaiter(this, void 0, void 0, function* () {
                 return this.getPullRequest(issue);
@@ -1142,7 +1142,7 @@ class IssuesProcessor {
         var _a;
         return __awaiter(this, void 0, void 0, function* () {
             const issueLogger = new issue_logger_1.IssueLogger(issue);
-            issueLogger.info(`The $$type is not closed nor locked. Trying to remove the close label...`);
+            issueLogger.info(`The $$type is neither closed nor locked. Trying to remove the close label...`);
             if (!closeLabel) {
                 issueLogger.info(logger_service_1.LoggerService.white('├──'), `The ${issueLogger.createOptionLink(IssuesProcessor._getCloseLabelUsedOptionName(issue))} option was not set`);
                 issueLogger.info(logger_service_1.LoggerService.white('└──'), `Skipping the removal of the close label`);
@@ -2548,15 +2548,15 @@ function _run() {
             const issueProcessor = new issues_processor_1.IssuesProcessor(args, state);
             const rateLimitAtStart = yield issueProcessor.getRateLimit();
             if (rateLimitAtStart) {
-                core.debug(`Github API rate status: limit=${rateLimitAtStart.limit}, used=${rateLimitAtStart.used}, remaining=${rateLimitAtStart.remaining}`);
+                core.debug(`GitHub API rate status: limit=${rateLimitAtStart.limit}, used=${rateLimitAtStart.used}, remaining=${rateLimitAtStart.remaining}`);
             }
             yield issueProcessor.processIssues();
             const rateLimitAtEnd = yield issueProcessor.getRateLimit();
             if (rateLimitAtEnd) {
-                core.debug(`Github API rate status: limit=${rateLimitAtEnd.limit}, used=${rateLimitAtEnd.used}, remaining=${rateLimitAtEnd.remaining}`);
+                core.debug(`GitHub API rate status: limit=${rateLimitAtEnd.limit}, used=${rateLimitAtEnd.used}, remaining=${rateLimitAtEnd.remaining}`);
                 if (rateLimitAtStart)
-                    core.info(`Github API rate used: ${rateLimitAtStart.remaining - rateLimitAtEnd.remaining}`);
-                core.info(`Github API rate remaining: ${rateLimitAtEnd.remaining}; reset at: ${rateLimitAtEnd.reset}`);
+                    core.info(`GitHub API rate used: ${rateLimitAtStart.remaining - rateLimitAtEnd.remaining}`);
+                core.info(`GitHub API rate remaining: ${rateLimitAtEnd.remaining}; reset at: ${rateLimitAtEnd.reset}`);
             }
             yield state.persist();
             yield processOutput(issueProcessor.staleIssues, issueProcessor.closedIssues);

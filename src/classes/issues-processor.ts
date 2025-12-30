@@ -447,8 +447,8 @@ export class IssuesProcessor {
     }
 
     // Ignore draft PR
-    // Note that this check is so far below because it cost one read operation
-    // So it's simply better to do all the stale checks which don't cost more operation before this one
+    // Note that this check is so far below because it costs one read operation
+    // So it's simply better to do all the stale checks which don't cost an operation before this one
     const exemptDraftPullRequest: ExemptDraftPullRequest =
       new ExemptDraftPullRequest(this.options, issue);
 
@@ -1226,7 +1226,7 @@ export class IssuesProcessor {
     const issueLogger: IssueLogger = new IssueLogger(issue);
 
     issueLogger.info(
-      `The $$type is not closed nor locked. Trying to remove the close label...`
+      `The $$type is neither closed nor locked. Trying to remove the close label...`
     );
 
     if (!closeLabel) {

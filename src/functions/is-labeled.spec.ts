@@ -131,7 +131,7 @@ describe('isLabeled()', (): void => {
     });
   });
 
-  describe('when the given issue contains a label wih diacritical marks', (): void => {
+  describe('when the given issue contains a label with diacritical marks', (): void => {
     beforeEach((): void => {
       issue = {
         labels: [
@@ -170,7 +170,7 @@ describe('isLabeled()', (): void => {
       });
     });
 
-    describe('when the given issue contains a label wih diacritical marks', (): void => {
+    describe('when the given issue contains a label with diacritical marks', (): void => {
       beforeEach((): void => {
         label = 'déjà vu';
       });

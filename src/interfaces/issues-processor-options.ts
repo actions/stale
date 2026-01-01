@@ -56,4 +56,5 @@ export interface IIssuesProcessorOptions {
   closeIssueReason: string;
   includeOnlyAssigned: boolean;
   onlyIssueTypes?: string;
+  excludeWeekdays: number[];
 }

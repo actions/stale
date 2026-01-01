@@ -8,6 +8,7 @@ import {isValidDate} from '../functions/dates/is-valid-date';
 import {isBoolean} from '../functions/is-boolean';
 import {isLabeled} from '../functions/is-labeled';
 import {cleanLabel} from '../functions/clean-label';
+import {elapsedMillisExcludingDays} from '../functions/elapsed-millis-excluding-days';
 import {shouldMarkWhenStale} from '../functions/should-mark-when-stale';
 import {wordsToList} from '../functions/words-to-list';
 import {IComment} from '../interfaces/comment';
@@ -36,10 +37,17 @@ import {getSortField} from '../functions/get-sort-field';
  */
 
 export class IssuesProcessor {
-  private static _updatedSince(timestamp: string, num_days: number): boolean {
-    const daysInMillis = 1000 * 60 * 60 * 24 * num_days;
-    const millisSinceLastUpdated =
-      new Date().getTime() - new Date(timestamp).getTime();
+  private static _updatedSince(
+    timestamp: string,
+    numDays: number,
+    excludeWeekdays: number[]
+  ): boolean {
+    const daysInMillis = 1000 * 60 * 60 * 24 * numDays;
+    const millisSinceLastUpdated = elapsedMillisExcludingDays(
+      new Date(timestamp),
+      new Date(),
+      excludeWeekdays
+    );
 
     return millisSinceLastUpdated <= daysInMillis;
   }
@@ -479,14 +487,16 @@ export class IssuesProcessor {
       if (shouldIgnoreUpdates) {
         shouldBeStale = !IssuesProcessor._updatedSince(
           issue.created_at,
-          daysBeforeStale
+          daysBeforeStale,
+          this.options.excludeWeekdays
         );
       }
       // Use the last update to check if we need to stale
       else {
         shouldBeStale = !IssuesProcessor._updatedSince(
           issue.updated_at,
-          daysBeforeStale
+          daysBeforeStale,
+          this.options.excludeWeekdays
         );
       }
 
@@ -787,7 +797,8 @@ export class IssuesProcessor {
 
     const issueHasUpdateInCloseWindow: boolean = IssuesProcessor._updatedSince(
       issue.updated_at,
-      daysBeforeClose
+      daysBeforeClose,
+      this.options.excludeWeekdays
     );
     issueLogger.info(
       `$$type has been updated in the last ${daysBeforeClose} days: ${LoggerService.cyan(

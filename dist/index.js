@@ -525,6 +525,19 @@ class IssuesProcessor {
                     return;
                 }
             }
+            // exemptIssueTypes wins if both it and onlyIssueTypes are specified
+            if (this.options.exemptIssueTypes) {
+                const exemptTypes = this.options.exemptIssueTypes
+                    .split(',')
+                    .map(t => t.trim().toLowerCase())
+                    .filter(Boolean);
+                const issueType = (issue.issue_type || '').toLowerCase();
+                if (exemptTypes.includes(issueType)) {
+                    issueLogger.info(`Skipping this $$type because its type ('${issue.issue_type}') is in exemptIssueTypes (${exemptTypes.join(', ')})`);
+                    IssuesProcessor._endIssueProcessing(issue);
+                    return;
+                }
+            }
             const onlyLabels = (0, words_to_list_1.wordsToList)(this._getOnlyLabels(issue));
             if (onlyLabels.length > 0) {
                 issueLogger.info(`The option ${issueLogger.createOptionLink(option_1.Option.OnlyLabels)} was specified to only process issues and pull requests with all those labels (${logger_service_1.LoggerService.cyan(onlyLabels.length)})`);
@@ -2258,6 +2271,7 @@ var Option;
     Option["IgnorePrUpdates"] = "ignore-pr-updates";
     Option["ExemptDraftPr"] = "exempt-draft-pr";
     Option["CloseIssueReason"] = "close-issue-reason";
+    Option["ExemptIssueTypes"] = "exempt-issue-types";
     Option["OnlyIssueTypes"] = "only-issue-types";
 })(Option || (exports.Option = Option = {}));
 
@@ -2625,7 +2639,8 @@ function _getAndValidateArgs() {
         exemptDraftPr: core.getInput('exempt-draft-pr') === 'true',
         closeIssueReason: core.getInput('close-issue-reason'),
         includeOnlyAssigned: core.getInput('include-only-assigned') === 'true',
-        onlyIssueTypes: core.getInput('only-issue-types')
+        onlyIssueTypes: core.getInput('only-issue-types'),
+        exemptIssueTypes: core.getInput('exempt-issue-types')
     };
     for (const numberInput of ['days-before-stale']) {
         if (isNaN(parseFloat(core.getInput(numberInput)))) {

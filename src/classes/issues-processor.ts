@@ -77,7 +77,6 @@ export class IssuesProcessor {
   readonly addedCloseCommentIssues: Issue[] = [];
   readonly statistics: Statistics | undefined;
   private readonly _logger: Logger = new Logger();
-  private readonly _issueEventsCache: Map<number, IIssueEvent[]> = new Map();
   private readonly state: IState;
 
   constructor(options: IIssuesProcessorOptions, state: IState) {
@@ -609,26 +608,21 @@ export class IssuesProcessor {
   async getLabelCreationDate(
     issue: Issue,
     label: string
-  ): Promise<string | undefined> {
+  ): Promise<{creationDate?: string; events: IIssueEvent[]}> {
     const issueLogger: IssueLogger = new IssueLogger(issue);
 
     issueLogger.info(`Checking for label on this $$type`);
 
-    let events = this._issueEventsCache.get(issue.number);
+    this._consumeIssueOperation(issue);
+    this.statistics?.incrementFetchedItemsEventsCount();
+    const options = this.client.rest.issues.listEvents.endpoint.merge({
+      owner: context.repo.owner,
+      repo: context.repo.repo,
+      per_page: 100,
+      issue_number: issue.number
+    });
 
-    if (!events) {
-      this._consumeIssueOperation(issue);
-      this.statistics?.incrementFetchedItemsEventsCount();
-      const options = this.client.rest.issues.listEvents.endpoint.merge({
-        owner: context.repo.owner,
-        repo: context.repo.repo,
-        per_page: 100,
-        issue_number: issue.number
-      });
-
-      events = await this.client.paginate(options);
-      this._issueEventsCache.set(issue.number, events);
-    }
+    const events: IIssueEvent[] = await this.client.paginate(options);
 
     const reversedEvents = events.reverse();
 
@@ -640,10 +634,10 @@ export class IssuesProcessor {
 
     if (!staleLabeledEvent) {
       // Must be old rather than labeled
-      return undefined;
+      return {creationDate: undefined, events};
     }
 
-    return staleLabeledEvent.created_at;
+    return {creationDate: staleLabeledEvent.created_at, events};
   }
 
   protected async hasOnlyStaleLabelingEventsSince(
@@ -739,8 +733,11 @@ export class IssuesProcessor {
     closeLabel?: string
   ) {
     const issueLogger: IssueLogger = new IssueLogger(issue);
-    const markedStaleOn: string =
-      (await this.getLabelCreationDate(issue, staleLabel)) || issue.updated_at;
+    const {creationDate, events} = await this.getLabelCreationDate(
+      issue,
+      staleLabel
+    );
+    const markedStaleOn: string = creationDate || issue.updated_at;
     issueLogger.info(
       `$$type marked stale on: ${LoggerService.cyan(markedStaleOn)}`
     );
@@ -804,21 +801,18 @@ export class IssuesProcessor {
       shouldRemoveStaleWhenUpdated &&
       !issue.markedStaleThisRun
     ) {
-      const cachedEvents = this._issueEventsCache.get(issue.number);
-      if (cachedEvents) {
-        const onlyStaleLabelAdded = await this.hasOnlyStaleLabelingEventsSince(
-          issue,
-          markedStaleOn,
-          staleLabel,
-          cachedEvents
-        );
+      const onlyStaleLabelAdded = await this.hasOnlyStaleLabelingEventsSince(
+        issue,
+        markedStaleOn,
+        staleLabel,
+        events
+      );
 
-        if (onlyStaleLabelAdded) {
-          issueHasUpdateSinceStale = false;
-          issueLogger.info(
-            `Ignoring $$type update since only the stale label was added`
-          );
-        }
+      if (onlyStaleLabelAdded) {
+        issueHasUpdateSinceStale = false;
+        issueLogger.info(
+          `Ignoring $$type update since only the stale label was added`
+        );
       }
     }
 

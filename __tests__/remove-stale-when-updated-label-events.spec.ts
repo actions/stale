@@ -33,17 +33,13 @@ describe('remove-stale-when-updated with stale label events', (): void => {
       ['Stale']
     );
 
-  const seedEventsCache = (processor: IssuesProcessorMock): void => {
-    const cachedEvents: IIssueEvent[] = [
-      {
-        event: 'labeled',
-        created_at: markedStaleOn,
-        label: {name: 'Stale'}
-      }
-    ];
-
-    (processor as any)._issueEventsCache.set(1, cachedEvents);
-  };
+  const buildEvents = (): IIssueEvent[] => [
+    {
+      event: 'labeled',
+      created_at: markedStaleOn,
+      label: {name: 'Stale'}
+    }
+  ];
 
   test('does not remove stale label when only stale label events occurred', async (): Promise<void> => {
     expect.assertions(1);
@@ -54,11 +50,10 @@ describe('remove-stale-when-updated with stale label events', (): void => {
       alwaysFalseStateMock,
       async p => (p === 1 ? [issue] : []),
       async () => [],
-      async () => markedStaleOn,
+      async () => ({creationDate: markedStaleOn, events: buildEvents()}),
       async () => true
     );
 
-    seedEventsCache(processor);
     await processor.processIssues();
 
     expect(processor.removedLabelIssues).toHaveLength(0);
@@ -73,11 +68,10 @@ describe('remove-stale-when-updated with stale label events', (): void => {
       alwaysFalseStateMock,
       async p => (p === 1 ? [issue] : []),
       async () => [],
-      async () => markedStaleOn,
+      async () => ({creationDate: markedStaleOn, events: buildEvents()}),
       async () => false
     );
 
-    seedEventsCache(processor);
     await processor.processIssues();
 
     expect(processor.removedLabelIssues).toHaveLength(1);

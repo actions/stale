@@ -18,7 +18,9 @@ export class IssuesProcessorMock extends IssuesProcessor {
     getLabelCreationDate?: (
       issue: Issue,
       label: string
-    ) => Promise<string | undefined>,
+    ) =>
+      | Promise<string | undefined>
+      | Promise<{creationDate?: string; events: IIssueEvent[]}>,
     hasOnlyStaleLabelingEventsSince?: (
       issue: Issue,
       sinceDate: string,
@@ -38,7 +40,17 @@ export class IssuesProcessorMock extends IssuesProcessor {
     }
 
     if (getLabelCreationDate) {
-      this.getLabelCreationDate = getLabelCreationDate;
+      this.getLabelCreationDate = async (
+        issue: Issue,
+        label: string
+      ): Promise<{creationDate?: string; events: IIssueEvent[]}> => {
+        const result = await getLabelCreationDate(issue, label);
+        if (typeof result === 'string' || typeof result === 'undefined') {
+          return {creationDate: result, events: []};
+        }
+
+        return result;
+      };
     }
 
     if (hasOnlyStaleLabelingEventsSince) {

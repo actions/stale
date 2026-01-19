@@ -40,7 +40,7 @@
     "@actions/cache": "^4.0.3",
     "@actions/core": "^1.11.1",
     "@actions/github": "^7.0.0",
-    "@octokit/core": "^4.2.0",
+    "@octokit/core": "^5.2.0",
     "@octokit/plugin-retry": "^4.1.1",
     "lodash.deburr": "^4.1.0",
     "semver": "^7.5.4"

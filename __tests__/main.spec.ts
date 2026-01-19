@@ -2150,6 +2150,7 @@ test('processing an issue opened since 4 hours and with the option "daysBeforeIs
   };
   const issueDate = new Date();
   issueDate.setHours(issueDate.getHours() - 4);
+  issueDate.setMinutes(issueDate.getMinutes() - 1); // Make it slightly older than 4 hours
   const TestIssueList: Issue[] = [
     generateIssue(opts, 1, 'An issue with no label', issueDate.toISOString())
   ];
@@ -2344,6 +2345,7 @@ test('processing a pull request opened since 4 hours and with the option "daysBe
   };
   const issueDate = new Date();
   issueDate.setHours(issueDate.getHours() - 4);
+  issueDate.setMinutes(issueDate.getMinutes() - 1); // Make it slightly older than 4 hours
   const TestIssueList: Issue[] = [
     generateIssue(
       opts,

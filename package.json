@@ -37,7 +37,7 @@
   "author": "GitHub",
   "license": "MIT",
   "dependencies": {
-    "@actions/cache": "^4.0.3",
+    "@actions/cache": "^5.0.2",
     "@actions/core": "^1.11.1",
     "@actions/github": "^7.0.0",
     "@octokit/core": "^5.2.0",

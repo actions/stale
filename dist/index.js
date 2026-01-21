@@ -970,11 +970,7 @@ class IssuesProcessor {
         var _a;
         return __awaiter(this, void 0, void 0, function* () {
             const issueLogger = new issue_logger_1.IssueLogger(issue);
-            issueLogger.info(`Delete
-    branch from closed $
-    $type
-    -
-    ${issue.title}`);
+            issueLogger.info(`Delete branch from closed $$type - ${issue.title}`);
             const pullRequest = yield this.getPullRequest(issue);
             if (!pullRequest) {
                 issueLogger.info(`Not deleting this branch as no pull request was found for this $$type`);

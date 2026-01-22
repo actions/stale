@@ -87,6 +87,7 @@ Every argument is optional.
 | [ascending](#ascending)                                             | Order to get issues/PRs                                                     | `false`               |
 | [start-date](#start-date)                                           | Skip stale action for issues/PRs created before it                          |                       |
 | [delete-branch](#delete-branch)                                     | Delete branch after closing a stale PR                                      | `false`               |
+| [exclude-weekdays](#exclude-weekdays)                               | Weekdays to exclude when calculating elapsed days                           |                       |
 | [exempt-milestones](#exempt-milestones)                             | Milestones on issues/PRs exempted from stale                                |                       |
 | [exempt-issue-milestones](#exempt-issue-milestones)                 | Override [exempt-milestones](#exempt-milestones) for issues only            |                       |
 | [exempt-pr-milestones](#exempt-pr-milestones)                       | Override [exempt-milestones](#exempt-milestones) for PRs only               |                       |
@@ -548,6 +549,15 @@ Default value: unset
 #### ignore-pr-updates
 
 Useful to override [ignore-updates](#ignore-updates) but only to ignore the updates for the pull requests.
+
+Default value: unset
+
+#### exclude-weekdays
+
+A comma separated list of weekdays (0-6, where 0 is Sunday and 6 is Saturday) to exclude when calculating elapsed days.
+This is useful when you want to count only business days for stale calculations.
+
+For example, to exclude weekends, set this to `0,6`.
 
 Default value: unset
 

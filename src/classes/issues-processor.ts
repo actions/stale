@@ -17,6 +17,7 @@ import {IPullRequest} from '../interfaces/pull-request';
 import {Assignees} from './assignees';
 import {IgnoreUpdates} from './ignore-updates';
 import {ExemptDraftPullRequest} from './exempt-draft-pull-request';
+import {OnlyDraftPullRequest} from './only-draft-pull-request';
 import {Issue} from './issue';
 import {IssueLogger} from './loggers/issue-logger';
 import {Logger} from './loggers/logger';
@@ -461,6 +462,17 @@ export class IssuesProcessor {
     ) {
       IssuesProcessor._endIssueProcessing(issue);
       return; // Don't process draft PR
+    }
+
+    // Skip non-draft PRs if only-draft-prs option is enabled
+    const onlyDraftPullRequest: OnlyDraftPullRequest = new OnlyDraftPullRequest(
+      this.options,
+      issue
+    );
+
+    if (onlyDraftPullRequest.shouldSkipNonDraftPullRequest()) {
+      IssuesProcessor._endIssueProcessing(issue);
+      return; // Only process draft PRs
     }
 
     // Determine if this issue needs to be marked stale first

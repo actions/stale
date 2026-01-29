@@ -380,6 +380,7 @@ const words_to_list_1 = __nccwpck_require__(1883);
 const assignees_1 = __nccwpck_require__(7236);
 const ignore_updates_1 = __nccwpck_require__(2935);
 const exempt_draft_pull_request_1 = __nccwpck_require__(854);
+const only_draft_pull_request_1 = __nccwpck_require__(4525);
 const issue_1 = __nccwpck_require__(4783);
 const issue_logger_1 = __nccwpck_require__(2984);
 const logger_1 = __nccwpck_require__(6212);
@@ -620,6 +621,12 @@ class IssuesProcessor {
             }))) {
                 IssuesProcessor._endIssueProcessing(issue);
                 return; // Don't process draft PR
+            }
+            // Skip non-draft PRs if only-draft-prs option is enabled
+            const onlyDraftPullRequest = new only_draft_pull_request_1.OnlyDraftPullRequest(this.options, issue);
+            if (onlyDraftPullRequest.shouldSkipNonDraftPullRequest()) {
+                IssuesProcessor._endIssueProcessing(issue);
+                return; // Only process draft PRs
             }
             // Determine if this issue needs to be marked stale first
             if (!issue.isStale) {
@@ -1502,6 +1509,44 @@ exports.Milestones = Milestones;
 
 /***/ }),
 
+/***/ 4525:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.OnlyDraftPullRequest = void 0;
+const option_1 = __nccwpck_require__(5931);
+const logger_service_1 = __nccwpck_require__(1973);
+const issue_logger_1 = __nccwpck_require__(2984);
+class OnlyDraftPullRequest {
+    constructor(options, issue) {
+        this._options = options;
+        this._issue = issue;
+        this._issueLogger = new issue_logger_1.IssueLogger(issue);
+    }
+    shouldSkipNonDraftPullRequest() {
+        var _a;
+        if (this._issue.isPullRequest) {
+            if (this._options.onlyDraftPr) {
+                this._issueLogger.info(`The option ${this._issueLogger.createOptionLink(option_1.Option.OnlyDraftPr)} is enabled`);
+                if (((_a = this._issue) === null || _a === void 0 ? void 0 : _a.draft) !== true) {
+                    this._issueLogger.info(logger_service_1.LoggerService.white('└──'), `Skip this $$type because it is not a draft and only draft PRs should be processed`);
+                    return true;
+                }
+                else {
+                    this._issueLogger.info(logger_service_1.LoggerService.white('└──'), `Continuing the process for this $$type because it is a draft`);
+                }
+            }
+        }
+        return false;
+    }
+}
+exports.OnlyDraftPullRequest = OnlyDraftPullRequest;
+
+
+/***/ }),
+
 /***/ 7957:
 /***/ ((__unused_webpack_module, exports) => {
 
@@ -2257,6 +2302,7 @@ var Option;
     Option["IgnoreIssueUpdates"] = "ignore-issue-updates";
     Option["IgnorePrUpdates"] = "ignore-pr-updates";
     Option["ExemptDraftPr"] = "exempt-draft-pr";
+    Option["OnlyDraftPr"] = "only-draft-pr";
     Option["CloseIssueReason"] = "close-issue-reason";
     Option["OnlyIssueTypes"] = "only-issue-types";
 })(Option || (exports.Option = Option = {}));
@@ -2623,6 +2669,7 @@ function _getAndValidateArgs() {
         ignoreIssueUpdates: _toOptionalBoolean('ignore-issue-updates'),
         ignorePrUpdates: _toOptionalBoolean('ignore-pr-updates'),
         exemptDraftPr: core.getInput('exempt-draft-pr') === 'true',
+        onlyDraftPr: core.getInput('only-draft-pr') === 'true',
         closeIssueReason: core.getInput('close-issue-reason'),
         includeOnlyAssigned: core.getInput('include-only-assigned') === 'true',
         onlyIssueTypes: core.getInput('only-issue-types')

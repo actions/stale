@@ -176,6 +176,10 @@ inputs:
     description: 'Exempt draft pull requests from being marked as stale. Default to false.'
     default: 'false'
     required: false
+  only-draft-pr:
+    description: 'Only process draft pull requests (skip non-draft PRs). Default to false.'
+    default: 'false'
+    required: false
   enable-statistics:
     description: 'Display some statistics at the end regarding the stale workflow (only when the logs are enabled).'
     default: 'true'

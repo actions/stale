@@ -2302,7 +2302,7 @@ var Option;
     Option["IgnoreIssueUpdates"] = "ignore-issue-updates";
     Option["IgnorePrUpdates"] = "ignore-pr-updates";
     Option["ExemptDraftPr"] = "exempt-draft-pr";
-    Option["OnlyDraftPr"] = "only-draft-prs";
+    Option["OnlyDraftPr"] = "only-draft-pr";
     Option["CloseIssueReason"] = "close-issue-reason";
     Option["OnlyIssueTypes"] = "only-issue-types";
 })(Option || (exports.Option = Option = {}));
@@ -2669,7 +2669,7 @@ function _getAndValidateArgs() {
         ignoreIssueUpdates: _toOptionalBoolean('ignore-issue-updates'),
         ignorePrUpdates: _toOptionalBoolean('ignore-pr-updates'),
         exemptDraftPr: core.getInput('exempt-draft-pr') === 'true',
-        onlyDraftPr: core.getInput('only-draft-prs') === 'true',
+        onlyDraftPr: core.getInput('only-draft-pr') === 'true',
         closeIssueReason: core.getInput('close-issue-reason'),
         includeOnlyAssigned: core.getInput('include-only-assigned') === 'true',
         onlyIssueTypes: core.getInput('only-issue-types')

@@ -10,12 +10,12 @@ import {alwaysFalseStateMock} from './classes/state-mock';
 let issuesProcessorBuilder: IssuesProcessorBuilder;
 let issuesProcessor: IssuesProcessorMock;
 
-describe('only-draft-prs option', (): void => {
+describe('only-draft-pr option', (): void => {
   beforeEach((): void => {
     issuesProcessorBuilder = new IssuesProcessorBuilder();
   });
 
-  describe('when the option "only-draft-prs" is disabled', (): void => {
+  describe('when the option "only-draft-pr" is disabled', (): void => {
     beforeEach((): void => {
       issuesProcessorBuilder.processAllPrs();
     });
@@ -53,7 +53,7 @@ describe('only-draft-prs option', (): void => {
     });
   });
 
-  describe('when the option "only-draft-prs" is enabled', (): void => {
+  describe('when the option "only-draft-pr" is enabled', (): void => {
     beforeEach((): void => {
       issuesProcessorBuilder.onlyDraftPr();
     });

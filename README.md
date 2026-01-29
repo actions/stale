@@ -100,6 +100,7 @@ Every argument is optional.
 | [exempt-all-issue-assignees](#exempt-all-issue-assignees)           | Override [exempt-all-assignees](#exempt-all-assignees) for issues only      |                       |
 | [exempt-all-pr-assignees](#exempt-all-pr-assignees)                 | Override [exempt-all-assignees](#exempt-all-assignees) for PRs only         |                       |
 | [exempt-draft-pr](#exempt-draft-pr)                                 | Skip the stale action for draft PRs                                         | `false`               |
+| [only-draft-pr](#only-draft-pr)                                     | Only process draft PRs (skip non-draft PRs)                                 | `false`               |
 | [enable-statistics](#enable-statistics)                             | Display statistics in the logs                                              | `true`                |
 | [ignore-updates](#ignore-updates)                                   | Any update (update/comment) can reset the stale idle time on the issues/PRs | `false`               |
 | [ignore-issue-updates](#ignore-issue-updates)                       | Override [ignore-updates](#ignore-updates) for issues only                  |                       |
@@ -522,6 +523,13 @@ If set to `true`, the pull requests currently in draft will not be marked as sta
 
 Default value: `false`  
 Required Permission: `pull-requests: read`
+
+#### only-draft-pr
+
+If set to `true`, only draft pull requests will be processed. Non-draft pull requests will be skipped.
+This is the inverse of [exempt-draft-pr](#exempt-draft-pr).
+
+Default value: `false`
 
 #### enable-statistics
 

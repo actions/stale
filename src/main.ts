@@ -123,6 +123,7 @@ function _getAndValidateArgs(): IIssuesProcessorOptions {
     ignoreIssueUpdates: _toOptionalBoolean('ignore-issue-updates'),
     ignorePrUpdates: _toOptionalBoolean('ignore-pr-updates'),
     exemptDraftPr: core.getInput('exempt-draft-pr') === 'true',
+    onlyDraftPr: core.getInput('only-draft-prs') === 'true',
     closeIssueReason: core.getInput('close-issue-reason'),
     includeOnlyAssigned: core.getInput('include-only-assigned') === 'true',
     onlyIssueTypes: core.getInput('only-issue-types')

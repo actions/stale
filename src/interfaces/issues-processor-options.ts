@@ -53,6 +53,7 @@ export interface IIssuesProcessorOptions {
   ignoreIssueUpdates: boolean | undefined;
   ignorePrUpdates: boolean | undefined;
   exemptDraftPr: boolean;
+  onlyDraftPr: boolean;
   closeIssueReason: string;
   includeOnlyAssigned: boolean;
   onlyIssueTypes?: string;

@@ -736,9 +736,35 @@ class IssuesProcessor {
                 (0, clean_label_1.cleanLabel)(event.label.name) === (0, clean_label_1.cleanLabel)(label));
             if (!staleLabeledEvent) {
                 // Must be old rather than labeled
-                return undefined;
+                return { creationDate: undefined, events };
             }
-            return staleLabeledEvent.created_at;
+            return { creationDate: staleLabeledEvent.created_at, events };
+        });
+    }
+    hasOnlyStaleLabelingEventsSince(issue, sinceDate, staleLabel, events) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const issueLogger = new issue_logger_1.IssueLogger(issue);
+            issueLogger.info(`Checking if only stale label added events on $$type since: ${logger_service_1.LoggerService.cyan(sinceDate)}`);
+            if (!sinceDate) {
+                return false;
+            }
+            const sinceTimestamp = new Date(sinceDate).getTime();
+            if (Number.isNaN(sinceTimestamp)) {
+                return false;
+            }
+            const relevantEvents = events.filter(event => {
+                const eventTimestamp = new Date(event.created_at).getTime();
+                return !Number.isNaN(eventTimestamp) && eventTimestamp >= sinceTimestamp;
+            });
+            if (relevantEvents.length === 0) {
+                return false;
+            }
+            return relevantEvents.every(event => {
+                if (event.event !== 'labeled') {
+                    return false;
+                }
+                return (0, clean_label_1.cleanLabel)(event.label.name) === (0, clean_label_1.cleanLabel)(staleLabel);
+            });
         });
     }
     getPullRequest(issue) {
@@ -783,7 +809,8 @@ class IssuesProcessor {
     _processStaleIssue(issue, staleLabel, staleMessage, labelsToAddWhenUnstale, labelsToRemoveWhenUnstale, labelsToRemoveWhenStale, closeMessage, closeLabel) {
         return __awaiter(this, void 0, void 0, function* () {
             const issueLogger = new issue_logger_1.IssueLogger(issue);
-            const markedStaleOn = (yield this.getLabelCreationDate(issue, staleLabel)) || issue.updated_at;
+            const { creationDate, events } = yield this.getLabelCreationDate(issue, staleLabel);
+            const markedStaleOn = creationDate || issue.updated_at;
             issueLogger.info(`$$type marked stale on: ${logger_service_1.LoggerService.cyan(markedStaleOn)}`);
             const issueHasCommentsSinceStale = yield this._hasCommentsSince(issue, markedStaleOn, staleMessage);
             issueLogger.info(`$$type has been commented on: ${logger_service_1.LoggerService.cyan(issueHasCommentsSinceStale)}`);
@@ -805,7 +832,17 @@ class IssuesProcessor {
             }
             // The issue.updated_at and markedStaleOn are not always exactly in sync (they can be off by a second or 2)
             // isDateMoreRecentThan makes sure they are not the same date within a certain tolerance (15 seconds in this case)
-            const issueHasUpdateSinceStale = (0, is_date_more_recent_than_1.isDateMoreRecentThan)(new Date(issue.updated_at), new Date(markedStaleOn), 15);
+            let issueHasUpdateSinceStale = (0, is_date_more_recent_than_1.isDateMoreRecentThan)(new Date(issue.updated_at), new Date(markedStaleOn), 15);
+            // Check if the only update was the stale label being added
+            if (issueHasUpdateSinceStale &&
+                shouldRemoveStaleWhenUpdated &&
+                !issue.markedStaleThisRun) {
+                const onlyStaleLabelAdded = yield this.hasOnlyStaleLabelingEventsSince(issue, markedStaleOn, staleLabel, events);
+                if (onlyStaleLabelAdded) {
+                    issueHasUpdateSinceStale = false;
+                    issueLogger.info(`Ignoring $$type update since only the stale label was added`);
+                }
+            }
             issueLogger.info(`$$type has been updated since it was marked stale: ${logger_service_1.LoggerService.cyan(issueHasUpdateSinceStale)}`);
             // Should we un-stale this issue?
             if (shouldRemoveStaleWhenUpdated &&

@@ -840,7 +840,7 @@ export class IssuesProcessor {
 
     const filteredComments = comments.filter(
       comment =>
-        comment.user?.type === 'User' &&
+        comment.user?.type !== 'Bot' &&
         comment.body?.toLowerCase() !== staleMessage.toLowerCase()
     );
 

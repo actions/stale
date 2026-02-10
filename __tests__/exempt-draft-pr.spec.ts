@@ -129,6 +129,7 @@ class IssuesProcessorBuilder {
       async p => (p === 1 ? this._issues : []),
       async () => [],
       async () => new Date().toDateString(),
+      undefined,
       async (): Promise<IPullRequest> => {
         return Promise.resolve({
           number: 0,

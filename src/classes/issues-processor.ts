@@ -213,12 +213,18 @@ export class IssuesProcessor {
     );
 
     // calculate string based messages for this issue
-    const staleMessage: string = issue.isPullRequest
-      ? this.options.stalePrMessage
-      : this.options.staleIssueMessage;
-    const closeMessage: string = issue.isPullRequest
-      ? this.options.closePrMessage
-      : this.options.closeIssueMessage;
+    const staleMessage: string = this._interpolatePlaceholders(
+      issue,
+      issue.isPullRequest
+        ? this.options.stalePrMessage
+        : this.options.staleIssueMessage
+      );
+    const closeMessage: string = this._interpolatePlaceholders(
+      issue,
+      issue.isPullRequest
+        ? this.options.closePrMessage
+        : this.options.closeIssueMessage
+      );
     const staleLabel: string = issue.isPullRequest
       ? this.options.stalePrLabel
       : this.options.staleIssueLabel;
@@ -1320,5 +1326,11 @@ export class IssuesProcessor {
     }
 
     return Option.RemoveStaleWhenUpdated;
+  }
+
+  private _interpolatePlaceholders(issue: Issue, message: string) {
+    return issue.user
+      ? message.replace('{author}', `@${issue.user?.login}`)
+      : message;
   }
 }

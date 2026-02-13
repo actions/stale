@@ -16,7 +16,8 @@ export function generateIssue(
   isLocked = false,
   milestone: string | undefined = undefined,
   assignees: string[] = [],
-  issue_type?: string
+  issue_type?: string,
+  userLogin: string | undefined = undefined
 ): Issue {
   return new Issue(options, {
     number: id,
@@ -41,6 +42,10 @@ export function generateIssue(
         type: 'User'
       };
     }),
+    user: {
+      login: userLogin ? userLogin : 'dummy-test-user',
+      type: 'User'
+    },
     ...(issue_type ? {type: {name: issue_type}} : {})
   });
 }

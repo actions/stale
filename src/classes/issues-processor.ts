@@ -581,8 +581,35 @@ export class IssuesProcessor {
 
   // grab issues from github in batches of 100
   async getIssues(page: number): Promise<Issue[]> {
+    const issuesDisabled =
+      this._getDaysBeforeIssueStale() < 0 &&
+      this._getDaysBeforeIssueClose() < 0;
+
     try {
       this.operations.consumeOperation();
+
+      if (issuesDisabled) {
+        const sortField = getSortField(this.options.sortBy);
+        const pullResult = await this.client.rest.pulls.list({
+          owner: context.repo.owner,
+          repo: context.repo.repo,
+          state: 'open',
+          per_page: 100,
+          direction: this.options.ascending ? 'asc' : 'desc',
+          sort: sortField === 'comments' ? 'created' : sortField,
+          page
+        });
+        this.statistics?.incrementFetchedItemsCount(pullResult.data.length);
+
+        return pullResult.data.map(
+          (pr): Issue =>
+            new Issue(
+              this.options,
+              {...pr, pull_request: {}} as unknown as Readonly<OctokitIssue>
+            )
+        );
+      }
+
       const issueResult = await this.client.rest.issues.listForRepo({
         owner: context.repo.owner,
         repo: context.repo.repo,

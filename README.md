@@ -5,7 +5,7 @@
 
 ## Breaking changes in V10
 
-- Upgraded action from node20 to node 24
+- Upgraded the action from Node.js 20 to Node.js 24
   > Make sure your runner is on version v2.327.1 or later to ensure compatibility with this release. [Release Notes](https://github.com/actions/runner/releases/tag/v2.327.1)
 
 For more details, see the full release notes on the [release page](https://github.com/actions/stale/releases/tag/v10.0.0)
@@ -270,7 +270,7 @@ Required Permission: `pull-requests: write`
 
 #### exempt-issue-labels
 
-Comma separated list of labels that can be assigned to issues to exclude them from being marked as stale
+Comma-separated list of labels that can be assigned to issues to exclude them from being marked as stale
 (e.g: `question,bug`)
 
 If unset (or an empty string), this option will not alter the stale workflow.
@@ -279,7 +279,7 @@ Default value: unset
 
 #### exempt-pr-labels
 
-Comma separated list of labels that can be assigned to pull requests to exclude them from being marked as stale
+Comma-separated list of labels that can be assigned to pull requests to exclude them from being marked as stale
 (e.g: `need-help,WIP`)
 
 If unset (or an empty string), this option will not alter the stale workflow.
@@ -289,7 +289,7 @@ Default value: unset
 #### only-labels
 
 An allow-list of label(s) to only process the issues or the pull requests that contain all these label(s).  
-It can be a comma separated list of labels (e.g: `answered,needs-rebase`).
+It can be a comma-separated list of labels (e.g: `answered,needs-rebase`).
 
 If unset (or an empty string), this option will not alter the stale workflow.
 
@@ -312,7 +312,7 @@ Default value: unset
 #### any-of-labels
 
 An allow-list of label(s) to only process the issues or the pull requests that contain one of these label(s).  
-It can be a comma separated list of labels (e.g: `answered,needs-rebase`).
+It can be a comma-separated list of labels (e.g: `answered,needs-rebase`).
 
 If unset (or an empty string), this option will not alter the stale workflow.
 
@@ -345,7 +345,7 @@ This option aims to limit the number of operations made with the GitHub API to a
 
 Based on your project, your GitHub business plan and the date of the cron job you set for this action, you can increase this limit to a higher number.
 If you are not sure which is the right value for you or if the default value is good enough, you could enable the logs and look at the end of the stale action.  
-If you reached the limit, you will see a warning message in the logs, telling you that you should increase the number of operations.
+If you reach the limit, you will see a warning message in the logs, telling you that you should increase the number of operations.
 If you choose not to increase the limit, you might end up with unprocessed issues or pull requests after a stale action run.
 
 When [debugging](#Debugging), you can set it to a much higher number like `1000` since there will be fewer operations made with the GitHub API.  
@@ -518,14 +518,14 @@ Default value: unset
 #### exempt-draft-pr
 
 If set to `true`, the pull requests currently in draft will not be marked as stale automatically.  
-⚠️ This option consume one operation per pull request to process because we need to fetch the pull request with the GitHub API to know if it's a draft one or not.
+⚠️ This option consumes one operation per pull request to process because we need to fetch the pull request with the GitHub API to know if it's a draft one or not.
 
 Default value: `false`  
 Required Permission: `pull-requests: read`
 
 #### enable-statistics
 
-Collects and display statistics at the end of the stale workflow logs to get a summary of what happened during the run.  
+Collects and displays statistics at the end of the stale workflow logs to get a summary of what happened during the run.  
 This option is only useful if the debug output secret `ACTIONS_STEP_DEBUG` is set to `true` in your repository to display the logs.
 
 Default value: `true`
@@ -565,7 +565,7 @@ Default value: `created`
 
 #### only-issue-types
 
-A comma separated list of allowed issue types. Only issues with a matching type will be processed (e.g.: `bug,question`).
+A comma-separated list of allowed issue types. Only issues with a matching type will be processed (e.g.: `bug,question`).
 
 If unset (or an empty string), this option will not alter the stale workflow.
 

@@ -1,9 +1,9 @@
-name: 'Close Stale Issues'
+name: 'Close Stale Issues and Pull Requests'
 description: 'Close issues and pull requests with no recent activity'
 author: 'GitHub'
 inputs:
   repo-token:
-    description: 'Token for the repository. Can be passed in using `{{ secrets.GITHUB_TOKEN }}`.'
+    description: 'Token for the repository. Can be passed in using `${{ secrets.GITHUB_TOKEN }}`.'
     required: false
     default: ${{ github.token }}
   stale-issue-message:
@@ -16,10 +16,10 @@ inputs:
     description: 'The message to post on the issue when closing it. If none provided, will not comment when closing an issue.'
     required: false
   close-pr-message:
-    description: 'The message to post on the pull request when closing it. If none provided, will not comment when closing a pull requests.'
+    description: 'The message to post on the pull request when closing it. If none provided, will not comment when closing a pull request.'
     required: false
   days-before-stale:
-    description: 'The number of days old an issue or a pull request can be before marking it stale. Set to -1 to never mark issues or pull requests as stale automatically.'
+    description: 'The number of days of inactivity before marking an issue or pull request as stale. Accepts fractional values (e.g. 0.5 for 12 hours). Set to -1 to never mark as stale automatically.'
     required: false
     default: '60'
   days-before-issue-stale:
@@ -29,14 +29,14 @@ inputs:
     description: 'The number of days old a pull request can be before marking it stale. Set to -1 to never mark pull requests as stale automatically. Override "days-before-stale" option regarding only the pull requests.'
     required: false
   days-before-close:
-    description: 'The number of days to wait to close an issue or a pull request after it being marked stale. Set to -1 to never close stale issues or pull requests.'
+    description: 'The number of days to wait to close an issue or a pull request after it being marked stale. Must be an integer. Set to -1 to never close stale issues or pull requests.'
     required: false
     default: '7'
   days-before-issue-close:
-    description: 'The number of days to wait to close an issue after it being marked stale. Set to -1 to never close stale issues. Override "days-before-close" option regarding only the issues.'
+    description: 'The number of days to wait to close an issue after it being marked stale. Must be an integer. Set to -1 to never close stale issues. Override "days-before-close" option regarding only the issues.'
     required: false
   days-before-pr-close:
-    description: 'The number of days to wait to close a pull request after it being marked stale. Set to -1 to never close stale pull requests. Override "days-before-close" option regarding only the pull requests.'
+    description: 'The number of days to wait to close a pull request after it being marked stale. Must be an integer. Set to -1 to never close stale pull requests. Override "days-before-close" option regarding only the pull requests.'
     required: false
   stale-issue-label:
     description: 'The label to apply when an issue is stale.'
@@ -50,7 +50,7 @@ inputs:
     default: ''
     required: false
   close-issue-reason:
-    description: 'The reason to use when closing an issue.'
+    description: 'The reason to use when closing an issue. Valid values are `completed` and `not_planned`. An invalid value will cause the action to fail.'
     default: 'not_planned'
     required: false
   stale-pr-label:
@@ -77,7 +77,7 @@ inputs:
     default: ''
     required: false
   exempt-all-milestones:
-    description: 'Exempt all issues and pull requests with milestones from being marked as stale. Default to false.'
+    description: 'Exempt all issues and pull requests with milestones from being marked as stale. Defaults to `false`.'
     default: 'false'
     required: false
   exempt-all-issue-milestones:
@@ -113,7 +113,7 @@ inputs:
     default: ''
     required: false
   operations-per-run:
-    description: 'The maximum number of operations per run, used to control rate limiting (GitHub API CRUD related).'
+    description: 'The maximum number of operations per run, used to control rate limiting (GitHub API CRUD related). Must be an integer.'
     default: '30'
     required: false
   remove-stale-when-updated:
@@ -137,7 +137,7 @@ inputs:
     default: 'false'
     required: false
   sort-by:
-    description: 'What to sort results by. Valid options are `created`, `updated`, and `comments`. Defaults to `created`.'
+    description: 'What to sort results by. Valid options are `created`, `updated`, and `comments`. Any other value falls back to `created`.'
     default: 'created'
     required: false
   delete-branch:
@@ -145,7 +145,7 @@ inputs:
     default: 'false'
     required: false
   start-date:
-    description: 'The date used to skip the stale action on issue/pull request created before it (ISO 8601 or RFC 2822).'
+    description: 'The date used to skip the stale action on issues and pull requests created before it (ISO 8601 or RFC 2822). An invalid date format will cause the action to fail.'
     default: ''
     required: false
   exempt-assignees:
@@ -161,7 +161,7 @@ inputs:
     default: ''
     required: false
   exempt-all-assignees:
-    description: 'Exempt all issues and pull requests with assignees from being marked as stale. Default to false.'
+    description: 'Exempt all issues and pull requests with assignees from being marked as stale. Defaults to `false`.'
     default: 'false'
     required: false
   exempt-all-issue-assignees:
@@ -173,7 +173,7 @@ inputs:
     default: ''
     required: false
   exempt-draft-pr:
-    description: 'Exempt draft pull requests from being marked as stale. Default to false.'
+    description: 'Exempt draft pull requests from being marked as stale. Defaults to `false`. Draft status is read from the issue list payload; no additional API call is required.'
     default: 'false'
     required: false
   enable-statistics:
@@ -193,15 +193,15 @@ inputs:
     default: ''
     required: false
   ignore-updates:
-    description: 'Any update (update/comment) can reset the stale idle time on the issues and pull requests.'
+    description: 'If set to `true`, updates and comments will not reset the stale idle time. Staleness is then calculated from the creation date instead of the last update date. Defaults to `false`.'
     default: 'false'
     required: false
   ignore-issue-updates:
-    description: 'Any update (update/comment) can reset the stale idle time on the issues. Override "ignore-updates" option regarding only the issues.'
+    description: 'If set to `true`, updates and comments on issues will not reset the stale idle time. Staleness is then calculated from the creation date. Overrides "ignore-updates" for issues only.'
     default: ''
     required: false
   ignore-pr-updates:
-    description: 'Any update (update/comment) can reset the stale idle time on the pull requests. Override "ignore-updates" option regarding only the pull requests.'
+    description: 'If set to `true`, updates and comments on pull requests will not reset the stale idle time. Staleness is then calculated from the creation date. Overrides "ignore-updates" for pull requests only.'
     default: ''
     required: false
   include-only-assigned:
@@ -213,10 +213,10 @@ inputs:
     default: ''
     required: false
 outputs:
-  closed-issues-prs:
-    description: 'List of all closed issues and pull requests.'
   staled-issues-prs:
-    description: 'List of all staled issues and pull requests.'
+    description: 'JSON array of all issues and pull requests marked stale in this run.'
+  closed-issues-prs:
+    description: 'JSON array of all issues and pull requests closed in this run.'
 runs:
   using: 'node24'
   main: 'dist/index.js'

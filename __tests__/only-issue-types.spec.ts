@@ -7,6 +7,10 @@ import {alwaysFalseStateMock} from './classes/state-mock';
 import * as core from '@actions/core';
 
 describe('only-issue-types option', () => {
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
   test('should only process issues with allowed type', async () => {
     const opts: IIssuesProcessorOptions = {
       ...DefaultProcessorOptions,
@@ -148,10 +152,6 @@ describe('only-issue-types option', () => {
 
     // Case-insensitive regex handles variations and ANSI codes
     expect(allLogs).not.toMatch(/pull request/i);
-
-    infoSpy.mockRestore();
-    groupSpy.mockRestore();
-    warningSpy.mockRestore();
   });
 
   test('should process all issues and PRs if onlyIssueTypes is unset', async () => {

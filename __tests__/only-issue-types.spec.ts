@@ -77,9 +77,11 @@ describe('only-issue-types option', () => {
     ]);
   });
   test('should process allowed issue types and skip PRs without logs', async () => {
-    const infoSpy = jest.spyOn(core, 'info');
-    const groupSpy = jest.spyOn(core, 'group');
-    const warningSpy = jest.spyOn(core, 'warning');
+    const infoSpy = jest.spyOn(core, 'info').mockImplementation(() => {});
+    const groupSpy = jest
+      .spyOn(core, 'group')
+      .mockImplementation(async (_name, fn) => fn());
+    const warningSpy = jest.spyOn(core, 'warning').mockImplementation(() => {});
 
     const opts: IIssuesProcessorOptions = {
       ...DefaultProcessorOptions,

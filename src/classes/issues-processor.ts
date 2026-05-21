@@ -148,6 +148,10 @@ export class IssuesProcessor {
       if (!this.operations.hasRemainingOperations()) {
         break;
       }
+      // Skip PRs silently when onlyIssueTypes is set
+      if (this.options.onlyIssueTypes && issue.isPullRequest) {
+        continue;
+      }
 
       const issueLogger: IssueLogger = new IssueLogger(issue);
       if (this.state.isIssueProcessed(issue)) {

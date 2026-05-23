@@ -7,6 +7,28 @@ import {DefaultProcessorOptions} from './constants/default-processor-options';
 import {generateIssue} from './functions/generate-issue';
 import {alwaysFalseStateMock} from './classes/state-mock';
 
+jest.mock('@actions/github', () => {
+  const actual = jest.requireActual('@actions/github');
+  return {
+    ...actual,
+    context: {
+      ...actual.context,
+      repo: {
+        owner: 'owner-mock',
+        repo: 'repo-mock'
+      }
+    },
+    getOctokit: (...args: unknown[]) => {
+      const originalCall = actual.getOctokit;
+      const client = originalCall(...args);
+      client.rest.issues.removeLabel = () => {
+        throw new Error('Something went wrong');
+      };
+      return client;
+    }
+  };
+});
+
 let issuesProcessorBuilder: IssuesProcessorBuilder;
 let issuesProcessor: IssuesProcessorMock;
 
@@ -64,6 +86,18 @@ describe('remove-stale-when-updated option', (): void => {
       await issuesProcessor.processIssues();
 
       expect(issuesProcessor.removedLabelIssues).toHaveLength(1);
+    });
+
+    test('should not count stale label removal when the operation is unsuccessful', async (): Promise<void> => {
+      expect.assertions(1);
+      issuesProcessor = issuesProcessorBuilder
+        .staleIssues([{}])
+        .unsetDebugMode()
+        .build();
+
+      await issuesProcessor.processIssues();
+
+      expect(issuesProcessor.removedLabelIssues).toHaveLength(0);
     });
   });
 });
@@ -538,6 +572,11 @@ class IssuesProcessorBuilder {
       })
     );
 
+    return this;
+  }
+
+  unsetDebugMode() {
+    this._options.debugOnly = false;
     return this;
   }
 

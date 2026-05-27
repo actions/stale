@@ -74,9 +74,10 @@ export class StateCacheStorage implements IStateStorage {
     fs.writeFileSync(filePath, serializedState);
 
     try {
-      const cacheExists = await checkIfCacheExists(CACHE_KEY);
+      const full_cache_key = CACHE_KEY + '_' + context.runId;
+      const cacheExists = await checkIfCacheExists(full_cache_key);
       if (cacheExists) {
-        await resetCacheWithOctokit(CACHE_KEY);
+        await resetCacheWithOctokit(full_cache_key);
       }
       const fileSize = fs.statSync(filePath).size;
 
@@ -85,7 +86,7 @@ export class StateCacheStorage implements IStateStorage {
         return;
       }
 
-      await cache.saveCache([path.dirname(filePath)], CACHE_KEY);
+      await cache.saveCache([path.dirname(filePath)], full_cache_key);
     } catch (error) {
       core.warning(
         `Saving the state was not successful due to "${
@@ -102,15 +103,16 @@ export class StateCacheStorage implements IStateStorage {
     const filePath = path.join(tmpDir, STATE_FILE);
     unlinkSafely(filePath);
     try {
-      const cacheExists = await checkIfCacheExists(CACHE_KEY);
+      const cacheExists = await cache.restoreCache(
+        [path.dirname(filePath)],
+        CACHE_KEY
+      );
       if (!cacheExists) {
         core.info(
           'The saved state was not found, the process starts from the first issue.'
         );
         return '';
       }
-
-      await cache.restoreCache([path.dirname(filePath)], CACHE_KEY);
 
       if (!fs.existsSync(filePath)) {
         core.warning(

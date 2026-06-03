@@ -122,4 +122,37 @@ describe('only-issue-types option', () => {
       'A feature'
     ]);
   });
+
+  test('should ignore onlyIssueTypes filter when item is a pull request', async () => {
+    const opts: IIssuesProcessorOptions = {
+      ...DefaultProcessorOptions,
+      onlyIssueTypes: 'bug'
+    };
+    const TestIssueList: Issue[] = [
+      generateIssue(
+        opts,
+        1,
+        'A pull request',
+        '2020-01-01T17:00:00Z',
+        '2020-01-01T17:00:00Z',
+        false,
+        true, // isPullRequest = true
+        [],
+        false,
+        false,
+        undefined,
+        [],
+        undefined // pull requests do not have an issue_type
+      )
+    ];
+    const processor = new IssuesProcessorMock(
+      opts,
+      alwaysFalseStateMock,
+      async p => (p === 1 ? TestIssueList : []),
+      async () => [],
+      async () => new Date().toDateString()
+    );
+    await processor.processIssues(1);
+    expect(processor.staleIssues.map(i => i.title)).toEqual(['A pull request']);
+  });
 });

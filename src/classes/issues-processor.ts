@@ -252,7 +252,7 @@ export class IssuesProcessor {
       return; // If the issue has an 'include-only-assigned' option set, process only issues with nonempty assignees list
     }
 
-    if (this.options.onlyIssueTypes) {
+    if (this.options.onlyIssueTypes && !issue.isPullRequest) {
       const allowedTypes = this.options.onlyIssueTypes
         .split(',')
         .map(t => t.trim().toLowerCase())

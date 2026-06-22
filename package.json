@@ -50,7 +50,7 @@
     "@types/lodash.deburr": "^4.1.6",
     "@types/node": "^24.3.1",
     "@types/semver": "^7.5.0",
-    "@typescript-eslint/eslint-plugin": "^7.18.0",
+    "@typescript-eslint/eslint-plugin": "^8.61.1",
     "@typescript-eslint/parser": "^7.18.0",
     "@vercel/ncc": "^0.36.1",
     "ansi-styles": "5.2.0",

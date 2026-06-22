@@ -41,7 +41,7 @@
     "@actions/core": "^2.0.3",
     "@actions/github": "^7.0.0",
     "@octokit/core": "^5.2.2",
-    "@octokit/plugin-retry": "^6.1.0",
+    "@octokit/plugin-retry": "^8.1.0",
     "lodash.deburr": "^4.1.0",
     "semver": "^7.7.4"
   },

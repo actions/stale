@@ -269,6 +269,24 @@ export class IssuesProcessor {
       }
     }
 
+    // exemptIssueTypes wins if both it and onlyIssueTypes are specified
+    if (this.options.exemptIssueTypes) {
+      const exemptTypes = this.options.exemptIssueTypes
+        .split(',')
+        .map(t => t.trim().toLowerCase())
+        .filter(Boolean);
+      const issueType = (issue.issue_type || '').toLowerCase();
+      if (exemptTypes.includes(issueType)) {
+        issueLogger.info(
+          `Skipping this $$type because its type ('${
+            issue.issue_type
+          }') is in exemptIssueTypes (${exemptTypes.join(', ')})`
+        );
+        IssuesProcessor._endIssueProcessing(issue);
+        return;
+      }
+    }
+
     const onlyLabels: string[] = wordsToList(this._getOnlyLabels(issue));
 
     if (onlyLabels.length > 0) {

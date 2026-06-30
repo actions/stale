@@ -55,5 +55,6 @@ export interface IIssuesProcessorOptions {
   exemptDraftPr: boolean;
   closeIssueReason: string;
   includeOnlyAssigned: boolean;
+  exemptIssueTypes?: string;
   onlyIssueTypes?: string;
 }

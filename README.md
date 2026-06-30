@@ -569,6 +569,8 @@ A comma separated list of allowed issue types. Only issues with a matching type 
 
 If unset (or an empty string), this option will not alter the stale workflow.
 
+This option does not affect PRs.
+
 Default value: unset
 
 ### Usage

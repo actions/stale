@@ -1,6 +1,6 @@
 {
   "name": "stale-action",
-  "version": "10.3.0",
+  "version": "10.4.0",
   "private": true,
   "description": "Marks old issues and PRs as stale",
   "main": "lib/main.js",
@@ -39,11 +39,14 @@
   "dependencies": {
     "@actions/cache": "^5.0.5",
     "@actions/core": "^2.0.3",
-    "@actions/github": "^9.1.1",
+    "@actions/github": "^7.0.0",
     "@octokit/core": "^5.2.2",
     "@octokit/plugin-retry": "^6.1.0",
     "lodash.deburr": "^4.1.0",
     "semver": "^7.7.4"
+  },
+  "overrides": {
+    "undici": ">=6.27.0"
   },
   "devDependencies": {
     "@types/jest": "^29.5.14",

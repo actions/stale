@@ -452,6 +452,10 @@ class IssuesProcessor {
                 if (!this.operations.hasRemainingOperations()) {
                     break;
                 }
+                // Skip PRs silently when onlyIssueTypes is set
+                if (this.options.onlyIssueTypes && issue.isPullRequest) {
+                    continue;
+                }
                 const issueLogger = new issue_logger_1.IssueLogger(issue);
                 if (this.state.isIssueProcessed(issue)) {
                     issueLogger.info('           $$type skipped due being processed during the previous run');

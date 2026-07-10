@@ -694,10 +694,26 @@ class IssuesProcessor {
     }
     // grab issues from github in batches of 100
     getIssues(page) {
-        var _a;
+        var _a, _b;
         return __awaiter(this, void 0, void 0, function* () {
+            const issuesDisabled = this._getDaysBeforeIssueStale() < 0 &&
+                this._getDaysBeforeIssueClose() < 0;
             try {
                 this.operations.consumeOperation();
+                if (issuesDisabled) {
+                    const sortField = (0, get_sort_field_1.getSortField)(this.options.sortBy);
+                    const pullResult = yield this.client.rest.pulls.list({
+                        owner: github_1.context.repo.owner,
+                        repo: github_1.context.repo.repo,
+                        state: 'open',
+                        per_page: 100,
+                        direction: this.options.ascending ? 'asc' : 'desc',
+                        sort: sortField === 'comments' ? 'created' : sortField,
+                        page
+                    });
+                    (_a = this.statistics) === null || _a === void 0 ? void 0 : _a.incrementFetchedItemsCount(pullResult.data.length);
+                    return pullResult.data.map((pr) => new issue_1.Issue(this.options, Object.assign(Object.assign({}, pr), { pull_request: {} })));
+                }
                 const issueResult = yield this.client.rest.issues.listForRepo({
                     owner: github_1.context.repo.owner,
                     repo: github_1.context.repo.repo,
@@ -707,7 +723,7 @@ class IssuesProcessor {
                     sort: (0, get_sort_field_1.getSortField)(this.options.sortBy),
                     page
                 });
-                (_a = this.statistics) === null || _a === void 0 ? void 0 : _a.incrementFetchedItemsCount(issueResult.data.length);
+                (_b = this.statistics) === null || _b === void 0 ? void 0 : _b.incrementFetchedItemsCount(issueResult.data.length);
                 return issueResult.data.map((issue) => new issue_1.Issue(this.options, issue));
             }
             catch (error) {

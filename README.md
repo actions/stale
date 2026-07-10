@@ -32,6 +32,14 @@ permissions:
   pull-requests: write
 ```
 
+**Pull requests only (no issue processing):**  
+When both [days-before-issue-stale](#days-before-issue-stale) and [days-before-issue-close](#days-before-issue-close) are set to `-1`, the action uses the pull requests API exclusively and does not require any `issues` permission:
+
+```yaml
+permissions:
+  pull-requests: write
+```
+
 You can find more information about the required permissions under the corresponding options that you wish to use.
 
 ## Statefulness
@@ -163,6 +171,8 @@ Default value: `60`
 
 Useful to override [days-before-stale](#days-before-stale) but only for the idle number of days before marking the issues as stale.
 
+If set to `-1` together with [days-before-issue-close](#days-before-issue-close) set to `-1`, the action will use the pull requests API exclusively to fetch items, avoiding the need for any `issues` permission in the workflow.
+
 Default value: unset
 
 #### days-before-pr-stale
@@ -189,6 +199,8 @@ Default value: `7`
 #### days-before-issue-close
 
 Override [days-before-close](#days-before-close) but only for the idle number of days before closing the stale issues.
+
+If set to `-1` together with [days-before-issue-stale](#days-before-issue-stale) set to `-1`, the action will use the pull requests API exclusively to fetch items, avoiding the need for any `issues` permission in the workflow.
 
 Default value: unset
 

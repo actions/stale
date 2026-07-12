@@ -1,6 +1,6 @@
 # Contributors
 
-### Checkin
+### Check-in
 
 - Do check in source (src)
 - Do not check in build output (lib)

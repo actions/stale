@@ -692,7 +692,9 @@ export class IssuesProcessor {
   // undefined when it cannot be determined. Used by ignore-bot-updates to
   // make sure a human push is never mistaken for ignorable bot activity:
   // pushes bump `updated_at` without leaving an issue event.
-  async getPullRequestLastCommitDate(issue: Issue): Promise<string | undefined> {
+  async getPullRequestLastCommitDate(
+    issue: Issue
+  ): Promise<string | undefined> {
     const issueLogger: IssueLogger = new IssueLogger(issue);
 
     try {

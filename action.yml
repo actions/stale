@@ -216,6 +216,10 @@ inputs:
     description: 'Only issues with a matching type are processed as stale/closed. Defaults to `[]` (disabled) and can be a comma-separated list of issue types.'
     default: ''
     required: false
+  exempt-issues-with-open-linked-pr:
+    description: 'Exempt issues that an open pull request will close when merged. Only linked pull requests count, not simple mentions. Costs one extra operation per issue that reaches this check, so it is disabled by default.'
+    default: 'false'
+    required: false
 outputs:
   closed-issues-prs:
     description: 'List of all closed issues and pull requests.'

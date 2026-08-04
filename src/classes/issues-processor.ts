@@ -650,7 +650,7 @@ export class IssuesProcessor {
     const issueLogger: IssueLogger = new IssueLogger(issue);
 
     issueLogger.info(
-      `Checking if only stale label added events on $$type since: ${LoggerService.cyan(
+      `Checking if only ignorable events on $$type since: ${LoggerService.cyan(
         sinceDate
       )}`
     );
@@ -674,12 +674,96 @@ export class IssuesProcessor {
     }
 
     return relevantEvents.every(event => {
+      // With ignore-bot-updates, any event caused by a bot account is
+      // ignorable — label syncs, automated milestoning, etc.
+      if (this.options.ignoreBotUpdates && event.actor?.type === 'Bot') {
+        return true;
+      }
+
       if (event.event !== 'labeled') {
         return false;
       }
 
       return cleanLabel(event.label.name) === cleanLabel(staleLabel);
     });
+  }
+
+  // Returns the date of the most recent commit on a pull request, or
+  // undefined when it cannot be determined. Used by ignore-bot-updates to
+  // make sure a human push is never mistaken for ignorable bot activity:
+  // pushes bump `updated_at` without leaving an issue event.
+  async getPullRequestLastCommitDate(issue: Issue): Promise<string | undefined> {
+    const issueLogger: IssueLogger = new IssueLogger(issue);
+
+    try {
+      this._consumeIssueOperation(issue);
+      this.statistics?.incrementFetchedPullRequestsCount();
+
+      const commits = await this.client.rest.pulls.listCommits({
+        owner: context.repo.owner,
+        repo: context.repo.repo,
+        pull_number: issue.number,
+        per_page: 100
+      });
+
+      const lastCommit = commits.data[commits.data.length - 1];
+
+      return lastCommit?.commit?.committer?.date;
+    } catch (error) {
+      issueLogger.error(
+        `Error when getting the last commit of this $$type: ${error.message}`
+      );
+    }
+  }
+
+  // With ignore-bot-updates, an `updated_at` bump only counts as an update
+  // when something other than bot activity explains it: a non-bot issue
+  // event, or (for pull requests) a commit pushed since the stale marking.
+  // An unexplained bump (e.g. a body edit, which leaves no issue event) is
+  // treated as human activity so the action stays on the safe side.
+  private async _hasHumanUpdateSince(
+    issue: Issue,
+    sinceDate: string,
+    staleLabel: string,
+    events: IIssueEvent[]
+  ): Promise<boolean> {
+    const issueLogger: IssueLogger = new IssueLogger(issue);
+
+    const onlyIgnorableEvents = await this.hasOnlyStaleLabelingEventsSince(
+      issue,
+      sinceDate,
+      staleLabel,
+      events
+    );
+
+    if (!onlyIgnorableEvents) {
+      return true;
+    }
+
+    if (issue.isPullRequest) {
+      const lastCommitDate = await this.getPullRequestLastCommitDate(issue);
+
+      if (
+        lastCommitDate &&
+        isDateMoreRecentThan(new Date(lastCommitDate), new Date(sinceDate), 15)
+      ) {
+        issueLogger.info(
+          `$$type has a commit more recent than the stale marking: ${LoggerService.cyan(
+            lastCommitDate
+          )}`
+        );
+
+        return true;
+      }
+    }
+
+    issueLogger.info(
+      `Only bot or stale-labeling activity on $$type since: ${LoggerService.cyan(
+        sinceDate
+      )}`
+    );
+
+    return false;
   }
 
   async getPullRequest(issue: Issue): Promise<IPullRequest | undefined | void> {
@@ -797,22 +881,30 @@ export class IssuesProcessor {
     );
 
     // Check if the only update was the stale label being added
+    // (or, with ignore-bot-updates, any bot activity)
     if (
       issueHasUpdateSinceStale &&
       shouldRemoveStaleWhenUpdated &&
       !issue.markedStaleThisRun
     ) {
-      const onlyStaleLabelAdded = await this.hasOnlyStaleLabelingEventsSince(
-        issue,
-        markedStaleOn,
-        staleLabel,
-        events
-      );
+      const hasHumanUpdate = this.options.ignoreBotUpdates
+        ? await this._hasHumanUpdateSince(
+            issue,
+            markedStaleOn,
+            staleLabel,
+            events
+          )
+        : !(await this.hasOnlyStaleLabelingEventsSince(
+            issue,
+            markedStaleOn,
+            staleLabel,
+            events
+          ));
 
-      if (onlyStaleLabelAdded) {
+      if (!hasHumanUpdate) {
         issueHasUpdateSinceStale = false;
         issueLogger.info(
-          `Ignoring $$type update since only the stale label was added`
+          `Ignoring $$type update since it was not caused by human activity`
         );
       }
     }
@@ -852,10 +944,13 @@ export class IssuesProcessor {
       return; // Nothing to do because we aren't closing stale issues
     }
 
-    const issueHasUpdateInCloseWindow: boolean = IssuesProcessor._updatedSince(
-      issue.updated_at,
-      daysBeforeClose
-    );
+    // With ignore-bot-updates, bots bump `updated_at` constantly, so recency
+    // of `updated_at` proves nothing. The close window instead runs from the
+    // stale marking, blocked by any human update found above.
+    const issueHasUpdateInCloseWindow: boolean = this.options.ignoreBotUpdates
+      ? IssuesProcessor._updatedSince(markedStaleOn, daysBeforeClose) ||
+        issueHasUpdateSinceStale
+      : IssuesProcessor._updatedSince(issue.updated_at, daysBeforeClose);
     issueLogger.info(
       `$$type has been updated in the last ${daysBeforeClose} days: ${LoggerService.cyan(
         issueHasUpdateInCloseWindow

@@ -52,6 +52,7 @@ export const DefaultProcessorOptions: IIssuesProcessorOptions = Object.freeze({
   labelsToRemoveWhenUnstale: '',
   labelsToAddWhenUnstale: '',
   ignoreUpdates: false,
+  ignoreBotUpdates: false,
   ignoreIssueUpdates: undefined,
   ignorePrUpdates: undefined,
   exemptDraftPr: false,

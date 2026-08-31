@@ -575,6 +575,8 @@ A comma separated list of issue types that can be assigned to issues to exclude 
 
 If unset (or an empty string), this option will not alter the stale workflow.
 
+If a type is listed in both `exempt-issue-types` and `only-issue-types`, `exempt-issue-types` takes precedence.
+
 Default value: unset
 
 #### only-issue-types

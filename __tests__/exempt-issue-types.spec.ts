@@ -128,6 +128,43 @@ describe('exempt-issue-types option', () => {
     ]);
   });
 
+  test('should take precedence over onlyIssueTypes', async () => {
+    const opts: IIssuesProcessorOptions = {
+      ...DefaultProcessorOptions,
+      exemptIssueTypes: 'bug',
+      onlyIssueTypes: 'bug'
+    };
+
+    const TestIssueList: Issue[] = [
+      generateIssue(
+        opts,
+        1,
+        'A bug',
+        '2020-01-01T17:00:00Z',
+        '2020-01-01T17:00:00Z',
+        false,
+        false,
+        [],
+        false,
+        false,
+        undefined,
+        [],
+        'bug'
+      )
+    ];
+
+    const processor = new IssuesProcessorMock(
+      opts,
+      alwaysFalseStateMock,
+      async p => (p === 1 ? TestIssueList : []),
+      async () => [],
+      async () => new Date().toDateString()
+    );
+
+    await processor.processIssues(1);
+    expect(processor.staleIssues).toEqual([]);
+  });
+
   test('should ignore exemptIssueTypes filter when item is a pull request', async () => {
     const opts: IIssuesProcessorOptions = {
       ...DefaultProcessorOptions,

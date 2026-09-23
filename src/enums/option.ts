@@ -51,5 +51,6 @@ export enum Option {
   ExemptDraftPr = 'exempt-draft-pr',
   CloseIssueReason = 'close-issue-reason',
   ExemptIssueTypes = 'exempt-issue-types',
-  OnlyIssueTypes = 'only-issue-types'
+  OnlyIssueTypes = 'only-issue-types',
+  ExemptIssuesWithOpenLinkedPr = 'exempt-issues-with-open-linked-pr'
 }

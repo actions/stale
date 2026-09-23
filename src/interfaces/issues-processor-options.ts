@@ -57,4 +57,5 @@ export interface IIssuesProcessorOptions {
   includeOnlyAssigned: boolean;
   exemptIssueTypes?: string;
   onlyIssueTypes?: string;
+  exemptIssuesWithOpenLinkedPr: boolean;
 }

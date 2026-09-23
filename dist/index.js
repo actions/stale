@@ -49745,6 +49745,7 @@ var Option;
     Option["CloseIssueReason"] = "close-issue-reason";
     Option["ExemptIssueTypes"] = "exempt-issue-types";
     Option["OnlyIssueTypes"] = "only-issue-types";
+    Option["ExemptIssuesWithOpenLinkedPr"] = "exempt-issues-with-open-linked-pr";
 })(Option || (Option = {}));
 
 ;// CONCATENATED MODULE: ./lib/functions/dates/get-humanized-date.js
@@ -51110,6 +51111,37 @@ class ExemptDraftPullRequest {
     }
 }
 
+;// CONCATENATED MODULE: ./lib/classes/exempt-linked-pull-request.js
+
+
+
+class ExemptLinkedPullRequest {
+    _options;
+    _issue;
+    _issueLogger;
+    constructor(options, issue) {
+        this._options = options;
+        this._issue = issue;
+        this._issueLogger = new IssueLogger(issue);
+    }
+    async shouldExemptLinkedPullRequest(hasOpenLinkedPullRequestCallback) {
+        // Pull requests are not linked to other pull requests, so there is nothing to check
+        if (this._issue.isPullRequest) {
+            return false;
+        }
+        if (!this._options.exemptIssuesWithOpenLinkedPr) {
+            return false;
+        }
+        this._issueLogger.info(`The option ${this._issueLogger.createOptionLink(Option.ExemptIssuesWithOpenLinkedPr)} is enabled`);
+        if (await hasOpenLinkedPullRequestCallback()) {
+            this._issueLogger.info(LoggerService.white('└──'), `Skip the $$type checks because an open pull request will close it when merged`);
+            return true;
+        }
+        this._issueLogger.info(LoggerService.white('└──'), `Continuing the process for this $$type because no open pull request will close it`);
+        return false;
+    }
+}
+
 ;// CONCATENATED MODULE: ./lib/functions/is-pull-request.js
 function isPullRequest(issue) {
     return !!issue.pull_request;
@@ -51840,6 +51872,7 @@ function getSortField(sortOption) {
 
 
 
+
 /***
  * Handle processing of issues for staleness/closure.
  */
@@ -52088,6 +52121,16 @@ class IssuesProcessor {
             IssuesProcessor._endIssueProcessing(issue);
             return; // Don't process draft PR
         }
+        // Ignore issues which an open pull request will close when merged
+        // Just like the draft PR check above, this one costs one read operation,
+        // so it only runs once every cheaper check has been passed
+        const exemptLinkedPullRequest = new ExemptLinkedPullRequest(this.options, issue);
+        if (await exemptLinkedPullRequest.shouldExemptLinkedPullRequest(async () => {
+            return this.hasOpenLinkedPullRequest(issue);
+        })) {
+            IssuesProcessor._endIssueProcessing(issue);
+            return; // Don't process issues with an open linked PR
+        }
         // Determine if this issue needs to be marked stale first
         if (!issue.isStale) {
             issueLogger.info(`This $$type is not stale`);
@@ -52238,6 +52281,34 @@ class IssuesProcessor {
         }
         catch (error) {
             issueLogger.error(`Error when getting this $$type: ${error.message}`);
+        }
+    }
+    // Returns true when at least one open pull request is linked to the issue in a
+    // way that will close it once merged (the "Development" link, not a mere mention)
+    async hasOpenLinkedPullRequest(issue) {
+        const issueLogger = new IssueLogger(issue);
+        try {
+            this._consumeIssueOperation(issue);
+            const response = await this.client.graphql(`query ($owner: String!, $repo: String!, $number: Int!) {
+          repository(owner: $owner, name: $repo) {
+            issue(number: $number) {
+              closedByPullRequestsReferences(first: 1, includeClosedPrs: false) {
+                totalCount
+              }
+            }
+          }
+        }`, {
+                owner: github_context.repo.owner,
+                repo: github_context.repo.repo,
+                number: issue.number
+            });
+            return ((response.repository?.issue?.closedByPullRequestsReferences
+                .totalCount ?? 0) > 0);
+        }
+        catch (error) {
+            issueLogger.error(`Error when getting the linked pull requests of this $$type: ${error.message}`);
+            // Keep processing the $$type as usual rather than silently exempting it
+            return false;
         }
     }
     async getRateLimit() {
@@ -106919,7 +106990,8 @@ function _getAndValidateArgs() {
         closeIssueReason: getInput('close-issue-reason'),
         includeOnlyAssigned: getInput('include-only-assigned') === 'true',
         onlyIssueTypes: getInput('only-issue-types'),
-        exemptIssueTypes: getInput('exempt-issue-types')
+        exemptIssueTypes: getInput('exempt-issue-types'),
+        exemptIssuesWithOpenLinkedPr: getInput('exempt-issues-with-open-linked-pr') === 'true'
     };
     for (const numberInput of ['days-before-stale']) {
         if (isNaN(parseFloat(getInput(numberInput)))) {

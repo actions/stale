@@ -77,6 +77,10 @@ export class IssuesProcessor {
   readonly statistics: Statistics | undefined;
   private readonly _logger: Logger = new Logger();
   private readonly state: IState;
+  private readonly pageSignatures = new Map<number, string>();
+  private readonly pagePasses = new Map<number, number>();
+  private readonly firstPassFetchCounts = new Map<number, number>();
+  private readonly waitPasses = new Map<number, number>();
 
   constructor(options: IIssuesProcessorOptions, state: IState) {
     this.options = options;
@@ -104,9 +108,24 @@ export class IssuesProcessor {
     }
   }
 
+  // overridable so tests don't incur real delays
+  async wait(milliseconds: number): Promise<void> {
+    return new Promise(resolve => setTimeout(resolve, milliseconds));
+  }
+
   async processIssues(page: Readonly<number> = 1): Promise<number> {
-    // get the next batch of issues
     const issues: Issue[] = await this.getIssues(page);
+    const pageSignature = issues.map(issue => issue.number).join(',');
+
+    if (
+      this.options.debugOnly &&
+      this.pageSignatures.get(page) === pageSignature
+    ) {
+      return this.processIssues(page + 1);
+    }
+    this.pageSignatures.set(page, pageSignature);
+    const pagePass = (this.pagePasses.get(page) ?? 0) + 1;
+    this.pagePasses.set(page, pagePass);
 
     if (issues.length <= 0) {
       this._logger.info(
@@ -117,18 +136,63 @@ export class IssuesProcessor {
         .logStats();
 
       this.state.reset();
+      this.pageSignatures.clear();
+      this.pagePasses.clear();
+      this.firstPassFetchCounts.clear();
+      this.waitPasses.clear();
 
       return this.operations.getRemainingOperationsCount();
-    } else {
+    }
+
+    if (pagePass === 1) {
+      this.firstPassFetchCounts.set(page, issues.length);
+    }
+    const fetchCountShrank =
+      issues.length < (this.firstPassFetchCounts.get(page) ?? issues.length);
+
+    const unprocessedIssues: Issue[] = [];
+    const previouslyProcessedIssues: Issue[] = [];
+
+    for (const issue of issues) {
+      if (this.state.isIssueProcessed(issue)) {
+        previouslyProcessedIssues.push(issue);
+      } else {
+        unprocessedIssues.push(issue);
+      }
+    }
+
+    // A previous-run skip is only detectable on a page's first fetch this run;
+    // later passes re-see the same items because we're waiting on GitHub, not because of restored state.
+    // Show processing logs on the first fetch or when new items are found.
+    const isVisiblePass = unprocessedIssues.length > 0 || pagePass === 1;
+    if (isVisiblePass) {
       this._logger.info(
         `${LoggerService.yellow(
-          'Processing the batch of issues '
+          'Processing page '
         )} ${LoggerService.cyan(`#${page}`)} ${LoggerService.yellow(
-          ' containing '
+          ': '
+        )} ${LoggerService.cyan(unprocessedIssues.length)} ${LoggerService.yellow(
+          `new item${unprocessedIssues.length === 1 ? '' : 's'} out of `
         )} ${LoggerService.cyan(issues.length)} ${LoggerService.yellow(
-          ` issue${issues.length > 1 ? 's' : ''}...`
+          `fetched (${previouslyProcessedIssues.length} previously processed)...`
         )}`
       );
+      if (fetchCountShrank) {
+        this._logger.info(
+          `${LoggerService.green('Page ')} ${LoggerService.cyan(
+            `#${page}`
+          )} ${LoggerService.green(' shrank as GitHub reflected the closures.')}`
+        );
+      }
+    }
+
+    if (pagePass === 1) {
+      for (const issue of previouslyProcessedIssues) {
+        const issueLogger: IssueLogger = new IssueLogger(issue);
+        issueLogger.info(
+          '           $$type skipped due being processed during the previous run'
+        );
+      }
     }
 
     const labelsToRemoveWhenStale: string[] = wordsToList(
@@ -141,20 +205,14 @@ export class IssuesProcessor {
     const labelsToRemoveWhenUnstale: string[] = wordsToList(
       this.options.labelsToRemoveWhenUnstale
     );
+    const closedItemsCountBeforePass = this.closedIssues.length;
 
-    for (const issue of issues.values()) {
-      // Stop the processing if no more operations remains
+    for (const issue of unprocessedIssues.values()) {
       if (!this.operations.hasRemainingOperations()) {
         break;
       }
 
       const issueLogger: IssueLogger = new IssueLogger(issue);
-      if (this.state.isIssueProcessed(issue)) {
-        issueLogger.info(
-          '           $$type skipped due being processed during the previous run'
-        );
-        continue;
-      }
       await issueLogger.grouping(`$$type #${issue.number}`, async () => {
         await this.processIssue(
           issue,
@@ -186,14 +244,95 @@ export class IssuesProcessor {
       return 0;
     }
 
-    this._logger.info(
-      `${LoggerService.green('Batch ')} ${LoggerService.cyan(
-        `#${page}`
-      )} ${LoggerService.green(' processed.')}`
-    );
+    if (isVisiblePass) {
+      this._logger.info(
+        `${LoggerService.green('Page ')} ${LoggerService.cyan(
+          `#${page}`
+        )} ${LoggerService.green(' processed.')}`
+      );
+    }
 
-    // Do the next batch
-    return this.processIssues(page + 1);
+    const closedItemsCount =
+      this.closedIssues.length - closedItemsCountBeforePass;
+    const closedIssueNumbers = new Set(
+      this.closedIssues.map(issue => issue.number)
+    );
+    const visibleClosedIssueNumbers = issues
+      .filter(issue => closedIssueNumbers.has(issue.number))
+      .map(issue => issue.number);
+    const pageContainsClosedIssue = visibleClosedIssueNumbers.length > 0;
+    // updated/comments sort order can shift once items are processed
+    const sortKeyIsMutable =
+      this.options.sortBy === 'updated' || this.options.sortBy === 'comments';
+    const pageMayHaveReordered =
+      sortKeyIsMutable && unprocessedIssues.length > 0;
+    const pageIsUnstable = pageContainsClosedIssue || pageMayHaveReordered;
+
+    // closes from this pass are freshly re-checked with no wait; only back
+    // off once a later fetch reconfirms the same closed item still persists
+    const shouldWaitForClosure =
+      pageContainsClosedIssue && closedItemsCount === 0;
+    const wasWaitingForClosure = (this.waitPasses.get(page) ?? 0) > 0;
+
+    if (shouldWaitForClosure) {
+      this.waitPasses.set(page, (this.waitPasses.get(page) ?? 0) + 1);
+    } else {
+      this.waitPasses.delete(page);
+    }
+    const retryNumber = this.waitPasses.get(page) ?? 0;
+    const backoffMilliseconds = Math.min(500 * 2 ** (retryNumber - 1), 5000);
+
+    if (pageContainsClosedIssue && closedItemsCount > 0) {
+      this._logger.info(
+        `${LoggerService.yellow(
+          `${closedItemsCount} item${
+            closedItemsCount === 1 ? '' : 's'
+          } just closed on page `
+        )} ${LoggerService.cyan(`#${page}`)}${LoggerService.yellow(
+          '. Re-checking this page immediately to confirm GitHub reflects it.'
+        )}`
+      );
+    } else if (shouldWaitForClosure) {
+      this._logger.info(
+        `${LoggerService.yellow(
+          `${visibleClosedIssueNumbers.length} previously closed item${
+            visibleClosedIssueNumbers.length === 1 ? '' : 's'
+          } still visible on page `
+        )} ${LoggerService.cyan(`#${page}`)}${LoggerService.yellow(
+          `. Waiting ${backoffMilliseconds}ms for GitHub to catch up with closures.`
+        )}`
+      );
+    } else if (wasWaitingForClosure) {
+      this._logger.info(
+        `${LoggerService.green(
+          'GitHub now reflects the closures on page '
+        )} ${LoggerService.cyan(`#${page}`)}${LoggerService.green('.')}`
+      );
+    } else if (pageMayHaveReordered) {
+      this._logger.info(
+        `${LoggerService.yellow(
+          'Items were just processed on page '
+        )} ${LoggerService.cyan(`#${page}`)}${LoggerService.yellow(
+          `, which can reorder results when sorting by "${this.options.sortBy}". Re-checking this page immediately to confirm GitHub reflects it.`
+        )}`
+      );
+    }
+
+    if (shouldWaitForClosure) {
+      await this.wait(backoffMilliseconds);
+    }
+
+    if (!pageIsUnstable) {
+      this._logger.info(
+        `${LoggerService.green('Page ')} ${LoggerService.cyan(
+          `#${page}`
+        )} ${LoggerService.green(' is stable. Advancing to page ')} ${LoggerService.cyan(
+          `#${page + 1}`
+        )}${LoggerService.green('.')}`
+      );
+    }
+
+    return this.processIssues(pageIsUnstable ? page : page + 1);
   }
 
   async processIssue(
@@ -1001,7 +1140,6 @@ export class IssuesProcessor {
     const issueLogger: IssueLogger = new IssueLogger(issue);
 
     issueLogger.info(`Closing $$type for being stale`);
-    this.closedIssues.push(issue);
 
     if (closeMessage) {
       try {
@@ -1042,7 +1180,6 @@ export class IssuesProcessor {
 
     try {
       this._consumeIssueOperation(issue);
-      this.statistics?.incrementClosedItemsCount(issue);
 
       if (!this.options.debugOnly) {
         await this.client.rest.issues.update({
@@ -1054,6 +1191,9 @@ export class IssuesProcessor {
             'completed' | 'reopened' | 'not_planned' | null | undefined
         });
       }
+
+      this.closedIssues.push(issue);
+      this.statistics?.incrementClosedItemsCount(issue);
     } catch (error) {
       issueLogger.error(`Error when updating this $$type: ${error.message}`);
     }

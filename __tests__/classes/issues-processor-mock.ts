@@ -31,6 +31,9 @@ export class IssuesProcessorMock extends IssuesProcessor {
   ) {
     super(options, state);
 
+    // tests should never incur real pagination backoff delays
+    this.wait = async () => {};
+
     if (getIssues) {
       this.getIssues = getIssues;
     }

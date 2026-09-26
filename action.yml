@@ -204,6 +204,10 @@ inputs:
     description: 'Any update (update/comment) can reset the stale idle time on the pull requests. Override "ignore-updates" option regarding only the pull requests.'
     default: ''
     required: false
+  ignore-bot-updates:
+    description: 'Updates, comments, and label changes made by bot accounts (user type "Bot") do not remove the stale label and do not block closing. Human activity behaves as usual.'
+    default: 'false'
+    required: false
   include-only-assigned:
     description: 'Only the issues or the pull requests with an assignee will be marked as stale automatically.'
     default: 'false'

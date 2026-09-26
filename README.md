@@ -108,6 +108,7 @@ Every argument is optional.
 | [ignore-updates](#ignore-updates)                                   | Any update (update/comment) can reset the stale idle time on the issues/PRs | `false`               |
 | [ignore-issue-updates](#ignore-issue-updates)                       | Override [ignore-updates](#ignore-updates) for issues only                  |                       |
 | [ignore-pr-updates](#ignore-pr-updates)                             | Override [ignore-updates](#ignore-updates) for PRs only                     |                       |
+| [ignore-bot-updates](#ignore-bot-updates)                           | Bot activity does not reset the stale clock or block closing                | `false`               |
 | [include-only-assigned](#include-only-assigned)                     | Process only assigned issues                                                | `false`               |
 | [sort-by](#sort-by)                                                 | What to sort issues and PRs by                                              | `created`             |
 | [exempt-issue-types](#exempt-issue-types)                           | Issue types on issues exempted from stale/closed.                           |                       |
@@ -555,6 +556,17 @@ Default value: unset
 Useful to override [ignore-updates](#ignore-updates) but only to ignore the updates for the pull requests.
 
 Default value: unset
+
+#### ignore-bot-updates
+
+If set to `true`, activity caused by bot accounts (users of type `Bot`) does not remove the stale label and does not block closing.
+This covers bot comments, bot label changes, and other bot-caused events.
+Human activity behaves as usual: a comment, label change, or (for pull requests) a pushed commit removes the stale label and restarts the cycle.
+An `updated_at` change that cannot be attributed (for example a body edit, which leaves no event) is treated as human activity, so the action errs on the side of keeping items open.
+
+Useful for repositories where automation (label syncs, preview deployments, generated comments) updates issues and pull requests so often that the stale cycle never completes.
+
+Default value: `false`
 
 #### include-only-assigned
 

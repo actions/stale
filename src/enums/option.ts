@@ -51,5 +51,8 @@ export enum Option {
   ExemptDraftPr = 'exempt-draft-pr',
   CloseIssueReason = 'close-issue-reason',
   ExemptIssueTypes = 'exempt-issue-types',
-  OnlyIssueTypes = 'only-issue-types'
+  OnlyIssueTypes = 'only-issue-types',
+  DaysBeforePrBranchDelete = 'days-before-pr-branch-delete',
+  DaysBeforeNoPrBranchDelete = 'days-before-no-pr-branch-delete',
+  ExemptBranches = 'exempt-branches'
 }

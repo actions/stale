@@ -29,6 +29,24 @@ import {IState} from '../interfaces/state/state.js';
 import {IRateLimit} from '../interfaces/rate-limit.js';
 import {RateLimit} from './rate-limit.js';
 import {getSortField} from '../functions/get-sort-field.js';
+import {IBranch} from '../interfaces/branch.js';
+import {posix} from 'node:path';
+
+type BranchesQueryResult = {
+  repository: {
+    defaultBranchRef: {name: string} | null;
+    refs: {
+      pageInfo: {hasNextPage: boolean; endCursor: string | null};
+      nodes: {
+        name: string;
+        target: {committedDate: string};
+        branchProtectionRule: {id: string} | null;
+        rules: {nodes: {type: string}[]};
+        associatedPullRequests: {nodes: {closedAt: string}[]};
+      }[];
+    };
+  };
+};
 
 /***
  * Handle processing of issues for staleness/closure.
@@ -71,6 +89,7 @@ export class IssuesProcessor {
   readonly staleIssues: Issue[] = [];
   readonly closedIssues: Issue[] = [];
   readonly deletedBranchIssues: Issue[] = [];
+  readonly deletedBranches: string[] = [];
   readonly removedLabelIssues: Issue[] = [];
   readonly addedLabelIssues: Issue[] = [];
   readonly addedCloseCommentIssues: Issue[] = [];
@@ -112,6 +131,7 @@ export class IssuesProcessor {
       this._logger.info(
         LoggerService.green(`No more issues found to process. Exiting...`)
       );
+      await this.processBranches();
       this.statistics
         ?.setOperationsCount(this.operations.getConsumedOperationsCount())
         .logStats();
@@ -716,6 +736,134 @@ export class IssuesProcessor {
       return pullRequest.data;
     } catch (error) {
       issueLogger.error(`Error when getting this $$type: ${error.message}`);
+    }
+  }
+
+  // Delete branches whose last commit and last closed PR are both older than the configured days
+  async processBranches(): Promise<void> {
+    const {daysBeforePrBranchDelete, daysBeforeNoPrBranchDelete} = this.options;
+
+    if (
+      (daysBeforePrBranchDelete < 0 && daysBeforeNoPrBranchDelete < 0) ||
+      !this.operations.hasRemainingOperations()
+    ) {
+      return;
+    }
+
+    const exemptBranches: string[] = wordsToList(this.options.exemptBranches);
+
+    for (const branch of await this.getBranches()) {
+      if (!this.operations.hasRemainingOperations()) {
+        break;
+      }
+
+      const days: number = branch.prClosedAt
+        ? daysBeforePrBranchDelete
+        : daysBeforeNoPrBranchDelete;
+
+      if (
+        days < 0 ||
+        branch.hasOpenPr ||
+        branch.isProtected ||
+        exemptBranches.some(pattern =>
+          posix.matchesGlob(branch.name, pattern)
+        ) ||
+        IssuesProcessor._updatedSince(branch.lastCommitDate, days) ||
+        (branch.prClosedAt !== null &&
+          IssuesProcessor._updatedSince(branch.prClosedAt, days))
+      ) {
+        continue;
+      }
+
+      this._logger.info(
+        `Deleting the stale branch "${LoggerService.cyan(branch.name)}"`
+      );
+
+      try {
+        this.operations.consumeOperation();
+        this.statistics?.incrementDeletedBranchesCount();
+        this.deletedBranches.push(branch.name);
+
+        if (!this.options.debugOnly) {
+          await this.client.rest.git.deleteRef({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            ref: `heads/${branch.name}`
+          });
+        }
+      } catch (error) {
+        this._logger.error(
+          `Error when deleting the branch "${LoggerService.cyan(
+            branch.name
+          )}": ${error.message}`
+        );
+      }
+    }
+  }
+
+  async getBranches(): Promise<IBranch[]> {
+    const {owner, repo} = context.repo;
+
+    try {
+      const openPrRefs = new Set<string>();
+      for await (const {data} of this.client.paginate.iterator(
+        this.client.rest.pulls.list,
+        {owner, repo, state: 'open', per_page: 100}
+      )) {
+        this.operations.consumeOperation();
+        for (const pr of data) {
+          openPrRefs.add(pr.base.ref).add(pr.head.ref);
+        }
+      }
+
+      const branches: IBranch[] = [];
+      let cursor: string | null = null;
+      do {
+        this.operations.consumeOperation();
+        const result: BranchesQueryResult = await this.client.graphql(
+          `query($owner: String!, $repo: String!, $cursor: String) {
+            repository(owner: $owner, name: $repo) {
+              defaultBranchRef { name }
+              refs(refPrefix: "refs/heads/", first: 100, after: $cursor) {
+                pageInfo { hasNextPage endCursor }
+                nodes {
+                  name
+                  target { ... on Commit { committedDate } }
+                  branchProtectionRule { id }
+                  rules(first: 100) { nodes { type } }
+                  associatedPullRequests(states: [CLOSED, MERGED], first: 1, orderBy: {field: UPDATED_AT, direction: DESC}) {
+                    nodes { closedAt }
+                  }
+                }
+              }
+            }
+          }`,
+          {owner, repo, cursor}
+        );
+        const {refs, defaultBranchRef} = result.repository;
+
+        for (const ref of refs.nodes) {
+          branches.push({
+            name: ref.name,
+            lastCommitDate: ref.target.committedDate,
+            prClosedAt: ref.associatedPullRequests.nodes[0]?.closedAt ?? null,
+            hasOpenPr: openPrRefs.has(ref.name),
+            isProtected:
+              ref.name === defaultBranchRef?.name ||
+              ref.branchProtectionRule !== null ||
+              ref.rules.nodes.some(rule => rule.type === 'DELETION')
+          });
+        }
+
+        cursor = refs.pageInfo.hasNextPage ? refs.pageInfo.endCursor : null;
+      } while (cursor);
+
+      return branches;
+    } catch (error) {
+      throw Error(
+        `Getting branches was blocked by the error: ${error.message}`,
+        {cause: error}
+      );
     }
   }
 

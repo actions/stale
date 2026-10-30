@@ -126,7 +126,14 @@ function _getAndValidateArgs(): IIssuesProcessorOptions {
     closeIssueReason: core.getInput('close-issue-reason'),
     includeOnlyAssigned: core.getInput('include-only-assigned') === 'true',
     onlyIssueTypes: core.getInput('only-issue-types'),
-    exemptIssueTypes: core.getInput('exempt-issue-types')
+    exemptIssueTypes: core.getInput('exempt-issue-types'),
+    daysBeforePrBranchDelete: parseInt(
+      core.getInput('days-before-pr-branch-delete')
+    ),
+    daysBeforeNoPrBranchDelete: parseInt(
+      core.getInput('days-before-no-pr-branch-delete')
+    ),
+    exemptBranches: core.getInput('exempt-branches')
   };
 
   for (const numberInput of ['days-before-stale']) {
@@ -137,7 +144,12 @@ function _getAndValidateArgs(): IIssuesProcessorOptions {
     }
   }
 
-  for (const numberInput of ['days-before-close', 'operations-per-run']) {
+  for (const numberInput of [
+    'days-before-close',
+    'operations-per-run',
+    'days-before-pr-branch-delete',
+    'days-before-no-pr-branch-delete'
+  ]) {
     if (isNaN(parseInt(core.getInput(numberInput)))) {
       const errorMessage = `Option "${numberInput}" did not parse to a valid integer`;
       core.setFailed(errorMessage);

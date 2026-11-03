@@ -589,6 +589,13 @@ export class IssuesProcessor {
         issue_number: issue.number,
         since: sinceDate
       });
+      // GitHub filters `since` by updated_at, which also returns older
+      // comments that were edited recently. Optionally count only new ones.
+      if (issue.isPullRequest && this.options.ignorePrCommentUpdates) {
+        return comments.data.filter(
+          comment => new Date(comment.created_at) >= new Date(sinceDate)
+        );
+      }
       return comments.data;
     } catch (error) {
       this._logger.error(`List issue comments error: ${error.message}`);

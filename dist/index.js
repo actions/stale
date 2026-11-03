@@ -49741,6 +49741,7 @@ var Option;
     Option["IgnoreUpdates"] = "ignore-updates";
     Option["IgnoreIssueUpdates"] = "ignore-issue-updates";
     Option["IgnorePrUpdates"] = "ignore-pr-updates";
+    Option["IgnorePrCommentUpdates"] = "ignore-pr-comment-updates";
     Option["ExemptDraftPr"] = "exempt-draft-pr";
     Option["CloseIssueReason"] = "close-issue-reason";
     Option["ExemptIssueTypes"] = "exempt-issue-types";
@@ -52148,6 +52149,11 @@ class IssuesProcessor {
                 issue_number: issue.number,
                 since: sinceDate
             });
+            // GitHub filters `since` by updated_at, which also returns older
+            // comments that were edited recently. Optionally count only new ones.
+            if (issue.isPullRequest && this.options.ignorePrCommentUpdates) {
+                return comments.data.filter(comment => new Date(comment.created_at) >= new Date(sinceDate));
+            }
             return comments.data;
         }
         catch (error) {
@@ -106915,6 +106921,7 @@ function _getAndValidateArgs() {
         ignoreUpdates: getInput('ignore-updates') === 'true',
         ignoreIssueUpdates: _toOptionalBoolean('ignore-issue-updates'),
         ignorePrUpdates: _toOptionalBoolean('ignore-pr-updates'),
+        ignorePrCommentUpdates: getInput('ignore-pr-comment-updates') === 'true',
         exemptDraftPr: getInput('exempt-draft-pr') === 'true',
         closeIssueReason: getInput('close-issue-reason'),
         includeOnlyAssigned: getInput('include-only-assigned') === 'true',

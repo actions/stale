@@ -108,6 +108,7 @@ Every argument is optional.
 | [ignore-updates](#ignore-updates)                                   | Any update (update/comment) can reset the stale idle time on the issues/PRs | `false`               |
 | [ignore-issue-updates](#ignore-issue-updates)                       | Override [ignore-updates](#ignore-updates) for issues only                  |                       |
 | [ignore-pr-updates](#ignore-pr-updates)                             | Override [ignore-updates](#ignore-updates) for PRs only                     |                       |
+| [ignore-pr-comment-updates](#ignore-pr-comment-updates)             | Ignore edits to PR comments created before the comment-check date         | `false`               |
 | [include-only-assigned](#include-only-assigned)                     | Process only assigned issues                                                | `false`               |
 | [sort-by](#sort-by)                                                 | What to sort issues and PRs by                                              | `created`             |
 | [exempt-issue-types](#exempt-issue-types)                           | Issue types on issues exempted from stale/closed.                           |                       |
@@ -555,6 +556,19 @@ Default value: unset
 Useful to override [ignore-updates](#ignore-updates) but only to ignore the updates for the pull requests.
 
 Default value: unset
+
+#### ignore-pr-comment-updates
+
+Set to `true` to exclude pull request comments created before the date used to check for new comments. GitHub's comments API filters `since` by the comment's `updated_at`, so it can return an older comment that was recently edited. This option filters those results by `created_at`, keeping comments created at or after `since`.
+
+This affects the comment check used when deciding whether to remove a stale label or close a stale PR. New comments still count, and issues are unaffected. The separate checks of the PR's own `updated_at` timestamp are unchanged.
+
+```yaml
+with:
+  ignore-pr-comment-updates: true
+```
+
+Default value: `false`
 
 #### include-only-assigned
 

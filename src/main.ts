@@ -126,7 +126,9 @@ function _getAndValidateArgs(): IIssuesProcessorOptions {
     closeIssueReason: core.getInput('close-issue-reason'),
     includeOnlyAssigned: core.getInput('include-only-assigned') === 'true',
     onlyIssueTypes: core.getInput('only-issue-types'),
-    exemptIssueTypes: core.getInput('exempt-issue-types')
+    exemptIssueTypes: core.getInput('exempt-issue-types'),
+    exemptIssuesWithOpenLinkedPr:
+      core.getInput('exempt-issues-with-open-linked-pr') === 'true'
   };
 
   for (const numberInput of ['days-before-stale']) {

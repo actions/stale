@@ -112,6 +112,7 @@ Every argument is optional.
 | [sort-by](#sort-by)                                                 | What to sort issues and PRs by                                              | `created`             |
 | [exempt-issue-types](#exempt-issue-types)                           | Issue types on issues exempted from stale/closed.                           |                       |
 | [only-issue-types](#only-issue-types)                               | Only issues with a matching type are processed as stale/closed.             |                       |
+| [exempt-issues-with-open-linked-pr](#exempt-issues-with-open-linked-pr) | Exempt issues that an open PR will close when merged                    | `false`               |
 
 ### List of output options
 
@@ -588,6 +589,18 @@ If unset (or an empty string), this option will not alter the stale workflow.
 This option does not affect PRs.
 
 Default value: unset
+
+#### exempt-issues-with-open-linked-pr
+
+If set to `true`, an issue is left alone while an open pull request is linked to it in a way that will close it once merged (the link shown in the issue's "Development" section, usually created by a `Closes #123` line in the pull request). Work is still happening on the pull request, so the issue is not really inactive.
+
+Only linked pull requests count. A pull request that merely mentions the issue does not exempt it.
+
+Because this check costs one extra operation per issue, it only runs once every cheaper check has been passed, and only for issues that would otherwise be marked stale. It is disabled by default so that existing workflows keep the same [operations-per-run](#operations-per-run) budget.
+
+This option does not affect PRs.
+
+Default value: `false`
 
 ### Usage
 

@@ -16,6 +16,7 @@ import {IPullRequest} from '../interfaces/pull-request.js';
 import {Assignees} from './assignees.js';
 import {IgnoreUpdates} from './ignore-updates.js';
 import {ExemptDraftPullRequest} from './exempt-draft-pull-request.js';
+import {ExemptLinkedPullRequest} from './exempt-linked-pull-request.js';
 import {Issue} from './issue.js';
 import {IssueLogger} from './loggers/issue-logger.js';
 import {Logger} from './loggers/logger.js';
@@ -480,6 +481,23 @@ export class IssuesProcessor {
       return; // Don't process draft PR
     }
 
+    // Ignore issues which an open pull request will close when merged
+    // Just like the draft PR check above, this one costs one read operation,
+    // so it only runs once every cheaper check has been passed
+    const exemptLinkedPullRequest: ExemptLinkedPullRequest =
+      new ExemptLinkedPullRequest(this.options, issue);
+
+    if (
+      await exemptLinkedPullRequest.shouldExemptLinkedPullRequest(
+        async (): Promise<boolean> => {
+          return this.hasOpenLinkedPullRequest(issue);
+        }
+      )
+    ) {
+      IssuesProcessor._endIssueProcessing(issue);
+      return; // Don't process issues with an open linked PR
+    }
+
     // Determine if this issue needs to be marked stale first
     if (!issue.isStale) {
       issueLogger.info(`This $$type is not stale`);
@@ -716,6 +734,49 @@ export class IssuesProcessor {
       return pullRequest.data;
     } catch (error) {
       issueLogger.error(`Error when getting this $$type: ${error.message}`);
+    }
+  }
+
+  // Returns true when at least one open pull request is linked to the issue in a
+  // way that will close it once merged (the "Development" link, not a mere mention)
+  async hasOpenLinkedPullRequest(issue: Issue): Promise<boolean> {
+    const issueLogger: IssueLogger = new IssueLogger(issue);
+
+    try {
+      this._consumeIssueOperation(issue);
+
+      const response = await this.client.graphql<{
+        repository: {
+          issue: {closedByPullRequestsReferences: {totalCount: number}} | null;
+        };
+      }>(
+        `query ($owner: String!, $repo: String!, $number: Int!) {
+          repository(owner: $owner, name: $repo) {
+            issue(number: $number) {
+              closedByPullRequestsReferences(first: 1, includeClosedPrs: false) {
+                totalCount
+              }
+            }
+          }
+        }`,
+        {
+          owner: context.repo.owner,
+          repo: context.repo.repo,
+          number: issue.number
+        }
+      );
+
+      return (
+        (response.repository?.issue?.closedByPullRequestsReferences
+          .totalCount ?? 0) > 0
+      );
+    } catch (error) {
+      issueLogger.error(
+        `Error when getting the linked pull requests of this $$type: ${error.message}`
+      );
+
+      // Keep processing the $$type as usual rather than silently exempting it
+      return false;
     }
   }
 

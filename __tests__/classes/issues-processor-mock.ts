@@ -27,7 +27,8 @@ export class IssuesProcessorMock extends IssuesProcessor {
       staleLabel: string,
       events: IIssueEvent[]
     ) => Promise<boolean>,
-    getPullRequest?: (issue: Issue) => Promise<IPullRequest | undefined | void>
+    getPullRequest?: (issue: Issue) => Promise<IPullRequest | undefined | void>,
+    hasOpenLinkedPullRequest?: (issue: Issue) => Promise<boolean>
   ) {
     super(options, state);
 
@@ -59,6 +60,10 @@ export class IssuesProcessorMock extends IssuesProcessor {
 
     if (getPullRequest) {
       this.getPullRequest = getPullRequest;
+    }
+
+    if (hasOpenLinkedPullRequest) {
+      this.hasOpenLinkedPullRequest = hasOpenLinkedPullRequest;
     }
   }
 }

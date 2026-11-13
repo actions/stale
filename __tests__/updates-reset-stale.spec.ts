@@ -1,5 +1,7 @@
-import {beforeEach, describe, expect, it, test} from '@jest/globals';
+import {beforeEach, describe, expect, it, jest, test} from '@jest/globals';
+import {context} from '@actions/github';
 import {Issue} from '../src/classes/issue.js';
+import {IComment} from '../src/interfaces/comment.js';
 import {IIssuesProcessorOptions} from '../src/interfaces/issues-processor-options.js';
 import {IsoDateString} from '../src/types/iso-date-string.js';
 import {IssuesProcessorMock} from './classes/issues-processor-mock.js';
@@ -551,6 +553,153 @@ describe('ignore-updates options', (): void => {
   });
 });
 
+describe('ignore-pr-comment-updates option', (): void => {
+  let sut: SUT;
+
+  beforeEach((): void => {
+    sut = new SUT();
+    sut
+      .toPullRequest()
+      .created(30)
+      .staleSince(10)
+      .closeIn(7)
+      .removeStaleWhenUpdated();
+  });
+
+  describe('when a comment was created 20 days ago and updated after the pull request became stale', (): void => {
+    beforeEach((): void => {
+      sut.commentCreated(20);
+    });
+
+    describe('when the ignore pull request comment updates option is enabled', (): void => {
+      beforeEach((): void => {
+        sut.ignorePullRequestCommentUpdates();
+      });
+
+      it('should close the pull request without removing the stale label', async () => {
+        expect.assertions(3);
+
+        await sut.test();
+
+        expect(sut.processor.staleIssues).toHaveLength(0);
+        expect(sut.processor.closedIssues).toHaveLength(1);
+        expect(sut.processor.removedLabelIssues).toHaveLength(0);
+      });
+
+      describe('when there is also a comment created 5 days ago', (): void => {
+        beforeEach((): void => {
+          sut.commentCreated(5);
+        });
+
+        it('should remove the stale label without closing the pull request', async () => {
+          expect.assertions(3);
+
+          await sut.test();
+
+          expect(sut.processor.staleIssues).toHaveLength(0);
+          expect(sut.processor.closedIssues).toHaveLength(0);
+          expect(sut.processor.removedLabelIssues).toHaveLength(1);
+        });
+      });
+
+      describe('when the pull request itself was updated 5 days ago', (): void => {
+        beforeEach((): void => {
+          sut.updated(5);
+        });
+
+        it('should remove the stale label without closing the pull request', async () => {
+          expect.assertions(3);
+
+          await sut.test();
+
+          expect(sut.processor.staleIssues).toHaveLength(0);
+          expect(sut.processor.closedIssues).toHaveLength(0);
+          expect(sut.processor.removedLabelIssues).toHaveLength(1);
+        });
+      });
+
+      describe('when the item is an issue', (): void => {
+        beforeEach((): void => {
+          sut.toIssue();
+        });
+
+        it('should remove the stale label without closing the issue', async () => {
+          expect.assertions(3);
+
+          await sut.test();
+
+          expect(sut.processor.staleIssues).toHaveLength(0);
+          expect(sut.processor.closedIssues).toHaveLength(0);
+          expect(sut.processor.removedLabelIssues).toHaveLength(1);
+        });
+      });
+    });
+
+    describe('when the ignore pull request comment updates option is disabled', (): void => {
+      beforeEach((): void => {
+        sut.staleOnPullRequestCommentUpdates();
+      });
+
+      it('should remove the stale label without closing the pull request', async () => {
+        expect.assertions(3);
+
+        await sut.test();
+
+        expect(sut.processor.staleIssues).toHaveLength(0);
+        expect(sut.processor.closedIssues).toHaveLength(0);
+        expect(sut.processor.removedLabelIssues).toHaveLength(1);
+      });
+    });
+
+    describe('when the ignore pull request comment updates option is left at its default', (): void => {
+      it('should remove the stale label without closing the pull request', async () => {
+        expect.assertions(3);
+
+        await sut.test();
+
+        expect(sut.processor.staleIssues).toHaveLength(0);
+        expect(sut.processor.closedIssues).toHaveLength(0);
+        expect(sut.processor.removedLabelIssues).toHaveLength(1);
+      });
+    });
+  });
+
+  describe('when a comment was created at the same time the pull request became stale', (): void => {
+    beforeEach((): void => {
+      sut.ignorePullRequestCommentUpdates().commentCreatedWhenMarkedStale();
+    });
+
+    it('should remove the stale label without closing the pull request', async () => {
+      expect.assertions(3);
+
+      await sut.test();
+
+      expect(sut.processor.staleIssues).toHaveLength(0);
+      expect(sut.processor.closedIssues).toHaveLength(0);
+      expect(sut.processor.removedLabelIssues).toHaveLength(1);
+    });
+  });
+
+  describe('when only bot and stale-message comments were created after the pull request became stale', (): void => {
+    beforeEach((): void => {
+      sut
+        .ignorePullRequestCommentUpdates()
+        .commentCreated(5, 'A bot comment', 'Bot')
+        .commentCreated(5, DefaultProcessorOptions.stalePrMessage);
+    });
+
+    it('should close the pull request without removing the stale label', async () => {
+      expect.assertions(3);
+
+      await sut.test();
+
+      expect(sut.processor.staleIssues).toHaveLength(0);
+      expect(sut.processor.closedIssues).toHaveLength(1);
+      expect(sut.processor.removedLabelIssues).toHaveLength(0);
+    });
+  });
+});
+
 class SUT {
   processor!: IssuesProcessorMock;
   private _opts: IIssuesProcessorOptions = {...DefaultProcessorOptions};
@@ -558,6 +707,11 @@ class SUT {
   private _createdAt: IsoDateString = '2020-01-01T17:00:00Z';
   private _updatedAt: IsoDateString = '2020-01-01T17:00:00Z';
   private _testIssueList: Issue[] = [];
+  private _markedStaleAt: IsoDateString | undefined;
+  private _comments: (IComment & {
+    created_at: IsoDateString;
+    updated_at: IsoDateString;
+  })[] = [];
 
   toIssue(): SUT {
     this._isPullRequest = false;
@@ -594,6 +748,49 @@ class SUT {
     this._updatedAt = today.toISOString();
 
     return this;
+  }
+
+  staleSince(daysAgo: number): SUT {
+    this.updated(daysAgo);
+    this._markedStaleAt = this._updatedAt;
+
+    return this;
+  }
+
+  closeIn(days: number): SUT {
+    return this._updateOptions({daysBeforeClose: days});
+  }
+
+  removeStaleWhenUpdated(): SUT {
+    return this._updateOptions({removeStaleWhenUpdated: true});
+  }
+
+  commentCreated(daysAgo: number, body = 'A comment', userType = 'User'): SUT {
+    const today = new Date();
+    today.setDate(today.getDate() - daysAgo);
+    this._comments.push({
+      created_at: today.toISOString(),
+      updated_at: new Date().toISOString(),
+      body,
+      user: {type: userType}
+    });
+
+    return this;
+  }
+
+  commentCreatedWhenMarkedStale(): SUT {
+    this.commentCreated(0);
+    this._comments[this._comments.length - 1].created_at = this._markedStaleAt!;
+
+    return this;
+  }
+
+  ignorePullRequestCommentUpdates(): SUT {
+    return this._updateOptions({ignorePrCommentUpdates: true});
+  }
+
+  staleOnPullRequestCommentUpdates(): SUT {
+    return this._updateOptions({ignorePrCommentUpdates: false});
   }
 
   ignoreUpdates(): SUT {
@@ -679,7 +876,14 @@ class SUT {
         this._updatedAt,
         this._createdAt,
         false,
-        this._isPullRequest
+        this._isPullRequest,
+        this._markedStaleAt
+          ? [
+              this._isPullRequest
+                ? this._opts.stalePrLabel
+                : this._opts.staleIssueLabel
+            ]
+          : []
       )
     ];
 
@@ -691,10 +895,25 @@ class SUT {
       this._opts,
       alwaysFalseStateMock,
       async p => (p === 1 ? this._testIssueList : []),
-      async () => [],
-      async () => new Date().toDateString()
+      undefined,
+      async () => this._markedStaleAt ?? new Date().toDateString()
     );
 
-    return this.processor.processIssues(1);
+    const repo = jest.spyOn(context, 'repo', 'get').mockReturnValue({
+      owner: 'owner',
+      repo: 'repo'
+    });
+    const listComments = jest
+      .spyOn(this.processor.client.rest.issues, 'listComments')
+      .mockResolvedValue({data: this._comments} as Awaited<
+        ReturnType<typeof this.processor.client.rest.issues.listComments>
+      >);
+
+    try {
+      return await this.processor.processIssues(1);
+    } finally {
+      repo.mockRestore();
+      listComments.mockRestore();
+    }
   }
 }

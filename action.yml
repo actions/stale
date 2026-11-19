@@ -141,7 +141,7 @@ inputs:
     default: 'created'
     required: false
   delete-branch:
-    description: 'Delete the git branch after closing a stale pull request.'
+    description: 'Delete the git branch after closing a stale pull request. For age-based cleanup of other branches, see `days-before-pr-branch-delete`.'
     default: 'false'
     required: false
   start-date:
@@ -214,6 +214,18 @@ inputs:
     required: false
   only-issue-types:
     description: 'Only issues with a matching type are processed as stale/closed. Defaults to `[]` (disabled) and can be a comma-separated list of issue types.'
+    default: ''
+    required: false
+  days-before-pr-branch-delete:
+    description: 'The number of days since the last commit and the last closed pull request before deleting a branch whose pull requests are all closed. Set to -1 to disable.'
+    default: '-1'
+    required: false
+  days-before-no-pr-branch-delete:
+    description: 'The number of days since the last commit before deleting a branch that never had a pull request. Set to -1 to disable.'
+    default: '-1'
+    required: false
+  exempt-branches:
+    description: 'Branches matching any of these comma-separated glob patterns are never deleted by the stale branch options.'
     default: ''
     required: false
 outputs:

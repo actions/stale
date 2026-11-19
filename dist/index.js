@@ -49745,6 +49745,9 @@ var Option;
     Option["CloseIssueReason"] = "close-issue-reason";
     Option["ExemptIssueTypes"] = "exempt-issue-types";
     Option["OnlyIssueTypes"] = "only-issue-types";
+    Option["DaysBeforePrBranchDelete"] = "days-before-pr-branch-delete";
+    Option["DaysBeforeNoPrBranchDelete"] = "days-before-no-pr-branch-delete";
+    Option["ExemptBranches"] = "exempt-branches";
 })(Option || (Option = {}));
 
 ;// CONCATENATED MODULE: ./lib/functions/dates/get-humanized-date.js
@@ -51815,7 +51818,10 @@ function getSortField(sortOption) {
             : 'created';
 }
 
+;// CONCATENATED MODULE: external "node:path"
+const external_node_path_namespaceObject = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("node:path");
 ;// CONCATENATED MODULE: ./lib/classes/issues-processor.js
+
 
 
 
@@ -51865,6 +51871,7 @@ class IssuesProcessor {
     staleIssues = [];
     closedIssues = [];
     deletedBranchIssues = [];
+    deletedBranches = [];
     removedLabelIssues = [];
     addedLabelIssues = [];
     addedCloseCommentIssues = [];
@@ -51890,6 +51897,7 @@ class IssuesProcessor {
         const issues = await this.getIssues(page);
         if (issues.length <= 0) {
             this._logger.info(LoggerService.green(`No more issues found to process. Exiting...`));
+            await this.processBranches();
             this.statistics
                 ?.setOperationsCount(this.operations.getConsumedOperationsCount())
                 .logStats();
@@ -52238,6 +52246,99 @@ class IssuesProcessor {
         }
         catch (error) {
             issueLogger.error(`Error when getting this $$type: ${error.message}`);
+        }
+    }
+    // Delete branches whose last commit and last closed PR are both older than the configured days
+    async processBranches() {
+        const { daysBeforePrBranchDelete, daysBeforeNoPrBranchDelete } = this.options;
+        if ((daysBeforePrBranchDelete < 0 && daysBeforeNoPrBranchDelete < 0) ||
+            !this.operations.hasRemainingOperations()) {
+            return;
+        }
+        const exemptBranches = wordsToList(this.options.exemptBranches);
+        for (const branch of await this.getBranches()) {
+            if (!this.operations.hasRemainingOperations()) {
+                break;
+            }
+            const days = branch.prClosedAt
+                ? daysBeforePrBranchDelete
+                : daysBeforeNoPrBranchDelete;
+            if (days < 0 ||
+                branch.hasOpenPr ||
+                branch.isProtected ||
+                exemptBranches.some(pattern => external_node_path_namespaceObject.posix.matchesGlob(branch.name, pattern)) ||
+                IssuesProcessor._updatedSince(branch.lastCommitDate, days) ||
+                (branch.prClosedAt !== null &&
+                    IssuesProcessor._updatedSince(branch.prClosedAt, days))) {
+                continue;
+            }
+            this._logger.info(`Deleting the stale branch "${LoggerService.cyan(branch.name)}"`);
+            try {
+                this.operations.consumeOperation();
+                this.statistics?.incrementDeletedBranchesCount();
+                this.deletedBranches.push(branch.name);
+                if (!this.options.debugOnly) {
+                    await this.client.rest.git.deleteRef({
+                        owner: github_context.repo.owner,
+                        repo: github_context.repo.repo,
+                        ref: `heads/${branch.name}`
+                    });
+                }
+            }
+            catch (error) {
+                this._logger.error(`Error when deleting the branch "${LoggerService.cyan(branch.name)}": ${error.message}`);
+            }
+        }
+    }
+    async getBranches() {
+        const { owner, repo } = github_context.repo;
+        try {
+            const openPrRefs = new Set();
+            for await (const { data } of this.client.paginate.iterator(this.client.rest.pulls.list, { owner, repo, state: 'open', per_page: 100 })) {
+                this.operations.consumeOperation();
+                for (const pr of data) {
+                    openPrRefs.add(pr.base.ref).add(pr.head.ref);
+                }
+            }
+            const branches = [];
+            let cursor = null;
+            do {
+                this.operations.consumeOperation();
+                const result = await this.client.graphql(`query($owner: String!, $repo: String!, $cursor: String) {
+            repository(owner: $owner, name: $repo) {
+              defaultBranchRef { name }
+              refs(refPrefix: "refs/heads/", first: 100, after: $cursor) {
+                pageInfo { hasNextPage endCursor }
+                nodes {
+                  name
+                  target { ... on Commit { committedDate } }
+                  branchProtectionRule { id }
+                  rules(first: 100) { nodes { type } }
+                  associatedPullRequests(states: [CLOSED, MERGED], first: 1, orderBy: {field: UPDATED_AT, direction: DESC}) {
+                    nodes { closedAt }
+                  }
+                }
+              }
+            }
+          }`, { owner, repo, cursor });
+                const { refs, defaultBranchRef } = result.repository;
+                for (const ref of refs.nodes) {
+                    branches.push({
+                        name: ref.name,
+                        lastCommitDate: ref.target.committedDate,
+                        prClosedAt: ref.associatedPullRequests.nodes[0]?.closedAt ?? null,
+                        hasOpenPr: openPrRefs.has(ref.name),
+                        isProtected: ref.name === defaultBranchRef?.name ||
+                            ref.branchProtectionRule !== null ||
+                            ref.rules.nodes.some(rule => rule.type === 'DELETION')
+                    });
+                }
+                cursor = refs.pageInfo.hasNextPage ? refs.pageInfo.endCursor : null;
+            } while (cursor);
+            return branches;
+        }
+        catch (error) {
+            throw Error(`Getting branches was blocked by the error: ${error.message}`, { cause: error });
         }
     }
     async getRateLimit() {
@@ -72052,8 +72153,6 @@ class BufferScheduler {
 //# sourceMappingURL=BufferScheduler.js.map
 ;// CONCATENATED MODULE: external "node:module"
 const external_node_module_namespaceObject = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("node:module");
-;// CONCATENATED MODULE: external "node:path"
-const external_node_path_namespaceObject = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("node:path");
 // EXTERNAL MODULE: external "node:url"
 var external_node_url_ = __nccwpck_require__(3136);
 ;// CONCATENATED MODULE: ./node_modules/@azure/storage-common/dist/esm/crc64.js
@@ -106919,7 +107018,10 @@ function _getAndValidateArgs() {
         closeIssueReason: getInput('close-issue-reason'),
         includeOnlyAssigned: getInput('include-only-assigned') === 'true',
         onlyIssueTypes: getInput('only-issue-types'),
-        exemptIssueTypes: getInput('exempt-issue-types')
+        exemptIssueTypes: getInput('exempt-issue-types'),
+        daysBeforePrBranchDelete: parseInt(getInput('days-before-pr-branch-delete')),
+        daysBeforeNoPrBranchDelete: parseInt(getInput('days-before-no-pr-branch-delete')),
+        exemptBranches: getInput('exempt-branches')
     };
     for (const numberInput of ['days-before-stale']) {
         if (isNaN(parseFloat(getInput(numberInput)))) {
@@ -106928,7 +107030,12 @@ function _getAndValidateArgs() {
             throw new Error(errorMessage);
         }
     }
-    for (const numberInput of ['days-before-close', 'operations-per-run']) {
+    for (const numberInput of [
+        'days-before-close',
+        'operations-per-run',
+        'days-before-pr-branch-delete',
+        'days-before-no-pr-branch-delete'
+    ]) {
         if (isNaN(parseInt(getInput(numberInput)))) {
             const errorMessage = `Option "${numberInput}" did not parse to a valid integer`;
             setFailed(errorMessage);

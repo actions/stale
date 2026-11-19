@@ -112,6 +112,9 @@ Every argument is optional.
 | [sort-by](#sort-by)                                                 | What to sort issues and PRs by                                              | `created`             |
 | [exempt-issue-types](#exempt-issue-types)                           | Issue types on issues exempted from stale/closed.                           |                       |
 | [only-issue-types](#only-issue-types)                               | Only issues with a matching type are processed as stale/closed.             |                       |
+| [days-before-pr-branch-delete](#days-before-pr-branch-delete)       | Days before deleting a branch whose PRs are all closed                      | `-1`                  |
+| [days-before-no-pr-branch-delete](#days-before-no-pr-branch-delete) | Days before deleting a branch that never had a PR                           | `-1`                  |
+| [exempt-branches](#exempt-branches)                                 | Glob patterns of branches never deleted by the options above                |                       |
 
 ### List of output options
 
@@ -434,6 +437,7 @@ Default value: unset
 #### delete-branch
 
 If set to `true`, the stale workflow will automatically delete the GitHub branches related to the pull requests automatically closed by the stale workflow.
+For age-based cleanup of other branches, see [days-before-pr-branch-delete](#days-before-pr-branch-delete).
 
 Default value: `false`  
 Required Permission: `pull-requests: write` and `contents: write`
@@ -586,6 +590,35 @@ A comma separated list of allowed issue types. Only issues with a matching type 
 If unset (or an empty string), this option will not alter the stale workflow.
 
 This option does not affect PRs.
+
+Default value: unset
+
+#### days-before-pr-branch-delete
+
+The number of days before deleting a branch whose pull requests are all closed or merged.
+The age is counted from the most recent of the last commit and the closing of the last pull request.
+Deleted branches can be restored from the pull request page.
+
+The default branch, branches with branch protection or a ruleset blocking deletion, branches that are the head or base of an open pull request, and branches matching [exempt-branches](#exempt-branches) are never deleted.
+
+Set to `-1` to disable.
+
+Default value: `-1`  
+Required Permission: `pull-requests: read` and `contents: write`
+
+#### days-before-no-pr-branch-delete
+
+Like [days-before-pr-branch-delete](#days-before-pr-branch-delete), but for branches that never had a pull request.
+The age is counted from the last commit.
+These branches **cannot** be restored from GitHub once deleted, so use a generous value (e.g: `90`).
+
+Default value: `-1`  
+Required Permission: `pull-requests: read` and `contents: write`
+
+#### exempt-branches
+
+A comma separated list of glob patterns for branches that are never deleted by [days-before-pr-branch-delete](#days-before-pr-branch-delete) and [days-before-no-pr-branch-delete](#days-before-no-pr-branch-delete) (e.g: `release/*,keep-*`).
+As in branch rulesets, `*` does not match `/`, while `**` does.
 
 Default value: unset
 

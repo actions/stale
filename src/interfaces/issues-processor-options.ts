@@ -57,4 +57,7 @@ export interface IIssuesProcessorOptions {
   includeOnlyAssigned: boolean;
   exemptIssueTypes?: string;
   onlyIssueTypes?: string;
+  daysBeforePrBranchDelete: number;
+  daysBeforeNoPrBranchDelete: number;
+  exemptBranches: string;
 }

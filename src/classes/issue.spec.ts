@@ -62,6 +62,7 @@ describe('Issue', (): void => {
       labelsToRemoveWhenUnstale: '',
       labelsToAddWhenUnstale: '',
       ignoreUpdates: false,
+      ignoreBotUpdates: false,
       ignoreIssueUpdates: undefined,
       ignorePrUpdates: undefined,
       exemptDraftPr: false,

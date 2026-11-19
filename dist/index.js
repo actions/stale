@@ -49741,6 +49741,7 @@ var Option;
     Option["IgnoreUpdates"] = "ignore-updates";
     Option["IgnoreIssueUpdates"] = "ignore-issue-updates";
     Option["IgnorePrUpdates"] = "ignore-pr-updates";
+    Option["IgnoreBotUpdates"] = "ignore-bot-updates";
     Option["ExemptDraftPr"] = "exempt-draft-pr";
     Option["CloseIssueReason"] = "close-issue-reason";
     Option["ExemptIssueTypes"] = "exempt-issue-types";
@@ -52202,7 +52203,7 @@ class IssuesProcessor {
     }
     async hasOnlyStaleLabelingEventsSince(issue, sinceDate, staleLabel, events) {
         const issueLogger = new IssueLogger(issue);
-        issueLogger.info(`Checking if only stale label added events on $$type since: ${LoggerService.cyan(sinceDate)}`);
+        issueLogger.info(`Checking if only ignorable events on $$type since: ${LoggerService.cyan(sinceDate)}`);
         if (!sinceDate) {
             return false;
         }
@@ -52218,11 +52219,60 @@ class IssuesProcessor {
             return false;
         }
         return relevantEvents.every(event => {
+            // With ignore-bot-updates, any event caused by a bot account is
+            // ignorable — label syncs, automated milestoning, etc.
+            if (this.options.ignoreBotUpdates && event.actor?.type === 'Bot') {
+                return true;
+            }
             if (event.event !== 'labeled') {
                 return false;
             }
             return cleanLabel(event.label.name) === cleanLabel(staleLabel);
         });
+    }
+    // Returns the date of the most recent commit on a pull request, or
+    // undefined when it cannot be determined. Used by ignore-bot-updates to
+    // make sure a human push is never mistaken for ignorable bot activity:
+    // pushes bump `updated_at` without leaving an issue event.
+    async getPullRequestLastCommitDate(issue) {
+        const issueLogger = new IssueLogger(issue);
+        try {
+            this._consumeIssueOperation(issue);
+            this.statistics?.incrementFetchedPullRequestsCount();
+            const commits = await this.client.rest.pulls.listCommits({
+                owner: github_context.repo.owner,
+                repo: github_context.repo.repo,
+                pull_number: issue.number,
+                per_page: 100
+            });
+            const lastCommit = commits.data[commits.data.length - 1];
+            return lastCommit?.commit?.committer?.date;
+        }
+        catch (error) {
+            issueLogger.error(`Error when getting the last commit of this $$type: ${error.message}`);
+        }
+    }
+    // With ignore-bot-updates, an `updated_at` bump only counts as an update
+    // when something other than bot activity explains it: a non-bot issue
+    // event, or (for pull requests) a commit pushed since the stale marking.
+    // An unexplained bump (e.g. a body edit, which leaves no issue event) is
+    // treated as human activity so the action stays on the safe side.
+    async _hasHumanUpdateSince(issue, sinceDate, staleLabel, events) {
+        const issueLogger = new IssueLogger(issue);
+        const onlyIgnorableEvents = await this.hasOnlyStaleLabelingEventsSince(issue, sinceDate, staleLabel, events);
+        if (!onlyIgnorableEvents) {
+            return true;
+        }
+        if (issue.isPullRequest) {
+            const lastCommitDate = await this.getPullRequestLastCommitDate(issue);
+            if (lastCommitDate &&
+                isDateMoreRecentThan(new Date(lastCommitDate), new Date(sinceDate), 15)) {
+                issueLogger.info(`$$type has a commit more recent than the stale marking: ${LoggerService.cyan(lastCommitDate)}`);
+                return true;
+            }
+        }
+        issueLogger.info(`Only bot or stale-labeling activity on $$type since: ${LoggerService.cyan(sinceDate)}`);
+        return false;
     }
     async getPullRequest(issue) {
         const issueLogger = new IssueLogger(issue);
@@ -52284,13 +52334,16 @@ class IssuesProcessor {
         // isDateMoreRecentThan makes sure they are not the same date within a certain tolerance (15 seconds in this case)
         let issueHasUpdateSinceStale = isDateMoreRecentThan(new Date(issue.updated_at), new Date(markedStaleOn), 15);
         // Check if the only update was the stale label being added
+        // (or, with ignore-bot-updates, any bot activity)
         if (issueHasUpdateSinceStale &&
             shouldRemoveStaleWhenUpdated &&
             !issue.markedStaleThisRun) {
-            const onlyStaleLabelAdded = await this.hasOnlyStaleLabelingEventsSince(issue, markedStaleOn, staleLabel, events);
-            if (onlyStaleLabelAdded) {
+            const hasHumanUpdate = this.options.ignoreBotUpdates
+                ? await this._hasHumanUpdateSince(issue, markedStaleOn, staleLabel, events)
+                : !(await this.hasOnlyStaleLabelingEventsSince(issue, markedStaleOn, staleLabel, events));
+            if (!hasHumanUpdate) {
                 issueHasUpdateSinceStale = false;
-                issueLogger.info(`Ignoring $$type update since only the stale label was added`);
+                issueLogger.info(`Ignoring $$type update since it was not caused by human activity`);
             }
         }
         issueLogger.info(`$$type has been updated since it was marked stale: ${LoggerService.cyan(issueHasUpdateSinceStale)}`);
@@ -52310,7 +52363,13 @@ class IssuesProcessor {
         if (daysBeforeClose < 0) {
             return; // Nothing to do because we aren't closing stale issues
         }
-        const issueHasUpdateInCloseWindow = IssuesProcessor._updatedSince(issue.updated_at, daysBeforeClose);
+        // With ignore-bot-updates, bots bump `updated_at` constantly, so recency
+        // of `updated_at` proves nothing. The close window instead runs from the
+        // stale marking, blocked by any human update found above.
+        const issueHasUpdateInCloseWindow = this.options.ignoreBotUpdates
+            ? IssuesProcessor._updatedSince(markedStaleOn, daysBeforeClose) ||
+                issueHasUpdateSinceStale
+            : IssuesProcessor._updatedSince(issue.updated_at, daysBeforeClose);
         issueLogger.info(`$$type has been updated in the last ${daysBeforeClose} days: ${LoggerService.cyan(issueHasUpdateInCloseWindow)}`);
         if (!issueHasCommentsSinceStale && !issueHasUpdateInCloseWindow) {
             issueLogger.info(`Closing $$type because it was last updated on: ${LoggerService.cyan(issue.updated_at)}`);
@@ -106915,6 +106974,7 @@ function _getAndValidateArgs() {
         ignoreUpdates: getInput('ignore-updates') === 'true',
         ignoreIssueUpdates: _toOptionalBoolean('ignore-issue-updates'),
         ignorePrUpdates: _toOptionalBoolean('ignore-pr-updates'),
+        ignoreBotUpdates: getInput('ignore-bot-updates') === 'true',
         exemptDraftPr: getInput('exempt-draft-pr') === 'true',
         closeIssueReason: getInput('close-issue-reason'),
         includeOnlyAssigned: getInput('include-only-assigned') === 'true',

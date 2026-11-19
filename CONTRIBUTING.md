@@ -6,7 +6,7 @@ Install the dependencies.
 $ npm install
 ```
 
-Build the typescript and package it for distribution.
+Build the TypeScript and package it for distribution.
 
 ```bash
 $ npm run build && npm run pack
@@ -51,7 +51,7 @@ Be sure to commit the result of:
 ```bash
 $ npm run pack
 ```
-Otherwise PR checks will fail. 
+Otherwise, PR checks will fail.
 
 # Release
 
@@ -62,7 +62,7 @@ Based on [standard-version](https://github.com/conventional-changelog/standard-v
 You can run `npm run release:dry-run` to create a dry-run, or you can directly run `npm run release` to create a new local release.  
 It will run `prerelease` beforehand to build and pack everything.
 
-If the `prerelease` succeeded, a bump of version will happen based on the unreleased commits.  
+If the `prerelease` succeeded, the version will be bumped based on the unreleased commits.  
 It will:
 
 - Update the _package.json_ version field
